@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8">
+<title>后台</title>
+<meta name="renderer" content="webkit">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="shortcut icon" href="images/title-logo.ico" type="image/x-icon"/>
+	
+<link rel="stylesheet" type="text/css" href="css/font-awesome.4.6.0.css">	
+<link rel="stylesheet" href="css/bootstrap.min.css">	
+<link rel="stylesheet" href="css/style.css">  
+	
+<script type="text/javascript" src="js/jQuery v3.2.1.js"></script>
+<script src="js/bootstrap.min.js"></script> 	
+<script type="text/javascript" src="js/script.js"></script> 
+	
+</head>
+  
+  <body>
+	  
+	    <div class="div_body">
+			
+	        <div class="div_form">
+	          
+			  <form class="form-inline">
+					<div class="form-group">
+						<input type="text" class="form-control" placeholder="请输入姓名">
+					</div>
+					<div class="form-group">
+						 <button type="button" class="btn btn-primary"><i class="fa fa-search"></i></button>
+					</div>
+			  </form>
+	        </div>
+			
+		    <div class="div_btn">
+			     <button type="button"  class="btn btn-primary" onClick="PopupRoleadd();"><i class="fa fa-plus"></i>新增</button>
+	        </div>
+			
+			<div class="div_table">
+			     <table class="table table-hover table_chongzhi">
+				        <thead>
+					           <tr>
+								   <th width="25%">姓名</th>
+							       <th width="25%">角色名</th>
+								   <th width="25%">角色编码</th>
+								   <th width="25%">操作</th>
+							   </tr>
+					    </thead>
+					    <tbody>
+					          <tr>
+								  <td>张一</td>
+							      <td>管理员</td>
+								  <td>4545666</td>
+								  <td>
+									  <button type="button" class="btn btn-danger-s" data-toggle="modal" data-target="#delete_role"><i class="fa fa-trash-o table_icon"></i>删除</button>
+								  </td> 
+							  </tr> 
+							 
+					    </tbody>
+				 </table>
+				
+                  <!--分页start-->
+<!--
+				  <div class="text-center">
+					  <ul class="pagination">
+						<li><a href="#">&laquo;</a></li>
+						<li class="active"><a href="#">1</a></li>
+						<li><a href="#">2</a></li>
+						<li><a href="#">3</a></li>
+						<li><a href="#">4</a></li>
+						<li><a href="#">5</a></li>
+						<li><a href="#">&raquo;</a></li>
+					 </ul>
+				 </div>
+-->
+				
+				
+			</div>
+	    </div>
+	  
+			
+			
+			
+       <!--新增角色弹框-->
+	    <div class="modal fade" id="tk_Roleadd" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+			<div class="modal-dialog modal-dialog-s">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true"> 
+							&times;
+						</button>
+						<h4 class="modal-title">
+							新增角色
+						</h4>
+					</div>
+					<div class="modal-body">
+						 <form class="clearfix">
+							 
+							  <div class="col-md-12 mar_b10">
+								    <label class="tk_label">
+										 <span class="text-red">*</span>姓名
+									</label>
+							        <div class="tk_div_input"><input class="form-control" type="text" placeholder="请输入姓名"></div>
+							  </div>
+							  <div class="col-md-12 mar_b10">
+								    <label class="tk_label">
+										 角色编码
+									</label>
+							        <div class="tk_div_input"><input class="form-control" type="text" placeholder="请输入角色编码" disabled></div>
+							  </div>
+							  <div class="col-md-12 mar_b10">
+								    <label class="tk_label">
+										 请输入部门名称  
+									</label>
+							        <div class="tk_div_input"><input class="form-control" type="text" placeholder="请输入部门名称" disabled></div>
+							  </div>
+							 <div class="col-md-12 mar_b10">
+								    <label class="tk_label">
+										手机号  
+									</label>
+							        <div class="tk_div_input"><input class="form-control" type="text" placeholder="请输入手机号" disabled></div>
+							  </div>
+							 <div class="col-md-12 mar_b10">
+								    <label class="tk_label">
+										 职位  
+									</label>
+							        <div class="tk_div_input"><input class="form-control" type="text" placeholder="请输入职位" disabled></div>
+							  </div>
+						 </form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary"><i class="fa fa-arrow-down"></i>保存</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-reply"></i>返回</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	    	
+       <!--新增角色弹框-->
+	  
+	         
+	    <!--删除账号弹框-->
+	    <div class="modal fade" id="delete_role" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+			<div class="modal-dialog">
+				<div class="modal-content modal-dialog-s">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+							&times;
+						</button>
+						<h4 class="modal-title">
+							删除账号
+						</h4>
+					</div>
+					<div class="modal-body">
+						 <div class="text-center">确定要删除账号吗？</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary"><i class="fa fa-check-square-o zdy_icon"></i>确定</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-reply zdy_icon"></i>取消</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	  
+	  <script>
+	          var PopupRoleadd = function () {
+				  
+				  $('#tk_Roleadd').modal('show');
+				  
+			  }
+			   var PopupSuccess = function () {
+				  
+				  $('#ts_tk_Success').modal('show');
+				  
+			  }
+	  </script>
+	  
+	  
+	 </body>
+</html>
+	  
+	  
+	  

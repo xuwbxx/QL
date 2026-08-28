@@ -1,0 +1,17 @@
+﻿[Unit]
+Description=QL PreAssembled API
+After=network.target
+
+[Service]
+WorkingDirectory=/var/www/qlprea
+ExecStart=/root/.dotnet/dotnet QL.PreAssembled.dll --urls="http://127.0.0.1:5001"
+Restart=always
+RestartSec=3
+Environment=ASPNETCORE_ENVIRONMENT=Production
+# 显式把DOTNET_ROOT注入进去，防止systemd环境丢失这个变量
+Environment=DOTNET_ROOT=/root/.dotnet
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

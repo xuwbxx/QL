@@ -1,0 +1,1283 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>岩土所-插拔桩风险评估</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="/lib/Echarts/echarts.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+
+        body {
+            padding: 1.5vw; /* 替换20px为1.5vw */
+            background-color: #f5f7fa;
+            min-height: 100vh; /* 页面最小高度占满视口 */
+        }
+
+        /* 核心：默认弹性布局，通过JS动态切换类名实现响应式 */
+        .page-container {
+            display: flex;
+            width: 100%;
+            gap: 1.5vw; /* 替换20px为1.5vw */
+            min-height: calc(100vh - 3vw); /* 减去上下padding的总和 */
+            flex-direction: row; /* 默认横向排列 */
+        }
+
+            /* 小屏幕适配类（通过JS动态添加/移除） */
+            .page-container.mobile {
+                flex-direction: column; /* 小屏幕垂直排列 */
+            }
+
+        .left-panel {
+            width: 40%; /* 左侧面板加宽（原30%） */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        /* 小屏幕左侧面板占满宽度 */
+        .page-container.mobile .left-panel {
+            width: 100%;
+        }
+
+        /* 右侧面板核心样式优化（居中显示） */
+        .right-panel {
+            width: 60%; /* 右侧面板适配左侧宽度 */
+            background: #fff;
+            border: 0.08vw solid #e6e6e6; /* 替换1px为0.08vw */
+            border-radius: 0.5vw; /* 替换6px为0.5vw */
+            box-shadow: 0 0.15vw 0.6vw rgba(0,0,0,0.08); /* 替换2px/8px为vw单位 */
+            display: flex;
+            align-items: center; /* 垂直居中 */
+            justify-content: center; /* 水平居中 */
+            font-size: 1.8vw; /* 替换24px为1.8vw */
+            color: #333;
+            font-weight: 600;
+            flex-shrink: 0;
+            min-height: 100%; /* 高度占满父容器 */
+            padding: 1vw; /* 增加内边距，避免图表贴边 */
+            box-sizing: border-box; /* 确保内边距不影响宽度计算 */
+        }
+
+        /* 图表容器样式（关键：居中+适配） */
+        #MainChart {
+            width: 99% !important; /* 图表宽度占面板95%，留边距更美观 */
+            height: 99% !important; /* 图表高度占面板95% */
+            margin: 0 auto; /* 双重保障水平居中 */
+            display: block; /* 确保块级元素居中生效 */
+        }
+
+        /* 小屏幕右侧面板适配 */
+        .page-container.mobile .right-panel {
+            width: 100%;
+            font-size: 3vw;
+            min-height: 60vh; /* 提升小屏幕高度，保证图表显示完整 */
+            margin-top: 1.5vw;
+            padding: 2vw; /* 小屏幕增加内边距 */
+        }
+
+        /* 小屏幕图表容器适配 */
+        .page-container.mobile #MainChart {
+            width: 98% !important;
+            height: 98% !important;
+        }
+
+        .menu-actions {
+            width: 100%;
+            max-width: 90%; /* 替换450px为90% */
+            margin: 0 auto 1vw; /* 替换15px为1vw */
+            display: flex;
+            gap: 0.6vw; /* 替换8px为0.6vw */
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .menu-btn {
+            padding: 0.45vw 0.9vw; /* 替换6px/12px为vw单位 */
+            border: none;
+            border-radius: 0.3vw; /* 替换4px为0.3vw */
+            cursor: pointer;
+            font-size: 1vw; /* 替换14px为1vw */
+            display: flex;
+            align-items: center;
+            gap: 0.3vw; /* 替换4px为0.3vw */
+            transition: background-color 0.2s;
+        }
+
+        /* 小屏幕按钮文字放大 */
+        .page-container.mobile .menu-btn {
+            font-size: 2vw;
+        }
+
+        .btn-add {
+            background-color: #52c41a;
+            color: #fff;
+        }
+
+            .btn-add:hover {
+                background-color: rgba(82, 196, 26, 0.6);
+            }
+
+        .btn-edit {
+            background-color: #1890ff;
+            color: #fff;
+        }
+
+            .btn-edit:hover {
+                background-color: rgba(24, 144, 255, 0.6);
+            }
+
+        .btn-delete {
+            background-color: #ff4d4f;
+            color: #fff;
+        }
+
+            .btn-delete:hover {
+                background-color: rgba(255, 77, 79, 0.6);
+            }
+
+        .btn-export {
+            background-color: #722ed1;
+            color: #fff;
+        }
+
+            .btn-export:hover {
+                background-color: rgba(114, 46, 209, 0.6);
+            }
+
+        .btn-import {
+            background-color: #13c2c2;
+            color: #fff;
+        }
+
+            .btn-import:hover {
+                background-color: rgba(19, 194, 194, 0.6);
+            }
+
+        /* 核心：加宽树状菜单 */
+        .tree-menu {
+            width: 100%;
+            max-width: 95%; /* 替换280px为95%，大幅加宽 */
+            background: #fff;
+            border: 0.08vw solid #e6e6e6; /* 替换1px为0.08vw */
+            border-radius: 0.5vw; /* 替换6px为0.5vw */
+            box-shadow: 0 0.15vw 0.6vw rgba(0,0,0,0.08); /* 替换2px/8px为vw单位 */
+        }
+
+        /* 小屏幕菜单占满宽度 */
+        .page-container.mobile .tree-menu {
+            max-width: 100%;
+        }
+
+        .tree-title {
+            padding: 0.9vw 1.2vw; /* 替换12px/16px为vw单位 */
+            font-size: 1.2vw; /* 替换16px为1.2vw */
+            font-weight: 600;
+            color: #333;
+            border-bottom: 0.08vw solid #e6e6e6; /* 替换1px为0.08vw */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tree-list {
+            list-style: none;
+            padding: 0.6vw 0; /* 替换8px为0.6vw */
+        }
+
+        .tree-item {
+            position: relative;
+            padding: 0 1.2vw; /* 替换16px为1.2vw */
+            list-style: none;
+        }
+
+        .tree-item-content {
+            display: flex;
+            align-items: center;
+            height: 3vw; /* 替换40px为3vw */
+            color: #666;
+            cursor: pointer;
+            border-radius: 0.3vw; /* 替换4px为0.3vw */
+            padding: 0 0.6vw; /* 替换8px为0.6vw */
+            transition: background-color 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 小屏幕菜单项高度增加 */
+        .page-container.mobile .tree-item-content {
+            height: 6vw;
+        }
+
+        .tree-item-content:hover {
+            background-color: #f5f7fa;
+        }
+
+        .tree-item-content.active {
+            background-color: #e8f4ff;
+            color: #1890ff;
+            font-weight: 500;
+        }
+
+        .tree-toggle {
+            margin-right: 0.6vw; /* 替换8px为0.6vw */
+            font-size: 0.9vw; /* 替换12px为0.9vw */
+            color: #999;
+            transition: transform 0.2s ease;
+            cursor: pointer;
+            flex-shrink: 0;
+            width: 1.2vw; /* 替换16px为1.2vw */
+            height: 1.2vw; /* 替换16px为1.2vw */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            /* 折叠图标默认状态，展开时旋转90度 */
+            .tree-toggle.expanded {
+                transform: rotate(90deg);
+            }
+
+        .tree-children {
+            list-style: none;
+            margin-left: 1.5vw; /* 替换20px为1.5vw */
+            display: none;
+            padding-left: 0;
+        }
+
+            /* 子菜单显示类 */
+            .tree-children.open {
+                display: block;
+            }
+
+        .tree-icon {
+            margin-right: 0.6vw; /* 替换8px为0.6vw */
+            font-size: 1.05vw; /* 替换14px为1.05vw */
+            width: 1.2vw; /* 替换16px为1.2vw */
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .menu-text {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .menu-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+            font-size: 1.05vw; /* 补充：菜单文字适配 */
+        }
+
+        /* 小屏幕菜单文字放大 */
+        .page-container.mobile .menu-name,
+        .page-container.mobile .form-label,
+        .page-container.mobile .modal-btn {
+            font-size: 2vw;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 1.5vw; /* 替换20px为1.5vw */
+            border-radius: 0.5vw; /* 替换6px为0.5vw */
+            width: 22vw; /* 替换300px为22vw */
+            box-shadow: 0 0.3vw 0.9vw rgba(0,0,0,0.15); /* 替换4px/12px为vw单位 */
+        }
+
+        /* 小屏幕模态框宽度适配 */
+        .page-container.mobile .modal-content {
+            width: 85vw;
+        }
+
+        #importModal .modal-content {
+            width: 38vw; /* 替换500px为38vw */
+        }
+
+        /* 小屏幕导入模态框宽度适配 */
+        .page-container.mobile #importModal .modal-content {
+            width: 90vw;
+        }
+
+        .modal-title {
+            font-size: 1.2vw; /* 替换16px为1.2vw */
+            font-weight: 600;
+            margin-bottom: 1.1vw; /* 替换15px为1.1vw */
+            color: #333;
+        }
+
+        .form-item {
+            margin-bottom: 1.1vw; /* 替换15px为1.1vw */
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.45vw; /* 替换6px为0.45vw */
+            font-size: 1vw; /* 替换14px为1vw */
+            color: #666;
+        }
+
+        .form-input {
+            width: 100%;
+            height: 2.7vw; /* 替换36px为2.7vw */
+            padding: 0 0.9vw; /* 替换12px为0.9vw */
+            border: 0.08vw solid #d9d9d9; /* 替换1px为0.08vw */
+            border-radius: 0.3vw; /* 替换4px为0.3vw */
+            font-size: 1vw; /* 替换14px为1vw */
+            outline: none;
+        }
+
+            .form-input:focus {
+                border-color: #1890ff;
+                box-shadow: 0 0 0 0.15vw rgba(24, 144, 255, 0.2); /* 替换2px为0.15vw */
+            }
+
+        .json-textarea {
+            width: 100%;
+            height: 15vw; /* 替换200px为15vw */
+            padding: 0.9vw; /* 替换12px为0.9vw */
+            border: 0.08vw solid #d9d9d9; /* 替换1px为0.08vw */
+            border-radius: 0.3vw; /* 替换4px为0.3vw */
+            font-size: 1vw; /* 替换14px为1vw */
+            outline: none;
+            resize: none;
+            font-family: "Consolas", monospace;
+        }
+
+            .json-textarea:focus {
+                border-color: #1890ff;
+                box-shadow: 0 0 0 0.15vw rgba(24, 144, 255, 0.2); /* 替换2px为0.15vw */
+            }
+
+        .icon-select {
+            width: 100%;
+            height: 2.7vw; /* 替换36px为2.7vw */
+            border: 0.08vw solid #d9d9d9; /* 替换1px为0.08vw */
+            border-radius: 0.3vw; /* 替换4px为0.3vw */
+            padding: 0 0.9vw; /* 替换12px为0.9vw */
+            font-size: 1vw; /* 替换14px为1vw */
+            outline: none;
+            appearance: none;
+            background: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 0.9vw center; /* 替换12px为0.9vw */
+            background-size: 1.2vw; /* 替换16px为1.2vw */
+        }
+
+            .icon-select:focus {
+                border-color: #1890ff;
+                box-shadow: 0 0 0 0.15vw rgba(24, 144, 255, 0.2); /* 替换2px为0.15vw */
+            }
+
+        .add-position-item {
+            margin-bottom: 0.75vw; /* 替换10px为0.75vw */
+            display: flex;
+            align-items: center;
+            gap: 0.6vw; /* 替换8px为0.6vw */
+        }
+
+        .add-position-radio {
+            width: 1.2vw; /* 替换16px为1.2vw */
+            height: 1.2vw; /* 替换16px为1.2vw */
+            cursor: pointer;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.6vw; /* 替换8px为0.6vw */
+            margin-top: 1.5vw; /* 替换20px为1.5vw */
+        }
+
+        .modal-btn {
+            padding: 0.45vw 1.2vw; /* 替换6px/16px为vw单位 */
+            border: none;
+            border-radius: 0.3vw; /* 替换4px为0.3vw */
+            cursor: pointer;
+            font-size: 1vw; /* 替换14px为1vw */
+            transition: all 0.2s;
+        }
+
+        .btn-cancel {
+            background-color: #f5f5f5;
+            color: #666;
+        }
+
+            .btn-cancel:hover {
+                background-color: #e8e8e8;
+            }
+
+        .btn-confirm {
+            background-color: #1890ff;
+            color: #fff;
+        }
+
+            .btn-confirm:hover {
+                background-color: #40a9ff;
+            }
+
+        .toast {
+            position: fixed;
+            top: 1.5vw; /* 替换20px为1.5vw */
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 0.6vw 1.2vw; /* 替换8px/16px为vw单位 */
+            border-radius: 0.3vw; /* 替换4px为0.3vw */
+            font-size: 1vw; /* 替换14px为1vw */
+            z-index: 1001;
+            display: none;
+            transition: opacity 0.2s;
+        }
+
+        .itemdata-textarea {
+            width: 100%;
+            height: 6vw; /* 替换80px为6vw */
+            padding: 0.9vw; /* 替换12px为0.9vw */
+            border: 0.08vw solid #d9d9d9; /* 替换1px为0.08vw */
+            border-radius: 0.3vw; /* 替换4px为0.3vw */
+            font-size: 1vw; /* 替换14px为1vw */
+            outline: none;
+            resize: vertical;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+
+            .itemdata-textarea:focus {
+                border-color: #1890ff;
+                box-shadow: 0 0 0 0.15vw rgba(24, 144, 255, 0.2); /* 替换2px为0.15vw */
+            }
+
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="left-panel">
+            <div class="menu-actions">
+                <button class="menu-btn btn-add" id="addMenuBtn">
+                    <i class="fas fa-plus"></i> 添加菜单
+                </button>
+                <button class="menu-btn btn-edit" id="editMenuBtn">
+                    <i class="fas fa-pen"></i> 修改菜单
+                </button>
+                <button class="menu-btn btn-delete" id="deleteMenuBtn">
+                    <i class="fas fa-trash"></i> 删除菜单
+                </button>
+                <button class="menu-btn btn-export" id="exportMenuBtn">
+                    <i class="fas fa-download"></i> 导出JSON
+                </button>
+                <button class="menu-btn btn-import" id="importMenuBtn">
+                    <i class="fas fa-upload"></i> 导入JSON
+                </button>
+                <button class="menu-btn btn-add" id="chartMenuBtn" onclick="ChartShow();">
+                    <i class="fas fa-area-chart"></i> 转换图表
+                </button>
+            </div>
+            <div class="tree-menu">
+                <div class="tree-title">工序步骤</div>
+                <ul class="tree-list" id="treeMenu">
+                </ul>
+            </div>
+        </div>
+        <div class="right-panel">
+            <div id="MainChart"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="menuModal">
+        <div class="modal-content">
+            <div class="modal-title" id="modalTitle">添加菜单</div>
+            <div class="form-item" id="addPositionContainer">
+                <label class="form-label">添加位置</label>
+                <div class="add-position-item">
+                    <input type="radio" name="addPosition" value="level1" class="add-position-radio" id="radioLevel1">
+                    <label for="radioLevel1">一级菜单（根节点）</label>
+                </div>
+                <div class="add-position-item">
+                    <input type="radio" name="addPosition" value="child" class="add-position-radio" id="radioChild">
+                    <label for="radioChild">当前选中菜单的子菜单</label>
+                </div>
+            </div>
+            <div class="form-item">
+                <label class="form-label">菜单名称</label>
+                <input type="text" class="form-input" id="menuNameInput" placeholder="请输入菜单名称">
+            </div>
+            <div class="form-item">
+                <label class="form-label">选择图标</label>
+                <select class="icon-select" id="menuIconSelect">
+                    <option value="">❌ 无图标</option>
+                    <option value="fas fa-circle">● 圆形</option>
+                    <option value="fas fa-home">🏠 首页</option>
+                    <option value="fas fa-desktop">🖥️ 桌面</option>
+                    <option value="fas fa-shopping-cart">🛒 购物车</option>
+                    <option value="fas fa-users">👥 用户</option>
+                    <option value="fas fa-cog">⚙️ 设置</option>
+                    <option value="fas fa-folder">📁 文件夹（一级菜单推荐）</option>
+                    <option value="fas fa-plus">➕ 加号</option>
+                    <option value="fas fa-pen">✏️ 编辑</option>
+                    <option value="fas fa-trash">🗑️ 删除</option>
+                    <option value="fas fa-list">📋 列表</option>
+                    <option value="fas fa-file">📄 文件</option>
+                    <option value="fas fa-search">🔍 搜索</option>
+                    <option value="fas fa-save">💾 保存</option>
+                    <option value="fas fa-redo">🔄 刷新</option>
+                </select>
+            </div>
+            <div class="form-item">
+                <label class="form-label">ItemData数据（可选，文本类型，仅存储）</label>
+                <textarea class="itemdata-textarea" id="menuItemDataInput" placeholder="请输入ItemData文本内容（不会在菜单中显示）"></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn btn-cancel" id="cancelBtn">取消</button>
+                <button class="modal-btn btn-confirm" id="confirmBtn">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="importModal">
+        <div class="modal-content">
+            <div class="modal-title">导入菜单JSON</div>
+            <div class="form-item">
+                <label class="form-label">JSON数据（菜单名称最多10个字符，超出会自动截断，仅包含itemData字段）</label>
+                <textarea class="json-textarea" id="jsonImportText" placeholder='示例格式：
+[
+  {
+    "id": 1,
+    "name": "首页管理",
+    "icon": "fas fa-home",
+    "itemData": "自定义文本数据，仅存储不显示",
+    "children": [
+      {
+        "id": 2,
+        "name": "首页轮播",
+        "icon": "fas fa-desktop",
+        "itemData": "子菜单的自定义文本",
+        "children": [
+          {
+            "id": 3,
+            "name": "轮播列表",
+            "icon": "fas fa-circle",
+            "itemData": "孙菜单的自定义文本",
+            "children": []
+          }
+        ]
+      }
+    ]
+  }
+]'></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn btn-cancel" id="importCancelBtn">取消</button>
+                <button class="modal-btn btn-confirm" id="importConfirmBtn">确认导入</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const MENU_CONFIG = {
+            MAX_NAME_LENGTH: 10,
+            DEFAULT_NEXT_ID: 32,
+            INIT_MENU_DATA: [
+                {
+                    "id": 14,
+                    "name": "桩靴插拔作业风险评估",
+                    "icon": "fas fa-home",
+                    "itemData": "一级菜单自定义文本数据",
+                    "children": [
+                        {
+                            "id": 15,
+                            "name": "地质情况",
+                            "icon": "",
+                            "itemData": "地质情况子菜单自定义数据",
+                            "children": [
+                                { "id": 19, "name": "表层土性", "icon": "", "itemData": "表层土性孙菜单自定义数据", "children": [] },
+                                { "id": 20, "name": "破坏模式", "icon": "", "itemData": "破坏模式孙菜单自定义数据", "children": [] },
+                                { "id": 21, "name": "土体性质指标", "icon": "", "itemData": "土体性质指标孙菜单自定义数据", "children": [] },
+                                { "id": 22, "name": "经验参数", "icon": "", "itemData": "经验参数孙菜单自定义数据", "children": [] }
+                            ]
+                        },
+                        {
+                            "id": 16,
+                            "name": "平台船情况",
+                            "icon": "",
+                            "itemData": "平台船情况子菜单自定义数据",
+                            "children": [
+                                { "id": 23, "name": "桩腿类型", "icon": "", "itemData": "桩腿类型孙菜单自定义数据", "children": [] },
+                                { "id": 24, "name": "桩靴型式", "icon": "", "itemData": "桩靴型式孙菜单自定义数据", "children": [] },
+                                { "id": 25, "name": "接地比压", "icon": "", "itemData": "接地比压孙菜单自定义数据", "children": [] },
+                                { "id": 26, "name": "冲桩减阻", "icon": "", "itemData": "冲桩减阻孙菜单自定义数据", "children": [] }
+                            ]
+                        },
+                        {
+                            "id": 17,
+                            "name": "作业情况",
+                            "icon": "",
+                            "itemData": "作业情况子菜单自定义数据",
+                            "children": [
+                                { "id": 27, "name": "插拔桩作业", "icon": "", "itemData": "插拔桩作业孙菜单自定义数据", "children": [] },
+                                { "id": 28, "name": "保压作业", "icon": "", "itemData": "保压作业孙菜单自定义数据", "children": [] },
+                                { "id": 29, "name": "站桩作业", "icon": "", "itemData": "站桩作业孙菜单自定义数据", "children": [] }
+                            ]
+                        },
+                        {
+                            "id": 18,
+                            "name": "施工荷载情况",
+                            "icon": "",
+                            "itemData": "施工荷载情况子菜单自定义数据",
+                            "children": [
+                                { "id": 30, "name": "吊重载荷", "icon": "", "itemData": "吊重载荷孙菜单自定义数据", "children": [] },
+                                { "id": 31, "name": "极端工况", "icon": "", "itemData": "极端工况孙菜单自定义数据", "children": [] }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        const MenuState = {
+            currentActiveItem: $(),
+            isEditMode: false,
+            nextMenuId: MENU_CONFIG.DEFAULT_NEXT_ID
+        };
+
+        const MenuUtils = {
+            truncateMenuName: function(name) {
+                if (!name) return '';
+                return name.length > MENU_CONFIG.MAX_NAME_LENGTH
+                    ? name.substring(0, MENU_CONFIG.MAX_NAME_LENGTH) + '...'
+                    : name;
+            },
+            showToast: function(message, duration) {
+                duration = duration || 3000;
+                const $toast = $('#toast');
+                $toast.text(message).show();
+                setTimeout(() => $toast.hide(), duration);
+            },
+            updateNextMenuId: function() {
+                let maxId = 0;
+                $('.tree-item').each(function() {
+                    const id = parseInt($(this).data('id'));
+                    if (!isNaN(id) && id > maxId) maxId = id;
+                });
+                MenuState.nextMenuId = maxId + 1;
+            },
+            processImportedMenuJson: function(menuJson) {
+                const self = this;
+                return menuJson.map(item => {
+                    const processedItem = {
+                        id: item.id,
+                        name: item.name || '',
+                        fullName: item.name || '',
+                        displayName: self.truncateMenuName(item.name || ''),
+                        icon: item.icon || '',
+                        itemData: item.itemData || '',
+                        children: []
+                    };
+                    if (item.children && item.children.length > 0) {
+                        processedItem.children = self.processImportedMenuJson(item.children);
+                    }
+                    return processedItem;
+                });
+            },
+            // 新增：检测屏幕宽度并适配
+            checkScreenSize: function() {
+                const $container = $('.page-container');
+                const screenWidth = window.innerWidth;
+                // 小于768px时添加mobile类，否则移除
+                if (screenWidth <= 768) {
+                    $container.addClass('mobile');
+                } else {
+                    $container.removeClass('mobile');
+                }
+            }
+        };
+
+        const MenuData = {
+            exportMenuToJson: function($container) {
+                const self = this;
+                const menuList = [];
+                if (!$container || !$container.length || !$container.children('.tree-item').length) return menuList;
+
+                $container.children('.tree-item').each(function() {
+                    const $item = $(this);
+                    const $content = $item.children('.tree-item-content').first();
+                    const $menuNameEl = $content.find('.menu-text > .menu-name').first();
+                    const menuName = $menuNameEl.attr('data-full-name') || $menuNameEl.text().trim();
+                    const menuIcon = $content.find('.menu-text > .tree-icon').first().attr('class')?.replace('tree-icon', '').trim() || '';
+                    const menuItemData = $item.data('itemdata');
+
+                    const menuItem = {
+                        id: parseInt($item.data('id') || 0),
+                        name: menuName,
+                        icon: menuIcon,
+                        children: []
+                    };
+                    if (menuItemData !== null && menuItemData !== undefined && menuItemData !== '') {
+                        menuItem.itemData = menuItemData;
+                    }
+
+                    const $childrenContainer = $item.find('.tree-children').first();
+                    if ($childrenContainer.length > 0) {
+                        menuItem.children = self.exportMenuToJson($childrenContainer);
+                    }
+                    menuList.push(menuItem);
+                });
+                return menuList;
+            },
+            renderMenuFromJson: function(menuJson, $container) {
+                const self = this;
+                menuJson.forEach(menuItem => {
+                    // 创建菜单项主容器
+                    const $treeItem = $('<li>').addClass('tree-item').attr('data-id', menuItem.id);
+                    if (menuItem.itemData) $treeItem.data('itemdata', menuItem.itemData);
+
+                    // 构建图标和折叠按钮
+                    let iconHtml = menuItem.icon ? `<i class="${menuItem.icon} tree-icon"></i>` : '';
+                    const fullName = menuItem.fullName || menuItem.name || '';
+                    const displayName = menuItem.displayName || MenuUtils.truncateMenuName(menuItem.name || '');
+                    let toggleHtml = '';
+
+                    // 有子菜单时添加折叠图标
+                    if (menuItem.children && menuItem.children.length > 0) {
+                        const level = $container.parents('.tree-item').length;
+                        const toggleIcon = level === 0 ? 'fas fa-caret-right' : 'fas fa-angle-right';
+                        toggleHtml = `<i class="${toggleIcon} tree-toggle"></i>`;
+                    }
+
+                    // 构建菜单内容
+                    const $content = $('<div>').addClass('tree-item-content');
+                    const $menuText = $('<div>').addClass('menu-text').html(toggleHtml + iconHtml + `<span class="menu-name" data-full-name="${fullName}">${displayName}</span>`);
+                    $content.append($menuText);
+                    $treeItem.append($content);
+
+                    // 渲染子菜单容器（关键：确保子菜单容器正确挂载）
+                    if (menuItem.children && menuItem.children.length > 0) {
+                        const $childrenContainer = $('<ul>').addClass('tree-children');
+                        $treeItem.append($childrenContainer);
+                        // 递归渲染子菜单
+                        self.renderMenuFromJson(menuItem.children, $childrenContainer);
+                    }
+
+                    // 添加到父容器
+                    $container.append($treeItem);
+                });
+            },
+            addLevel1Menu: function(fullName, displayName, menuIcon, menuItemData) {
+                const newMenuId = MenuState.nextMenuId++;
+                let iconHtml = menuIcon ? `<i class="${menuIcon} tree-icon"></i>` : '';
+
+                const $newMenuItem = $('<li>').addClass('tree-item').attr('data-id', newMenuId);
+                const $content = $('<div>').addClass('tree-item-content active');
+                const $menuText = $('<div>').addClass('menu-text').html(`<i class="fas fa-caret-right tree-toggle"></i>${iconHtml}<span class="menu-name" data-full-name="${fullName}">${displayName}</span>`);
+
+                $content.append($menuText);
+                $newMenuItem.append($content).append($('<ul>').addClass('tree-children'));
+                if (menuItemData) $newMenuItem.data('itemdata', menuItemData);
+
+                $('#treeMenu').append($newMenuItem);
+                MenuState.currentActiveItem = $newMenuItem;
+                $('.tree-item-content').removeClass('active');
+                $newMenuItem.find('.tree-item-content').addClass('active');
+            },
+            addChildMenu: function(fullName, displayName, menuIcon, menuItemData) {
+                const newMenuId = MenuState.nextMenuId++;
+                let iconHtml = menuIcon ? `<i class="${menuIcon} tree-icon"></i>` : '';
+
+                const $newMenuItem = $('<li>').addClass('tree-item').attr('data-id', newMenuId);
+                const $content = $('<div>').addClass('tree-item-content active');
+                const $menuText = $('<div>').addClass('menu-text').html(`${iconHtml}<span class="menu-name" data-full-name="${fullName}">${displayName}</span>`);
+
+                $content.append($menuText);
+                $newMenuItem.append($content);
+                if (menuItemData) $newMenuItem.data('itemdata', menuItemData);
+
+                let $childrenContainer = MenuState.currentActiveItem.find('.tree-children').first();
+                if (!$childrenContainer.length) {
+                    const $menuText = MenuState.currentActiveItem.find('.tree-item-content > .menu-text').first();
+                    const level = MenuState.currentActiveItem.parents('.tree-item').length;
+                    const toggleIcon = level === 0 ? 'fas fa-caret-right' : 'fas fa-angle-right';
+                    $menuText.prepend(`<i class="${toggleIcon} tree-toggle"></i>`);
+                    $childrenContainer = $('<ul>').addClass('tree-children open');
+                    MenuState.currentActiveItem.append($childrenContainer);
+                } else {
+                    $childrenContainer.addClass('open');
+                }
+
+                $childrenContainer.append($newMenuItem);
+                MenuState.currentActiveItem = $newMenuItem;
+                $('.tree-item-content').removeClass('active');
+                $newMenuItem.find('.tree-item-content').addClass('active');
+            }
+        };
+
+        const MenuEvents = {
+            initEvents: function() {
+                const self = this;
+                $(document)
+                    // 折叠图标点击事件（核心修复）
+                    .on('click', '.tree-toggle', function(e) {
+                        e.stopPropagation();
+                        const $toggle = $(this);
+                        const $parentItem = $toggle.closest('.tree-item');
+                        const $children = $parentItem.find('.tree-children').first();
+
+                        // 切换折叠状态
+                        $toggle.toggleClass('expanded');
+                        $children.toggleClass('open');
+
+                        // 切换图标样式（视觉优化）
+                        if ($toggle.hasClass('fa-caret-right')) {
+                            $toggle.toggleClass('fa-caret-right fa-caret-down');
+                        } else if ($toggle.hasClass('fa-angle-right')) {
+                            $toggle.toggleClass('fa-angle-right fa-angle-down');
+                        }
+                    })
+                    // 菜单项点击事件
+                    .on('click', '.tree-item-content', function(e) {
+                        e.stopPropagation();
+                        const $content = $(this);
+                        const $treeItem = $content.closest('.tree-item');
+
+                        // 激活选中状态
+                        $('.tree-item-content').removeClass('active');
+                        $content.addClass('active');
+                        MenuState.currentActiveItem = $treeItem;
+
+                        // 自动展开子菜单（如果有）
+                        const $toggle = $content.find('.tree-toggle').first();
+                        const $children = $treeItem.find('.tree-children').first();
+                        if ($toggle.length > 0 && $children.length > 0 && !$children.hasClass('open')) {
+                            $toggle.click(); // 触发折叠图标点击事件
+                        }
+                    })
+                    .on('click', '#addMenuBtn', () => self.handleAddMenuClick())
+                    .on('click', '#editMenuBtn', () => self.handleEditMenuClick())
+                    .on('click', '#deleteMenuBtn', () => self.handleDeleteMenuClick())
+                    .on('click', '#confirmBtn', () => self.handleConfirmClick())
+                    .on('click', '#cancelBtn', () => self.handleCancelClick())
+                    .on('click', '#exportMenuBtn', () => self.handleExportClick())
+                    .on('click', '#importMenuBtn', () => self.handleImportClick())
+                    .on('click', '#importCancelBtn', () => self.handleImportCancelClick())
+                    .on('click', '#importConfirmBtn', () => self.handleImportConfirmClick())
+                    .on('click', '.modal', (e) => self.handleModalOutsideClick(e));
+
+                // 新增：监听窗口大小变化，实时适配
+                $(window).on('resize', function() {
+                    MenuUtils.checkScreenSize();
+                });
+            },
+            handleAddMenuClick: function() {
+                $('#modalTitle').text('添加菜单');
+                $('#menuNameInput').val('');
+                $('#menuIconSelect').val('');
+                $('#menuItemDataInput').val('');
+                MenuState.isEditMode = false;
+
+                $('#radioLevel1').prop('checked', !MenuState.currentActiveItem.length);
+                $('#radioChild').prop('checked', !!MenuState.currentActiveItem.length);
+
+                $('#menuModal').show();
+            },
+            handleEditMenuClick: function() {
+                if (!MenuState.currentActiveItem.length) {
+                    MenuUtils.showToast('请先选中要修改的菜单');
+                    return;
+                }
+
+                const $content = MenuState.currentActiveItem.children('.tree-item-content').first();
+                const menuText = $content.find('.menu-name').attr('data-full-name') || $content.find('.menu-name').text().trim();
+                const menuIcon = $content.find('.tree-icon').attr('class')?.replace('tree-icon', '').trim() || '';
+                const menuItemData = MenuState.currentActiveItem.data('itemdata') || '';
+
+                $('#modalTitle').text('修改菜单');
+                $('#menuNameInput').val(menuText);
+                $('#menuIconSelect').val(menuIcon);
+                $('#menuItemDataInput').val(menuItemData);
+                MenuState.isEditMode = true;
+                $('#addPositionContainer').hide();
+                $('#menuModal').show();
+            },
+            handleDeleteMenuClick: function() {
+                const $activeContent = $('.tree-item-content.active');
+                if (!$activeContent.length) {
+                    MenuUtils.showToast('请先选中要删除的菜单');
+                    return;
+                }
+
+                const $activeItem = $activeContent.closest('.tree-item');
+                const menuText = $activeContent.find('.menu-name').attr('data-full-name') || $activeContent.find('.menu-name').text().trim();
+
+                if (confirm(`确定要删除菜单【${menuText}】吗？删除后子菜单也会被移除！`)) {
+                    const $parentContainer = $activeItem.parent();
+                    $activeItem.remove();
+                    $('.tree-item-content').removeClass('active');
+
+                    // 选中父菜单（如果存在）
+                    const $firstItem = $parentContainer.find('.tree-item').first();
+                    if ($firstItem.length) {
+                        // $firstItem.find('.tree-item-content').addClass('active');
+                        // MenuState.currentActiveItem = $firstItem;
+                    } else {
+                        const $parentTreeItem = $parentContainer.closest('.tree-item');
+                        if ($parentTreeItem.length) {
+                            $parentTreeItem.find('.tree-item-content').addClass('active');
+                            MenuState.currentActiveItem = $parentTreeItem;
+                            // 移除空父菜单的折叠图标
+                            $parentTreeItem.find('.tree-toggle').remove();
+                            $parentTreeItem.find('.tree-children').remove();
+                        } else {
+                            MenuState.currentActiveItem = $();
+                        }
+                    }
+                    MenuUtils.showToast('菜单删除成功');
+                }
+            },
+            handleConfirmClick: function() {
+                let menuName = $('#menuNameInput').val().trim();
+                const menuIcon = $('#menuIconSelect').val().trim();
+                const menuItemData = $('#menuItemDataInput').val().trim();
+
+                if (!menuName) {
+                    MenuUtils.showToast('请输入菜单名称');
+                    return;
+                }
+
+                const fullMenuName = menuName;
+                const displayMenuName = MenuUtils.truncateMenuName(menuName);
+
+                if (MenuState.isEditMode) {
+                    const $content = MenuState.currentActiveItem.children('.tree-item-content').first();
+                    const $menuNameEl = $content.find('.menu-name');
+                    const $iconEl = $content.find('.tree-icon');
+
+                    $menuNameEl.text(displayMenuName).attr('data-full-name', fullMenuName);
+                    if (menuIcon) {
+                        $iconEl.length ? $iconEl.attr('class', `tree-icon ${menuIcon}`) : $menuNameEl.before(`<i class="${menuIcon} tree-icon"></i>`);
+                    } else {
+                        $iconEl.remove();
+                    }
+                    MenuState.currentActiveItem.data('itemdata', menuItemData);
+                    MenuUtils.showToast('菜单修改成功');
+                } else {
+                    const addAsLevel1 = $('#radioLevel1').is(':checked');
+                    if (addAsLevel1) {
+                        MenuData.addLevel1Menu(fullMenuName, displayMenuName, menuIcon, menuItemData);
+                    } else {
+                        if (!MenuState.currentActiveItem.length) {
+                            MenuUtils.showToast('请先选中父菜单');
+                            return;
+                        }
+                        MenuData.addChildMenu(fullMenuName, displayMenuName, menuIcon, menuItemData);
+                    }
+                    MenuUtils.showToast('菜单添加成功');
+                }
+
+                $('#menuModal').hide();
+                $('#addPositionContainer').show();
+            },
+            handleCancelClick: function() {
+                $('#menuModal').hide();
+                $('#addPositionContainer').show();
+            },
+            handleExportClick: function() {
+                const menuJson = MenuData.exportMenuToJson($('#treeMenu'));
+                const formattedJson = JSON.stringify(menuJson, null, 2);
+                const blob = new Blob([formattedJson], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = $('<a>').attr({ href: url, download: `菜单配置_${new Date().toLocaleDateString()}.json` });
+
+                $('body').append(a);
+                a[0].click();
+                setTimeout(() => {
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                }, 100);
+
+                MenuUtils.showToast('JSON导出成功（仅包含itemData字段）');
+            },
+            handleImportClick: function() {
+                $('#importModal').show();
+            },
+            handleImportCancelClick: function() {
+                $('#importModal').hide();
+            },
+            handleImportConfirmClick: function() {
+                try {
+                    const jsonText = $('#jsonImportText').val().trim();
+                    if (!jsonText) {
+                        MenuUtils.showToast('请输入JSON数据');
+                        return;
+                    }
+
+                    const menuJson = JSON.parse(jsonText);
+                    if (!Array.isArray(menuJson)) throw new Error('JSON格式错误：根节点必须是数组');
+
+                    const processedMenuJson = MenuUtils.processImportedMenuJson(menuJson);
+                    $('#treeMenu').empty();
+                    $('.tree-item-content').removeClass('active');
+                    MenuState.currentActiveItem = $();
+
+                    MenuData.renderMenuFromJson(processedMenuJson, $('#treeMenu'));
+                    MenuUtils.updateNextMenuId();
+
+                    // 导入后默认选中第一个菜单并激活样式
+                    const $firstItem = $('#treeMenu').find('.tree-item').first();
+                    if ($firstItem.length) {
+                        MenuState.currentActiveItem = $firstItem;
+                        $firstItem.find('.tree-item-content').addClass('active');
+                        const $toggle = $firstItem.find('.tree-toggle').first();
+                        if ($toggle.length > 0) {
+                            setTimeout(() => $toggle.click(), 100); // 延迟执行确保DOM渲染完成
+                        }
+                    }
+
+                    MenuUtils.showToast('JSON导入成功（超长名称已自动截断，仅包含itemData字段）');
+                    $('#importModal').hide();
+                } catch (error) {
+                    MenuUtils.showToast(`导入失败：${error.message}`);
+                    console.error('导入错误：', error);
+                }
+            },
+            handleModalOutsideClick: function(e) {
+                if (e.target === this) {
+                    $(this).hide();
+                    $('#addPositionContainer').show();
+                }
+            }
+        };
+
+        const MenuInit = {
+            initLoadMenuJson: function() {
+                try {
+                    const processedMenuJson = MenuUtils.processImportedMenuJson(MENU_CONFIG.INIT_MENU_DATA);
+                    $('#treeMenu').empty();
+                    $('.tree-item-content').removeClass('active');
+                    MenuState.currentActiveItem = $();
+
+                    // 渲染菜单
+                    MenuData.renderMenuFromJson(processedMenuJson, $('#treeMenu'));
+                    MenuUtils.updateNextMenuId();
+
+                    // 初始化后默认选中第一个菜单并展开（关键：延迟执行）
+                    setTimeout(() => {
+                        const $firstItem = $('#treeMenu').find('.tree-item').first();
+                        if ($firstItem.length) {
+                            MenuState.currentActiveItem = $firstItem;
+                            $firstItem.find('.tree-item-content').addClass('');
+                            const $toggle = $firstItem.find('.tree-toggle').first();
+                            if ($toggle.length > 0) {
+                                $toggle.click(); // 展开一级菜单
+                                // 展开第一个子菜单（可选）
+                                setTimeout(() => {
+                                    const $firstChildToggle = $firstItem.find('.tree-children .tree-toggle').first();
+                                    if ($firstChildToggle.length > 0) $firstChildToggle.click();
+                                }, 100);
+                            }
+                        }
+                    }, 200);
+
+                    MenuUtils.showToast('初始化菜单加载成功');
+                } catch (error) {
+                    MenuUtils.showToast(`初始化加载失败：${error.message}`);
+                    console.error('初始化加载错误：', error);
+                }
+            },
+            init: function() {
+                // 初始化屏幕适配
+                MenuUtils.checkScreenSize();
+                // 初始化事件
+                MenuEvents.initEvents();
+                // 加载菜单数据
+                this.initLoadMenuJson();
+            }
+        };
+
+        // 页面加载完成后初始化
+        $(document).ready(function() {
+            MenuInit.init();
+            // 暴露全局方法（保留原功能）
+            window.getTreeMenuData = () => MenuData.exportMenuToJson($('#treeMenu'));
+            window.convertTreeData = () => convertModel2ToModel1(MenuData.exportMenuToJson($('#treeMenu')));
+        });
+
+                // 辅助函数：数据格式转换（仅保留原功能，移除换行处理）
+        function convertModel2ToModel1(model2Data) {
+            if (!Array.isArray(model2Data) || model2Data.length === 0) return {};
+
+            const transformNode = node => {
+                const resultNode = {
+                    name: node.name || '',
+                    // 移除formattedName字段，恢复原始逻辑
+                    value: node.itemData || 0
+                };
+                if (Array.isArray(node.children) && node.children.length > 0) {
+                    resultNode.children = node.children.map(child => transformNode(child));
+                }
+                return resultNode;
+            };
+            return transformNode(model2Data[0]);
+        }
+
+        var ChartShow = function(){
+        
+            var data = convertModel2ToModel1(MenuData.exportMenuToJson($('#treeMenu')));
+
+            //ChartData = formatNodeName(ChartData);
+
+            // 完整的ECharts配置项
+                    const option = {
+          title: {
+            text: '插拔桩作业风险评估',
+            left: 'center',          // 水平居中
+            top: '10px',             // 距离顶部距离
+            textStyle: {
+              fontSize: 20,          // 标题字体大小
+              fontWeight: 'bold',    // 加粗
+              color: '#333'          // 标题颜色
+            }
+          },
+          // 提示框优化
+          tooltip: {
+            trigger: 'item',
+            triggerOn: 'mousemove',
+            backgroundColor: 'rgba(255,255,255,0.95)', // 半透明白色背景
+            borderColor: '#409EFF',                    // 边框颜色
+            borderWidth: 1,                            // 边框宽度
+            padding: 10,                               // 内边距
+            textStyle: {
+              fontSize: 14                             // 提示框文字大小
+            },
+            formatter: function(params) {
+              // 自定义提示框格式
+              return `<div>${params.value || '无'}</div>`;
+            }
+          },
+          // 背景色
+          backgroundColor: '#f8f9fa',
+          series: [
+            {
+              type: 'tree',
+              id: 0,
+              name: 'tree1',
+              data: [data],
+              // 位置调整
+              top: '10%',
+              left: '22%',
+              bottom: '5%',
+              right: '18%',
+              // 节点样式
+              symbolSize: 12,          // 节点大小
+              symbol: 'circle',        // 节点形状（圆形更美观）
+              // 连接线样式优化
+              edgeShape: 'polyline',   // 折线连接
+              edgeForkPosition: '50%', // 分叉位置
+              lineStyle: {
+                width: 1.5,            // 线条宽度
+                color: '#666',         // 线条颜色
+                curveness: 0.3,        // 曲线弧度（更柔和）
+                type: 'solid'          // 实线
+              },
+              // 初始展开深度
+              initialTreeDepth: 3,
+              // 节点标签样式（核心优化）
+              label: {
+                fontSize: 18,          // 字体大小
+                backgroundColor: '#e8f4ff', // 背景色
+                borderColor: '#409EFF',    // 边框颜色
+                borderWidth: 1,            // 边框宽度
+                borderRadius: 4,          // 圆角
+                padding: [6, 10],          // 内边距
+                position: 'left',
+                verticalAlign: 'middle',
+                align: 'right',
+                color: '#333'             // 文字颜色
+              },
+              // 叶子节点样式
+              leaves: {
+                label: {
+                  fontSize: 14,
+                  backgroundColor: '#f0f9ff',
+                  borderColor: '#66b1ff',
+                  borderWidth: 1,
+                  borderRadius: 4,
+                  padding: [5, 8],
+                  position: 'right',
+                  verticalAlign: 'middle',
+                  align: 'left',
+                  color: '#333'
+                }
+              },
+              // 高亮样式
+              emphasis: {
+                focus: 'none', // 关键：改为none，不隐藏/淡化其他节点
+                blurScope: 'none', // 可选：关闭模糊作用域
+                label: {
+                  fontSize: 15,
+                  backgroundColor: '#409EFF',
+                  color: '#fff',
+                  borderColor: '#1989fa'
+                },
+                lineStyle: {
+                  width: 2,
+                  color: '#1989fa'
+                },
+                // 确保其他节点样式不变
+                itemStyle: {
+                  opacity: 1 // 强制当前节点外的其他节点不透明
+                }
+              },
+              // 展开收起配置
+              expandAndCollapse: true,
+              // 动画配置
+              animationDuration: 550,
+              animationDurationUpdate: 750,
+              // 折叠/展开图标样式
+              expandIcon: {
+                path: 'M10 8L6 12 10 16V8Z', // 自定义展开图标
+                size: 12
+              },
+              collapseIcon: {
+                path: 'M8 10L12 6 8 2V10Z', // 自定义折叠图标
+                size: 12
+              }
+            }
+          ]
+        };
+
+            var chartDom = document.getElementById('MainChart');
+            var myChart = echarts.init(chartDom);
+
+            option && myChart.setOption(option);
+        }
+        
+
+    </script>
+</body>
+</html>

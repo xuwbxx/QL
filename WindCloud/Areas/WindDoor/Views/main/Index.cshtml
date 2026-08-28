@@ -1,0 +1,119 @@
+﻿
+@{
+    ViewBag.Title = "三航局技术中心风电数字化板块";
+    Layout = "~/Views/Shared/WindDoorLayout.cshtml";
+
+}
+
+<div class="content clearfix">
+
+    <div class="col-lg-6 col-sm-6 col-xs-12" style="padding-right: 1.5vh;">
+        <div class="mod01">
+            <div class="mod_title">海上风电施工技术服务云平台</div>
+            <div class="mod_content clearfix">
+                <div class="img_box"><img src="~/Content/WindRedirect/img/pic1.png"></div>
+                <div class="jianjie_box_w">
+                    <div class="jianjie_box">
+                        <p>海上风电施工云服务平台是一种基于网络云技术的大型综合应用平台，它将涵盖许多独立的子系统、软件平台、风电业务系统、数据系统。</p>
+                        <p>三航局技术中心在海上风电施工辅助方面已经开发了多款风电自研软件，例如用于计算桩腿插拔的分析软件、风机整体安装模拟软件、起重船基础施工可作业性预报分析软件等。</p>
+                    </div>
+                    <div class="text-center box_btn_enter"><button class="btn_enter" onclick="OpenWindCloud();">进入云平台</button></div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 col-sm-6 col-xs-12" style="padding-left: 1.5vh;">
+        <div class="mod01">
+            <div class="mod_title">海上风电施工设备物联网</div>
+            <div class="mod_content clearfix">
+                <div class="img_box"><img src="~/Content/WindRedirect/img/img02.jpg"></div>
+                <div class="jianjie_box_w">
+
+                    <div class="jianjie_box">
+                        <p>实时收集和存储海上风电物联网数据，如远距离拖航保障系统、起重船施工数据采集系统等。</p>
+                    </div>
+                    <div class="text-center box_btn_enter"><button class="btn_enter" onclick="OpenWindIOT();">进入物联网</button></div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 col-sm-6 col-xs-12" style="padding-right: 1.5vh;">
+        <div class="mod01">
+            <div class="mod_title">风电地理信息（GIS）综合查询平台</div>
+            <div class="mod_content clearfix">
+                <div class="img_box"><img src="~/Content/WindRedirect/img/pic2.png"></div>
+                <div class="jianjie_box" style="height:28vh;">
+                    <p>风电地理信息（GIS）综合查询平台整合风电场地理数据、资源分布、设备状态及环境信息，提供可视化地图展示与智能分析功能。用户可快速查询风能资源、机组运行状态、电网接入点等关键数据，支持风电场选址、运维管理和效益评估。</p>
+                    <div class="zi_xiangmu_box">
+
+                        @{ 
+                            var Projects = Model as List<Model.Tech.Cloud.CloudWindProject>;
+                            foreach(var item in Projects)
+                            {
+                                string ProjectName = "";
+                                if(item.ProjectName.Length > 20)
+                                {
+                                    ProjectName = item.ProjectName.Substring(0, 20) + "...";
+                                }
+                                else
+                                {
+                                    ProjectName = item.ProjectName;
+                                }
+                                <div class="xiangmu_box"><span title="@item.ProjectName.ToString()">@(ProjectName)</span><button class="s_btn_enter" onclick="OpenGIS('@item.ID')">进入</button></div>
+                            }
+                        }
+
+
+                        @*<div class="xiangmu_box"><span>山东青岛深海1号海上风电场</span><button class="s_btn_enter">进入平台</button></div>
+                        <div class="xiangmu_box"><span>大唐平潭长江澳风电项目</span><button class="s_btn_enter">进入平台</button></div>
+                        <div class="xiangmu_box"><span>国华投资山东国华时代投资发展有限公司海上漂浮式光伏工程示范项目</span><button class="s_btn_enter">进入平台</button></div>*@
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 col-sm-6 col-xs-12" style="padding-left: 1.5vh;">
+        <div class="mod01">
+            <div class="mod_title">正在建设中......</div>
+            <div class="mod_content clearfix">
+                @*<div class="img_box"><img src="~/Content/WindRedirect/img/img01.png"></div>
+                <div class="jianjie_box">
+                    <p>海上风电施工数字化平台建设通过集成物联网、大数据和GIS技术，实现施工全流程的智能化管理。该平台实时监控船舶、吊装设备及环境数据，优化施工调度与资源分配，支持远程协同与风险预警。结合BIM模型与数字孪生技术，可模拟施工方案、追踪工程进度，提高作业效率与安全性，降低建设成本，为海上风电规模化开发提供全生命周期数字化支撑。</p>
+                    
+                    <div class="text-center box_btn_enter"><button class="btn_enter">正在建设中......</button></div>
+
+                </div>*@
+            </div>
+        </div>
+    </div>
+
+
+
+
+</div>
+
+<script>
+    var OpenWindCloud = function () {
+
+        window.open('/Cloud/Project/Index', '_blank');
+
+    }
+
+
+    var OpenWindIOT = function () {
+
+        window.open('/WindDoor/IOT/Index', '_blank');
+
+    }
+
+    var OpenGIS = function (ProjectID) {
+
+        window.open('/Cloud/WebGIS/Index?ProjectID=' + ProjectID, '_blank')
+
+    }
+
+</script>

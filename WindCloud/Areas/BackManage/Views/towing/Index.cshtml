@@ -1,0 +1,536 @@
+﻿
+@{
+    ViewBag.Title = "拖航监控账户配置";
+    Layout = "~/Views/Shared/BackManagePageLayout.cshtml";
+}
+
+<input type="hidden" id="hid_PostToken" value="@ViewData["PostToken"].ToString()" />
+
+<div class="div_body">
+
+    <div class="div_form">
+
+        <form class="form-inline">
+            <div class="form-group">
+                <input type="text" class="form-control" placeholder="请输入姓名" name="txt_RealName_Query">
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" onclick="TowingJS.DoQuery();">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="div_btn">
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="" onclick="TowingJS.Add();"><i class="fa fa-plus zdy_icon"></i>新增</button>
+    </div>
+
+    <div class="div_table">
+        <table class="table table-hover table_chongzhi">
+            <thead>
+                <tr>
+                    <th>姓名</th>
+                    <th>部门</th>
+                    <th>角色</th>
+                    <th>是否确认</th>
+                    <th>时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="html_UserList">
+            </tbody>
+
+        </table>
+
+        <div class="text-center">
+
+            <div id="Pagination">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!--配置节点人员弹框-->
+<div class="modal fade" id="tk_Configuration" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-s">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    新增账户
+                </h4>
+            </div>
+            <div class="modal-body">
+
+                <ul class="pejd_user" id="popup_htmlTowing">
+
+                    <!-- 第1行：用户名 + 搜索框 -->
+                    <li class="clearfix">
+                        <span style="width:5vw;">用户名</span>
+                        <span style="width:15vw;">
+                            <div class="nice-select">
+                                <input id="popup_txt_UserInfo" type="text" class="form-control" data-UserName="" data-UserCode="" data-UserDepart="" data-UserPhone="" data-UserJobName="" value="" autocomplete="off">
+                                <div class="search_div" onclick="TowingJS.ClearRole(this);">
+                                    <i class="fa fa-close"></i>
+                                </div>
+                                <ul></ul>
+                            </div>
+                        </span>
+                        <span>
+                            <button type="button" class="btn btn-primary" onclick="TowingJS.FindUser(this);">
+                                <i class="fa fa-search"></i>搜索
+                            </button>
+                        </span>
+                    </li>
+
+                    <!-- 第2行：角色（radio 单选） -->
+                    <li class="clearfix">
+                        <span style="width:10vw;">角色</span>
+                        <span style="display: flex; gap: 20px; align-items: center; font-size: 14px;">
+                            <label style="margin:0; font-weight:normal; cursor:pointer;">
+                                <input type="radio" name="popup_txt_Role" value="1" checked>
+                                &nbsp;管理者
+                            </label>
+                            <label style="margin:0; font-weight:normal; cursor:pointer;">
+                                <input type="radio" name="popup_txt_Role" value="2">
+                                &nbsp;浏览者
+                            </label>
+                        </span>
+                    </li>
+
+
+                    <!-- 第2行：角色（radio 单选） -->
+                    <li class="clearfix">
+                        <span style="width:10vw;">是否确认</span>
+                        <span style="display: flex; gap: 20px; align-items: center; font-size: 14px;">
+                            <label style="margin:0; font-weight:normal; cursor:pointer;">
+                                <input type="radio" name="popup_txt_IsConfirm" value="1" checked>
+                                &nbsp;已确认
+                            </label>
+                            <label style="margin:0; font-weight:normal; cursor:pointer;">
+                                <input type="radio" name="popup_txt_IsConfirm" value="0">
+                                &nbsp;未确认
+                            </label>
+                        </span>
+                    </li>
+
+
+                </ul>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="TowingJS.Save();"><i class="fa fa-arrow-down"></i>保存</button>
+                <button type="button" class="btn btn-default" onclick="TowingJS.DoBack();"><i class="fa fa-reply"></i>返回</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var TowingJS = function ($) {
+
+        $(document).ready(function () {
+            ParamInit();
+            Query();
+        })
+
+        var Param = {};
+        var ParamInit = function () {
+            Param.PageIndex = 1;
+            Param.PageSize = 10;
+            Param.TotalPage = 0;
+            Param.TotalCount = 0;
+
+        }
+
+        var Query = function () {
+
+            Param.RealName = $("input[name='txt_RealName_Query']").val();
+
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('ListQuery', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+                            debugger;
+
+                            var ListHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                // 1. 角色转换 1=管理 2=浏览 null=空
+                                let roleText = '';
+                                if (dom.Role === 1) {
+                                    roleText = '管理者';
+                                } else if (dom.Role === 2) {
+                                    roleText = '浏览者';
+                                }
+
+                                // 2. 确认状态 0=未确认 1=确认 null=未确认 + 颜色样式
+                                let confirmText = '';
+                                let confirmClass = '';
+                                if (dom.IsConfirm) {
+                                    confirmText = '已确认';
+                                    confirmClass = 'background:#28a745; color:#fff; padding:3px 8px; border-radius:3px;'; // 绿底白字
+                                } else {
+                                    confirmText = '未确认';
+                                    confirmClass = 'background:#dc3545; color:#fff; padding:3px 8px; border-radius:3px;'; // 红底白字
+                                }
+
+                                // 3. 解析 C# /Date(1759460052000)/ 时间戳
+                                let timeText = '';
+                                if (dom.CreateTime && dom.CreateTime !== '') {
+                                    // 提取毫秒级时间戳
+                                    var timeStamp = dom.CreateTime.replace(/\D/g, '');
+                                    var date = new Date(parseInt(timeStamp));
+                                    // 格式化 yyyy-MM-dd HH:mm:ss
+                                    timeText = date.getFullYear() + "-" +
+                                        String(date.getMonth() + 1).padStart(2, '0') + "-" +
+                                        String(date.getDate()).padStart(2, '0') + " " +
+                                        String(date.getHours()).padStart(2, '0') + ":" +
+                                        String(date.getMinutes()).padStart(2, '0') + ":" +
+                                        String(date.getSeconds()).padStart(2, '0');
+                                }
+
+                                // 拼接行
+                                // 拼接表格（状态带颜色）
+                                ListHtml += '<tr>' +
+                                    '<td>' + dom.RealName + '</td>' +
+                                    '<td>' + (dom.Depart ?? '') + '</td>' +
+                                    '<td>' + roleText + '</td>' +
+                                    '<td><span style="' + confirmClass + '">' + confirmText + '</span></td>' +
+                                    '<td>' + timeText + '</td>' +
+                                    '<td><button type="button" class="btn btn-success-s" data-id="' + dom.ID + '" data-name="' + dom.RealName + '" onclick="TowingJS.Edit(' + dom.ID + ')">修改</button></td>' +
+                                    '</tr>';
+
+                            });
+                            $('#html_UserList').html(ListHtml);
+
+                            //分页
+                            Param.TotalPage = data.TotalPage;
+                            Param.TotalCount = data.TotalCount;
+                            Param.PageIndex = data.PageIndex;
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                    Pagination();
+                    //CloseMaskLayout();
+                });
+        };
+
+        var DoQuery = function () {
+
+            Param.UserName = $("input[name='txt_UserName_Query']").val();
+            Query();
+        }
+
+        //分页
+        var Pagination = function () {
+            $("#Pagination").pagination({
+                currentPage: Param.PageIndex,
+                totalPage: Param.TotalPage,
+                isShow: true,
+                totalCount: Param.TotalCount,
+                count: 7,
+                homePageText: "首页",
+                endPageText: "尾页",
+                prevPageText: "上一页",
+                nextPageText: "下一页",
+                callback: function (current) {
+                    Param.PageIndex = current;
+                    Query();
+                }
+            });
+        }
+
+        //新增
+        var Add = function () {
+
+            DataModalClear();
+
+            Param.ID = 0;
+            Param.Type = 'add';
+
+            $('#tk_Configuration').modal('show');
+
+
+        }
+
+        //清除模态框
+        var DataModalClear = function () {
+
+            //$('#popup_htmlTowing').html('');
+
+            $('#popup_txt_UserInfo').val('');
+            $('#popup_txt_UserInfo').attr('data-UserName','');
+            $('#popup_txt_UserInfo').attr('data-UserCode', '');
+            $('#popup_txt_UserInfo').attr('data-UserDepart', '');
+            $('#popup_txt_UserInfo').attr('data-UserPhone', '');
+            $('#popup_txt_UserInfo').attr('data-UserJobName', '');
+
+        }
+
+        //打开模态框
+        var Save = function () {
+
+            ModalPopup('information', '是否保存?');
+
+            $("#ModalSubmit").unbind('click').bind('click', function () {
+                SaveData();
+            });
+        }
+
+        //保存
+        var SaveData = function () {
+
+            DataModalCreate();
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('DataSave', Param)
+                .success(function (data, statusText, jqXRH) {
+
+                    if (data) {
+                        //$('#myModal').modal('hide');
+
+                        if (data.Success) {
+                            ModalPopup('success', '保存成功');
+                            //$('#Modal_Account').modal('hide');
+                            $('#tk_Configuration').modal('hide');
+                            DoQuery();
+                        }
+                        else {
+
+                            ModalPopup('error', data.Message);
+                        }
+
+
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                    ModalClose('information');
+                });
+        }
+
+        //打开删除提示框
+        var Delete = function (dom) {
+            if (dom == null) {
+                return;
+            }
+            var ID = $(dom).attr('data-id');
+            var Name = $(dom).attr('data-name');
+            ModalPopup('information', '是否删除 ' + Name + " ?");
+
+
+
+            $("#ModalSubmit").unbind('click').bind('click', function () {
+                var DeleteParam = {};
+                DeleteParam.ID = ID;
+                DoDelete(DeleteParam);
+            })
+
+        }
+
+        //删除数据
+        var DoDelete = function (dom) {
+
+            $.post('DataDelete', dom)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+                            ModalPopup('success', '删除成功');
+                            DoQuery();
+                        }
+                        else {
+                            ModalPopup('error', data.Message);
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                    ModalClose('information');
+                });
+        }
+
+        //编辑
+        var Edit = function (ID) {
+
+            $('#tk_Configuration').modal('show');
+
+            if (ID == null || ID == '' || ID == 0)
+                return;
+
+            DataModalClear();
+            Param.ID = ID;
+            Param.Type = 'edit';
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('DataQuery', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+                            debugger;
+
+                            var user = data.Data;
+
+
+                            $('#popup_txt_UserInfo').attr('data-UserName', user.RealName).attr('data-UserCode', user.UserName).attr('data-UserDepart', (user.Depart ?? '')).val(user.RealName + '(' + (user.Depart ?? '') + ')');
+
+                            if (user.IsConfirm) {
+                                $('input[name="popup_txt_IsConfirm"][value="1"]').prop('checked', true);
+                            }
+                            else {
+                                $('input[name="popup_txt_IsConfirm"][value="0"]').prop('checked', true);
+                            }
+                            
+                            if (user.Role == 1) {
+                                $('input[name="popup_txt_Role"][value="1"]').prop('checked', true);
+                            }
+                            else {
+                                $('input[name="popup_txt_Role"][value="2"]').prop('checked', true);
+                            }
+
+
+                            //$('#popup_ProjectName').html(data.Data.ProjectName);
+
+                            //$('#hid_ProjectID').val(data.Data.ID);
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+
+                });
+
+        }
+
+        //数据生成
+        var DataModalCreate = function () {
+
+
+            Param.RealName = $('#popup_txt_UserInfo').attr('data-UserName');
+            Param.UserName = $('#popup_txt_UserInfo').attr('data-UserCode');
+            Param.Depart = $('#popup_txt_UserInfo').attr('data-UserDepart');
+            Param.Role = $('input[name="popup_txt_Role"]:checked').val();
+            Param.IsConfirm = $('input[name="popup_txt_IsConfirm"]:checked').val() == '1';
+
+
+        }
+
+
+        var ClearRole = function (dom) {
+
+            $(dom).prev('input').val('');
+
+        }
+
+        var DeleteRole = function (dom) {
+
+            $(dom).parent().parent().remove();
+
+        }
+
+        var DoBack = function () {
+
+            $('#tk_Configuration').modal('hide');
+
+        }
+
+        var FindUser = function (dom) {
+
+            var UserName = $(dom).parent().prev().children().last().children().first().val()
+            if (UserName == null || UserName == '')
+                return;
+
+            var ShjUserDom = $(dom).parent().prev().children().children('ul');
+
+            $(ShjUserDom).html('');
+
+            Param.Name = UserName;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('/Cloud/Base/FindShjUser', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        if (data.Success) {
+
+                            var ShjUsertml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                ShjUsertml += '<li onclick="TowingJS.ChooseUser(this);" data-usercode="' + dom.empcode + '" data-name="' + dom.name + '" data-depart="' + dom.wholeDeptPath + '" data-phone="' + dom.phone + '" data-jobname="' + dom.jobname + '" ><h3>' + dom.name + '(' + dom.jobname + ')</h3><div>' + dom.wholeDeptPath + '</div></li >';
+
+                            });
+                            $(ShjUserDom).show().html(ShjUsertml);
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                    Pagination();
+                });
+
+        }
+
+        var ChooseUser = function (dom) {
+
+            if (dom == null)
+                return;
+
+            var Name = $(dom).attr('data-name');
+            var UserCode = $(dom).attr('data-usercode');
+            var Depart = $(dom).attr('data-depart');
+            var Phone = $(dom).attr('data-phone');
+            var JobName = $(dom).attr('data-jobname');
+
+            var UserDom = $(dom).parent().parent().children().first();
+
+            $(UserDom).val(Name + '(' + Depart + ')');
+
+            $(UserDom).attr('data-UserName', Name);
+            $(UserDom).attr('data-UserCode', UserCode);
+            $(UserDom).attr('data-UserDepart', Depart);
+            $(UserDom).attr('data-UserPhone', Phone);
+            $(UserDom).attr('data-UserJobName', JobName);
+
+            $(dom).parent().hide();
+
+        }
+
+        return {
+            HomeSiteInit: function () {
+                Init();
+            },
+            DoQuery: DoQuery,
+            Add: Add,
+            Edit: Edit,
+            Save: Save,
+            ClearRole: ClearRole ,
+            DoBack: DoBack,
+            FindUser: FindUser,
+            ChooseUser: ChooseUser,
+            Delete: Delete,
+            field: {
+
+            }
+        }
+
+    }(jQuery);
+</script>

@@ -1,0 +1,499 @@
+﻿
+@{
+    ViewBag.Title = "可作业预报接收人设置";
+    Layout = "~/Views/Shared/BackManagePageLayout.cshtml";
+}
+
+<input type="hidden" id="hid_PostToken" value="@ViewData["PostToken"].ToString()" />
+
+<div class="div_body">
+
+    <div class="div_form">
+
+        <form class="form-inline">
+            <div class="form-group">
+                <input type="text" class="form-control" placeholder="请输入项目名称" name="txt_ProjectName_Query">
+                <input type="text" class="form-control" placeholder="请输入任务名称" name="txt_TaskName_Query">
+            </div>
+            @*<div class="form-group">
+                    <select class="form-control" name="select_Node_Query">
+                        <option value="100">请选择流程类型</option>
+                        <option value="0">项目申请类</option>
+                        <option value="1">软件委托型</option>
+                        <option value="2">软件使用类</option>
+                    </select>
+                </div>*@
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" onclick="KZYReportJS.DoQuery();">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+
+
+    <div class="div_table">
+        <table class="table table-hover table_chongzhi">
+            <thead>
+                <tr>
+                    <th width="10%">项目编号</th>
+                    <th width="20%">项目名称</th>
+                    <th width="10%">任务编号</th>
+                    <th width="30%">任务名称</th>
+                    <th width="20%">文件推送时间</th>
+                    <th width="10%">操作</th>
+                </tr>
+            </thead>
+            <tbody id="html_ProjectList">
+                <tr>
+                    <td>项目部业务员申请</td>
+                    <td>节点类型</td>
+                    <td class="zt_green">
+                        <button type="button" class="btn btn-primary-s" onClick="PopupConfiguration();"><i class="icon iconfont table_icon">&#xe66e;</i>配置节点人员</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>项目部总工审批</td>
+                    <td class="redcolor">否</td>
+                    <td>节点类型</td>
+                    <td>
+                        <button type="button" class="btn btn-primary-s"><i class="icon iconfont table_icon">&#xe66e;</i>配置节点人员</button>
+                    </td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+        <div class="text-center">
+
+            <div id="Pagination">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!--配置节点人员弹框-->
+<div class="modal fade" id="tk_Configuration" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-s">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="popup_TaskName">
+                    可作业预报接收人配置
+                </h4>
+                <input type="hidden" id="hid_TaskID" />
+            </div>
+            <div class="modal-body">
+
+                <div class="div_btn mar_b20">
+                    <button type="button" class="btn btn-primary" onclick="KZYReportJS.AddRole();"><i class="fa fa-plus"></i>新增</button>
+                </div>
+                <ul class="pejd_user" id="popup_htmlProjectRole">
+                    <li class="clearfix">
+                        <span>
+                            <select>
+                                <option value="1" selected>项目协调员</option>
+                            </select>
+                            <div class="nice-select">
+                                <input type="text" class="form-control" value="张一">
+                                <div class="search_div"><i class="fa fa-close"></i></div>
+
+                                <ul>
+                                </ul>
+
+                            </div>
+                        </span>
+                        <span>
+
+
+                            <button type="button" class="btn btn-primary"><i class="fa fa-search"></i>搜索</button><button type="button" class="btn btn-danger"><i class="fa fa-trash-o"></i>删除</button>
+                        </span>
+                    </li>
+                    <li class="clearfix">
+                        <span>
+                            <div class="nice-select">
+                                <input type="text" class="form-control" value="张二">
+                                <div class="search_div"><i class="fa fa-close"></i></div>
+
+                            </div>
+                        </span>
+                        <span>
+                            <button type="button" class="btn btn-primary"><i class="fa fa-search"></i>搜索</button><button type="button" class="btn btn-danger"><i class="fa fa-trash-o"></i>删除</button>
+                        </span>
+                    </li>
+                </ul>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="KZYReportJS.Save();"><i class="fa fa-arrow-down"></i>保存</button>
+                <button type="button" class="btn btn-default" onclick="KZYReportJS.DoBack();"><i class="fa fa-reply"></i>返回</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var KZYReportJS = function ($) {
+
+        $(document).ready(function () {
+            ParamInit();
+            Query();
+        })
+
+        var Param = {};
+        var ParamInit = function () {
+            Param.PageIndex = 1;
+            Param.PageSize = 10;
+            Param.TotalPage = 0;
+            Param.TotalCount = 0;
+
+            Param.ProjectName = $("input[name='txt_ProjectName_Query']").val();
+            Param.TaskName = $("input[name='txt_TaskName_Query']").val();
+        }
+
+        //查询
+        var Query = function () {
+
+            //OpenMaskLayout();
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('ListQuery', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        if (data.Success) {
+
+                            var ListHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                var TimeClass = 'greencolor';
+                                if (dom.IsTimeOut)
+                                {
+                                    TimeClass = 'redcolor';
+                                }
+                                var TimeStr = dom.SendStartTime + ' 至 ' + dom.SendEndTime
+
+                                ListHtml += '<tr><td>' + dom.ProjectCode + '</td><td>' + dom.ProjectName + '</td><td>' + dom.TaskCode + '</td><td>' + dom.TaskName + '</td><td class="' + TimeClass + '">' + TimeStr + '</td><td><button type="button" class="btn btn-primary-s" onclick="KZYReportJS.Edit(' + dom.ID + ');"><i class="icon iconfont table_icon">&#xe66e;</i>配置报告接收人</button></td></tr>';
+
+                            })
+                            $('#html_ProjectList').html(ListHtml);
+
+                            //分页
+                            Param.TotalPage = data.TotalPage;
+                            Param.TotalCount = data.TotalCount;
+                            Param.PageIndex = data.PageIndex;
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                    Pagination();
+                    //CloseMaskLayout();
+                });
+
+        }
+
+        var DoQuery = function () {
+
+            Param.ProjectName = $("input[name='txt_ProjectName_Query']").val();
+            Param.TaskName = $("input[name='txt_TaskName_Query']").val();
+            Query();
+        }
+
+        //分页
+        var Pagination = function () {
+            $("#Pagination").pagination({
+                currentPage: Param.PageIndex,
+                totalPage: Param.TotalPage,
+                isShow: true,
+                totalCount: Param.TotalCount,
+                count: 7,
+                homePageText: "首页",
+                endPageText: "尾页",
+                prevPageText: "上一页",
+                nextPageText: "下一页",
+                callback: function (current) {
+                    Param.PageIndex = current;
+                    Query();
+                }
+            });
+        }
+
+        //打开模态框
+        var Save = function () {
+
+            ModalPopup('information', '是否保存?');
+
+            $("#ModalSubmit").unbind('click').bind('click', function () {
+                SaveData();
+            });
+        }
+
+        //保存
+        var SaveData = function () {
+
+            DataModalCreate();
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('DataSave', Param)
+                .success(function (data, statusText, jqXRH) {
+
+                    if (data) {
+                        //$('#myModal').modal('hide');
+
+                        if (data.Success) {
+                            ModalPopup('success', '保存成功');
+                            $('#Modal_Account').modal('hide');
+                            $('#tk_Configuration').modal('hide');
+                            DoQuery();
+                        }
+                        else {
+
+                            ModalPopup('error', data.Message);
+                        }
+
+
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                    ModalClose('information');
+                });
+        }
+
+        //打开删除提示框
+        //var Delete = function (dom) {
+        //    if (dom == null) {
+        //        return;
+        //    }
+        //    var ID = $(dom).attr('data-id');
+        //    var Name = $(dom).attr('data-name');
+        //    ModalPopup('information', '是否删除 ' + Name + " ?");
+
+
+
+        //    $("#ModalSubmit").bind('click', function () {
+        //        var DeleteParam = {};
+        //        DeleteParam.ID = ID;
+        //        DoDelete(DeleteParam);
+        //    })
+
+        //}
+
+        //删除数据
+        //var DoDelete = function (dom) {
+
+        //    $.post('DataDelete', dom)
+        //        .success(function (data, statusText, jqXRH) {
+        //            if (data) {
+        //                if (data.Success) {
+        //                    ModalPopup('success', '删除成功');
+        //                    DoQuery();
+        //                }
+        //                else {
+        //                    ModalPopup('error', data.Message);
+        //                }
+        //            }
+        //        })
+        //        .fail(function (jqXHR, statusText, errorMessage) {
+        //            //console.error(arguments);
+        //        })
+        //        .always(function (data) {
+        //            ModalClose('information');
+        //        });
+        //}
+
+        //编辑
+        var Edit = function (ID) {
+
+            if (ID == null || ID == '' || ID == 0)
+                return;
+
+            DataModalClear();
+            Param.TaskID = ID;
+            $('#tk_Configuration').modal('show');
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('DataQuery', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+                            var ProjectRoleHtml = '';
+                            $(data.Data.Delivers).each(function (index, dom) {
+
+                                ProjectRoleHtml += '<li class="clearfix"><span><div class="nice-select"><input type="text" class="form-control" data-UserName="' + dom.UserName + '" data-UserCode="' + dom.UserCode + '" data-UserDepart="' + dom.UserDepartName + '" data-UserPhone="' + dom.UserPhone + '" data-UserJobName="' + dom.UserJobName + '" value="' + dom.UserName + '(' + dom.UserDepartName + ')">'
+                                    + '<div class="search_div" onclick="KZYReportJS.ClearRole(this);"><i class="fa fa-close"></i></div><ul></ul></div></span><span><button type="button" class="btn btn-primary" onclick="KZYReportJS.FindUser(this);"><i class="fa fa-search"></i>搜索</button><button type="button" class="btn btn-danger" onclick="KZYReportJS.DeleteRole(this);"><i class="fa fa-trash-o"></i>删除</button></span></li>';
+
+                            })
+
+                            $('#popup_TaskName').html('(' + data.Data.ProjectCode + ')' + data.Data.ProjectName);
+
+                            $('#popup_htmlProjectRole').html(ProjectRoleHtml);
+
+                            $('#hid_TaskID').val(data.Data.TaskID);
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+
+                });
+
+        }
+
+        //数据生成
+        var DataModalCreate = function () {
+
+            Param.TaskID = $('#hid_TaskID').val();
+
+            var TaskDelivers = [];
+
+            $('#popup_htmlProjectRole li.clearfix').each(function (index, dom) {
+
+                var Deliver = {};
+
+                var UserDom = $(dom).find('div.nice-select').children().first();
+                Deliver.UserName = $(UserDom).attr('data-UserName');
+                Deliver.UserCode = $(UserDom).attr('data-UserCode');
+                Deliver.UserDepartName = $(UserDom).attr('data-UserDepart');
+                Deliver.UserPhone = $(UserDom).attr('data-UserPhone');
+                Deliver.UserJobName = $(UserDom).attr('data-UserJobName');
+
+                TaskDelivers.push(Deliver);
+            })
+
+            Param.NodeManagers = TaskDelivers;
+
+        }
+
+        //清除模态框
+        var DataModalClear = function () {
+
+            $('#popup_htmlProjectRole').html('');
+
+        }
+
+
+
+        var AddRole = function () {
+
+            var NewHtml = '<li class="clearfix"><span><div class="nice-select"><input type="text" class="form-control" placeholder="输入姓名并搜索" data-UserName="" data-UserCode="" data-UserDepart="" data-UserPhone="" data-UserJobName="" value=""><div class="search_div" onclick="KZYReportJS.ClearRole(this);"><i class="fa fa-close"></i></div><ul></ul></div></span>'
+                + '<span><button type="button" class="btn btn-primary" onclick="KZYReportJS.FindUser(this);"><i class="fa fa-search"></i>搜索</button><button type="button" class="btn btn-danger" onclick="KZYReportJS.DeleteRole(this);"><i class="fa fa-trash-o"></i>删除</button></span></li>';
+
+            $('#popup_htmlProjectRole').append(NewHtml);
+
+        }
+
+        var ClearRole = function (dom) {
+
+            $(dom).prev('input').val('');
+
+        }
+
+        var DeleteRole = function (dom) {
+
+            $(dom).parent().parent().remove();
+
+        }
+
+        var DoBack = function () {
+
+            $('#tk_Configuration').modal('hide');
+
+        }
+
+        var FindUser = function (dom) {
+
+            var UserName = $(dom).parent().prev().children().last().children().first().val()
+            if (UserName == null || UserName == '')
+                return;
+
+            var ShjUserDom = $(dom).parent().prev().children().children('ul');
+
+            $(ShjUserDom).html('');
+
+            Param.Name = UserName;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('/Cloud/Base/FindShjUser', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        if (data.Success) {
+
+                            var ShjUsertml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                ShjUsertml += '<li onclick="KZYReportJS.ChooseUser(this);" data-usercode="' + dom.empcode + '" data-name="' + dom.name + '" data-depart="' + dom.wholeDeptPath + '" data-phone="' + dom.phone + '" data-jobname="' + dom.jobname + '" ><h3>' + dom.name + '(' + dom.jobname + ')</h3><div>' + dom.wholeDeptPath + '</div></li >';
+
+                            });
+                            $(ShjUserDom).show().html(ShjUsertml);
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                    Pagination();
+                });
+
+        }
+
+        var ChooseUser = function (dom) {
+
+            if (dom == null)
+                return;
+
+            var Name = $(dom).attr('data-name');
+            var UserCode = $(dom).attr('data-usercode');
+            var Depart = $(dom).attr('data-depart');
+            var Phone = $(dom).attr('data-phone');
+            var JobName = $(dom).attr('data-jobname');
+
+            var UserDom = $(dom).parent().parent().children().first();
+
+            $(UserDom).val(Name + '(' + Depart + ')');
+
+            $(UserDom).attr('data-UserName', Name);
+            $(UserDom).attr('data-UserCode', UserCode);
+            $(UserDom).attr('data-UserDepart', Depart);
+            $(UserDom).attr('data-UserPhone', Phone);
+            $(UserDom).attr('data-UserJobName', JobName);
+
+            $(dom).parent().hide();
+
+        }
+
+        return {
+            HomeSiteInit: function () {
+                Init();
+            },
+            DoQuery: DoQuery,
+            Edit: Edit,
+            AddRole: AddRole,
+            ClearRole: ClearRole,
+            DeleteRole: DeleteRole,
+            FindUser: FindUser,
+            ChooseUser: ChooseUser,
+            Save: Save,
+            DoBack: DoBack,
+            field: {
+
+            }
+        }
+
+    }(jQuery);
+</script>

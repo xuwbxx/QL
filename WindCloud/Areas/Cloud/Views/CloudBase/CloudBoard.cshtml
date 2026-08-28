@@ -1,0 +1,80 @@
+﻿<div class="xm_header clearfix">
+
+
+
+    <h3><img src="~/Content/Cloud/img/logo.png">三航海上风电施工云服务平台</h3>
+
+    @*<div class="pull-right con_son">
+            <div class="login_help" onclick="OpenHelp();"><i class="fa fa-question"></i></div>
+
+        </div>*@
+
+    <div class="pull-right con_son mr05">
+        <div class="login_ryxx">@ViewData["FirstName"].ToString()</div>
+
+        <div class="ryxx_box">
+            <ul class="ryxx_box_ul">
+                <li>@ViewData["Name"].ToString()</li>
+                <li>@ViewData["DepartName"].ToString()</li>
+            </ul>
+
+            <ul class="ryxx_box_ul02">
+                <li><a href="/Home/Logout">退出</a></li>
+                <li><a href="" onclick="OpenBackManage();">后台管理</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="pull-right con_son" style="width: 2.8vw;">
+        <div class="login_help" onClick="OpenHelp();"><img src="~/Content/Cloud/img/icon_help.png"></div>
+    </div>
+
+</div>
+
+
+<!--帮助文档弹框-->
+<div class="modal fade" id="tk_Help" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-help">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title  modal-title-s">
+                    风电云平台使用说明
+                </h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="help_box">
+                    <ul class="help_wd">
+                        <li><a href="~/File/Help/云平台使用视频.mp4" download="云平台使用视频.mp4">云平台使用视频.mp4</a></li>
+                        <li><a href="~/File/Help/1.风电项目立项操作说明.docx" download="1.风电项目立项操作说明.docx">1.风电项目立项操作说明.docx</a></li>
+                        <li><a href="~/File/Help/2.插拔桩计算操作说明.docx" download="2.插拔桩计算操作说明.docx">2.插拔桩计算操作说明.docx</a></li>
+
+                    </ul>
+                </div>
+
+            </div>
+            <div class="modal-footer tishi_footer_tk">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    var OpenBackManage = function () {
+
+        window.open('/BackManage/Main/Door', '_blank')
+
+    }
+
+    var OpenHelp = function () {
+
+        $('#tk_Help').modal('show');
+
+    }
+
+</script>

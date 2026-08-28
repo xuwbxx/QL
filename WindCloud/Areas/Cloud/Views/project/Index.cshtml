@@ -1,0 +1,3065 @@
+﻿
+@{
+    ViewBag.Title = "风电项目列表";
+    Layout = "~/Views/Shared/ManageLayout.cshtml";
+}
+
+@{ 
+    var Companys = ViewData["Companys"] as List<DataFactory.KingBase.CloudWind.Manage_Company>;
+}
+<input type="hidden" id="hid_CloudID" value="@ViewData["CloudID"].ToString()" />
+<input type="hidden" id="hid_PostToken" value="@ViewData["PostToken"].ToString()" />
+
+<div class="content">
+    <div class="box_mode">
+
+        <div class="title text-center">
+            <div class="pull-left absolute_position">
+                <button class="btn btn-primary btn-yfprw" onclick="OpenTask();"><i class="icon iconfont mr03">&#xe711;</i>已分配任务</button>
+                
+            </div>
+            <span class="xmlb_tit" style="color: #bf1111;">风电项目列表</span>
+            
+        </div>
+        <div class="clearfix box_table_top">
+            <div class="search_box pull-left">
+                <input type="text" class="form-control" placeholder="请输入项目名称" id="query_txtProjectName">
+                <button class="btn btn-primary search_btn" onclick="DoQuery();"><i class="fa fa-search"></i></button>
+                <span class="xm_zt_red" style="padding-left:3vw;">点击项目名称，进入软件使用界面。</span>
+            </div>
+            <div class="btn_box pull-right">
+                <button class="btn btn-warning border-radius8" onclick="OpenProjectPopup('new');"><i class="icon iconfont">&#xe728;</i>创建项目</button>
+            </div>
+        </div>
+
+        <table class="table table_project table_project02">
+            <thead>
+                <tr>
+                    <th width="6%"><a class="xm_zt_blue" href="javascript:;" data-order="asc" onclick="DoOrderQuery(this, 'ProjectCode');">项目号</a></th>
+                    <th width="16%">项目名</th>
+                    <th width="4%">项目状态</th>
+                    <th width="6%">项目经理</th>
+                    <th width="8%">项目组成员</th>
+                    <th width="10%"><a class="xm_zt_blue" href="javascript:;" data-order="asc" onclick="DoOrderQuery(this, 'ApplyTime');">申请时间</a></th>
+                    <th width="12%">项目期限</th>
+                    <th width="16%">当前节点</th>
+                    <th width="6%">状态</th>
+                    <th width="16%">操作</th>
+                </tr>
+            </thead>
+            <tbody id="html_DataList">
+            </tbody>
+        </table>
+        <ul class="pagination">
+            <div id="Pagination"></div>
+        </ul>
+    </div>
+</div>
+
+<div class="zlk_box">
+    <div><i class="icon iconfont">&#xe651;</i></div>
+    <div>资料库</div>
+</div>
+
+<!--创建弹框-->
+<div class="modal fade" id="tk_Project" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="popup_txtTitle">
+                    创建风场项目
+                </h4>
+            </div>
+            <div class="modal-body">
+
+
+                <div class="sqzl_box">
+                    <div class="form-horizontal form-horizontal_sqrjzl">
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">风场名<span class="BT_span">*</span></label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" placeholder="请输入风场名" id="popup_txtProjectName">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">风场编号</label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" placeholder="例如 OW1100" id="popup_txtProjectCode">
+                                <span style="color:red;">注意：项目编号由“技术中心海工所”输入。</span>
+                            </div>
+                        </div>
+                        <div class="form-group mod_touying">
+                            <label class="col-md-2 control-label control-label_position">风场区域坐标<span class="BT_span">*</span></label>
+                            <div class="col-md-10">
+                                <div class="liru_box">（提示：可以选择excel文件导入方式，格式请查看模板。）</div>
+                                <div class="zdtj_box clearfix">
+                                    <div class="col-md-8 zdtj_box_son" style="width:80%;">
+                                        <span>文件导入方式：</span>
+                                        <input type="file" accept=".xlsx" class="form-control pull-left" id="popup_uploadProjectPosition">
+                                        <button class="btn btn-success" id="popup_btnProjectPositionUpload" onclick="UploadProjectPosition();">上传</button>
+                                        <button class="btn btn-warning" id="popup_btnProjectPositionDownload" onclick="DownloadProjectPosition();">下载</button>
+                                    </div>
+                                    <div class="col-md-4 zdtj_box_son text-right" style="width:20%;"><a class="btn btn-primary btn-primary-a" href="~/File/Template/风场经纬度模板.xlsx">模板下载</a></div>
+                                </div>
+                                <div class="table_project_box">
+                                    <table class="table table_project table_fcjzb">
+                                        <thead>
+                                            <tr>
+                                                <th width="13%">序号</th>
+                                                <th width="37%">经度</th>
+                                                <th width="37%">纬度</th>
+                                                <th width="13%">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="popup_htmlProjectPosition">
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="sdtj_box">
+                                    @*<button class="btn" id="popup_btnAddProjectPosition" onclick="AddProjectPositionManual();">手动添加方式</button>*@
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mod_touying">
+                            <label class="col-md-2 control-label control-label_position">风机坐标<span class="BT_span">*</span></label>
+                            <div class="col-md-10">
+                                <div class="liru_box">（提示：可以选择excel文件导入方式，格式请查看模板。）</div>
+                                <div class="zdtj_box clearfix">
+                                    <div class="col-md-8 zdtj_box_son" style="width:80%;">
+                                        <span>文件导入方式：</span>
+                                        <input type="file" accept=".xlsx" class="form-control pull-left" id="popup_uploadProjectFanPosition">
+                                        <button class="btn btn-success" id="popup_btnProjectFanPositionUpload" onclick="UploadProjectFanPosition();">上传</button>
+                                        <button class="btn btn-warning" id="popup_btnProjectFanPositionDownload" onclick="DownloadProjectFanPosition();">下载</button>
+                                    </div>
+                                    <div class="col-md-4 zdtj_box_son text-right" style="width:20%;"><a class="btn btn-primary btn-primary-a" href="~/File/Template/风机经纬度模板.xlsx">模板下载</a></div>
+                                </div>
+                                <div class="table_project_box">
+                                    <table class="table table_project table_fcjzb">
+                                        <thead>
+                                            <tr>
+                                                <th width="13%">机位号</th>
+                                                <th width="37%">经度</th>
+                                                <th width="37%">纬度</th>
+                                                <th width="13%">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="popup_htmlProjectFanPosition">
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="sdtj_box">
+                                    @*<button class="btn" id="popup_btnAddFanPosition" onclick="AddProjectFanPositionManual();">手动添加方式</button>*@
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">项目基本信息<span class="BT_span">*</span></label>
+
+                            <div class="col-md-10 p0 xmjbxx_box">
+                                <div class="col-md-6 pr0">
+                                    <span>所属分公司</span>
+                                    <select id="popup_ProjectCompany" class="form-control" disabled="disabled">
+                                        <option value="0">请选择</option>
+                                        @{
+                                            foreach (var item in Companys)
+                                            {
+                                                <option value="@item.ID">@item.Company</option>
+                                            }
+                                        }
+
+                                    </select>
+                                </div>
+                                <div class="col-md-6 pr0">
+                                    <span>项目状态</span>
+                                    <select id="popup_ProjectStatus" class="form-control" disabled="disabled">
+                                        <option value="0">请选择</option>
+                                        <option value="1">可研</option>
+                                        <option value="2">投标</option>
+                                        <option value="3">在建</option>
+                                        <option value="4">运维</option>
+                                        <option value="5">拆除</option>
+                                        <option value="6">中标</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 pr0">
+                                    <span>最小水深（米）</span>
+                                    <input type="number" id="popup_ProjectWaterDepthMin" class="form-control" value="0" disabled="disabled">
+                                </div>
+                                <div class="col-md-6 pr0">
+                                    <span>最大水深（米）</span>
+                                    <input type="number" id="popup_ProjectWaterDepthMax" class="form-control" value="0" disabled="disabled">
+                                </div>
+
+                                <div class="xmjbxx_boxmore_btn" onclick="OpenProjectInfoMore();"><div class="xmjbxx_boxmore_wenzi">更多</div></div>
+                                <div class="xmjbxx_boxmore">
+
+                                </div>
+
+
+                            </div>
+                        </div>
+
+                        <div class="form-group mod_touying">
+
+                            <label class="col-md-2 control-label control-label_position02">简道云项目资料上传</label>
+                            <div class="col-md-10">
+                                <div class="zdtj_box clearfix">
+                                    <div class="col-md-6 pr0">
+                                        <input type="file" multiple class="form-control pull-left" id="popup_uploadProjectFileInfo">
+                                    </div>
+                                    <div class="col-md-1 text-center">
+                                        <button class="btn search_btn btn-success" id="popup_btnUploadProjectFile" onclick="UploadProjectFileInfo();">上传</button>
+                                    </div>
+                                    <div class="col-md-5 zhuyi_zt pr0">
+                                        注意：由用户“简单云”中上传，在投标项目请提交招标文件中的技术部分/已中标的项目请提交投标文件中的技术部分。
+                                    </div>
+                                </div>
+
+                                <div class="table_project_box">
+                                    <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                        <thead>
+                                            <tr>
+                                                <th width="60%">文件名</th>
+                                                <th width="30%">上传时间</th>
+                                                <th width="10%">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="popup_htmlProjectFile" data-tag="0">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-group mod_touying" id="popup_divDKYSZL">
+                            <label class="col-md-2 control-label control-label_position">机孔位地勘原始资料</label>
+                            <div class="col-md-10">
+                                <div class="zdtj_box clearfix">
+                                    <div class="col-md-6 pr0">
+                                        <input type="file" multiple class="form-control pull-left" id="popup_uploadProjectFile_dkyszl">
+                                    </div>
+                                    <div class="col-md-1 text-center">
+                                        <button class="btn search_btn btn-success" id="popup_btn_uploadProjectFile_dkyszl" onclick="UploadProjectDKFile(1);">上传</button>
+                                    </div>
+                                    <div class="col-md-5 zhuyi_zt pr0">
+
+                                    </div>
+                                </div>
+
+                                <div class="table_project_box">
+                                    <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                        <thead>
+                                            <tr>
+                                                <th width="60%">文件名</th>
+                                                <th width="30%">上传时间</th>
+                                                <th width="10%">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="popup_htmlProjectFile_dkyszl" data-tag="0">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group mod_touying" id="popup_divDKSJB">
+                            <label class="col-md-2 control-label control-label_position">机孔位地勘数据表</label>
+                            <div class="col-md-10">
+                                <div class="zdtj_box clearfix">
+                                    <div class="col-md-6 pr0">
+                                        <input type="file" class="form-control pull-left" accept=".xlsx" id="popup_uploadProjectFile_dksjb">
+                                    </div>
+                                    <div class="col-md-1 text-center">
+                                        <button class="btn search_btn btn-success" id="popup_btn_uploadProjectFile_dksjb" onclick="UploadProjectDKFile(2);">上传</button>
+                                    </div>
+                                    <div class="col-md-5 text-right zhuyi_zt pr0">
+                                        <a class="btn btn-primary btn-primary-a" href="~/File/Template/地勘数据表(汇总表).xlsx">模板下载</a>
+                                    </div>
+                                </div>
+
+                                <div class="table_project_box">
+                                    <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                        <thead>
+                                            <tr>
+                                                <th width="60%">文件名</th>
+                                                <th width="30%">上传时间</th>
+                                                <th width="10%">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="popup_htmlProjectFile_dksjb" data-tag="0">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        @*机孔位和地勘资料匹配入口7-12*@
+                        <div id="popup_divDKMatch" class="form-group mod_touying">
+
+                            <label class="col-md-2 control-label">机孔位地勘资料匹配</label>
+                            <div class="col-md-10 text-center">
+                                <button class="btn btn-primary" onclick="OpenDKMatch();">进入设置</button>
+                            </div>
+                        </div>
+
+
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">项目经理<span class="BT_span">*</span></label>
+                            <div class="col-md-4">
+                                <div class="nice-select">
+                                    <input type="text" class="form-control" placeholder="姓名关键字搜索" id="popup_txtUserName" autocomplete="off" />
+                                    <div class="search_div" onclick="ClearShjUserName();" id="popup_divClearManageName">
+                                        <i class="fa fa-close"></i>
+                                    </div>
+                                    <ul id="popup_ulUserList" style="display:none;">
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="col-md-1 pl0 text-center">
+                                <button class="btn btn-primary search_btn" style="width: 100%" id="popup_btnFindUserName" onclick="FindShjUserByName();">搜索</button>
+                            </div>
+                            <div class="col-md-5 zhuyi_zt">
+                                注意：请指定项目经理，<br />能发起后续“风电施工辅助软件”的使用申请。
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-group">
+                            <div class="mb1 clearfix">
+                                <label class="col-md-2 control-label" style="padding-right:0;">项目组成员</label>
+                                <div class="col-md-2"><button class="btn btn-primary width100" id="popup_btnAddProjectGroupUser" onclick="AddProjectGroupUser();">新增项目成员</button></div>
+                                <div class="col-md-8 mt1">
+                                    <span class="zhuyi_zt">
+                                        可以添加项目组成员，成员可以发起“风电施工辅助软件”的使用申请。
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="clearfix">
+                                <div class="col-md-2"></div>
+                                <div class="col-md-10">
+                                    <ul class="pejd_user" id="popup_htmlProjectGroupUser">
+                                        @*<li class="clearfix">
+                            <span>
+                                <div class="nice-select">
+                                    <input type="text" class="form-control" value="张一">
+                                    <div class="search_div"><i class="fa fa-close"></i></div>
+
+                                    <ul>
+                                        <li>
+                                            <h3>张三</h3>
+                                            <div>港湾院-常设公司-港湾院-数智工程设计研究所</div>
+                                        </li>
+                                        <li>
+                                            <h3>李四</h3>
+                                            <div>港湾院-常设公司-港湾院-数智工程设计研究所</div>
+                                        </li>
+                                        <li>
+                                            <h3>李四</h3>
+                                            <div>港湾院-常设公司-港湾院-数智工程设计研究所</div>
+                                        </li>
+                                        <li>
+                                            <h3>李四</h3>
+                                            <div>港湾院-常设公司-港湾院-数智工程设计研究所</div>
+                                        </li>
+                                        <li>
+                                            <h3>李四（E）</h3>
+                                            <div>港湾院-常设公司-港湾院-数智工程设计研究所</div>
+                                        </li>
+                                        <li>
+                                            <h3>王刚</h3>
+                                            <div>港湾院-常设公司-港湾院-数智工程设计研究所</div>
+                                        </li>
+                                        <li>
+                                            <h3>王</h3>
+                                            <div>港湾院-常设公司-港湾院-数智工程设计研究所</div>
+                                        </li>
+
+                                        <li>
+                                            <h3>姜</h3>
+                                            <div>三航局-常设公司-港湾院-数智工程设计研究所</div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </span>
+                            <span>
+                                <button type="button" class="btn btn-primary">搜索</button><button type="button" class="btn btn-danger">删除</button>
+                            </span>
+                        </li>
+                        <li class="clearfix">
+                            <span>
+                                <div class="nice-select">
+                                    <input type="text" class="form-control" value="张一">
+                                    <div class="search_div"><i class="fa fa-close"></i></div>
+
+                                    <ul></ul>
+                                </div>
+                            </span>
+                            <span>
+                                <button type="button" class="btn btn-primary">搜索</button><button type="button" class="btn btn-danger">删除</button>
+                            </span>
+                        </li>*@
+                                    </ul>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">云平台使用期限</label>
+                            <div class="col-md-5">
+                                <input placeholder="开始时间" class="laydate-icon timeUstyle stateUTime form-control" id="popup_ProjectDateStart" onclick="laydate({istime: true,format:'YYYY-MM-DD'})">
+
+                            </div>
+                            <div class="col-md-5">
+                                <input placeholder="结束时间" class="laydate-icon timeUstyle stateUTime form-control" id="popup_ProjectDateEnd" onclick="laydate({istime: true,format:'YYYY-MM-DD'})">
+
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="popup_divLastContent">
+                            <label class="col-md-2 control-label control-label_position02">上一节点意见</label>
+
+                            <div class="col-md-10">
+                                <textarea class="form-control" id="popup_txtLastContent" disabled></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="popup_divContent">
+                            <label class="col-md-2 control-label control-label_position02">审批意见</label>
+
+                            <div class="col-md-10">
+                                <textarea class="form-control" id="popup_txtContent"></textarea>
+                            </div>
+                        </div>
+
+
+                        <div class="form-group mod_touying" id="popup_divNextNode">
+
+                            <label class="col-md-2 control-label lcjd_next">流程下一节点</label>
+                            <div class="col-md-4 pr0">
+                                <div class="lcjd_next_sp"><i class="icon iconfont">&#xe63e;</i><span id="popup_spanNextNodeName">分子公司审批</span></div>
+                                <div class="nice-select">
+                                    <input id="popup_txtNodeUserName" type="text" class="form-control" placeholder="搜索" autocomplete="off" />
+                                    <div class="search_div" onclick="ClearShjNodeUserName();" id="popup_divClearNodeName">
+                                        <i class="fa fa-close"></i>
+                                    </div>
+                                    <ul id="popup_ulNodeUserList" style="display:none;">
+                                    </ul>
+                                </div>
+
+                            </div>
+                            <div class="col-md-1 text-center mt4">
+                                <button class="btn btn-primary search_btn" style="width: 100%" id="popup_btnFindNodeUserName" onclick="FindShjNodeUserByName();">搜索</button>
+                            </div>
+                            <div class="col-md-5 zhuyi_zt mt4">
+                                注意：请按照流程节点审批要求，指定下一节点审批人。如果节点审批人选错，整个流程将不能通过或者退回。
+                            </div>
+                        </div>
+
+
+                    </div>
+
+
+
+                </div>
+
+                <div class="text-center sqzl_btn_box relative_position">
+                    @*<div class="absolute_position">
+                        <button class="btn btn-warning bmxy_btn" id="popup_btnAgreement" onclick="OpenAgreementPopup();">保密协议</button>
+                    </div>*@
+                    <button class="btn btn-success" id="popup_btnSubmit" data-type="1" onclick="AddProjectSubmit(this);">申请</button>
+                    <button class="btn btn-danger" id="popup_btnBack" data-type="0" onclick="AddProjectSubmit(this);">审批退回</button>
+                    <button class="btn btn-success" id="popup_btnEditSubmit" data-type="3" onclick="AddProjectEditSubmit(this);">修改资料</button>
+                </div>
+
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!--流程弹框-->
+<div class="modal fade" id="tk_path" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    流程图
+                </h4>
+            </div>
+            <div class="modal-body clearfix">
+
+                <!--流程 start-->
+                <div class="flowChart">
+                    <!--左侧轴-->
+                    <div class="flowChart-left">
+                        <!--虚线-->
+                        <div class="dashed"></div>
+                    </div>
+
+                    <!--右侧内容-->
+                    <div class="flowChart-right" id="html_ProjectFlowHistory">
+                        <!--                                                节点1  -->
+
+                        <div class="oneNode">
+                            <!--左侧小球-->
+                            <div class="check">
+                                <img src="~/Content/Cloud/img/lc_faqi.png">
+                            </div>
+
+                            <!--右侧内容-->
+                            <div class="NodeDetail">
+                                <div class="NodeLinkName"><i class="fa fa-paper-plane-o"></i>员工入职发起申请</div>
+                                <!--上-->
+                                <div class="NodeDetail-title">
+                                    <!--内容-->
+                                    <div class="details">
+                                        <h4>程伟（高级工程师）</h4>
+                                        <p>三航局-技术中心-总部-BIM中心</p>
+                                    </div>
+                                </div>
+                                <!--中-->
+                                <div class="NodeDetail-content">
+                                    <p>请领导查阅</p>
+                                </div>
+
+                                <div class="NodeDetail-footer">
+                                    <span>2017-10-31 22:22:31</span>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="oneNode">
+                            <!--左侧小球-->
+                            <div class="check check-prime">
+                                发起
+                            </div>
+
+                            <!--右侧内容-->
+                            <div class="flowChart_lb">
+                                <div class="NodeLinkName_lb"><i class="fa fa-paper-plane-o"></i>领导审批基本信息</div>
+                                <ul class="clearfix">
+                                    <li>
+                                        <div class="NodeDetail_lb">
+
+                                            <!--上-->
+                                            <div class="NodeDetail-title">
+                                                <!--内容-->
+                                                <div class="details">
+                                                    <h4>程伟（高级工程师）</h4>
+                                                    <p></p>
+                                                </div>
+                                            </div>
+
+                                            <!--中-->
+                                            <div class="NodeDetail-content">
+                                                <p></p>
+                                            </div>
+                                            <div class="NodeDetail-content">
+                                                <p class="xm_zt_green m0">审批通过</p>
+                                            </div>
+
+                                            <div class="NodeDetail-footer_lb">
+                                                <span>2017-10-31 22:22:31</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="NodeDetail_lb">
+
+                                            <!--上-->
+                                            <div class="NodeDetail-title">
+                                                <!--内容-->
+                                                <div class="details">
+                                                    <h4>程伟（高级工程师）</h4>
+                                                    <p>三航局-技术中心-总部-BIM中心</p>
+                                                </div>
+                                            </div>
+
+                                            <!--中-->
+                                            <div class="NodeDetail-content">
+                                                <p>审批意见：</p>
+                                            </div>
+                                            <div class="NodeDetail-content">
+                                                <p class="xm_zt_orange m0">待审批</p>
+                                            </div>
+
+                                            <div class="NodeDetail-footer_lb">
+                                                <span>2017-10-31 22:22:31</span>
+                                            </div>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="NodeDetail_lb">
+
+                                            <!--上-->
+                                            <div class="NodeDetail-title">
+                                                <!--内容-->
+                                                <div class="details">
+                                                    <h4>程伟（高级工程师）</h4>
+                                                    <p>三航局-技术中心-总部-BIM中心</p>
+                                                </div>
+                                            </div>
+                                            <!--中-->
+                                            <div class="NodeDetail-content">
+                                                <p>审批意见：</p>
+                                            </div>
+                                            <div class="NodeDetail-content">
+                                                <p class="xm_zt_red m0">审批退回</p>
+                                            </div>
+                                            <div class="NodeDetail-footer_lb">
+                                                <span>2017-10-31 22:22:31</span>
+                                            </div>
+                                        </div>
+                                    </li>
+
+
+                                    <li>
+                                        <div class="NodeDetail_lb">
+
+                                            <!--上-->
+                                            <div class="NodeDetail-title">
+                                                <!--内容-->
+                                                <div class="details">
+                                                    <h4>程伟（高级工程师）</h4>
+                                                    <p>三航局-技术中心-总部-BIM中心</p>
+                                                </div>
+                                            </div>
+                                            <!--中-->
+                                            <div class="NodeDetail-content">
+                                                <p>审批意见：</p>
+                                            </div>
+                                            <div class="NodeDetail-content">
+                                                <p class="xm_zt_red m0">审批退回</p>
+                                            </div>
+                                            <div class="NodeDetail-footer_lb">
+                                                <span>2017-10-31 22:22:31</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+
+                        <div class="oneNode">
+                            <!--左侧小球-->
+                            <div class="check check-prime">
+                                发起
+                            </div>
+
+                            <!--右侧内容-->
+                            <div class="NodeDetail clearfix">
+                                <div class="NodeLinkName"><i class="fa fa-paper-plane-o"></i>已抄送</div>
+
+                                <div class="NodeDetail-title pull-left">
+                                    <!--内容-->
+                                    <div class="details">
+                                        <h4>张三（董事长）</h4>
+                                        <p>三航局-技术中心-总部-BIM中心</p>
+                                    </div>
+                                </div>
+                                <div class="NodeDetail-title pull-left">
+                                    <!--内容-->
+                                    <div class="details">
+                                        <h4>李四（总经理）</h4>
+                                        <p>三航局-技术中心-总部-BIM中心</p>
+                                    </div>
+                                </div>
+                                <div class="NodeDetail-title pull-left">
+                                    <!--内容-->
+                                    <div class="details">
+                                        <h4>王五（副总经理）</h4>
+                                        <p>三航局-技术中心-总部-BIM中心</p>
+                                    </div>
+                                </div>
+                                <div class="NodeDetail-title pull-left">
+                                    <!--内容-->
+                                    <div class="details">
+                                        <h4>程伟（人事经理）</h4>
+                                        <p>三航局-技术中心-总部-BIM中心</p>
+                                    </div>
+                                </div>
+
+
+                                <div class="NodeDetail-footer">
+                                    <span>2017-10-31 22:22:31</span>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+
+                        <!--节点 end-->
+                    </div>
+
+
+
+                </div>
+                <!--流程 end-->
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!--选择地勘资料一对多详情弹框7-12-->
+<div class="modal fade" id="tk_DK_Match" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+
+
+    <div class="modal-dialog modal-dialog-m mt12">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    机孔位和地勘数据匹配
+                </h4>
+            </div>
+            <div class="modal-body clearfix">
+                <div class="pull-left tk_checkbox">
+                    <ul id="popup_htmlFanMatch">
+                        @*<li>
+                            <span>
+                                <input type="radio" name="fengji">1#风机
+                            </span>
+                            <span>
+                                <i title="地勘资料1111">地勘资料1111</i>
+                                <i title="地勘资料1111">地勘资料1111</i>
+                                <i title="地勘资料1111">地勘资料1111</i>
+                            </span>
+                        </li>
+                        <li>
+                            <span><input type="radio" name="fengji">1#风机</span>
+                            <span>
+                                <i title="地勘资料1111">地勘资料1111</i>
+                                <i title="地勘资料1111">地勘资料1111</i>
+                                <i title="地勘资料1111">地勘资料1111</i>
+                            </span>
+                        </li>
+                        <li>
+                            <span><input type="radio" name="fengji">12#风机</span>
+                            <span><i title="地勘资料1111">地勘资料1111</i><i title="地勘资料1111">地勘资料1111</i><i title="地勘资料1111">地勘资料1111</i></span>
+                        </li>*@
+                    </ul>
+                </div>
+                <div class="pull-left tk_checkbox_btn">
+                    <button class="btn btn-primary" onclick="FanDKMatch();">匹配</button>
+                </div>
+                <div class="pull-left tk_checkbox width24">
+                    <ul class="clearfix" id="popup_htmlDKMatch">
+                        @*<li><input type="checkbox">地勘资料1111</li>
+                        <li><input type="checkbox">地勘资料1111</li>
+                        <li><input type="checkbox">地勘资料1111</li>
+                        <li><input type="checkbox">地勘资料1111</li>*@
+                    </ul>
+
+                </div>
+
+            </div>
+            <div class="modal-footer tishi_footer_tk">
+
+                <button type="button" class="btn btn-primary" onclick="SaveDKMatch();">确认</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">返回</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--保密协议弹框-->
+<div class="modal fade" id="tk_Agreement" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-bmxy">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="popup_cns">
+                    <div class="popup_cns-title">
+                        <p>保密协议</p>
+                    </div>
+
+                    <div class="popup_cns-content">
+                        <p>在使用本平台的过程中，本人庄重承诺以下责任：</p>
+                        <p>一、云平台软件使用范围仅限于本次申请并经公司科学技术部授权使用的海上风电工程项目，未经中交第三航务工程局有限公司领导及科学技术部允许，不为任何其他项目使用，也不授权任何他人使用本平台。</p>
+                        <p>二、未经技术中心许可，不向任何第三方提供本平台输出的分析报告。</p>
+                        <p>三、未经技术中心书面许可，不以云平台提供的成果发表公开文章、著述。</p>
+                        <p>四、不提供虚假项目信息和技术资料。</p>
+                        <p>五、不为他人提供攻击云平台网络的条件。</p>
+                        <p class="mt10">
+                            <span style="color:red;font-weight:bold;" id="popup_CheckAgreementTime">10</span>
+                            <input type="checkbox" id="popup_CheckAgreement" disabled onchange="CheckAgreement(this);">我已阅读以上协议，并严格遵守，如我方违背了上述承诺，愿意并承担由此引发的责任和损失。
+                        </p>
+                        <div class="btn_box"><button class="btn btn-primary" id="popup_Agree" disabled onclick="DoAgreement();">同意</button></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@*列表事件*@
+<script>
+    $(document).ready(function () {
+        ParamInit();
+
+        Query();
+
+        
+    })
+
+    var Param = {};
+    var ParamInit = function () {
+        Param.PageIndex = 1;
+        Param.PageSize = 100;
+        Param.TotalPage = 0;
+        Param.TotalCount = 0;
+
+        Param.ProjectName = $("#query_txtProjectName").val();
+        Param.Name = $('#popup_txtUserName').val();
+
+        Param.Order = "desc";
+        Param.OrderName = "ApplyTime";
+
+    }
+
+    //查询
+    var Query = function () {
+
+        //OpenMaskLayout();
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('ProjectListQuery', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+
+                    if (data.Success) {
+
+                        var DataListHtml = '';
+                        $(data.Data).each(function (index, dom) {
+
+                            var ProjectCodeClass = dom.IsFinished ? 'xm_zt_blue' : 'xm_zt_orange';
+
+                            //流程状态
+                            var FlowStatusClass = 'zt_orange';
+                            if (dom.FlowStatus == 1) {
+                                FlowStatusClass = 'zt_red';
+                            }
+                            else if (dom.FlowStatus == 2) {
+                                FlowStatusClass = 'zt_green';
+                            }
+                            else if (dom.FlowStatus == 3) {
+                                FlowStatusClass = 'zt_grey';
+                            }
+
+                            //操作
+                            if (dom.FlowHandle == 'view') {
+                                FlowOperateContent = '查看';
+                                FlowOperateClass = 'cz_blue';
+                                FlowOperateType = 'view'
+                            }
+                            else if (dom.FlowHandle == 'approval') {
+                                FlowOperateContent = '审批';
+                                FlowOperateClass = 'cz_orange';
+                                FlowOperateType = 'approval'
+                            }
+                            else if (dom.FlowHandle == 'renew') {
+                                FlowOperateContent = '重填';
+                                FlowOperateClass = 'cz_orange';
+                                FlowOperateType = 'approval'
+                            }
+
+                            var FlowNodeHtml = '';
+                            if (dom.IsFinished == true) {
+                                FlowNodeHtml = '流程结束';
+                            }
+                            else {
+                                FlowNodeHtml = dom.FlowNode + '：';
+                                $(dom.NodeUser).each(function (index, dom) {
+                                    FlowNodeHtml += '<a href="#" class="xm_zt_blue table_ryxx_box"><span>' + dom.NodeUserName + ';</span><div class="hover_ryxx"><ul><li><i class="icon iconfont">&#xe752;</i>部门：' + dom.NodeUserDepart + '</li><li><i class="icon iconfont">&#xe607;</i>手机号：' + dom.NodeUserPhone + '</li><li> <i class="icon iconfont">&#xe673;</i>职位：' + dom.NodeUserJobName + '</li></ul></div></a>';
+                                });
+                                //FlowNodeHtml = dom.FlowNode + '：<a href="#" class="xm_zt_blue table_ryxx_box"><span>' + dom.NodeUser.NodeUserName + '</span><div class="hover_ryxx"><ul><li><i class="icon iconfont">&#xe752;</i>部门：' + dom.NodeUser.NodeUserDepart + '</li><li><i class="icon iconfont">&#xe607;</i>手机号：' + dom.NodeUser.NodeUserPhone + '</li><li> <i class="icon iconfont">&#xe673;</i>职位：' + dom.NodeUser.NodeUserJobName + '</li></ul></div></a>';
+                            }
+
+                            var FlowRightEditHtml = '';
+                            if (dom.DoRightEdit == true)
+                            {
+                                FlowRightEditHtml = '<a class="cz_orange" href="#" onclick="OpenProjectEdit(' + dom.ID + ');">资料修改</a>';
+                            }
+                            var FlowRightDeleteHtml = '';
+                            if (dom.DoRightDelete == true) {
+                                FlowRightDeleteHtml = '<a class="cz_red" href="#" onclick="DeleteProjectFlow(' + dom.ID + ',\'' + dom.ProjectName + '\');">删除</a>';
+                            }
+
+                            var WebGISHtml = '';
+                            if (dom.IsWebGIS)
+                            {
+                                WebGISHtml = '<img src="/Content/Cloud/img/icon_webgis.png" class="img_webgis" onclick="OpenWebGIS(' + dom.ID + ');">';
+                            }
+
+                            DataListHtml += '<tr><td class="' + ProjectCodeClass + '"><a class="xm_zt_blue" href="/Cloud/Task/Index?ProjectID=' + dom.ID + '">' + dom.ProjectCode + '</a></td><td><a class="xm_zt_blue" href="/Cloud/Task/Index?ProjectID=' + dom.ID + '">' + dom.ProjectName + '</a></td><td class="xm_zt_green">' + dom.ProjectStatus + '</td>'
+                                + '<td class=""><a href="#" class="xm_zt_blue table_ryxx_box"><span>' + dom.Director.DirectorName + '</span><div class="hover_ryxx"><ul><li><i class="icon iconfont">&#xe752;</i>部门：' + dom.Director.DirectorDepart + '</li><li><i class="icon iconfont">&#xe607;</i>手机号：' + dom.Director.DirectorPhone + '</li><li> <i class="icon iconfont">&#xe673;</i>职位：' + dom.Director.DirectorJobName + '</li></ul></div></a></td>'
+                                + '<td class="">' + dom.Assister + '</td>'
+                                + '<td>' + dom.ApplyTime + '</td><td>' + dom.ProjectStartTime + ' 至 ' + dom.ProjectEndTime + '</td>'
+                                + '<td class="">' + FlowNodeHtml + '</td>'
+                                + '<td><a class="' + FlowStatusClass + '" href="#" onclick="QueryFlowHistory(' + dom.ID + ');">' + dom.FlowStatusName + '</a></td>'
+                                + '<td><a class="' + FlowOperateClass + '" href="#" onclick="OpenProjectInfo(' + dom.ID + ');">' + FlowOperateContent + '</a>' + FlowRightEditHtml + FlowRightDeleteHtml + WebGISHtml + '</td>'
+                                + '</tr>';
+                        });
+
+                        $('#html_DataList').html(DataListHtml);
+
+                        //分页
+                        Param.TotalPage = data.TotalPage;
+                        Param.TotalCount = data.TotalCount;
+                        Param.PageIndex = data.PageIndex;
+
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+                Pagination();
+            });
+
+    }
+
+    var OpenWebGIS = function (ProjectID) {
+
+        if (ProjectID == null || ProjectID == '' || ProjectID == 0) {
+            return;
+        }
+
+        window.open('/Cloud/WebGIS/Index?ProjectID=' + ProjectID, '_blank')
+
+    }
+
+    var DoQuery = function () {
+
+        Param.ProjectName = $("#query_txtProjectName").val();
+        Query();
+    }
+
+    var DoOrderQuery = function (dom, OrderName) {
+
+        var Order = $(dom).attr('data-order');
+
+        Param.Order = Order;
+        Param.OrderName = OrderName;
+
+        Query();
+
+        if (Order == 'asc') {
+            $(dom).attr('data-order', 'desc');
+        }
+        else
+        {
+            $(dom).attr('data-order', 'asc');
+        }
+
+    }
+
+    //分页
+    var Pagination = function () {
+        $("#Pagination").pagination({
+            currentPage: Param.PageIndex,
+            totalPage: Param.TotalPage,
+            isShow: true,
+            totalCount: Param.TotalCount,
+            count: 7,
+            homePageText: "首页",
+            endPageText: "尾页",
+            prevPageText: "上一页",
+            nextPageText: "下一页",
+            callback: function (current) {
+                Param.PageIndex = current;
+                Query();
+            }
+        });
+    }
+
+
+    var OpenTask = function () {
+
+        //window.open('/Cloud/Task/Index', '_blank')
+        window.location.href = '/Cloud/Task/Index';
+    }
+
+    var PopupOpenedProjectID = 0;
+    var PopupOpenedFlowHandle = 'view';
+    var PopupIsBackFlow = false;
+    var PopupIsCreateProjectCodeNode = false;
+    var OpenProjectInfo = function (ProjectID) {
+
+        Param.ProjectID = ProjectID;
+
+        PopupOpenedProjectID = 0;
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('ProjectQuery', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+                    if (data.Success) {
+                        PopupOpenedProjectID = ProjectID;
+
+                        var Project = data.Data;
+
+                        OpenProjectPopup(Project.FlowInfo.FlowHandle);
+                        PopupIsBackFlow = Project.FlowInfo.IsBackFlow;
+
+                        if (Project.FlowInfo.DoEditConfirm == true)
+                        {
+                            //此节点如果是可编辑状态
+                            $('#popup_uploadProjectPosition').attr('disabled', false);
+                            $('#popup_btnProjectPositionUpload').attr('disabled', false);
+                            $('#popup_btnProjectPositionDownload').attr('disabled', false);
+                            $('#popup_btnAddProjectPosition').attr('disabled', false);
+
+                            $('#popup_uploadProjectFanPosition').attr('disabled', false);
+                            $('#popup_btnProjectFanPositionUpload').attr('disabled', false);
+                            /*$('#popup_btnAddFanPosition').attr('disabled', false);*/
+
+                            $('#popup_uploadProjectFileInfo').attr('disabled', false);
+                            $('#popup_btnUploadProjectFile').attr('disabled', false);
+
+                            $('#popup_uploadProjectFile_dkyszl').attr('disabled', false);
+                            $('#popup_btn_uploadProjectFile_dkyszl').attr('disabled', false);
+
+                            $('#popup_uploadProjectFile_dksjb').attr('disabled', false);
+                            $('#popup_btn_uploadProjectFile_dksjb').attr('disabled', false);
+
+                            $('div#popup_divDKMatch').show();
+
+                        }
+
+                        //退回重新走流程
+                        if (Project.FlowInfo.FlowHandle == 'renew') {
+                            ChoosedProjectManager.Name = Project.ProjectManager.UserName;
+                            ChoosedProjectManager.UserCode = Project.ProjectManager.UserCode;
+                            ChoosedProjectManager.Depart = Project.ProjectManager.UserDepart;
+                            ChoosedProjectManager.Phone = Project.ProjectManager.UserPhone;
+                            ChoosedProjectManager.JobName = Project.ProjectManager.UserJobName;
+                        }
+
+                        //如果下一节点流程结束
+                        ChoosedProjectNodeManager.NextNodeID = Project.FlowInfo.NextNodeID;
+                        if (Project.FlowInfo.NextNodeID == 0) {
+                            $('#popup_txtNodeUserName').attr('disabled', true);
+                            $('#popup_btnFindNodeUserName').attr('disabled', true);
+                            $('#popup_divClearNodeName').hide();
+
+                        }
+
+                        
+
+                        //下一节点如果有默认人物,则不能让用户搜索人物
+                        if (Project.FlowInfo.NextNode != null && Project.FlowInfo.NextNode.length > 0) {
+                            $('#popup_txtNodeUserName').attr('disabled', true);
+                            $('#popup_btnFindNodeUserName').attr('disabled', true);
+                            $('#popup_divClearNodeName').hide();
+
+                            var NodeUserHtml = '';
+                            $(Project.FlowInfo.NextNode).each(function (index, dom) {
+
+                                NodeUserHtml += dom.UserName + '(' + dom.UserDepart + ');'
+
+                            });
+                            $('#popup_txtNodeUserName').val(NodeUserHtml);
+                        }
+
+                        //填充数据
+                        $('#popup_txtProjectName').val(Project.ProjectName);
+                        $('#popup_txtProjectCode').val(Project.ProjectCode);
+                        $('#popup_spanNextNodeName').html(Project.FlowInfo.NextNodeName);
+
+                        
+                        PopupIsCreateProjectCodeNode = Project.FlowInfo.IsCreateProjectCode;
+                        if (PopupIsCreateProjectCodeNode) {
+                            $('#popup_txtProjectCode').attr('disabled', false).val('');
+                        }
+                        else {
+                            $('#popup_txtProjectCode').attr('disabled', true);
+                        }
+
+                        //项目负责人
+                        $('#popup_txtUserName').val(Project.ProjectManager.UserName + '(' + Project.ProjectManager.UserDepart + ')');
+
+                        var ProjectGroupUserHtml = '';
+                        $(Project.ProjectGroupUser).each(function (index, dom) {
+
+                            ProjectGroupUserHtml += '<li class="clearfix"><span><div class="nice-select"><input type="text" class="form-control" data-UserName="' + dom.UserName + '" data-UserCode="' + dom.UserCode + '" data-UserDepart="' + dom.UserDepart + '" data-UserPhone="' + dom.UserPhone + '" data-UserJobName="' + dom.UserJobName + '" value="' + dom.UserName + '(' + dom.UserDepart + ')"><div class="search_div" onclick="ClearProjectGroupUser(this);"><i class="fa fa-close"></i></div><ul></ul></div></span><span><button type="button" class="btn btn-primary" onclick="FindProjectGroupUser(this);">搜索</button><button type="button" class="btn btn-danger" onclick="DeleteProjectGroupUser(this);">删除</button></span></li>';
+
+                        })
+                        $('#popup_htmlProjectGroupUser').html(ProjectGroupUserHtml);
+                        if (Project.FlowInfo.FlowHandle == 'renew') {
+                            SetProjectGroupUserWrite();
+                        }
+                        else
+                        {
+                            SetProjectGroupUserRead();
+                        }
+                        
+                        
+
+
+                        $('#popup_ProjectDateStart').val(Project.ProjectStartTime);
+                        $('#popup_ProjectDateEnd').val(Project.ProjectEndTime);
+
+                        //上一节点意见（可能多人）
+                        var CommentHtml = '';
+                        $(Project.FlowInfo.LastNode).each(function (index, dom) {
+                            CommentHtml += dom.UserName + ':' + dom.Comment + ';\n'
+                        });
+                        $('#popup_txtLastContent').val(CommentHtml);
+
+
+                        //基本信息
+                        var ProjectInfo = Project.ProjectInfo;
+                        $('#popup_ProjectCompany').val(Project.CompanyID);
+                        $('#popup_ProjectStatus').val(Project.Status);
+                        $('#popup_ProjectWaterDepthMax').val(ProjectInfo.WaterDepthMax);
+                        $('#popup_ProjectWaterDepthMin').val(ProjectInfo.WaterDepthMin);
+
+                        //以下是文件资料
+                        var ProjectPositionHtml = '';
+                        $(Project.ProjectPosition).each(function (index, dom) {
+                            ProjectPositionHtml += '<tr><td>' + (index + 1) + '</td><td><input type="text" disabled class="form-control" placeholder="注意格式：120.1794393" value="' + dom.Lon + '"></td><td><input type="text" disabled class="form-control" placeholder="注意格式：25.1794393" value="' + dom.Lat + '"></td><td></td></tr>';  //<a href="#" class="xm_zt_red" onclick="DeleteProjectPosition(this);">删除</a>
+                        });
+                        $('#popup_htmlProjectPosition').html(ProjectPositionHtml);
+
+                        var FanPositionHtml = '';
+                        $(Project.ProjectFan).each(function (index, dom) {
+                            FanPositionHtml += '<tr><td><input type="text" disabled class="form-control" disabled placeholder="1#" value="' + dom.FanName + '"></td><td><input type="text" disabled class="form-control" placeholder="注意格式：120.1794393" value="' + dom.Lon + '"></td><td><input type="text" disabled class="form-control" placeholder="25.1794393" value="' + dom.Lat + '"></td><td></td></tr>';  //<a href="#" class="xm_zt_red" onclick="DeleteProjectPosition(this);">删除</a>
+                        });
+                        $('#popup_htmlProjectFanPosition').html(FanPositionHtml);
+
+                        var ProjectFileHtml = '';
+                        $(Project.ProjectFile).each(function (index, dom) {
+                            if (Project.FlowInfo.FlowHandle == 'approval' || Project.FlowInfo.FlowHandle == 'renew') {
+                                ProjectFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a> / <a class="xm_zt_red" onclick="DeleteProjectFile(' + dom.ID + ')">删除</a></td></tr>';
+                            }
+                            else
+                            {
+                                ProjectFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a></td></tr>';
+                            }
+                        })
+                        $('#popup_htmlProjectFile').html(ProjectFileHtml);
+
+                        var GeologyFile_dkyszl_Html = '';
+                        $(Project.File_dkyszl).each(function (index, dom) {
+                            GeologyFile_dkyszl_Html += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a></td></tr>';
+                        })
+                        $('#popup_htmlProjectFile_dkyszl').html(GeologyFile_dkyszl_Html);
+
+                        var GeologyFile_dksjb_Html = '';
+                        $(Project.File_dksjb).each(function (index, dom) {
+                            GeologyFile_dksjb_Html += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a></td></tr>';
+                        })
+                        $('#popup_htmlProjectFile_dksjb').html(GeologyFile_dksjb_Html);
+
+
+
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+            });
+
+    }
+
+
+    var OpenProjectEdit = function (ProjectID) {
+
+        Param.ProjectID = ProjectID;
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('ProjectEditQuery', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+                    if (data.Success) {
+                        PopupOpenedProjectID = ProjectID;
+                        var Project = data.Data;
+                        OpenProjectPopup(Project.FlowInfo.FlowHandle);
+                        PopupIsBackFlow = Project.FlowInfo.IsBackFlow;
+
+                        //$('#popup_txtProjectCode').attr('disabled', true);
+
+                        //如果下一节点流程结束
+                        ChoosedProjectNodeManager.NextNodeID = Project.FlowInfo.NextNodeID;
+                        if (Project.FlowInfo.NextNodeID == 0) {
+                            $('#popup_txtNodeUserName').attr('disabled', true);
+                            $('#popup_btnFindNodeUserName').attr('disabled', true);
+                            $('#popup_divClearNodeName').hide();
+                        }
+
+                        ChoosedProjectManager.Name = Project.ProjectManager.UserName;
+                        ChoosedProjectManager.UserCode = Project.ProjectManager.UserCode;
+                        ChoosedProjectManager.Depart = Project.ProjectManager.UserDepart;
+                        ChoosedProjectManager.Phone = Project.ProjectManager.UserPhone;
+                        ChoosedProjectManager.JobName = Project.ProjectManager.UserJobName;
+
+
+                        //下一节点如果有默认人物,则不能让用户搜索人物
+                        if (Project.FlowInfo.NextNode != null && Project.FlowInfo.NextNode.length > 0) {
+                            $('#popup_txtNodeUserName').attr('disabled', true);
+                            $('#popup_btnFindNodeUserName').attr('disabled', true);
+                            $('#popup_divClearNodeName').hide();
+
+                            var NodeUserHtml = '';
+                            $(Project.FlowInfo.NextNode).each(function (index, dom) {
+
+                                NodeUserHtml += dom.UserName + '(' + dom.UserDepart + ');'
+
+                            });
+                            $('#popup_txtNodeUserName').val(NodeUserHtml);
+                        }
+
+                        //填充数据
+                        $('#popup_txtProjectName').val(Project.ProjectName);
+                        $('#popup_txtProjectCode').val(Project.ProjectCode);
+                        $('#popup_spanNextNodeName').html(Project.FlowInfo.NextNodeName);
+
+                        //项目负责人
+                        $('#popup_txtUserName').val(Project.ProjectManager.UserName + '(' + Project.ProjectManager.UserDepart + ')');
+                        var ProjectGroupUserHtml = '';
+                        $(Project.ProjectGroupUser).each(function (index, dom) {
+
+                            ProjectGroupUserHtml += '<li class="clearfix"><span><div class="nice-select"><input type="text" class="form-control" data-UserName="' + dom.UserName + '" data-UserCode="' + dom.UserCode + '" data-UserDepart="' + dom.UserDepart + '" data-UserPhone="' + dom.UserPhone + '" data-UserJobName="' + dom.UserJobName + '" value="' + dom.UserName + '(' + dom.UserDepart + ')"><div class="search_div" onclick="ClearProjectGroupUser(this);"><i class="fa fa-close"></i></div><ul></ul></div></span><span><button type="button" onclick="FindProjectGroupUser(this);" class="btn btn-primary">搜索</button><button type="button" onclick="DeleteProjectGroupUser(this);" class="btn btn-danger">删除</button></span></li>';
+
+                        })
+                        $('#popup_htmlProjectGroupUser').html(ProjectGroupUserHtml);
+                        SetProjectGroupUserWrite();
+
+                        //var NewHtml = '<li class="clearfix"><span><div class="nice-select"><input type="text" class="form-control" data-UserName="" data-UserCode="" data-UserDepart="" data-UserPhone="" data-UserJobName="" value="" placeholder="姓名关键字搜索"><div class="search_div" onclick="ClearProjectGroupUser(this);"><i class="fa fa-close"></i></div><ul></ul></div></span><span>'
+                        //    + '<button type="button" class="btn btn-primary" onclick="FindProjectGroupUser(this);">搜索</button><button type="button" class="btn btn-danger" onclick="DeleteProjectGroupUser(this);">删除</button></span></li>';
+
+
+                        $('#popup_ProjectDateStart').val(Project.ProjectStartTime);
+                        $('#popup_ProjectDateEnd').val(Project.ProjectEndTime);
+
+                        //基本信息
+                        var ProjectInfo = Project.ProjectInfo;
+                        $('#popup_ProjectCompany').val(Project.CompanyID);
+                        $('#popup_ProjectStatus').val(Project.Status);
+                        $('#popup_ProjectWaterDepthMin').val(ProjectInfo.WaterDepthMin);
+                        $('#popup_ProjectWaterDepthMax').val(ProjectInfo.WaterDepthMax);
+
+                        var CommentHtml = '';
+                        $(Project.FlowInfo.LastNode).each(function (index, dom) {
+                            CommentHtml += dom.UserName + ':' + dom.Comment + ';\n'
+                        });
+                        $('#popup_txtLastContent').val(CommentHtml);
+
+                        //以下是文件资料
+                        var ProjectPositionHtml = '';
+                        $(Project.ProjectPosition).each(function (index, dom) {
+                            ProjectPositionHtml += '<tr><td>' + (index + 1) + '</td><td><input type="text" disabled class="form-control" placeholder="注意格式：120.1794393" value="' + dom.Lon + '"></td><td><input type="text" disabled class="form-control" placeholder="注意格式：25.1794393" value="' + dom.Lat + '"></td><td></td></tr>';  //<a href="#" class="xm_zt_red" onclick="DeleteProjectPosition(this);">删除</a>
+                        });
+                        $('#popup_htmlProjectPosition').html(ProjectPositionHtml);
+
+                        var FanPositionHtml = '';
+                        $(Project.ProjectFan).each(function (index, dom) {
+                            FanPositionHtml += '<tr><td><input type="text" disabled class="form-control" placeholder="1#" value="' + dom.FanName + '"></td><td><input type="text" disabled class="form-control" placeholder="120.1794393" value="' + dom.Lon + '"></td><td><input type="text" disabled class="form-control" placeholder="25.1794393" value="' + dom.Lat + '"></td><td></td></tr>';  //<a href="#" class="xm_zt_red" onclick="DeleteProjectPosition(this);">删除</a>
+                        });
+                        $('#popup_htmlProjectFanPosition').html(FanPositionHtml);
+
+                        var ProjectFileHtml = '';
+                        $(Project.ProjectFile).each(function (index, dom) {
+                            ProjectFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" download="' + dom.FileName + '" class="xm_zt_green" >下载</a> / <a class="xm_zt_red" onclick="DeleteProjectFile(' + dom.ID + ')">删除</a></td></tr>';
+                        })
+                        $('#popup_htmlProjectFile').html(ProjectFileHtml);
+
+                        var GeologyFile_dkyszl_Html = '';
+                        $(Project.File_dkyszl).each(function (index, dom) {
+                            GeologyFile_dkyszl_Html += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" download="' + dom.FileName + '" class="xm_zt_green" >下载</a></td></tr>';
+                        })
+                        $('#popup_htmlProjectFile_dkyszl').html(GeologyFile_dkyszl_Html);
+
+                        var GeologyFile_dksjb_Html = '';
+                        $(Project.File_dksjb).each(function (index, dom) {
+                            GeologyFile_dksjb_Html += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" download="' + dom.FileName + '" class="xm_zt_green" >下载</a></td></tr>';
+                        })
+                        $('#popup_htmlProjectFile_dksjb').html(GeologyFile_dksjb_Html);
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+            });
+
+    }
+
+
+    var DeleteProjectFlow = function (ProjectID, ProjectName) {
+
+        ModalPopup('information', '是否要删除 ' + ProjectName + ' ？');
+
+        $("#ModalSubmit").unbind('click').bind('click', function () {
+            DoDeleteProjectFlow(ProjectID);
+        });
+
+    }
+
+    var DoDeleteProjectFlow = function (ProjectID) {
+
+        if (ProjectID == null || ProjectID == '' || ProjectID == 0)
+            return;
+
+        Param.ProjectID = ProjectID;
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('DeleteProjectFlow', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+                    if (data.Success) {
+
+                        ModalPopup('success', '删除成功');
+                        DoQuery();
+                        
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+                ModalClose('information');
+            });
+    }
+
+
+
+    var QueryFlowHistory = function (ProjectID) {
+
+        if (ProjectID == null || ProjectID == '' || ProjectID == 0) {
+            return;
+        }
+
+        Param.ProjectID = ProjectID;
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('QueryFlowHistory', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+                    if (data.Success) {
+
+                        var ProjectFlowHistoryHtml = '';
+                        $(data.Data).each(function (index, dom) {
+
+                            var FlowHtml = '';
+                            if (dom.FlowType == 0) {
+                                FlowHtml += '<div class="oneNode"><!--左侧小球--><div class="check"><img src="../../Content/Cloud/img/lc_faqi.png"></div>'
+                                    + '<!--右侧内容--><div class="NodeDetail"><div class="NodeLinkName"><i class="fa fa-paper-plane-o"></i>' + dom.NodeName + '</div>'
+                                    + '<!--上--><div class="NodeDetail-title"><!--内容--><div class="details"><h4>' + dom.Flow[0].NodeUserName + '(' + dom.Flow[0].NodeUserJobName + ')</h4><p title="' + dom.Flow[0].NodeUserDepart + '">' + dom.Flow[0].NodeUserDepart.substring(0, 15) + '</p></div></div>'
+                                    + '<!--中--><div class="NodeDetail-content"><p title="' + dom.Flow[0].Comment + '">' + dom.Flow[0].Comment.substring(0, 20) + '</p></div><div class="NodeDetail-footer"><span>' + dom.FlowTime + '</span></div></div></div>';
+                            }
+                            else if (dom.FlowType == 2) {
+                                FlowHtml += '<div class="oneNode"><!--左侧小球--><div class="check"><img src="../../Content/Cloud/img/lc_end.png"></div>'
+
+                                    + '<!--右侧内容--><div class="NodeDetail clearfix"><div class="NodeLinkName"><i class="fa fa-paper-plane-o"></i>抄送</div>';
+
+                                $(dom.Flow).each(function (index2, dom2) {
+                                    FlowHtml += '<div class="NodeDetail-title pull-left"><!--内容--><div class="details"><h4>' + dom2.NodeUserName + '（' + dom2.NodeUserJobName + '）</h4><p title="' + dom2.NodeUserDepart + '">' + dom2.NodeUserDepart.substring(0, 15) + '</p></div></div>';
+                                })
+                                FlowHtml += '<div class="NodeDetail-footer"><span>' + dom.FlowTime ?? "" + '</span></div></div></div>';
+                            }
+                            else if (dom.FlowType == 1) {
+                                var PicType = 'lc_daishenpi.png';
+                                //正常流程
+                                if (dom.FlowHandle == 0) {
+                                    //待审批
+                                    PicType = 'lc_daishenpi.png';
+                                }
+                                else if (dom.FlowHandle == 1) {
+                                    //审批通过
+                                    PicType = 'lc_sptg.png';
+                                }
+                                else if (dom.FlowHandle == 2) {
+                                    //审批退回
+                                    PicType = 'lc_tuihui.png';
+                                }
+                                else if (dom.FlowHandle == 3) {
+                                    //审批删除
+                                    PicType = 'lc_delete.png';
+                                }
+
+                                if (dom.ApprovalType == 1) {
+                                    //单人审批
+                                    FlowHtml += '<div class="oneNode"><!--左侧小球--><div class="check"><img src="../../Content/Cloud/img/' + PicType + '"></div>'
+                                        + '<!--右侧内容--><div class="NodeDetail"><div class="NodeLinkName"><i class="fa fa-paper-plane-o"></i>' + dom.NodeName + '</div>'
+                                        + '<!--上--><div class="NodeDetail-title"><!--内容--><div class="details"><h4>' + dom.Flow[0].NodeUserName + '(' + dom.Flow[0].NodeUserJobName + ')</h4><p title="' + dom.Flow[0].NodeUserDepart + '">' + dom.Flow[0].NodeUserDepart.substring(0, 15) + '</p></div></div>'
+                                        + '<!--中--><div class="NodeDetail-content"><p title="' + dom.Flow[0].Comment + '">' + dom.Flow[0].Comment.substring(0, 20) + '</p></div><div class="NodeDetail-footer"><span>' + dom.Flow[0].FlowTime + '</span></div></div></div>';
+                                }
+                                else {
+                                    //多人审批
+                                    FlowHtml += '<div class="oneNode"><!--左侧小球--><div class="check"><img src="../../Content/Cloud/img/' + PicType + '"></div>'
+                                        + '<!--右侧内容--><div class="flowChart_lb"><div class="NodeLinkName_lb"><i class="fa fa-paper-plane-o"></i>' + dom.NodeName + '</div><ul class="clearfix">'
+
+                                    $(dom.Flow).each(function (index2, dom2) {
+
+                                        var FlowHandleType = 'xm_zt_orange';
+                                        if (dom2.FlowHandle == 1) {
+                                            FlowHandleType = 'xm_zt_green';
+                                        }
+                                        else if (dom2.FlowHandle == 2) {
+                                            FlowHandleType = 'xm_zt_red';
+                                        }
+
+                                        FlowHtml += '<li><div class="NodeDetail_lb"><!--上--><div class="NodeDetail-title"><!--内容--><div class="details"><h4>' + dom2.NodeUserName + '（' + dom2.NodeUserJobName + '）</h4><p title="' + dom2.NodeUserDepart + '">' + dom2.NodeUserDepart.substring(0, 15) + '</p></div></div>'
+                                            + '<!--中--><div class="NodeDetail-content"><p title="' + dom2.Comment + '">' + dom2.Comment.substring(0, 20) + '</p></div><div class="NodeDetail-content"><p class="' + FlowHandleType + ' m0">' + dom2.FlowHandleName + '</p></div><div class="NodeDetail-footer_lb"><span>' + dom2.FlowTime + '</span></div></div></li>';
+
+                                    })
+                                    FlowHtml += '</ul></div></div>';
+                                }
+
+                            }
+
+                            ProjectFlowHistoryHtml += FlowHtml;
+
+                        })
+
+                        $('#html_ProjectFlowHistory').html(ProjectFlowHistoryHtml);
+                        $('#tk_path').modal('show');
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+            });
+
+    }
+
+
+</script>
+
+@*弹窗事件*@
+<script>
+
+    $(document).ready(function () {
+
+        DatePickInit();
+
+        //初始打开弹框时间
+        LoadProject();
+
+    })
+
+    var LoadProject = function () {
+
+        var CloudID = $('#hid_CloudID').val();
+        if (CloudID != '' && CloudID != '0')
+        {
+            OpenProjectInfo(CloudID);
+        }
+
+    }
+
+
+    var DatePickInit = function () {
+
+        $('#popup_ProjectDateStart').val(formatDateTimeByDay(new Date()));
+        $('#popup_ProjectDateEnd').val(formatDateTimeByDay(new Date(new Date().setMonth(new Date().getMonth() + 3))));
+
+    }
+
+    var OpenProjectPopup = function (type) {
+        AgreementPopupPass = true;
+
+        $('#popup_btnEditSubmit').hide();
+
+        if (type == 'new') {
+            //清空弹窗
+            ClearProjectPopup();
+            //设置可写
+            SetProjectPopupWrite();
+
+            //风场编号
+            $('#popup_txtProjectCode').attr('disabled', true);
+
+            //上一节点意见
+            $('#popup_divLastContent').hide();
+            //审批意见
+            $('#popup_divContent').hide();
+            //下一节点
+            $('#popup_divNextNode').hide();
+            //地勘数据
+            $('#popup_divDKMatch').hide();
+            $('#popup_divDKSJB').hide();
+            $('#popup_divDKYSZL').hide();
+            //按钮
+            $('#popup_btnSubmit').show().html('申请').attr('data-type', 1);//.attr('disabled', true);
+            $('#popup_btnBack').hide();
+
+            //保密协议
+            $('#popup_CheckAgreement').prop('checked', false);
+            $('#popup_Agree').attr('disabled', true);
+            $('#popup_btnAgreement').show();
+
+
+            $('#popup_txtTitle').html('新建风场项目')
+
+            $('#tk_Project').modal('show');
+
+            PopupOpenedProjectID = parseInt(Math.random() * 10000000);
+
+            AgreementPopupPass = false;
+
+        }
+        else if (type == 'view') {
+            //清空弹窗
+            ClearProjectPopup();
+            //设置可写
+            SetProjectPopupRead();
+
+            $('#popup_divLastContent').hide();
+            $('#popup_divContent').hide();
+            $('#popup_divNextNode').hide();
+
+            //地勘
+            $('#popup_divDKMatch').hide();
+            $('#popup_divDKSJB').show();
+            $('#popup_divDKYSZL').show();
+
+            $('#popup_btnSubmit').hide();
+            $('#popup_btnBack').hide();
+
+
+            $('#popup_btnAgreement').hide();
+
+            $('#popup_txtTitle').html('查看风场项目')
+
+            $('#tk_Project').modal('show');
+        }
+        else if (type == 'approval') {
+            //清空弹窗
+            ClearProjectPopup();
+            //设置可写
+            SetProjectPopupRead();
+
+            $('#popup_divLastContent').show();
+            $('#popup_divContent').show();
+            $('#popup_divNextNode').show();
+
+            //地勘
+            $('#popup_divDKMatch').hide();
+            $('#popup_divDKSJB').show();
+            $('#popup_divDKYSZL').show();
+
+            $('#popup_btnSubmit').show().html('审批通过').attr('data-type', 2);//.attr('disabled', false);
+            $('#popup_btnBack').show();
+
+            $('#popup_btnAgreement').hide();
+
+            $('#popup_txtTitle').html('审批风场项目')
+
+            //特殊
+            $('#popup_txtContent').attr('disabled', false);
+            $('#popup_btnFindNodeUserName').attr('disabled', false);
+            $('#popup_txtNodeUserName').attr('disabled', false);
+            $('#popup_divClearNodeName').show();
+
+            $('#tk_Project').modal('show');
+        }
+        else if (type == 'renew') {
+            //清空弹窗
+            ClearProjectPopup();
+            //设置可写
+            SetProjectPopupWrite();
+
+            //风场编号
+            $('#popup_txtProjectCode').attr('disabled', true);
+
+            $('#popup_divLastContent').show();
+            $('#popup_divContent').show();
+            $('#popup_divNextNode').hide();
+
+            //地勘
+            $('#popup_divDKMatch').hide();
+            $('#popup_divDKSJB').hide();
+            $('#popup_divDKYSZL').hide();
+
+            $('#popup_btnAgreement').hide();
+
+            $('#popup_btnSubmit').show().html('重新提交').attr('data-type', 2);//.attr('disabled', false);
+            $('#popup_btnBack').hide();
+
+            $('#popup_txtTitle').html('重填风场项目资料');
+
+            //特殊
+            $('#popup_txtLastContent').attr('disabled', true);
+
+            $('#tk_Project').modal('show');
+        }
+        else if (type == 'update')
+        {
+            //清空弹窗
+            ClearProjectPopup();
+            //设置可写
+            SetProjectPopupWrite();
+
+            //风场编号
+            $('#popup_txtProjectCode').attr('disabled', true);
+
+            $('#popup_divDKMatch').show();
+            $('#popup_divDKSJB').show();
+            $('#popup_divDKYSZL').show();
+
+            $('#popup_divContent').hide();
+            $('#popup_txtContent').attr('disabled', true);
+            $('#popup_txtLastContent').attr('disabled', true);
+            //$('#popup_txtUserName').attr('disabled', true);
+            //$('#popup_btnFindUserName').attr('disabled', true);
+            //$('#popup_divClearManageName').hide();
+            
+
+            $('#popup_divNextNode').show();
+            $('#popup_txtTitle').html('修改风场项目资料');
+
+            $('#popup_btnEditSubmit').show();
+            $('#popup_btnSubmit').hide();
+            $('#popup_btnBack').hide();
+
+            $('#popup_btnFindNodeUserName').attr('disabled', true);
+            $('#popup_divClearNodeName').hide();
+            $('#popup_txtNodeUserName').attr('disabled', true);
+
+            $('#tk_Project').modal('show');
+        }
+
+        PopupOpenedFlowHandle = type;
+
+    }
+
+    var ClearProjectPopup = function () {
+
+        $('#popup_txtProjectName').val('');
+        $('#popup_txtProjectCode').val('');
+        $('#popup_txtUserName').val('');
+
+        $('#popup_htmlProjectGroupUser').html('');
+
+        $('#popup_uploadProjectPosition').val('');
+        $('#popup_uploadProjectFanPosition').val('');
+        $('#popup_htmlProjectPosition').html('');
+        $('#popup_htmlProjectFanPosition').html('');
+        $('#popup_uploadProjectFileInfo').val('');
+        $('#popup_htmlProjectFile').html('');
+
+        $('#popup_uploadProjectFile_dkyszl').val('');
+        $('#popup_htmlProjectFile_dkyszl').html('');
+        $('#popup_uploadProjectFile_dksjb').val('');
+        $('#popup_htmlProjectFile_dksjb').html('');
+
+
+        $('#popup_txtContent').val('');
+        $('#popup_txtLastContent').val('');
+
+        $('#popup_txtNodeUserName').val('');
+
+        $('#popup_ProjectCompany').val(0);
+        $('#popup_ProjectStatus').val(0);
+        $('#popup_ProjectWaterDepthMin').val('');
+        $('#popup_ProjectWaterDepthMax').val('');
+
+        DatePickInit();
+    }
+
+    var SetProjectPopupRead = function () {
+
+        $('#popup_txtProjectName').attr('disabled', true);
+        $('#popup_txtProjectCode').attr('disabled', true);
+
+        $('#popup_uploadProjectPosition').attr('disabled', true);
+        $('#popup_btnProjectPositionUpload').attr('disabled', true);
+        $('#popup_btnProjectPositionDownload').attr('disabled', true);
+        $('#popup_btnAddProjectPosition').attr('disabled', true);
+
+        $('#popup_uploadProjectFanPosition').attr('disabled', true);
+        $('#popup_btnProjectFanPositionUpload').attr('disabled', true);
+        /*$('#popup_btnAddFanPosition').attr('disabled', true);*/
+
+        $('#popup_uploadProjectFileInfo').attr('disabled', true);
+        $('#popup_btnUploadProjectFile').attr('disabled', true);
+
+        $('#popup_uploadProjectFile_dkyszl').attr('disabled', true);
+        $('#popup_btn_uploadProjectFile_dkyszl').attr('disabled', true);
+
+        $('#popup_uploadProjectFile_dksjb').attr('disabled', true);
+        $('#popup_btn_uploadProjectFile_dksjb').attr('disabled', true);
+
+        $('#popup_txtUserName').attr('disabled', true);
+        $('#popup_btnFindUserName').attr('disabled', true);
+        $('#popup_divClearManageName').hide();
+
+        $('#popup_btnAddProjectGroupUser').attr('disabled', true);
+
+        $('#popup_ProjectDateStart').attr('disabled', true);
+        $('#popup_ProjectDateEnd').attr('disabled', true);
+
+        $('#popup_txtNodeUserName').attr('disabled', true);
+        $('#popup_btnFindNodeUserName').attr('disabled', true);
+        $('#popup_divClearNodeName').hide();
+
+        $('#popup_txtLastContent').attr('disabled', true);
+        $('#popup_txtContent').attr('disabled', true);
+
+        $('#popup_ProjectCompany').attr('disabled', true);
+        $('#popup_ProjectStatus').attr('disabled', true);
+        $('#popup_ProjectWaterDepthMin').attr('disabled', true);
+        $('#popup_ProjectWaterDepthMax').attr('disabled', true);
+    }
+
+    var SetProjectPopupWrite = function () {
+
+        $('#popup_txtProjectName').attr('disabled', false);
+        $('#popup_txtProjectCode').attr('disabled', false);
+
+        $('#popup_uploadProjectPosition').attr('disabled', false);
+        $('#popup_btnProjectPositionUpload').attr('disabled', false);
+        $('#popup_btnProjectPositionDownload').attr('disabled', false);
+        $('#popup_btnAddProjectPosition').attr('disabled', false);
+
+        $('#popup_uploadProjectFanPosition').attr('disabled', false);
+        $('#popup_btnProjectFanPositionUpload').attr('disabled', false);
+       /* $('#popup_btnAddFanPosition').attr('disabled', false);*/
+
+        $('#popup_uploadProjectFileInfo').attr('disabled', false);
+        $('#popup_btnUploadProjectFile').attr('disabled', false);
+
+        $('#popup_uploadProjectFile_dkyszl').attr('disabled', false);
+        $('#popup_btn_uploadProjectFile_dkyszl').attr('disabled', false);
+
+        $('#popup_uploadProjectFile_dksjb').attr('disabled', false);
+        $('#popup_btn_uploadProjectFile_dksjb').attr('disabled', false);
+
+        $('#popup_txtUserName').attr('disabled', false);
+        $('#popup_btnFindUserName').attr('disabled', false);
+        $('#popup_divClearManageName').show();
+
+        $('#popup_btnAddProjectGroupUser').attr('disabled', false);
+
+        $('#popup_ProjectDateStart').attr('disabled', false);
+        $('#popup_ProjectDateEnd').attr('disabled', false);
+
+        $('#popup_txtNodeUserName').attr('disabled', false);
+        $('#popup_btnFindNodeUserName').attr('disabled', false);
+        $('#popup_divClearNodeName').show();
+
+        $('#popup_txtLastContent').attr('disabled', false);
+        $('#popup_txtContent').attr('disabled', false);
+
+        $('#popup_ProjectCompany').attr('disabled', false);
+        $('#popup_ProjectStatus').attr('disabled', false);
+        $('#popup_ProjectWaterDepthMin').attr('disabled', false);
+        $('#popup_ProjectWaterDepthMax').attr('disabled', false);
+    }
+
+    var SetProjectGroupUserRead = function () {
+
+        //$('#popup_txtUserName').attr('disabled', true);
+        //$('#popup_btnFindUserName').attr('disabled', true);
+        //$('#popup_divClearManageName').hide();
+
+        $('#popup_htmlProjectGroupUser input').attr('disabled', true);
+        $('#popup_htmlProjectGroupUser button').attr('disabled', true);
+        $('#popup_htmlProjectGroupUser div.search_div').hide();
+
+    }
+
+    var SetProjectGroupUserWrite = function () {
+
+        //$('#popup_txtUserName').attr('disabled', true);
+        //$('#popup_btnFindUserName').attr('disabled', true);
+        //$('#popup_divClearManageName').hide();
+
+        $('#popup_htmlProjectGroupUser input').attr('disabled', false);
+        $('#popup_htmlProjectGroupUser button').attr('disabled', false);
+        $('#popup_htmlProjectGroupUser div.search_div').show();
+
+    }
+
+
+    var FindShjUserByName = function () {
+
+        Param.Name = $("#popup_txtUserName").val();
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('FindShjUser', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+
+                    if (data.Success) {
+
+                        var DataListHtml = '';
+                        $(data.Data).each(function (index, dom) {
+
+                            DataListHtml += '<li onclick="ChooseProjectManager(this);" data-usercode="' + dom.empcode + '" data-name="' + dom.name + '" data-depart="' + dom.wholeDeptPath + '" data-phone="' + dom.phone + '" data-jobname="' + dom.jobname + '" ><h3>' + dom.name + '(' + dom.jobname + ')</h3><div>' + dom.wholeDeptPath + '</div></li >';
+
+                        });
+                        $('#popup_ulUserList').html(DataListHtml);
+                        $('ul#popup_ulUserList').show();
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+            });
+
+    }
+
+    var FindShjNodeUserByName = function () {
+
+        Param.Name = $("#popup_txtNodeUserName").val();
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('FindShjUser', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+
+                    if (data.Success) {
+
+                        var DataListHtml = '';
+                        $(data.Data).each(function (index, dom) {
+
+                            DataListHtml += '<li onclick="ChooseProjectNodeManager(this);" data-usercode="' + dom.empcode + '" data-name="' + dom.name + '" data-depart="' + dom.wholeDeptPath + '" data-phone="' + dom.phone + '" data-jobname="' + dom.jobname + '" ><h3>' + dom.name + '(' + dom.jobname + ')</h3><div>' + dom.wholeDeptPath + '</div></li >';
+
+                        });
+                        $('#popup_ulNodeUserList').html(DataListHtml);
+                        $('ul#popup_ulNodeUserList').show();
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+            });
+
+    }
+
+    var UploadProjectPosition = function () {
+
+        var formData = new FormData();
+        formData.append("ProjectID", PopupOpenedProjectID);
+        formData.append("ProjectPositionImport", $('#popup_uploadProjectPosition')[0].files[0]);
+
+        $.ajax({
+            url: 'ProjectPositionUpload',
+            dataType: 'json',
+            type: 'POST',
+            async: false,
+            data: formData,
+            processData: false, // 使数据不做处理
+            contentType: false, // 不要设置Content-Type请求头
+            success: function (data) {
+
+                if (data) {
+                    if (data.Success) {
+
+                        var ProjectPositionHtml = '';
+                        var PositionCount = 1;
+                        $(data.Data).each(function (index, dom) {
+
+                            ProjectPositionHtml += '<tr><td>' + PositionCount + '</td><td><input type="text" class="form-control" placeholder="注意格式：120.1794393" value="' + dom.AreaLon + '"></td><td><input type="text" class="form-control" placeholder="注意格式：25.1794393" value="' + dom.AreaLat + '"></td><td></td></tr>'; //<a href="#" class="xm_zt_red" onclick="DeleteProjectPosition(this);">删除</a>
+                            PositionCount++;
+                        });
+                        $('#popup_htmlProjectPosition').html(ProjectPositionHtml);
+
+                        ModalPopup('success', '保存成功');
+
+                    }
+                    else
+                    {
+                        ModalPopup('error', data.Message);
+                    }
+
+                }
+
+            },
+            error: function (response) {
+                console.log(response);
+            },
+            complete: function (data) {
+            }
+        });
+
+
+    }
+
+    var DownloadProjectPosition = function () {
+
+        if (PopupOpenedProjectID == null || PopupOpenedProjectID == '' || PopupOpenedProjectID == 0)
+            return;
+
+        window.location.href = "ProjectPositionDownload?" + "ProjectID=" + PopupOpenedProjectID;
+
+    }
+
+    var UploadProjectFanPosition = function () {
+
+        var formData = new FormData();
+        formData.append("ProjectID", PopupOpenedProjectID);
+        formData.append("ProjectFanPositionImport", $('#popup_uploadProjectFanPosition')[0].files[0]);
+
+        $.ajax({
+            url: 'ProjectFanPositionUpload',
+            dataType: 'json',
+            type: 'POST',
+            async: false,
+            data: formData,
+            processData: false, // 使数据不做处理
+            contentType: false, // 不要设置Content-Type请求头
+            success: function (data) {
+
+                if (data) {
+                    if (data.Success) {
+
+                        var ProjectFanPositionHtml = '';
+                        $(data.Data).each(function (index, dom) {
+
+                            ProjectFanPositionHtml += '<tr><td><input type="text" class="form-control" placeholder="1#" value="' + dom.FanName + '"></td><td><input type="text" class="form-control" placeholder="120.1794393" value="' + dom.Lon + '"></td><td><input type="text" class="form-control" placeholder="25.1794393" value="' + dom.Lat + '"></td><td></td></tr>';  //<a href="#" class="xm_zt_red" onclick="DeleteProjectFanPosition(this);">删除</a>
+                        });
+                        $('#popup_htmlProjectFanPosition').html(ProjectFanPositionHtml);
+
+                        ModalPopup('success', '保存成功');
+                    }
+                    else {
+                        ModalPopup('error', data.Message);
+                    }
+                }
+
+            },
+            error: function (response) {
+                console.log(response);
+            },
+            complete: function (data) {
+            }
+        });
+
+
+    }
+
+    var DownloadProjectFanPosition = function () {
+
+        if (PopupOpenedProjectID == null || PopupOpenedProjectID == '' || PopupOpenedProjectID == 0)
+            return;
+
+        window.location.href = "ProjectFanPositionDownload?" + "ProjectID=" + PopupOpenedProjectID;
+
+
+    }
+
+    var DeleteProjectPosition = function (dom) {
+
+        if (dom != null) {
+            $(dom).parent().parent().remove();
+        }
+
+    }
+
+    var DeleteProjectFanPosition = function (dom) {
+
+        if (dom != null) {
+            $(dom).parent().parent().remove();
+        }
+
+    }
+
+    var DeleteProjectFile = function (dom) {
+
+        if (dom != null) {
+            $(dom).parent().parent().remove();
+        }
+
+    }
+
+    //var AddProjectPositionManual = function () {
+
+    //    var count = 1;
+    //    if ($('#popup_htmlProjectPosition tr').length > 0) {
+    //        count = Number($('#popup_htmlProjectPosition tr:last td:first').html()) + 1;
+    //    }
+
+    //    var html = '<tr><td>' + count + '</td><td><input type="text" class="form-control" placeholder="120.1794393"></td><td><input type="text" class="form-control" placeholder="25.1794393"></td><td><a href="#" class="xm_zt_red" onclick="DeleteProjectPosition(this);">删除</a></td></tr>';
+
+    //    $('#popup_htmlProjectPosition').append(html);
+
+    //    //焦距
+    //    $('#popup_htmlProjectPosition tr:last input:first').focus();
+
+
+    //}
+
+    //var AddProjectFanPositionManual = function () {
+
+    //    var html = '<tr><td><input type="text" class="form-control" placeholder="1#"></td><td><input type="text" class="form-control" placeholder="120.1794393"></td><td><input type="text" class="form-control" placeholder="25.1794393"></td><td><a href="#" class="xm_zt_red" onclick="DeleteProjectPosition(this);">删除</a></td></tr>';
+
+    //    $('#popup_htmlProjectFanPosition').append(html);
+
+    //    //焦距
+    //    $('#popup_htmlProjectFanPosition tr:last input:first').focus();
+
+
+    //}
+
+    var CountSecondNum = 10;
+    var AgreeCountSecondNum = 0;
+    var OpenAgreementPopup = function () {
+
+        $('#tk_Agreement').modal('show');
+
+        clearInterval(AgreeCountSecondNum);
+
+        $('#popup_CheckAgreementTime').show();
+
+        $('#popup_CheckAgreement').attr('disabled', true).attr('checked', false);
+
+        CountSecondNum = 10;
+
+        AgreeCountSecondNum = setInterval("CountSecond()", 1000)
+        
+    }
+
+    var CountSecond = function () {
+
+        if (CountSecondNum > 0) {
+
+            CountSecondNum--;
+
+            $('#popup_CheckAgreementTime').html(CountSecondNum);
+        }
+
+        if (CountSecondNum == 0)
+        {
+            $('#popup_CheckAgreementTime').hide();
+            $('#popup_CheckAgreement').attr('disabled', false);
+        }
+
+    }
+
+    var CheckAgreement = function (dom) {
+
+        if ($(dom).prop('checked') == true) {
+            $('#popup_Agree').attr('disabled', false);
+        }
+        else
+        {
+            $('#popup_Agree').attr('disabled', true);
+        }
+    }
+
+    var DoAgreement = function () {
+
+        $('#popup_btnSubmit').attr('disabled', false);
+        $('#tk_Agreement').modal('hide');
+
+        AgreementPopupPass = true;
+    }
+
+
+
+
+    var ChoosedProjectManager = {};
+    ChoosedProjectManager.Name = '';
+    ChoosedProjectManager.UserCode = '';
+    ChoosedProjectManager.Depart = '';
+    ChoosedProjectManager.Phone = '';
+    ChoosedProjectManager.JobName = '';
+    var ChooseProjectManager = function (dom) {
+
+        ChoosedProjectManager = {};
+
+        if (dom == null)
+            return;
+
+        var Name = $(dom).attr('data-name');
+        var UserCode = $(dom).attr('data-usercode');
+        var Depart = $(dom).attr('data-depart');
+        var Phone = $(dom).attr('data-phone');
+        var JobName = $(dom).attr('data-jobname');
+
+        ChoosedProjectManager.Name = Name;
+        ChoosedProjectManager.UserCode = UserCode;
+        ChoosedProjectManager.Depart = Depart;
+        ChoosedProjectManager.Phone = Phone;
+        ChoosedProjectManager.JobName = JobName;
+
+        if (Name == '' || UserCode == '')
+            return;
+
+        $('#popup_txtUserName').val(Name + '(' + Depart + ')');
+
+        $('ul#popup_ulUserList').hide();
+
+    }
+
+    var ClearShjUserName = function () {
+        ChoosedProjectManager = {};
+        $('#popup_txtUserName').val('');
+    }
+
+    var ChoosedProjectNodeManager = {};
+    ChoosedProjectNodeManager.NextNodeID = '';
+    ChoosedProjectNodeManager.Name = '';
+    ChoosedProjectNodeManager.UserCode = '';
+    ChoosedProjectNodeManager.Depart = '';
+    ChoosedProjectNodeManager.Phone = '';
+    ChoosedProjectNodeManager.JobName = '';
+    var ChooseProjectNodeManager = function (dom) {
+
+        //ChoosedProjectNodeManager = {};
+
+        if (dom == null)
+            return;
+
+        var Name = $(dom).attr('data-name');
+        var UserCode = $(dom).attr('data-usercode');
+        var Depart = $(dom).attr('data-depart');
+        var Phone = $(dom).attr('data-phone');
+        var JobName = $(dom).attr('data-jobname');
+
+        ChoosedProjectNodeManager.Name = Name;
+        ChoosedProjectNodeManager.UserCode = UserCode;
+        ChoosedProjectNodeManager.Depart = Depart;
+        ChoosedProjectNodeManager.Phone = Phone;
+        ChoosedProjectNodeManager.JobName = JobName;
+
+        if (Name == '' || UserCode == '')
+            return;
+
+        $('#popup_txtNodeUserName').val(Name + '(' + Depart + ')');
+
+        $('ul#popup_ulNodeUserList').hide();
+
+    }
+
+    var ClearShjNodeUserName = function () {
+        ChoosedProjectNodeManager.Name = '';
+        ChoosedProjectNodeManager.UserCode = '';
+        ChoosedProjectNodeManager.Depart = '';
+        ChoosedProjectNodeManager.Phone = '';
+        ChoosedProjectNodeManager.JobName = '';
+        $('#popup_txtNodeUserName').val('');
+    }
+
+    //上传项目资料
+    var UploadProjectFileInfo = function () {
+
+        var formData = new FormData();
+        formData.append("ProjectID", PopupOpenedProjectID);
+        formData.append("FlowHandle", PopupOpenedFlowHandle);
+        if ($('#popup_uploadProjectFileInfo')[0].files == null || $('#popup_uploadProjectFileInfo')[0].files.length == 0)
+            return;
+
+        //$('#popup_htmlProjectFile').attr('data-tag', 1);
+
+        var FileCount = $('#popup_uploadProjectFileInfo')[0].files.length;
+        formData.append("ProjectFileCount", FileCount);
+        var Count = 1;
+        var ProjectFiles = $('#popup_uploadProjectFileInfo')[0].files;
+        $(ProjectFiles).each(function (index, dom) {
+
+            formData.append("ProjectFile" + Count, dom);
+
+            Count++;
+        });
+
+
+        $.ajax({
+            url: 'ProjectFileInfoUpload',
+            dataType: 'json',
+            type: 'POST',
+            async: false,
+            data: formData,
+            processData: false, // 使数据不做处理
+            contentType: false, // 不要设置Content-Type请求头
+            success: function (data) {
+
+                if (data) {
+                    if (data.Success) {
+
+                        var ProjectFileHtml = '';
+                        $(data.Data).each(function (index, dom) {
+
+                            ProjectFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" download="' + dom.FileName + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a> / <a class="xm_zt_red" onclick="DeleteProjectFile(' + dom.ID + ')">删除</a></td></tr>';  //<a href="#" class="xm_zt_red" onclick="DeleteProjectFile(this);">删除</a>
+                        });
+                        $('#popup_htmlProjectFile').html(ProjectFileHtml);
+
+                        ModalPopup('success', '保存成功');
+                    }
+                    else
+                    {
+                        ModalPopup('error', data.Message);
+                    }
+
+                }
+
+            },
+            error: function (response) {
+                console.log(response);
+            },
+            complete: function (data) {
+            }
+        });
+
+    }
+
+    var UploadProjectDKFile = function (FileType) {
+
+        if (FileType == null || FileType == '' || FileType == 0)
+            return;
+        
+        var formData = new FormData();
+        formData.append("ProjectID", PopupOpenedProjectID);
+        formData.append("FlowHandle", PopupOpenedFlowHandle);
+        formData.append("FileType", FileType);
+        var TaskFiles = null;
+        if (FileType == 1) {
+            TaskFiles = $('#popup_uploadProjectFile_dkyszl')[0].files;
+        }
+        else if (FileType == 2) {
+            TaskFiles = $('#popup_uploadProjectFile_dksjb')[0].files;
+        }
+
+        if (TaskFiles == null || TaskFiles.length == 0)
+            return;
+
+        var FileCount = TaskFiles.length;
+        formData.append("ProjectFileCount", FileCount);
+        var Count = 1;
+        $(TaskFiles).each(function (index, dom) {
+
+            formData.append("ProjectFile" + Count, dom);
+
+            Count++;
+        });
+
+
+        $.ajax({
+            url: 'ProjectDKFileInfoUpload',
+            dataType: 'json',
+            type: 'POST',
+            async: false,
+            data: formData,
+            processData: false, // 使数据不做处理
+            contentType: false, // 不要设置Content-Type请求头
+            success: function (data) {
+
+                if (data) {
+                    if (data.Success) {
+
+                        var ProjectFileHtml = '';
+                        $(data.Data).each(function (index, dom) {
+
+                            ProjectFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" >下载</a></td></tr>';  //<a href="#" class="xm_zt_red" onclick="SoftwareCBZHelper.DeleteTaskFile(this);">删除</a>
+                        });
+
+                        if (data.Data.length > 0) {
+                            if (FileType == 1) {
+                                $('#popup_htmlProjectFile_dkyszl').html(ProjectFileHtml);
+                                //$('#popup_htmlProjectFile_dkyszl').attr('data-tag', 1);
+                            }
+                            else if (FileType == 2) {
+                                $('#popup_htmlProjectFile_dksjb').html(ProjectFileHtml);
+                                //$('#popup_htmlProjectFile_dksjb').attr('data-tag', 1);
+                            }
+                        }
+
+                        ModalPopup('success', '保存成功');
+
+                    }
+                    else
+                    {
+                        ModalPopup('error', data.Message);
+                    }
+
+                }
+
+            },
+            error: function (response) {
+                console.log(response);
+            },
+            complete: function (data) {
+            }
+        });
+
+    }
+
+    //提交表单
+    var AgreementPopupPass = false;
+    var AddProjectSubmit = function (dom) {
+
+        if (!AgreementPopupPass)
+        {
+            OpenAgreementPopup();
+            return;
+        }
+        
+
+        var type = $(dom).attr('data-type');
+        if (type == null || type == '')
+            return;
+
+        var InfoText = '';
+        if (type == 0) {
+            InfoText = '是否要流程退回？流程将退回至申请人';
+        }
+        else if (type == 1) {
+            InfoText = '是否要保存项目？';
+        }
+        else if (type == 2) {
+            InfoText = '是否要审批通过？';
+        }
+
+        ModalPopup('information', InfoText);
+
+        $("#ModalSubmit").unbind('click').bind('click', function () {
+            DoProjectSubmit(type);
+        });
+
+    }
+
+    var DoProjectSubmit = function (type) {
+
+        if (type == 1) {
+            DoProjectAdd();
+        }
+        else if (type == 0 || type == 2) {
+            DoProjectApproval(type);
+        }
+
+    }
+
+    var DoProjectAdd = function () {
+
+        if (ChoosedProjectManager == null || ChoosedProjectManager.UserCode == null || ChoosedProjectManager.UserCode == '') {
+            ModalClose('information');
+            ModalPopup('error', '需要选择项目负责人');
+            return;
+        }
+        var SubmitFormData = new FormData();
+        SubmitFormData.append("ProjectID", PopupOpenedProjectID);
+        SubmitFormData.append("ProjectName", $('#popup_txtProjectName').val());
+        SubmitFormData.append("ProjectCode", $('#popup_txtProjectCode').val());
+        SubmitFormData.append("ProjectManagerName", ChoosedProjectManager.Name);
+        SubmitFormData.append("ProjectManagerUserCode", ChoosedProjectManager.UserCode);
+        SubmitFormData.append("ProjectManagerDepart", ChoosedProjectManager.Depart);
+        SubmitFormData.append("ProjectManagerPhone", ChoosedProjectManager.Phone);
+        SubmitFormData.append("ProjectManagerJobName", ChoosedProjectManager.JobName);
+
+        SubmitFormData.append("ProjectStartTime", $('#popup_ProjectDateStart').val());
+        SubmitFormData.append("ProjectEndTime", $('#popup_ProjectDateEnd').val());
+
+        SubmitFormData.append("CompanyID", $('#popup_ProjectCompany').val());
+        SubmitFormData.append("Status", $('#popup_ProjectStatus').val());
+        SubmitFormData.append("WaterDepthMin", $('#popup_ProjectWaterDepthMin').val());
+        SubmitFormData.append("WaterDepthMax", $('#popup_ProjectWaterDepthMax').val());
+
+        var ProjectGroupUsers = [];
+
+        $('#popup_htmlProjectGroupUser li.clearfix').each(function (index, dom) {
+
+            if ($(UserDom).attr('data-UserCode') != '')
+            {
+                var User = {};
+                var UserDom = $(dom).find('div.nice-select').children().first();
+                User.UserName = $(UserDom).attr('data-UserName');
+                User.UserCode = $(UserDom).attr('data-UserCode');
+                User.UserDepartName = $(UserDom).attr('data-UserDepart');
+                User.UserPhone = $(UserDom).attr('data-UserPhone');
+                User.UserJobName = $(UserDom).attr('data-UserJobName');
+
+                ProjectGroupUsers.push(User);
+            }
+        })
+
+        SubmitFormData.append("ProjectGroupUsers", JSON.stringify(ProjectGroupUsers));
+
+        $.ajax({
+            url: 'ProjectSubmit',
+            dataType: 'json',
+            type: 'POST',
+            async: false,
+            data: SubmitFormData,
+            processData: false, // 使数据不做处理
+            contentType: false, // 不要设置Content-Type请求头
+            success: function (data) {
+
+                if (data) {
+                    if (data.Success) {
+                        ModalPopup('success', '保存成功');
+                        $('#tk_Project').modal('hide');
+                        DoQuery();
+                    }
+                    else {
+
+                        ModalPopup('error', data.Message);
+                    }
+
+                }
+
+            },
+            error: function (response) {
+                console.log(response);
+            },
+            complete: function (data) {
+                ModalClose('information');
+            }
+        });
+
+    }
+
+    //通过或者退回0和2
+    var DoProjectApproval = function (type) {
+
+        if (PopupOpenedProjectID == 0) {
+            ModalClose('information');
+            ModalPopup('error', '数据出错，重新打开弹窗。');
+            return;
+        }
+
+        var SubmitFormData = new FormData();
+        SubmitFormData.append("ApprovalType", type);
+        SubmitFormData.append("NodeID", ChoosedProjectNodeManager.NextNodeID);
+        SubmitFormData.append("ProjectID", PopupOpenedProjectID);
+        SubmitFormData.append("ProjectComment", $('#popup_txtContent').val());
+        if (ChoosedProjectNodeManager.NextNodeID == 0) {
+            //流程结束
+
+            if (type != 0)
+            {
+                //生成风电项目编号
+                var ProjectCode = $('#popup_txtProjectCode').val();
+                if (ProjectCode == '') {
+                    ModalClose('information');
+                    ProjectCode = ModalPopup('error', '必须输入风场项目编号');
+                    return;
+                }
+                SubmitFormData.append("ProjectCode", $('#popup_txtProjectCode').val());
+            }
+            
+        }
+        else {
+            //正常审批
+            SubmitFormData.append("ProjectNodeName", ChoosedProjectNodeManager.Name);
+            SubmitFormData.append("ProjectNodeUserCode", ChoosedProjectNodeManager.UserCode);
+            SubmitFormData.append("ProjectNodeDepart", ChoosedProjectNodeManager.Depart);
+            SubmitFormData.append("ProjectNodePhone", ChoosedProjectNodeManager.Phone);
+            SubmitFormData.append("ProjectNodeJobName", ChoosedProjectNodeManager.JobName);
+
+            //如果是退回重新审批的流程
+            if (PopupIsBackFlow) {
+
+                var ProjectName = $('#popup_txtProjectName').val();
+                if (ProjectName == '') {
+                    ModalClose('information');
+                    ProjectCode = ModalPopup('error', '项目名称必须输入');
+                    return;
+                }
+
+                SubmitFormData.append("ProjectName", $('#popup_txtProjectName').val());
+                //SubmitFormData.append("ProjectCode", $('#popup_txtProjectCode').val());
+                SubmitFormData.append("ProjectManagerName", ChoosedProjectManager.Name);
+                SubmitFormData.append("ProjectManagerUserCode", ChoosedProjectManager.UserCode);
+                SubmitFormData.append("ProjectManagerDepart", ChoosedProjectManager.Depart);
+                SubmitFormData.append("ProjectManagerPhone", ChoosedProjectManager.Phone);
+                SubmitFormData.append("ProjectManagerJobName", ChoosedProjectManager.JobName);
+
+                //项目组成员
+                var ProjectGroupUsers = [];
+                $('#popup_htmlProjectGroupUser li.clearfix').each(function (index, dom) {
+
+                    if ($(UserDom).attr('data-UserCode') != '') {
+                        var User = {};
+                        var UserDom = $(dom).find('div.nice-select').children().first();
+                        User.UserName = $(UserDom).attr('data-UserName');
+                        User.UserCode = $(UserDom).attr('data-UserCode');
+                        User.UserDepartName = $(UserDom).attr('data-UserDepart');
+                        User.UserPhone = $(UserDom).attr('data-UserPhone');
+                        User.UserJobName = $(UserDom).attr('data-UserJobName');
+
+                        ProjectGroupUsers.push(User);
+                    }
+                })
+                SubmitFormData.append("ProjectGroupUsers", JSON.stringify(ProjectGroupUsers));
+
+                SubmitFormData.append("ProjectStartTime", $('#popup_ProjectDateStart').val());
+                SubmitFormData.append("ProjectEndTime", $('#popup_ProjectDateEnd').val());
+
+                var CompanyID = $('#popup_ProjectCompany').val();
+                var Status = $('#popup_ProjectStatus').val();
+                var MaxWater = $('#popup_ProjectWaterDepthMax').val();
+                var MinWater = $('#popup_ProjectWaterDepthMin').val();
+                if (CompanyID == 0 || Status == 0 || MaxWater == '' || MinWater == '')
+                {
+                    ModalClose('information');
+                    ProjectCode = ModalPopup('error', '必须输入风场项目基本信息');
+                    return;
+                }
+
+                SubmitFormData.append("CompanyID", $('#popup_ProjectCompany').val());
+                SubmitFormData.append("Status", $('#popup_ProjectStatus').val());
+                SubmitFormData.append("WaterDepthMin", $('#popup_ProjectWaterDepthMin').val());
+                SubmitFormData.append("WaterDepthMax", $('#popup_ProjectWaterDepthMax').val());
+
+
+
+                var ProjectPosition = [];
+                $('#popup_htmlProjectPosition tr').each(function (index, dom) {
+
+                    var PPosition = {};
+                    PPosition.Lon = $(dom).find('input').eq(0).val();
+                    PPosition.Lat = $(dom).find('input').eq(1).val();
+                    ProjectPosition.push(PPosition);
+                });
+                SubmitFormData.append("ProjectPositionString", JSON.stringify(ProjectPosition));
+
+                var ProjectFanPosition = [];
+                $('#popup_htmlProjectFanPosition tr').each(function (index, dom) {
+
+                    var FPosition = {};
+                    FPosition.FanName = $(dom).find('input').eq(0).val();
+                    FPosition.Lon = $(dom).find('input').eq(1).val();
+                    FPosition.Lat = $(dom).find('input').eq(2).val();
+                    ProjectFanPosition.push(FPosition);
+                });
+                SubmitFormData.append("ProjectFanPositionString", JSON.stringify(ProjectFanPosition));
+
+
+                var ProjectFile_tag = $('#popup_htmlProjectFile').attr('data-tag');
+                SubmitFormData.append("ProjectFile_tag", ProjectFile_tag);
+                if (ProjectFile_tag == '1') {
+                    var FileCount = $('#popup_htmlProjectFile tr').length;
+                    if (FileCount > 0) {
+                        SubmitFormData.append("ProjectFileCount", FileCount);
+                        var ProjectFiles = $('#popup_uploadProjectFileInfo')[0].files;
+                        var Count = 1;
+                        $('#popup_htmlProjectFile tr').each(function (index, dom) {
+
+                            var FileName = $(dom).find('td').first().html();
+                            if (FileName != null && FileName != '') {
+
+                                $(ProjectFiles).each(function (index2, dom2) {
+
+                                    if (dom2.name == FileName) {
+                                        SubmitFormData.append("ProjectFile" + Count, dom2);
+                                        Count++;
+                                        return false;
+                                    }
+
+                                });
+
+                            }
+                        })
+
+                    }
+                }
+
+
+                //1.地勘原始资料
+                var ProjectFile_dkyszl_tag = $('#popup_htmlProjectFile_dkyszl').attr('data-tag');
+                SubmitFormData.append("ProjectFile_dkyszl_tag", ProjectFile_dkyszl_tag);
+                if (ProjectFile_dkyszl_tag == '1') {
+                    var FileCount_dkyszl = $('#popup_htmlProjectFile_dkyszl tr').length;
+                    if (FileCount_dkyszl > 0) {
+                        SubmitFormData.append("ProjectFileCount_dkyszl", FileCount_dkyszl);
+                        var Files = $('#popup_uploadProjectFile_dkyszl')[0].files;
+                        var Count = 1;
+                        $('#popup_htmlProjectFile_dkyszl tr').each(function (index, dom) {
+
+                            var FileName = $(dom).find('td').first().html();
+                            if (FileName != null && FileName != '') {
+
+                                $(Files).each(function (index2, dom2) {
+
+                                    if (dom2.name == FileName) {
+                                        SubmitFormData.append("ProjectFile_dkyszl" + Count, dom2);
+                                        Count++;
+                                        return false;
+                                    }
+                                });
+                            }
+                        })
+                    }
+                }
+
+
+
+                //2.地勘数据表
+                var ProjectFile_dksjb_tag = $('#popup_htmlProjectFile_dksjb').attr('data-tag');
+                SubmitFormData.append("ProjectFile_dksjb_tag", ProjectFile_dksjb_tag);
+                if (ProjectFile_dksjb_tag == '1') {
+                    var FileCount_dksjb = $('#popup_htmlProjectFile_dksjb tr').length;
+                    if (FileCount_dksjb > 0) {
+                        SubmitFormData.append("ProjectFileCount_dksjb", FileCount_dksjb);
+                        var Files = $('#popup_uploadProjectFile_dksjb')[0].files;
+                        var Count = 1;
+                        $('#popup_htmlProjectFile_dksjb tr').each(function (index, dom) {
+
+                            var FileName = $(dom).find('td').first().html();
+                            if (FileName != null && FileName != '') {
+
+                                $(Files).each(function (index2, dom2) {
+
+                                    if (dom2.name == FileName) {
+                                        SubmitFormData.append("ProjectFile_dksjb" + Count, dom2);
+                                        Count++;
+                                        return false;
+                                    }
+                                });
+                            }
+                        })
+                    }
+                }
+
+            }
+
+        }
+
+        $.ajax({
+            url: 'ProjectApprovalSubmit',
+            dataType: 'json',
+            type: 'POST',
+            async: false,
+            data: SubmitFormData,
+            processData: false, // 使数据不做处理
+            contentType: false, // 不要设置Content-Type请求头
+            success: function (data) {
+
+                if (data) {
+                    if (data.Success) {
+                        ModalPopup('success', '保存成功');
+                        $('#tk_Project').modal('hide');
+                        DoQuery();
+                    }
+                    else {
+
+                        ModalPopup('error', data.Message);
+                    }
+
+                }
+
+            },
+            error: function (response) {
+                console.log(response);
+            },
+            complete: function (data) {
+                ModalClose('information');
+            }
+        });
+
+    }
+
+
+    var AddProjectEditSubmit = function () {
+
+        ModalPopup('information', '是否更新项目资料？');
+
+        $("#ModalSubmit").unbind('click').bind('click', function () {
+            DoProjectEditSubmit();
+        });
+    }
+
+    var DoProjectEditSubmit = function () {
+
+        if (ChoosedProjectManager == null || ChoosedProjectManager.UserCode == null || ChoosedProjectManager.UserCode == '') {
+            ModalClose('information');
+            ModalPopup('error', '需要选择项目负责人');
+            return;
+        }
+
+        var SubmitFormData = new FormData();
+        SubmitFormData.append("ProjectID", PopupOpenedProjectID);
+        SubmitFormData.append("ProjectName", $('#popup_txtProjectName').val());
+        SubmitFormData.append("ProjectStartTime", $('#popup_ProjectDateStart').val());
+        SubmitFormData.append("ProjectEndTime", $('#popup_ProjectDateEnd').val());
+
+        SubmitFormData.append("ProjectManagerName", ChoosedProjectManager.Name);
+        SubmitFormData.append("ProjectManagerUserCode", ChoosedProjectManager.UserCode);
+        SubmitFormData.append("ProjectManagerDepart", ChoosedProjectManager.Depart);
+        SubmitFormData.append("ProjectManagerPhone", ChoosedProjectManager.Phone);
+        SubmitFormData.append("ProjectManagerJobName", ChoosedProjectManager.JobName);
+
+        SubmitFormData.append("CompanyID", $('#popup_ProjectCompany').val());
+        SubmitFormData.append("Status", $('#popup_ProjectStatus').val());
+        SubmitFormData.append("WaterDepthMax", $('#popup_ProjectWaterDepthMax').val());
+        SubmitFormData.append("WaterDepthMin", $('#popup_ProjectWaterDepthMin').val());
+
+        var ProjectGroupUsers = [];
+        $('#popup_htmlProjectGroupUser li.clearfix').each(function (index, dom) {
+
+            if ($(UserDom).attr('data-UserCode') != '')
+            {
+                var User = {};
+                var UserDom = $(dom).find('div.nice-select').children().first();
+                User.UserName = $(UserDom).attr('data-UserName');
+                User.UserCode = $(UserDom).attr('data-UserCode');
+                User.UserDepartName = $(UserDom).attr('data-UserDepart');
+                User.UserPhone = $(UserDom).attr('data-UserPhone');
+                User.UserJobName = $(UserDom).attr('data-UserJobName');
+                ProjectGroupUsers.push(User);
+            }
+        })
+
+        SubmitFormData.append("ProjectGroupUsers", JSON.stringify(ProjectGroupUsers));
+
+        $.ajax({
+            url: 'ProjectEditSubmit',
+            dataType: 'json',
+            type: 'POST',
+            async: false,
+            data: SubmitFormData,
+            processData: false, // 使数据不做处理
+            contentType: false, // 不要设置Content-Type请求头
+            success: function (data) {
+
+                if (data) {
+                    if (data.Success) {
+                        ModalPopup('success', '保存成功');
+                        $('#tk_Project').modal('hide');
+                        DoQuery();
+                    }
+                    else {
+
+                        ModalPopup('error', data.Message);
+                    }
+
+                }
+
+            },
+            error: function (response) {
+                console.log(response);
+            },
+            complete: function (data) {
+                ModalClose('information');
+            }
+        });
+    }
+
+
+    var AddProjectGroupUser = function () {
+
+        var NewHtml = '<li class="clearfix"><span><div class="nice-select"><input type="text" class="form-control" data-UserName="" data-UserCode="" data-UserDepart="" data-UserPhone="" data-UserJobName="" value="" placeholder="姓名关键字搜索"><div class="search_div" onclick="ClearProjectGroupUser(this);"><i class="fa fa-close"></i></div><ul></ul></div></span><span>'
+            + '<button type="button" class="btn btn-primary" onclick="FindProjectGroupUser(this);">搜索</button><button type="button" class="btn btn-danger" onclick="DeleteProjectGroupUser(this);">删除</button></span></li>';
+
+        $('#popup_htmlProjectGroupUser').append(NewHtml);
+
+    }
+
+    var ClearProjectGroupUser = function (dom) {
+
+        $(dom).prev('input').val('');
+
+        $(dom).prev('input').attr('data-username', '');
+        $(dom).prev('input').attr('data-usercode', '');
+        $(dom).prev('input').attr('data-userdepart', '');
+        $(dom).prev('input').attr('data-userphone', '');
+        $(dom).prev('input').attr('data-userjobname', '');
+    }
+
+    var FindProjectGroupUser = function (dom) {
+
+        var UserName = $(dom).parent().prev().children().last().children().first().val()
+        if (UserName == null || UserName == '')
+            return;
+
+        var ShjUserDom = $(dom).parent().prev().children().children('ul');
+
+        $(ShjUserDom).html('');
+
+        Param.Name = UserName;
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('/Cloud/Base/FindShjUser', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+
+                    if (data.Success) {
+
+                        var ShjUsertml = '';
+                        $(data.Data).each(function (index, dom) {
+
+                            ShjUsertml += '<li onclick="ChooseProjectGroupUser(this);" data-usercode="' + dom.empcode + '" data-name="' + dom.name + '" data-depart="' + dom.wholeDeptPath + '" data-phone="' + dom.phone + '" data-jobname="' + dom.jobname + '" ><h3>' + dom.name + '(' + dom.jobname + ')</h3><div>' + dom.wholeDeptPath + '</div></li >';
+
+                        });
+                        $(ShjUserDom).show().html(ShjUsertml);
+
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+                //Pagination();
+            });
+
+    }
+
+    var DeleteProjectGroupUser = function (dom) {
+
+        $(dom).parent().parent().remove();
+
+    }
+
+    var ChooseProjectGroupUser = function (dom) {
+
+        if (dom == null)
+            return;
+
+        var Name = $(dom).attr('data-name');
+        var UserCode = $(dom).attr('data-usercode');
+        var Depart = $(dom).attr('data-depart');
+        var Phone = $(dom).attr('data-phone');
+        var JobName = $(dom).attr('data-jobname');
+
+        var UserDom = $(dom).parent().parent().children().first();
+
+        $(UserDom).val(Name + '(' + Depart + ')');
+
+        $(UserDom).attr('data-UserName', Name);
+        $(UserDom).attr('data-UserCode', UserCode);
+        $(UserDom).attr('data-UserDepart', Depart);
+        $(UserDom).attr('data-UserPhone', Phone);
+        $(UserDom).attr('data-UserJobName', JobName);
+
+        $(dom).parent().hide();
+
+    }
+
+</script>
+
+@*地勘数据匹配*@
+<script>
+    var OpenDKMatch = function () {
+
+        $('#tk_DK_Match').modal('show');
+
+        Param.ProjectID = PopupOpenedProjectID;
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('QueryDKData', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+
+                    if (data.Success) {
+
+                        var FanHtml = '';
+                        $(data.Data.Fans).each(function (index, dom) {
+
+                            FanHtml += '<li><span><input type="radio" name="fengji" data-id="' + dom.ID + '" onchange="ChooseFan(this);">' + dom.FanName + '</span><span>';
+
+                            var FanDKHtml = '';
+                            $(dom.DKs).each(function (index2, dom2) {
+
+                                FanDKHtml += '<i data-id="' + dom2.ID + '" title="' + dom2.DKName + '">' + dom2.DKName + '</i>';
+
+                            })
+                            FanHtml += FanDKHtml;
+                            FanHtml += '</span></li>';
+                        })
+                        $('#popup_htmlFanMatch').html(FanHtml);
+
+                        var DKHtml = '';
+                        $(data.Data.DKs).each(function (index, dom) {
+
+                            var IsChecked = '';
+                            if (dom.IsChecked)
+                            {
+                                IsChecked = 'checked disabled';
+                            }
+                            
+                            DKHtml += '<li><input type="checkbox" data-name="' + dom.DKName + '" data-fanid="' + dom.FanID + '" data-id="' + dom.ID + '" ' + IsChecked + '>' + dom.DKName + '</li>';
+
+                        })
+                        $('#popup_htmlDKMatch').html(DKHtml);
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+            });
+
+    }
+
+
+    var FanDKMatch = function () {
+
+        var FanDom = $('input[name="fengji"]:checked');
+        if (FanDom == null)
+            return;
+
+        var FanID = $(FanDom).attr('data-id');
+
+        $(FanDom).parent().next().html('');
+
+        $('#popup_htmlDKMatch input:checkbox').each(function (index, dom) {
+
+            if ($(dom).attr('disabled') != 'disabled')
+            {
+                $(dom).attr('data-fanid', 0);
+
+                if ($(dom).prop('checked') == true)
+                {
+                    $(dom).attr('data-fanid', FanID);
+
+                    $(FanDom).parent().next().append('<i data-id="' + $(dom).attr('data-id') + '" data-name="' + $(dom).attr('data-name') + '">' + $(dom).attr('data-name') + '</i>')
+
+                }
+
+            }
+
+        })
+
+    }
+
+
+    var ChooseFan = function (dom) {
+
+        var FanID = $(dom).attr('data-id');
+
+        $('#popup_htmlDKMatch input:checkbox').each(function (index, dom) {
+
+            //$(dom).parent().show();
+            $(dom).prop('checked', false).attr('disabled', false);
+
+            var ThisFanID = $(dom).attr('data-fanid');
+
+            if (ThisFanID != 0)
+            {
+                if (ThisFanID == FanID) {
+                    $(dom).prop('checked', true).attr('disabled', false);
+                }
+                else
+                {
+                    $(dom).prop('checked', true).attr('disabled', true);
+                }
+            }
+        })
+
+    }
+
+    var SaveDKMatch = function () {
+
+        Param.ProjectID = PopupOpenedProjectID;
+
+        Param.Fans = [];
+
+        $('#popup_htmlFanMatch input[name="fengji"]').each(function (index, dom) {
+
+            var fan = {};
+            fan.ID = $(dom).attr('data-id');
+            fan.DKs = [];
+
+            $(dom).parent().next().children('i').each(function (index2, dom2) {
+
+                var dk = {};
+                dk.ID = $(dom2).attr('data-id');
+                fan.DKs.push(dk);
+            })
+
+            Param.Fans.push(fan);
+
+        })
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('SaveDKMatch', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+
+                    if (data.Success) {
+
+                        ModalPopup('success', '保存成功');
+
+                        $('#tk_DK_Match').modal('hide');
+                        
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+            });
+
+    }
+
+    var OpenProjectInfoMore = function () {
+
+        if ($('.xmjbxx_boxmore').css("display") == 'block') {
+            $('.xmjbxx_boxmore').hide();
+            $('.xmjbxx_boxmore_btn').css("background", "url('../../Content/Cloud/img/icon-fc-bottom.png') no-repeat center center");
+        } else {
+            $('.xmjbxx_boxmore').show();
+            $('.xmjbxx_boxmore_btn').css("background", "url('../../Content/Cloud/img/icon-fc-top.png') no-repeat center center");
+        }
+
+    }
+
+    var DeleteProjectFile = function (ID) {
+
+        if (ID == null || ID == '' || ID == 0)
+        {
+            return;
+        }
+
+        Param.ID = ID;
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        //下一节点人员
+        $.post('DeleteProjectFile', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+                    if (data.Success) {
+
+                        var ProjectFileHtml = '';
+                        $(data.Data).each(function (index, dom) {
+
+                            ProjectFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" download="' + dom.FileName + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a> / <a class="xm_zt_red" onclick="DeleteProjectFile(' + dom.ID + ')">删除</a></td></tr>';  //<a href="#" class="xm_zt_red" onclick="DeleteProjectFile(this);">删除</a>
+                        });
+                        $('#popup_htmlProjectFile').html(ProjectFileHtml);
+
+                        ModalPopup('success', '删除成功');
+
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+            });
+
+    }
+    
+
+</script>
+

@@ -1,0 +1,84 @@
+@charset "utf-8";
+/* CSS Document */
+body{font-size: 1.4vh '微软雅黑';}
+
+ul,li{list-style: none;padding: 0;margin: 0;}
+@font-face {font-family: 'fzzzh';/*这里填写字体名*/src: url(../fonts/fzzzh.ttf);}
+@font-face {font-family: 'ysbth';/*这里填写字体名*/src: url(../fonts/ysbth.ttf);}
+/*header*/
+.body_bg{height:100vh;background: #f1f1f1;background-size: 100% 100%;overflow: hidden;}
+.header_box{width: 100%;height: 7vh;line-height: 7vh; background: url("../img/bg_header.png") top center no-repeat;background-size: 100% 100%;text-align: center;}
+.header_box > span{font-size: 2.8vh;color: #fff;font-family: 'fzzzh';text-shadow: 5px 5px 15px rgba(0,0,0,0.2);letter-spacing: 2px;}
+.header_box > span img{width: 2.8vw;height: 2.8vw;position: relative;bottom: 0.2vh;margin-right: 0.3vw;}
+.login_user{position: absolute;right: 1vw;top: 0vh;color: #fff;font-size: 1.4vh;}
+.login_user img{width: 0.8vw;margin-right: 0.5vw;position: relative;top: -0.3vh;}
+.login_user span{color:#fff; }
+
+.fzr_user{position: absolute;right: 30vw;top: 0.5vh;color: #fff;font-size: 1.4vh;}
+@media (min-width: 768px) and (max-width: 1200px) {
+  .fzr_user { right: 26vw; }
+}
+
+.fzr_user span{color:#fff;font-weight: bold;letter-spacing: 1px;}
+
+.content{height: 86vh;overflow: hidden;margin-top: 4.5vh;padding: 0 8vw;}
+/*content*/
+/*1*/
+.mod01{background:#fff;border-radius: 5px;border:1px solid rgba(0,0,0,0.15);font-size: 1.4vh;color: #fff;height: 40vh;margin-bottom: 3vh;}
+.mod_title{font-size: 2.6vh;color: #333;padding: 3vh 0 0 0;text-align: center;letter-spacing: 1.5px;font-family: 'fzzzh';border-bottom: 1px solid rgba(0,0,0,0.15);margin-bottom: 1.5vh;height: 8vh;line-height: 1.2;}
+.mod_content{}
+.img_box{float: left;width: 50%;padding: 0 0.5vw 0 1.5vw;}
+.img_box img{width:100%;border-radius: 5px;height: 28.5vh;}
+
+
+
+.jianjie_box_w{float: left;width: 50%;padding: 0 1vw 0 0.5vw;}
+.jianjie_box{height: 24vh;overflow:hidden;}
+
+
+
+.jianjie_box p{font-size: 1.4vh;text-indent: 2.8vh;line-height: 2.2vh;color: #333;}
+.p0{padding: 0!important;}
+.box_btn_enter{margin-top: 0vh;}
+.btn_enter{height: 3.6vh;width: 6.6vw; font-size: 1.6vh;color: #fff;background: rgba(41,112,198,0.9);outline: none;border-radius: 3px;border: none;}
+.btn_enter:hover{background: rgba(41,112,198,0.8);}
+
+.jianjie_box_ww{float: left;width: 50%;padding: 0 1vw 0 0.5vw;}
+.jianjie_box02{height: 15vh;overflow-y:hidden;}
+.jianjie_box02 p{font-size: 1.4vh;text-indent: 2.8vh;line-height: 2.2vh;color: #333;}
+.mar_t4{margin-top: 4vh;}
+.zi_xiangmu_box{height:18vh;overflow-y:scroll;}
+.xiangmu_box{margin-bottom:1vh;}
+.xiangmu_box span{font-size: 1.4vh;color:rgba(41,112,198,0.8);font-weight: bold;letter-spacing: 1px;padding: 0.5vh;border-radius: 3px;background: #fff;display: inline-block;margin-right: 0.5vw;}
+.s_btn_enter{height: 2.6vh;width: 4vw; font-size: 1.4vh;color: #fff;background: rgba(41,112,198,0.9);outline: none;border-radius: 3px;border: none;float: right;margin-right: 0.1vw;}
+.s_btn_enter:hover{background: rgba(41,112,198,0.8)}
+
+
+.content04{padding: 0 6vw;}
+.mod_title04{font-size: 2vh;padding: 3vh 0 0 0;}
+.mod04{height: 34vh!important;}
+.img_box04 img{height: 22.5vh;width: 12vw;}
+.jianjie_box04{height: 18vh;overflow-y:hidden;margin-bottom: 1vh}
+
+.newline{padding: 2vh 0 0 0!important;}
+/*滚动条*/
+::-webkit-scrollbar{ width:0.25vw!important; background:rgba(0,0,0,0.1)!important;}
+::-moz-scrollbar{ width:0.25vw!important; background:rgba(0,0,0,0.1)!important;}
+::-ms-scrollbar{ width:0.25vw!important;  background:rgba(0,0,0,0.1)!important;}
+::-o-scrollbar{ width:0.25vw!important;  background:rgba(0,0,0,0.1)!important;}
+::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.5)!important;}  
+::-moz-scrollbar-thumb{background:rgba(0,0,0,0.5)!important;}
+::-mswebkit-scrollbar-thumb{background:rgba(0,0,0,0.5)!important;}
+::-o-scrollbar-thumb{background:rgba(0,0,0,0.5)!important;}
+div{
+	scrollbar-arrow-color: rgba(1,136,153,1); /**//*三角箭头的颜色*/ 
+	scrollbar-face-color: rgba(1,136,153,1); /**//*立体滚动条的颜色*/ 
+	scrollbar-3dlight-color: rgba(1,136,153,1); /**//*立体滚动条亮边的颜色*/ 
+	scrollbar-highlight-color: rgba(1,136,153,1); /**//*滚动条空白部分的颜色*/ 
+	scrollbar-shadow-color: rgba(1,136,153,1); /**//*立体滚动条阴影的颜色*/ 
+	scrollbar-darkshadow-color: rgba(1,136,153,1); /**//*立体滚动条强阴影的颜色*/ 
+	scrollbar-track-color: #4e657b; /**//*立体滚动条背景颜色*/ 
+	scrollbar-base-color:rgba(1,136,153,1); /**//*滚动条的基本颜色*/ 
+}
+
+

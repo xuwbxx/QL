@@ -1,0 +1,1070 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>施工装备数据展示</title>
+    <script type="text/javascript" src="~/lib/jquery/dist/jquery.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            overflow: hidden; /* 禁止整个页面滚动 */
+            height: 100vh; /* 让body占满视口高度 */
+        }
+
+        /* 标题栏样式 - 三列布局实现标题居中、用户名居右 */
+        .header {
+            width: 100vw;
+            height: 4vw;
+            background-color: #2c3e50;
+            color: white;
+            padding: 0 2vw;
+            display: flex;
+            justify-content: space-between; /* 三元素均分空间 */
+            align-items: center;
+            box-shadow: 0 0.5vw 1vw rgba(0,0,0,0.1);
+            flex-shrink: 0; /* 标题栏不收缩 */
+        }
+
+        .header-left {
+            width: 100%; /* 占位元素占满左侧空间 */
+        }
+
+        .header-title {
+            font-size: 2vw;
+            font-weight: bold;
+            width: 100%;
+            text-align: center; /* 标题自身居中 */
+            position: relative; /* 取消绝对定位 */
+            left: 0;
+            transform: none;
+        }
+
+        .header-right {
+            font-size: 1.2vw;
+            font-weight: bold;
+            width: 100%;
+            text-align: right; /* 强制居右 */
+        }
+
+        /* 主体内容样式 */
+        .main {
+            width: 98vw;
+            margin: 1vw auto;
+            display: flex;
+            flex-direction: column; /* 垂直排列检索区和数据区 */
+            overflow: hidden; /* 防止main自身滚动 */
+            /* 修复：计算main高度 = 视口高度 - header高度 - main的上下margin */
+            height: calc(100vh - 4vw - 2vw);
+        }
+
+        /* 检索区域样式 - 修改后 */
+        .search-area {
+            background-color: white;
+            padding: 1.5vw 2vw;
+            border-radius: 1vw;
+            box-shadow: 0 0.5vw 1vw rgba(0,0,0,0.05);
+            margin-bottom: 1vw;
+            display: flex;
+            align-items: center;
+            gap: 1.5vw;
+            flex-wrap: wrap;
+            flex-shrink: 0; /* 检索区域不收缩，固定显示 */
+        }
+
+        .search-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5vw;
+        }
+
+            .search-item label {
+                font-size: 1vw; /* 缩小标签字体 */
+                color: #555;
+            }
+
+            .search-item input {
+                padding: 0.6vw 1.2vw; /* 减小输入框内边距（核心：降低高度） */
+                font-size: 1vw; /* 缩小输入框字体 */
+                border: 0.1vw solid #ddd;
+                border-radius: 0.5vw;
+                width: 20vw;
+                outline: none;
+                transition: border-color 0.3s;
+                height: auto; /* 确保高度由内边距控制 */
+            }
+
+                .search-item input:focus {
+                    border-color: #3498db;
+                }
+
+        .time-group {
+            display: flex;
+            gap: 1vw;
+        }
+
+        .search-btn {
+            padding: 0.6vw 2.5vw; /* 减小按钮内边距（降低高度） */
+            font-size: 1vw; /* 缩小按钮字体 */
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 0.5vw;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 1.8vw; /* 取消顶部外边距，让按钮和输入框垂直对齐 */
+            align-self: flex-end; /* 关键：让按钮和输入框底部对齐 */
+            height: auto;
+        }
+
+            .search-btn:hover {
+                background-color: #2980b9;
+            }
+
+        /* 新增按钮样式 */
+        .add-btn {
+            padding: 0.6vw 2.5vw;
+            font-size: 1vw;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 0.5vw;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 1.8vw;
+            align-self: flex-end;
+            height: auto;
+            margin-left: 1vw; /* 与搜索按钮保持间距 */
+        }
+
+            .add-btn:hover {
+                background-color: #27ae60;
+            }
+
+        /* 数据块展示区域样式 */
+        .data-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5vw;
+            justify-content: flex-start;
+            flex: 1; /* 占据main剩余高度 */
+            overflow-y: auto; /* 垂直滚动 */
+            padding-right: 0.5vw; /* 给滚动条预留空间，避免卡片被遮挡 */
+            min-height: 0; /* 关键：让flex子元素正确计算剩余高度 */
+            padding-bottom: 1vw; /* 底部预留间距，避免最后一个卡片被遮挡 */
+        }
+
+        .data-card {
+            width: calc((100% - 6vw) / 5); /* 5个卡片 + 4个间距(1.5vw*4=6vw) */
+            background-color: white;
+            border-radius: 1vw;
+            box-shadow: 0 0.5vw 1vw rgba(0,0,0,0.05);
+            padding: 1.5vw;
+            transition: transform 0.3s;
+            border: 0.15vw solid #3498db; /* 个性化蓝色边框 */
+            position: relative; /* 为删除按钮定位做准备 */
+            height: 48vh;
+            display: flex; /* 新增：卡片内部flex布局 */
+            flex-direction: column; /* 垂直排列内容和按钮 */
+            justify-content: space-between; /* 内容在上，按钮在下 */
+            flex-shrink: 0; /* 卡片不收缩 */
+        }
+
+        /* 卡片操作按钮容器样式 */
+        .card-actions {
+            display: flex; /* 横向排列按钮 */
+            gap: 1vw; /* 按钮之间间距 */
+            justify-content: center; /* 按钮居中显示 */
+            flex-shrink: 0; /* 按钮区域不收缩 */
+        }
+
+        /* 编辑按钮样式 */
+        .edit-btn {
+            padding: 0.3vw 1vw; /* 减小上下/左右内边距 */
+            font-size: 0.8vw; /* 缩小字体 */
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            border-radius: 0.5vw;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            flex: 1; /* 按钮均分宽度 */
+            max-width: 6vw; /* 缩小最大宽度 */
+        }
+
+            .edit-btn:hover {
+                background-color: #e67e22;
+            }
+
+        /* 打开按钮样式 */
+        .open-btn {
+            padding: 0.3vw 1vw; /* 减小上下/左右内边距 */
+            font-size: 0.8vw; /* 缩小字体 */
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 0.5vw;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            flex: 1; /* 按钮均分宽度 */
+            max-width: 6vw; /* 缩小最大宽度 */
+        }
+
+            .open-btn:hover {
+                background-color: #219653;
+            }
+
+        /* 卡片删除按钮样式 */
+        .delete-btn {
+            position: absolute;
+            top: 0.8vw;
+            right: 0.8vw;
+            width: 1.2vw;
+            height: 1.2vw;
+            background-color: #db1111;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s;
+            z-index: 1; /* 确保删除按钮在最上层 */
+        }
+
+            .delete-btn:hover {
+                background-color: #c0392b;
+            }
+
+        /* 核心修改：调整data-item布局，解决span换行对齐问题 */
+        .data-item {
+            margin-bottom: 1vw;
+            display: flex; /* 改为flex布局 */
+            align-items: flex-start; /* 顶部对齐 */
+        }
+
+            .data-item label {
+                font-size: 1.2vw;
+                color: #666;
+                flex: 0 0 8vw; /* 固定宽度，不伸缩 */
+                margin-right: 0.5vw; /* 与span保持小间距 */
+                white-space: nowrap; /* 防止label换行 */
+            }
+
+            .data-item span {
+                font-size: 1vw;
+                color: #1120c4;
+                font-weight: 500;
+                flex: 1; /* 占据剩余宽度 */
+                word-wrap: break-word; /* 允许单词内换行 */
+                word-break: break-all; /* 强制换行，适配长文本 */
+            }
+
+        /* 新增弹窗样式 - 核心修改：确保弹窗完全居中 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none; /* 默认隐藏弹窗 */
+            justify-content: center; /* 水平居中 */
+            align-items: center; /* 垂直居中 */
+            z-index: 1000;
+            /* 防止弹窗内容溢出 */
+            overflow: auto;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2vw;
+            border-radius: 1vw;
+            width: 45vw;
+            box-shadow: 0 0.5vw 2vw rgba(0, 0, 0, 0.2);
+            /* 确保弹窗内容不会超出视口 */
+            max-width: 95vw;
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-size: 1.5vw;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 1.5vw;
+            text-align: center;
+        }
+
+        .modal-form-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.2vw;
+        }
+
+            .modal-form-item label {
+                font-size: 1.1vw;
+                color: #555;
+                width: 8vw;
+                text-align: right;
+                margin-right: 1vw;
+            }
+
+            .modal-form-item input {
+                padding: 0.6vw 0.8vw;
+                font-size: 1vw;
+                border: 0.1vw solid #ddd;
+                border-radius: 0.5vw;
+                outline: none;
+                transition: border-color 0.3s;
+                width: 10vw;
+            }
+
+                .modal-form-item input:focus {
+                    border-color: #3498db;
+                }
+
+            .modal-form-item .input-group {
+                display: flex;
+                gap: 1vw;
+            }
+
+        /* ========== 关键修改：重构弹窗按钮组样式 ========== */
+        .modal-btn-group {
+            display: flex;
+            flex-direction: column; /* 垂直排列两行按钮 */
+            gap: 1vw; /* 两行之间的间距 */
+            justify-content: center;
+            align-items: center;
+            margin-top: 2vw;
+        }
+
+            /* 第一行按钮组（保存、退出） */
+            .modal-btn-group .first-row {
+                display: flex;
+                gap: 2vw; /* 按钮间距 */
+                justify-content: center;
+            }
+
+            /* 第二行按钮组（导出、文件选择、导入） */
+            .modal-btn-group .second-row {
+                display: flex;
+                align-items: center;
+                gap: 1vw; /* 元素间距 */
+                justify-content: center;
+            }
+
+            /* 美化文件选择框 */
+            .modal-btn-group input[type="file"] {
+                padding: 0.4vw 0.8vw;
+                font-size: 1vw;
+                border: 0.1vw solid #ddd;
+                border-radius: 0.5vw;
+                outline: none;
+                width: 12vw;
+            }
+
+        .modal-btn {
+            padding: 0.6vw 2.5vw;
+            font-size: 1vw;
+            border: none;
+            border-radius: 0.5vw;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .save-btn {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+            .save-btn:hover {
+                background-color: #27ae60;
+            }
+
+        .cancel-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+            .cancel-btn:hover {
+                background-color: #c0392b;
+            }
+
+        .cancel-import {
+            background-color: #3498db;
+            color: white;
+        }
+
+            .cancel-import:hover {
+                background-color: #2980b9;
+            }
+
+        .cancel-export {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+            .cancel-export:hover {
+                background-color: #27ae60;
+            }
+
+        /* 滚动条美化（可选，提升体验） */
+        .data-area::-webkit-scrollbar {
+            width: 0.6vw;
+        }
+
+        .data-area::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 0.3vw;
+        }
+
+        .data-area::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 0.3vw;
+        }
+
+            .data-area::-webkit-scrollbar-thumb:hover {
+                background: #999;
+            }
+    </style>
+</head>
+<body>
+
+
+    <!-- 标题栏 - 仅保留居中标题 -->
+    <div class="header">
+        <div class="header-left"></div> <!-- 新增空占位，撑起左侧空间 -->
+        <div class="header-title">桶式基础结构地基改良处理系统</div>
+        <div class="header-right">@ViewData["userName"].ToString()</div>
+    </div>
+
+    <!-- 主体内容 -->
+    <div class="main">
+        <!-- 检索区域 -->
+        <div class="search-area">
+            <div class="search-item">
+                <label for="name">区域名称</label>
+                <input type="text" id="query_areaNo" placeholder="请输入名称">
+            </div>
+            <div class="search-item">
+                <label>时间范围</label>
+                <div class="time-group">
+                    <input type="datetime-local" id="query_startTime" placeholder="开始时间">
+                    <input type="datetime-local" id="query_endTime" placeholder="结束时间">
+                </div>
+            </div>
+            <div class="search-item">
+                <label for="operator">操作人</label>
+                <input type="text" id="query_operator" placeholder="请输入操作人" style="width:10vw;">
+            </div>
+            <button class="search-btn">搜索</button>
+            <button class="add-btn" onclick="WorkAreaAdd();">新增</button>
+        </div>
+
+        <!-- 数据块展示区域 -->
+        <div class="data-area" id="workAreaHtml">
+            <!-- 数据卡片1 - 新增编辑和打开按钮 -->
+            <div class="data-card">
+                <button class="delete-btn">×</button>
+                <div class="card-content">
+                    <div class="data-item">
+                        <label>区域编号：</label>
+                        <span>00A</span>
+                    </div>
+                    <div class="data-item">
+                        <label>施工矩阵：</label>
+                        <span>10*12</span>
+                    </div>
+                    <div class="data-item">
+                        <label>创建时间：</label>
+                        <span>2026-03-01<br />10:12</span>
+                    </div>
+                    <div class="data-item">
+                        <label>起始坐标：</label>
+                        <span>X:123.54<br />Y:54.12</span>
+                    </div>
+                    <div class="data-item">
+                        <label>操作人：</label>
+                        <span>张三</span>
+                    </div>
+                </div>
+                <!-- 新增操作按钮 -->
+                <div class="card-actions">
+                    <button class="edit-btn">修改</button>
+                    <button class="open-btn">施工</button>
+                </div>
+            </div>
+            <div class="data-card">
+                <button class="delete-btn">×</button>
+                <div class="card-content">
+                    <div class="data-item">
+                        <label>区域编号：</label>
+                        <span>00A</span>
+                    </div>
+                    <div class="data-item">
+                        <label>施工矩阵：</label>
+                        <span>10*12</span>
+                    </div>
+                    <div class="data-item">
+                        <label>创建时间：</label>
+                        <span>2026-03-01<br />10:12</span>
+                    </div>
+                    <div class="data-item">
+                        <label>起始坐标：</label>
+                        <span>X:123.54<br />Y:54.12</span>
+                    </div>
+                    <div class="data-item">
+                        <label>操作人：</label>
+                        <span>张三</span>
+                    </div>
+                </div>
+                <!-- 新增操作按钮 -->
+                <div class="card-actions">
+                    <button class="edit-btn">修改</button>
+                    <button class="open-btn">施工</button>
+                </div>
+            </div>
+            <div class="data-card">
+                <button class="delete-btn">×</button>
+                <div class="card-content">
+                    <div class="data-item">
+                        <label>区域编号：</label>
+                        <span>00A</span>
+                    </div>
+                    <div class="data-item">
+                        <label>施工矩阵：</label>
+                        <span>10*12</span>
+                    </div>
+                    <div class="data-item">
+                        <label>创建时间：</label>
+                        <span>2026-03-01<br />10:12</span>
+                    </div>
+                    <div class="data-item">
+                        <label>起始坐标：</label>
+                        <span>X:123.54<br />Y:54.12</span>
+                    </div>
+                    <div class="data-item">
+                        <label>操作人：</label>
+                        <span>张三</span>
+                    </div>
+                    <div class="data-item">
+                        <label>完成度：</label>
+                        <span>65%</span>
+                    </div>
+                </div>
+                <!-- 新增操作按钮 -->
+                <div class="card-actions">
+                    <button class="edit-btn">修改</button>
+                    <button class="open-btn">施工</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="modal-overlay" id="dataModal">
+        <div class="modal-content">
+            <div class="modal-title">施工设计数据</div>
+            <input type="hidden" id="hid_ID" />
+            @* <div class="modal-form">
+                <input type="hidden" id="hid_ID" />
+                <!-- 第1行：区域编号 -->
+                <div class="modal-form-item">
+                    <label>区域编号：</label>
+                    <input type="text" id="areaCode" placeholder="请输入区域编号">
+                </div>
+
+                <!-- 第2行：施工矩阵 -->
+                <div class="modal-form-item">
+                    <label>施工矩阵：</label>
+                    <input type="number" id="workColumn" placeholder="列数" step="1" style="width: 8vw; margin-right: 1vw;">
+                    <input type="number" id="workRow" placeholder="行数" step="1" style="width: 8vw;">
+                </div>
+
+                <!-- 第3行：起始坐标 -->
+                <div class="modal-form-item">
+                    <label>起始坐标：</label>
+                    <input type="number" id="startX" placeholder="X坐标" step="0.01" style="width: 8vw; margin-right: 1vw;">
+                    <input type="number" id="startY" placeholder="Y坐标" step="0.01" style="width: 8vw;">
+                </div>
+
+                <!-- 第4行：终止坐标 -->
+                <div class="modal-form-item">
+                    <label>终止坐标：</label>
+                    <input type="number" id="endX" placeholder="X坐标" step="0.01" style="width: 8vw; margin-right: 1vw;">
+                    <input type="number" id="endY" placeholder="Y坐标" step="0.01" style="width: 8vw;">
+                </div>
+
+                <!-- 第5行：顶标高/底标高 -->
+                <div class="modal-form-item">
+                    <label>顶标高（米）：</label>
+                    <input type="number" id="topBiaoGao" placeholder="顶标高" step="0.01" style="width: 8vw; margin-right: 1vw;">
+                    <label>底标高（米）：</label>
+                    <input type="number" id="bottomBiaoGao" placeholder="底标高" step="0.01" style="width: 8vw;">
+                </div>
+
+                <!-- 第6行：泥贯入量/用泥总量 -->
+                <div class="modal-form-item">
+                    <label>泥贯入量：</label>
+                    <input type="number" id="soilGuanRuLiang" placeholder="泥贯入量" step="0.01" style="width: 8vw; margin-right: 1vw;">
+                    <label>用泥总量：</label>
+                    <input type="number" id="soilUseTotal" placeholder="用泥总量" step="0.01" style="width: 8vw;">
+                </div>
+
+                <!-- 第7行：泥面标高 -->
+                <div class="modal-form-item">
+                    <label>泥面标高：</label>
+                    <input type="number" id="soilBiaoGao" placeholder="请输入泥面标高" step="0.01" style="width: 8vw;">
+                </div>
+            </div> *@
+            <!-- 按钮组 -->
+            <!-- ========== 关键修改：重构弹窗按钮组HTML结构 ========== -->
+            <div class="modal-btn-group">
+                <!-- 第一行：保存、退出 -->
+                <div class="first-row">
+                    @* <button class="modal-btn save-btn" id="saveBtn" onclick="WorkAreaSave();">保存</button>
+                    <button class="modal-btn cancel-btn" id="cancelBtn">退出</button> *@
+                    <input type="file" id="fileInput" style="width:20vw;" />
+                    <button class="modal-btn cancel-import" id="importBtn">导入</button>
+                </div> 
+                <!-- 第二行：导出、文件选择、导入 -->
+                <div class="second-row">
+                    @* <button class="modal-btn cancel-export" id="exportBtn">导出</button> *@
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 删除按钮点击事件 - 弹出确认提示框
+        $(document).ready(function() {
+
+
+            // 新增按钮点击事件 - 打开居中的弹窗
+            $('.add-btn').click(function() {
+                $('#dataModal').css('display', 'flex'); // 显示弹窗（flex布局实现居中）
+            });
+
+            // 编辑按钮点击事件 - 打开居中的弹窗
+            $('.edit-btn').click(function() {
+                // 获取当前卡片的区域编号
+                const areaCode = $(this).closest('.data-card').find('.data-item:eq(0) span').text();
+                // 填充区域编号到弹窗
+                $('#areaCode').val(areaCode);
+                // 显示居中的弹窗
+                $('#dataModal').css('display', 'flex');
+            });
+
+            // 搜索按钮点击事件（保留原有逻辑）
+            $('.search-btn').click(function() {
+
+                DataListQuery();
+
+            });
+
+            // 打开按钮点击事件
+            $('.open-btn').click(function() {
+                // 获取当前卡片的区域编号（可扩展获取更多数据）
+                const areaCode = $(this).closest('.data-card').find('.data-item:eq(0) span').text();
+                alert(`即将打开区域编号为【${areaCode}】的详情页面，打开功能待实现`);
+            });
+
+
+
+            // 弹窗退出按钮点击事件
+            $('#cancelBtn').click(function() {
+                // 关闭弹窗
+                $('#dataModal').css('display', 'none');
+            });
+
+            $('#exportBtn').click(function() {
+
+                var areaId = $('#hid_ID').val();
+                if(areaId == null || areaId == '' || areaId == 0)
+                {
+                    return;
+                }
+
+                window.location.href = 'WorkAreaPointExport2?AreaID=' + areaId;
+
+
+            });
+
+            $('#importBtn').click(function() {
+
+                    // 1. 校验区域ID
+                // var areaId = $('#hid_ID').val();
+                // if (!areaId || areaId <= 0) {
+                //     alert("数据错误，请刷新页面！");
+                //     return;
+                // }
+
+                // 2. 获取上传的文件
+                var fileInput = $('#fileInput')[0]; // 获取原生DOM元素
+                var file = fileInput.files[0]; // 获取选中的文件
+
+                // 3. 校验文件
+                if (!file) {
+                    alert("请先选择要导入的Excel文件！");
+                    return;
+                }
+                // 校验文件格式（仅允许xlsx/xls）
+                var fileName = file.name;
+                var fileExt = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
+                if (fileExt !== '.xlsx') {
+                    alert("仅支持导入xlsx格式文件");
+                    fileInput.value = ''; // 清空选择的文件
+                    return;
+                }
+
+                        // ===== 新增：导入确认提示框 =====
+                var confirmMsg = `即将导入文件：【${fileName}】
+                    确认导入吗？`;
+                var isConfirm = confirm(confirmMsg); // 原生确认弹窗
+                if (!isConfirm) {
+                    // 用户点击“取消”，终止导入流程
+                    return;
+                }
+
+
+                // 4. 构建FormData（用于上传文件）
+                var formData = new FormData();
+                formData.append('file', file); // 文件流
+                //formData.append('AreaID', areaId); // 区域ID
+
+
+                    // 5. 发送导入请求（POST上传文件）
+                $.ajax({
+                    url: '/Work/Improve/WorkAreaPointImport2', // 后端导入接口地址
+                    type: 'POST',
+                    data: formData,
+                    contentType: false, // 必须false，让浏览器自动设置Content-Type
+                    processData: false, // 必须false，避免jQuery处理文件流
+                    beforeSend: function() {
+                        // 加载中状态
+                        $('#importBtn').text('导入中...').prop('disabled', true);
+                    },
+                    success: function(res) {
+                        // 后端返回结果处理
+                        if (res.success || res.Success) {
+                            alert("数据导入成功！");
+                            // 可选：导入成功后刷新数据列表
+                            // location.reload();
+                            fileInput.value = ''; // 清空文件选择框
+
+                            // 关闭弹窗
+                            $('#dataModal').css('display', 'none');
+
+                            DataListQuery();
+
+                        } else {
+                            alert("导入失败：" + (res.message || res.Message || "未知错误"));
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert("导入请求失败：" + error);
+                        console.error("导入错误详情：", xhr);
+                    },
+                    complete: function() {
+                        // 恢复按钮状态
+                        $('#importBtn').text('导入').prop('disabled', false);
+                    }
+                });
+
+
+            });
+
+            // 点击弹窗外层关闭弹窗
+            $('#dataModal').click(function(e) {
+                if (e.target === this) {
+                    $(this).css('display', 'none');
+                }
+            });
+
+            DataListQuery();
+
+        });
+
+        var DataListQuery = function(){
+
+            const formData = {
+                areaNo: $('#query_areaNo').val().trim(),
+                startTime: $('#query_startTime').val().trim(),
+                endTime: $('#query_endTime').val().trim(),
+                UserName: $('#query_operator').val().trim(),
+            };
+
+            $.ajax({
+                    url: '/Work/Improve/WorkAreaList', // 替换为你的实际后端接口地址
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8', // 指定JSON格式
+                    dataType: 'json',
+                    data: JSON.stringify(formData), // 转换为JSON字符串
+                    success: function(response) {
+
+                        if(response.Success)
+                        {
+                            var listHtml = '';
+                            $(response.Data).each(function(index, dom){
+
+                                listHtml += '<div class="data-card"><button class="delete-btn" onclick="WorkAreaDelete(' + dom.ID + ');">×</button><div class="card-content">'
+                                        + '<div class="data-item"><label>区域名称：</label><span>' + dom.AreaNo + '</span></div>'
+                                        + '<div class="data-item"><label>创建时间：</label><span>' + dom.CreateTime1 + '<br />' + dom.CreateTime2 + '</span></div>'
+                                        + '<div class="data-item"><label>操作人：</label><span>' + dom.UserName + '</span></div>'
+                                        + '<div class="data-item"><label>完成度：</label><span>' + dom.FinishRate + '</span></div></div>'
+                                        + '<div class="card-actions"><button class="edit-btn" onclick="WorkAreaEdit(' + dom.ID + ');">导出</button><button class="open-btn" onclick="WorkAreaOpen(' + dom.ID + ');">施工</button></div></div>';
+
+                            })
+
+                            $('#workAreaHtml').html(listHtml);
+
+                        }
+
+                    },
+                    error: function(xhr, status, error) {
+
+                    },
+                    complete: function() {
+                        // 无论成功失败都执行的逻辑（可选）
+                        // 例如：隐藏加载中状态
+                    }
+                });
+        }
+
+        var WorkAreaDelete = function(ID){
+
+
+            // 弹出确认删除提示框
+                var isDelete = confirm("是否要删除？");
+                if (isDelete) {
+                    // 确认删除则移除当前卡片
+                    //$(this).closest('.data-card').remove();
+                    //alert(ID);
+
+                    const formData = {
+                        ID: ID
+                    };
+
+                    $.ajax({
+                    url: '/Work/Improve/WorkAreaDelete', // 替换为你的实际后端接口地址
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8', // 指定JSON格式
+                    dataType: 'json',
+                    data: JSON.stringify(formData), // 转换为JSON字符串
+                    success: function(response) {
+
+                        if(response.success)
+                        {
+                            alert('删除成功！' + response.message);
+                            DataListQuery();
+                        }
+                        else
+                        {
+                            alert('删除失败！' + response.message);
+                        }
+
+                    },
+                    error: function(xhr, status, error) {
+                        // 请求失败处理
+                        console.error('保存失败：', error);
+                        alert(`保存失败！\n错误状态：${status}\n错误信息：${xhr.responseText || '网络异常，请重试'}`);
+                    },
+                    complete: function() {
+                        // 无论成功失败都执行的逻辑（可选）
+                        // 例如：隐藏加载中状态
+                    }
+                });
+
+                }
+
+
+
+        }
+
+        var WorkAreaEdit = function(ID){
+
+            if(ID == null || ID == '')
+            {
+                return;
+            }
+
+            // var areaId = $('#hid_ID').val();
+            // if(areaId == null || areaId == '' || areaId == 0)
+            // {
+            //     return;
+            // }
+
+            window.location.href = 'WorkAreaPointExport2?AreaID=' + ID;
+
+
+            // $('#hid_ID').val(ID);
+
+            // const formData = {
+            //             ID: ID
+            //         };
+
+            // $.ajax({
+            //         url: '/Work/Improve/WorkAreaData', 替换为你的实际后端接口地址
+            //         type: 'POST',
+            //         contentType: 'application/json; charset=utf-8', 指定JSON格式
+            //         dataType: 'json',
+            //         data: JSON.stringify(formData), 转换为JSON字符串
+            //         success: function(response) {
+
+            //             if(response.Success)
+            //             {
+
+            //                 var data = response.Data;
+
+            //                 $('#areaCode').val(data.AreaNo);
+            //                 $('#workColumn').val(data.WorkColumn);
+            //                 $('#workRow').val(data.WorkRow);
+            //                 $('#startX').val(data.StartX);
+            //                 $('#startY').val(data.StartY);
+            //                 $('#endX').val(data.EndX);
+            //                 $('#endY').val(data.EndY);
+            //                 $('#topBiaoGao').val(data.TopBiaoGao);
+            //                 $('#bottomBiaoGao').val(data.BottomBiaoGao);
+            //                 $('#soilGuanRuLiang').val(data.SoilGuanRuLiang);
+            //                 $('#soilUseTotal').val(data.SoilUseTotal);
+            //                 $('#soilBiaoGao').val(data.SoilBiaoGao);
+            //                 $('#dataModal').css('display', 'flex');
+
+            //                 $('#workColumn, #workRow, #startX, #startY, #endX, #endY').prop('disabled', true);
+            //             }
+            //             else
+            //             {
+            //                 alert('数据错误');
+            //             }
+
+            //         },
+            //         error: function(xhr, status, error) {
+            //             请求失败处理
+            //             console.error('保存失败：', error);
+            //             alert(`保存失败！\n错误状态：${status}\n错误信息：${xhr.responseText || '网络异常，请重试'}`);
+            //         },
+            //         complete: function() {
+            //             无论成功失败都执行的逻辑（可选）
+            //             例如：隐藏加载中状态
+            //         }
+            //     });
+
+        }
+
+        var WorkAreaAdd = function(){
+            // 修复：新增时不仅清空表单，还要显示弹窗
+            $('#hid_ID').val(0);
+            $('#areaCode, #workColumn, #workRow, #startX, #startY, #endX, #endY, #topBiaoGao, #bottomBiaoGao, #soilGuanRuLiang, #soilUseTotal, #soilBiaoGao').val('');
+            $('#workColumn, #workRow, #startX, #startY, #endX, #endY').prop('disabled', false);
+            $('#dataModal').css('display', 'flex'); // 新增这行，打开弹窗
+        }
+
+        var WorkAreaSave = function(){
+
+            // 1. 获取并验证表单数据
+                const formData = {
+                    ID: $('#hid_ID').val(),
+                    areaNo: $('#areaCode').val().trim(),
+                    workColumn: formatValue($('#workColumn').val().trim()),
+                    workRow: formatValue($('#workRow').val().trim()),
+                    startX: formatValue($('#startX').val().trim()),
+                    startY: formatValue($('#startY').val().trim()),
+                    endX: formatValue($('#endX').val().trim()),
+                    endY: formatValue($('#endY').val().trim()),
+                    topBiaoGao: formatValue($('#topBiaoGao').val().trim()),
+                    bottomBiaoGao: formatValue($('#bottomBiaoGao').val().trim()),
+                    soilGuanRuLiang: formatValue($('#soilGuanRuLiang').val().trim()),
+                    soilUseTotal: formatValue($('#soilUseTotal').val().trim()),
+                    soilBiaoGao: formatValue($('#soilBiaoGao').val().trim())
+                };
+
+                // 基础验证：区域编号不能为空
+                if (!formData.areaNo) {
+                    alert('请输入区域编号！');
+                    return;
+                }
+
+                // 2. 弹出确认提示框
+                const isConfirm = confirm(`确认要保存区域编号【${formData.areaNo}】的施工数据吗？`);
+                if (!isConfirm) {
+                    // 用户取消保存
+                    return;
+                }
+
+                // 3. 发送POST请求到后端（JSON格式）
+                $.ajax({
+                    url: '/Work/Improve/WorkAreaSave', // 替换为你的实际后端接口地址
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8', // 指定JSON格式
+                    dataType: 'json',
+                    data: JSON.stringify(formData), // 转换为JSON字符串
+                    success: function(response) {
+
+                        if(response.success)
+                        {
+                            alert('保存成功！区域编号： ' + formData.areaNo + ',' + response.message);
+                            // 关闭弹窗
+                            $('#dataModal').css('display', 'none');
+                            // 可选：清空表单数据
+                            $('#areaCode, #workColumn, #workRow, #startX, #startY, #endX, #endY, #topBiaoGao, #bottomBiaoGao, #soilGuanRuLiang, #soilUseTotal, #soilBiaoGao').val('');
+
+                            DataListQuery();
+
+                        }
+                        else
+                        {
+                            alert('保存失败！' + response.message);
+                        }
+
+                    },
+                    error: function(xhr, status, error) {
+                        // 请求失败处理
+                        console.error('保存失败：', error);
+                        alert(`保存失败！\n错误状态：${status}\n错误信息：${xhr.responseText || '网络异常，请重试'}`);
+                    },
+                    complete: function() {
+                        // 无论成功失败都执行的逻辑（可选）
+                        // 例如：隐藏加载中状态
+                    }
+                });
+
+        }
+
+        var WorkAreaOpen = function(ID){
+
+            //alert(ID);
+
+            window.open('Work2?areaID=' + ID, '_blank');
+
+        }
+
+
+        var formatValue = function(value){
+
+            // 空字符串/空值 → null
+            if (value === '' || value === undefined || value === null) {
+                return null;
+            }
+            // 尝试转换为数字（针对数值型字段）
+            const num = Number(value);
+            // 转换成功则返回数字，否则返回原始值（如字符串类型的areaNo）
+            return isNaN(num) ? value : num;
+
+        }
+
+    </script>
+</body>
+</html>

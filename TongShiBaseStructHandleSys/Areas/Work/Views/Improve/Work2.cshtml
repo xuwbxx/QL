@@ -1,0 +1,1022 @@
+﻿@{
+    var webDataID = (int)Model;
+}
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地基弱化处理页面</title>
+    @* <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script> *@
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <style>
+        /* 全局样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Inter", "Microsoft Yahei", sans-serif;
+        }
+        /* 全局变量定义 */
+        :root {
+            --primary-color: #165DFF; /* 主色调：专业蓝 */
+            --secondary-color: #4E83FD; /* 次要蓝色 */
+            --text-primary: #1D2129; /* 主要文字色 */
+            --text-secondary: #4E5969; /* 次要文字色 */
+            --text-tertiary: #86909C; /* 辅助文字色 */
+            --bg-primary: #FFFFFF; /* 主背景色 */
+            --bg-secondary: #F2F3F5; /* 次要背景色 */
+            --border-color: #E5E6EB; /* 边框色 */
+            --hover-color: #0E48D9; /* 悬浮色 */
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06); /* 轻微阴影 */
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08); /* 中等阴影 */
+            --radius-sm: 0.4vw; /* 小圆角 */
+            --radius-md: 0.8vw; /* 中等圆角 */
+            /* 小方块颜色定义 */
+            --block-unfinished: #E5E6EB; /* 浅灰色-未施工 */
+            --block-processing: #FFF1B8; /* 浅黄色-正在施工 */
+            --block-finished: #B7F0B7; /* 浅绿色-已完成 */
+            --block-selected: #165DFF; /* 选中色-主蓝 */
+            --block-selected-text: #FFFFFF; /* 选中文字色-白色 */
+            --block-gap: 0.1vw; /* 减小间隙，降低总宽度 */
+            /* 调整方块尺寸，适配30列显示 */
+            --block-width: 1.5vw; /* 宽度基准 */
+            --block-height: calc(var(--block-width) * 2.8);
+        }
+        /* 页面容器（占满视口） */
+        body, html {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background-color: var(--bg-secondary);
+        }
+        /* 主容器：左右布局 */
+        .main-container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            padding: 1vw;
+            gap: 1vw;
+        }
+        /* 左侧div1：80%宽度 */
+        .div1 {
+            width: 80vw;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-primary);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+        /* div1-1：标题区域（15%高度） */
+        .div1-1 {
+            height: 15vh;
+            display: flex;
+            align-items: center;
+            padding: 0 2vw;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--bg-primary);
+            flex-wrap: wrap; /* 适配小屏幕，参数换行 */
+        }
+        /* 标题文字样式 */
+        .title-text {
+            font-size: 2.2vw;
+            font-weight: 600;
+            color: var(--primary-color);
+            width: 20vw; /* 标题独占一行，避免挤压参数 */
+            margin-bottom: 0.5vh;
+            letter-spacing: 0.05vw;
+        }
+        /* 参数区域样式 */
+        .params-area {
+            width: 50vw;
+            font-size: 1vw; /* 缩小字体，减少宽度占用 */
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4vw; /* 减小间隙 */
+            color: var(--text-secondary);
+        }
+
+            .params-area span {
+                padding: 0.4vw 0.8vw;
+                background-color: var(--bg-secondary);
+                border-radius: var(--radius-sm);
+                transition: all 0.2s ease;
+            }
+
+                .params-area span:hover {
+                    background-color: #e8eaed;
+                    color: var(--primary-color);
+                }
+        /* div1-2：施工面板（75%高度）- 核心容器 */
+        .div1-2 {
+            height: 75vh;
+            background-color: var(--bg-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow: hidden;
+        }
+        /* 状态说明栏 */
+        .status-legend {
+            width: 98%; /* 扩大宽度，避免挤压 */
+            height: 8%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2vw; /* 减小间隙 */
+            margin-bottom: 0.5vw;
+            font-size: 0.9vw;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4vw;
+        }
+
+        .legend-block {
+            width: 1.2vw;
+            height: 1.2vw;
+            border-radius: var(--radius-sm);
+        }
+        /* 核心：方块容器 - 优化滚动逻辑 */
+        .blocks-container {
+            width: 98%; /* 扩大容器宽度，增加可视范围 */
+            height: calc(75vh - 8% - 0.5vw);
+            display: flex;
+            align-items: flex-start; /* 从顶部开始显示，避免垂直居中导致顶部被切 */
+            justify-content: flex-start; /* 从左侧开始显示，确保第一行完整暴露 */
+            overflow: auto; /* 双向滚动，优先显示第一行/第一列 */
+            position: relative;
+            /* 滚动条美化 */
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) var(--bg-secondary);
+        }
+            /* Chrome滚动条美化 */
+            .blocks-container::-webkit-scrollbar {
+                width: 0.6vw;
+                height: 0.6vw;
+            }
+
+            .blocks-container::-webkit-scrollbar-thumb {
+                background-color: var(--primary-color);
+                border-radius: 0.3vw;
+            }
+
+            .blocks-container::-webkit-scrollbar-track {
+                background-color: var(--bg-secondary);
+            }
+        /* 表格样式 - 限制最大宽度，适配容器 */
+        .construction-table {
+            table-layout: fixed !important;
+            width: auto !important;
+            border-collapse: collapse;
+        }
+
+            /* 表格行 - 高度匹配方块 */
+            .construction-table tr {
+                height: var(--block-height); /* 固定行高3vh */
+            }
+            /* 核心：小方块样式（适配尺寸） */
+            .construction-table td {
+                width: var(--block-width); /* 2.8vw，适配30列 */
+                height: var(--block-height); /* 3vh不变 */
+                border-radius: var(--radius-sm);
+                text-align: center;
+                vertical-align: middle;
+                font-size: 0.7vw; /* 缩小字体，确保文字不溢出方块 */
+                color: var(--text-secondary);
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                /* 更明显的边框 + 更大间隔 */
+                border: 2px solid #b8c0cc;
+                box-sizing: border-box;
+                margin: 3px;
+            }
+        /* 方块状态样式 */
+        .block-unfinished {
+            background-color: var(--block-unfinished);
+        }
+
+        .block-processing {
+            background-color: var(--block-processing);
+        }
+
+        .block-finished {
+            background-color: var(--block-finished);
+        }
+        /* 选中样式 */
+        .block-selected {
+            background-color: var(--block-selected) !important;
+            color: var(--block-selected-text) !important;
+            box-shadow: 0 0 0 0.15vw rgba(22, 93, 255, 0.5);
+        }
+        /* 悬浮效果 */
+        td:hover:not(.block-selected) {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-sm);
+        }
+        /* div1-3：操作栏（10%高度） */
+        .div1-3 {
+            height: 10vh;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2vw;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--bg-primary);
+        }
+        /* 复选框区域 */
+        .checkbox-area {
+            display: flex;
+            gap: 1.2vw;
+            font-size: 0.75vw;
+            color: var(--text-secondary);
+        }
+
+            .checkbox-area label {
+                display: flex;
+                align-items: center;
+                gap: 0.3vw;
+                cursor: pointer;
+                transition: color 0.2s ease;
+                white-space: nowrap;
+            }
+
+                .checkbox-area label:hover {
+                    color: var(--primary-color);
+                }
+
+                .checkbox-area label .machine-blocks {
+                    color: var(--primary-color);
+                    font-weight: 600;
+                    margin-left: 0.2vw;
+                }
+
+            .checkbox-area input {
+                width: 1vw;
+                height: 1vw;
+                cursor: pointer;
+                accent-color: var(--primary-color);
+            }
+        /* 操作按钮区域 */
+        .operate-area {
+            display: flex;
+            align-items: center;
+            gap: 1.5vw;
+            font-size: 0.8vw;
+        }
+
+            .operate-area label {
+                color: var(--text-secondary);
+                padding: 0.4vw 0.8vw;
+                background-color: var(--bg-secondary);
+                border-radius: var(--radius-sm);
+            }
+
+            .operate-area button {
+                padding: 0.7vw 1vw;
+                font-size: 1vw;
+                cursor: pointer;
+                background-color: var(--primary-color);
+                color: white;
+                border: none;
+                border-radius: var(--radius-md);
+                transition: all 0.2s ease;
+                box-shadow: var(--shadow-sm);
+                width: 6vw;
+                flex-shrink: 0;
+            }
+
+                .operate-area button:hover {
+                    background-color: var(--hover-color);
+                    transform: translateY(-0.1vw);
+                    box-shadow: var(--shadow-md);
+                }
+
+                .operate-area button:active {
+                    transform: translateY(0);
+                }
+        /* 右侧div2：20%宽度 */
+        .div2 {
+            width: 20vw;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1vw;
+        }
+
+        .div2-1, .div2-2 {
+            height: calc(50% - 0.5vw);
+            background-color: var(--bg-primary);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            padding: 1.2vw;
+            overflow: hidden;
+        }
+
+        .side-title {
+            text-align: center;
+            font-size: 1vw;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 1vw;
+            padding-bottom: 0.5vw;
+            border-bottom: 2px solid var(--bg-secondary);
+            letter-spacing: 0.05vw;
+        }
+
+        .data-placeholder {
+            width: 100%;
+            height: calc(100% - 3vw);
+            border: 1px dashed var(--border-color);
+            border-radius: var(--radius-sm);
+            display: flex;
+            flex-direction: column; /* 改为列布局展示多行数据 */
+            align-items: flex-start; /* 左对齐 */
+            justify-content: center;
+            color: var(--text-secondary); /* 加深文字颜色 */
+            font-size: 1vw;
+            background-color: #FAFAFA;
+            padding: 0 1.5vw; /* 增加左右内边距 */
+            gap: 0.8vh; /* 行间距 */
+        }
+
+        /* 数据项样式优化 */
+        .data-item {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding-bottom: 1vh;
+        }
+
+        .data-label {
+            color: var(--text-tertiary);
+            font-size: 2vh;
+        }
+
+        .data-value {
+            font-weight: bold;
+            color: #054ad5;
+            font-size: 1.5vh;
+        }
+
+
+        /* 闪动边框的通用class样式（可复用） */
+        .blink-border-label {
+            position: relative; /* 为伪元素定位 */
+            padding: 0.6vw 1vw; /* 增加内边距，给边框留出空间 */
+            border-radius: var(--radius-sm);
+            background-color: var(--bg-secondary);
+            /* 基础样式适配 */
+            color: #E6A23C; /* 施工主题色（暖黄色），突出状态 */
+            font-weight: 600;
+            display: inline-block; /* 确保伪元素能正确包裹 */
+        }
+
+            /* 闪动边框的伪元素 - 基于class实现 */
+            .blink-border-label::before {
+                content: '';
+                position: absolute;
+                top: -0.2vw;
+                left: -0.2vw;
+                right: -0.2vw;
+                bottom: -0.2vw;
+                border: 2px solid #E6A23C; /* 匹配正在施工的浅黄色方块 */
+                border-radius: var(--radius-sm);
+                animation: blink-animation 1.5s infinite ease-in-out; /* 循环闪动动画 */
+                pointer-events: none; /* 不影响点击交互 */
+                box-sizing: border-box;
+            }
+
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- 左侧div1：80%宽度 -->
+        <div class="div1">
+            <div class="div1-1">
+                <div class="title-text">地基弱化处理</div>
+                <div class="params-area">
+                    <span style="font-weight: 600; color: #1D2129; margin-right: 4px;">施工区域名称：</span>
+                    <span id="span_workAreaName">001A</span>
+                    <span style="font-weight: 600; color: #1D2129; margin: 0 8px 0 12px;">区域选择：</span>
+                    <select id="select_areaNo" onchange="WorkAreaPointInfo();">
+                        <option value="0">所有</option>
+                        <option>1</option>
+                        <option>2</option>
+                    </select>
+                </div>
+            </div>
+            <div class="div1-2">
+                <!-- 状态说明 -->
+                <div class="status-legend">
+                    <div class="legend-item">
+                        <div class="legend-block block-unfinished"></div>
+                        <span>未施工</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-block block-processing"></div>
+                        <span>正在施工</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-block block-finished"></div>
+                        <span>已完成</span>
+                    </div>
+                </div>
+                <!-- 方块容器 -->
+                <div class="blocks-container" id="blocksContainer">
+
+                </div>
+            </div>
+            <div class="div1-3">
+                <div class="checkbox-area">
+                    <label><input type="checkbox" name="machine" value="1"> 1#机<span class="machine-blocks" data-machine="1"></span></label>
+                    <label><input type="checkbox" name="machine" value="2"> 2#机<span class="machine-blocks" data-machine="2"></span></label>
+                    <label><input type="checkbox" name="machine" value="3"> 3#机<span class="machine-blocks" data-machine="3"></span></label>
+                </div>
+                <div class="operate-area">
+                    <label class="blink-border-label" id="workingLabel">正在施工：112 113 114</label>
+                </div>
+                <div class="operate-area">
+                    <button id="cancelSelectBtn" style="background-color:burlywood;">撤销选择</button>
+                    <button id="sendSelectBtn">发送指令</button>
+                </div>
+
+            </div>
+        </div>
+        <!-- 右侧div2：20%宽度 -->
+        <div class="div2">
+            <div class="div2-1" style="height:40vh;">
+                <div class="side-title">设计数据<span id="des_AreaNo">(00A001)</span></div>
+                <div class="data-placeholder" id="workDataDesHtml">
+                    
+                </div>
+            </div>
+            <div class="div2-2" style="height:48vh;">
+                <div class="side-title">实际数据</div>
+                <div class="data-placeholder" id="workDataActHtml">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 确保DOM加载完成后执行
+
+        var dataID = 0;
+
+            // 定义定时器变量，方便后续清除
+        var workAreaTimer = null;
+
+        $(document).ready(function() {
+
+            dataID = @webDataID;
+
+            WorkAreaPointInfo();
+
+            // 设置定时器：每隔10秒执行一次
+        // 使用箭头函数确保能正确获取到dataID参数
+            workAreaTimer = setInterval(() => {
+                WorkAreaPointInfo(dataID);
+                //console.log(111);
+            }, 30000); // 10000毫秒 = 10秒
+
+        });
+
+        var WorkAreaPointInfo = function(){
+
+            if(dataID == null || dataID == 0)
+            {
+                return;
+            }
+
+            var areaNo = $('#select_areaNo').val();
+
+            const formData = {
+                        ID: dataID,
+                        areaNo: areaNo
+                    };
+
+            $.ajax({
+                    url: '/Work/Improve/WorkAreaPointInfo2', // 替换为你的实际后端接口地址
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8', // 指定JSON格式
+                    dataType: 'json',
+                    data: JSON.stringify(formData), // 转换为JSON字符串
+                    success: function(response) {
+
+                        if(response.Success)
+                        {
+
+                            var data = response.Data;
+                            initTitle(data);
+
+                            
+                            bindAreaNo(data);
+
+                            //数据处理一层
+
+                            var points = [];
+                            $(data.WorkAreas).each(function(index, dom){
+                            
+                                $(dom.Points).each(function(index2, dom2){
+                                
+                                    points.push(dom2);
+
+                                })
+
+                            })
+
+                            initConstructionTable2(points);
+
+                            // 刷新后更新机器标签显示
+                            updateSelectedLabel();
+
+                            //initConstructionTable(data.WorkColumn, data.WorkRow, data.AreaNo, data.WorkAreaPoints);
+
+                            var workPointHtml = '正在施工：';
+                            if(!data.WorkingPoint == '')
+                            {
+                                workPointHtml += data.WorkingPoint;
+                            }
+
+                            $('#workingLabel').html(workPointHtml);
+
+                        }
+                        else
+                        {
+                            alert('数据错误');
+                        }
+
+                    },
+                    error: function(xhr, status, error) {
+                        // 请求失败处理
+                        console.error('保存失败：', error);
+                        alert(`保存失败！\n错误状态：${status}\n错误信息：${xhr.responseText || '网络异常，请重试'}`);
+                    },
+                    complete: function() {
+                        // 无论成功失败都执行的逻辑（可选）
+                        // 例如：隐藏加载中状态
+                    }
+                });
+
+        }
+
+        var IsBind = false;
+        var bindAreaNo = function(data){
+        
+            if(IsBind)
+            {
+                return;
+            }
+
+            var selectAreaNoHtml = '<option value="0">所有</option>';
+            $(data.WorkAreas).each(function(index, dom){
+
+                selectAreaNoHtml += '<option value="' + dom.AreaName + '">' + dom.AreaName + '</option>';
+
+            })
+            $('#select_areaNo').html(selectAreaNoHtml);
+            IsBind = true;
+        }
+
+        var initTitle = function(data){
+
+            
+            $('#span_workAreaName').html(data.AreaNo);
+
+        }
+
+
+        const MAX_SELECT = 3; // 最大选中数
+        let selectedBlocks = new Set(); // 选中集合
+        var initConstructionTable = function(COLUMN, ROW, name, points){
+
+            let $table = $('<table class="construction-table"></table>');
+            let blockNum = 1;
+
+            var count = 0;
+
+            const statusList = ['block-unfinished', 'block-processing', 'block-finished'];
+
+            // 生成行
+            for (let i = 0; i < ROW; i++) {
+                    let $tr = $('<tr></tr>');
+                    // 生成列
+                    for (let j = 0; j < COLUMN; j++) {
+                        let num = blockNum.toString().padStart(3, '0');
+                        let blockId = name + points[count].PointName;
+                        // 随机状态
+                        let status = statusList[points[count].Status]
+
+                        var selectStyle = '';
+                        if(selectedBlocks.has(blockId))
+                        {
+                            selectStyle = 'block-selected';
+                        }
+
+                        // 生成固定尺寸的td
+                        let $td = $(`<td id="${points[count].ID}" name-id="${blockId}" class="construction-block ${status} ${selectStyle}" onclick="WorkPointSelect(this)" ondblclick="WorkPointInfo(this)">${blockId}</td>`);
+                        $tr.append($td);
+                        blockNum++;
+                        count++;
+                    }
+                    $table.append($tr);
+                }
+
+            // 插入容器并确保第一行在可视区域
+            $('#blocksContainer').empty().append($table);
+            // 滚动到表格顶部左侧，确保第一行/第一列显示
+            $('#blocksContainer').scrollTop(0).scrollLeft(0);
+
+
+
+        }
+
+        //
+
+        var initConstructionTable2 = function (points) {
+            let $table = $('<table class="construction-table"></table>');
+
+            // 统一解析所有点
+            let pointMap = {};
+            let prefixSet = new Set();
+            let letterSet = new Set();
+            let numSet = new Set();
+
+            $(points).each(function (i, p) {
+                let pn = p.PointName;
+                if (!pn) return;
+
+                let match = pn.match(/^(\d+)([A-Z])(\d+)$/);
+                if (!match) return;
+
+                let prefix = match[1];
+                let letter = match[2];
+                let num = match[3];
+
+                prefixSet.add(prefix);
+                letterSet.add(letter);
+                numSet.add(num);
+                pointMap[pn] = p;
+            });
+
+            // 排序
+            let prefixes = Array.from(prefixSet).sort((a, b) => parseInt(a) - parseInt(b));
+            let letters = Array.from(letterSet).sort();
+            let nums = Array.from(numSet).sort((a, b) => parseInt(a) - parseInt(b));
+
+
+            // ===================== 核心：按行生成 =====================
+            for (let i = nums.length - 1; i >= 0; i--) {
+                let num = nums[i];
+                let $tr = $('<tr></tr>');
+
+                $(prefixes).each(function (pi, prefix) {
+                    $(letters).each(function (li, letter) {
+                        let key = prefix + letter + num;
+                        let p = pointMap[key];
+
+                        // ===================== 分组分隔线：每个前缀最后一列加右边框 =====================
+                        let borderRight = '';
+                        if (li == letters.length - 1) {
+                            borderRight = 'border-right: 2px solid #555 !important;'; // 深色粗线
+                        }
+
+                        if (!p) {
+                            $tr.append(`<td class="construction-block" style="${borderRight}"></td>`);
+                            return;
+                        }
+
+                        let blockId = p.PointName;
+                        let statusCls = p.Status === 0 ? 'block-unfinished'
+                            : p.Status === 1 ? 'block-processing'
+                            : 'block-finished';
+                        let selectStyle = selectedBlocks.has(blockId) ? 'block-selected' : '';
+
+                        let pre = blockId.slice(0, -3);
+                        let last3 = blockId.slice(-3);
+                        let showText = pre + "<br>" + last3;
+
+                        let $td = $(`
+                            <td id="${p.ID}"
+                                name-id="${blockId}"
+                                class="construction-block ${statusCls} ${selectStyle}"
+                                onclick="WorkPointSelect(this)"
+                                ondblclick="WorkPointInfo(this)"
+                                style="${borderRight}">
+                                ${showText}
+                            </td>
+                        `);
+                        $tr.append($td);
+                    });
+                });
+
+                $table.append($tr);
+            }
+
+            $('#blocksContainer').empty().append($table);
+            //$('#blocksContainer').scrollTop(0).scrollLeft(0);
+        };
+        
+        //
+
+
+
+        var WorkPointSelect = function(dom){
+
+            let $this = $(dom);
+            let blockId = $this.attr('name-id');
+
+            // 获取选中的机器数量
+            let machineCount = $('input[name="machine"]:checked').length;
+
+            if (selectedBlocks.has(blockId)) {
+                // 取消选择
+                selectedBlocks.delete(blockId);
+                $this.removeClass('block-selected');
+            } else {
+                // 没有选中任何机器时，提示
+                if (machineCount === 0) {
+                    alert('没有选择机器');
+                    return;
+                }
+                // 选中的方格数超出机器数量时，提示
+                if (selectedBlocks.size >= machineCount) {
+                    alert('超出机器数量');
+                    return;
+                }
+                // 选中
+                selectedBlocks.add(blockId);
+                $this.addClass('block-selected');
+            }
+            // 更新选中提示
+            updateSelectedLabel();
+
+        }
+
+        var WorkPointInfo = function(dom){
+
+            let $this = $(dom);
+            let dataID = $this.attr('id');
+
+            //alert(dataId);
+
+            if(dataID == null || dataID == '' || dataID == 0)
+            {
+                return;
+            }
+
+            const formData = {
+                ID: dataID
+            };
+
+            $.ajax({
+                url: '/Work/Improve/WorkAreaPointData', // 替换为你的实际后端接口地址
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8', // 指定JSON格式
+                dataType: 'json',
+                data: JSON.stringify(formData), // 转换为JSON字符串
+                success: function(response) {
+
+                    if(response.Success)
+                    {
+
+                        var data = response.Data;
+
+                        $('#des_AreaNo').html('(' + $this.attr('name-id') + ')');
+
+                        var workDataDesHtml = '';
+
+                        workDataDesHtml += '<div class="data-item"><span class="data-label">坐标X：</span><span class="data-value">' + (data.PointX ?? '') + '</span></div>'
+                                        + '<div class="data-item"><span class="data-label">坐标Y：</span><span class="data-value">' + (data.PointY ?? '') + '</span></div>'
+                                        + '<div class="data-item"><span class="data-label">用浆量：</span><span class="data-value">' + (data.SheJiYongJiangLiang ?? '') + '</span><span class="data-label">每米用浆量：</span><span class="data-value">' + ('1.2*2.8*0.8') + '</span></div>'
+                                        + '<div class="data-item"><span class="data-label">桩顶标高：</span><span class="data-value">' + (data.ZhuangDing ?? '') + '</span><span class="data-label">桩底标高：</span><span class="data-value">' + (data.ZhuangDi ?? '') + '</span></div>'
+                                        + '<div class="data-item"><span class="data-label">砂面标高：</span><span class="data-value">' + (data.ShaMianBiaoGao ?? '') + '</span><span class="data-label">桩长：</span><span class="data-value">' + (data.SheJiZhuangChang ?? '') + '</span></div>';
+
+                        $('#workDataDesHtml').html(workDataDesHtml);
+
+
+
+                        var workDataActHtml = '';
+
+                        workDataActHtml += '<div class="data-item"><span class="data-label">坐标X：</span><span class="data-value">' + (data.PointXAct ?? '') + '</span><span class="data-label">坐标Y：</span><span class="data-value">' + (data.PointYAct ?? '') + '</span></div>'
+                                        + '<div class="data-item"><span class="data-label">1#流量：</span><span class="data-value">' + (data.LiuLiangNum1Act ?? '') + '</span><span class="data-label">2#流量：</span><span class="data-value">' + (data.LiuLiangNum2Act ?? '') + '</span></div>'
+                                        + '<div class="data-item"><span class="data-label">1#压力：</span><span class="data-value">' + (data.YaLiNum1Act ?? '') + '</span><span class="data-label">2#压力：</span><span class="data-value">' + (data.YaLiNum2Act ?? '') + '</span></div>'
+                                        + '<div class="data-item"><span class="data-label">1#电流：</span><span class="data-value">' + (data.DianLiuNum1Act ?? '') + '</span><span class="data-label">2#电流：</span><span class="data-value">' + (data.DianLiuNum2Act ?? '') + '</span></div>'
+                                        + '<div class="data-item"><span class="data-label">底标高：</span><span class="data-value">' + (data.BottomBiaoGaoAct ?? '') + '米</span></div>'
+                                        + '<div class="data-item"><span class="data-label">总用泥量：</span><span class="data-value">' + (data.SoilUseTotalAct ?? '') + '立方</span></div>';
+
+                        $('#workDataActHtml').html(workDataActHtml);
+
+                    }
+                    else
+                    {
+                        alert('数据错误');
+                    }
+
+                },
+                error: function(xhr, status, error) {
+                    // 请求失败处理
+                    console.error('查询失败：', error);
+                    //alert(`保存失败！\n错误状态：${status}\n错误信息：${xhr.responseText || '网络异常，请重试'}`);
+                },
+                complete: function() {
+                    // 无论成功失败都执行的逻辑（可选）
+                    // 例如：隐藏加载中状态
+                }
+            });
+
+        }
+
+
+
+        $('#cancelSelectBtn').click(function() {
+            selectedBlocks.clear();
+            $('.construction-table td').removeClass('block-selected');
+            updateSelectedLabel();
+
+            $('input[name="machine"]').prop('checked', false);
+
+        });
+
+            // 更新选中提示文本
+        function updateSelectedLabel() {
+            // let $label = $('#selectedLabel');
+            // if (selectedBlocks.size === 0) {
+            //     $label.text('已选择：无');
+            // } else {
+            //     let selectedText = Array.from(selectedBlocks).join('，');
+            //     $label.text(`已选择：${selectedText}`);
+            // }
+
+            // 将选中的小方块按顺序分配到已选中的机器
+            let blocks = Array.from(selectedBlocks);
+            let $checkedMachines = $('input[name="machine"]:checked');
+            // 先清空所有机器的方块显示
+            $('.machine-blocks').text('');
+            // 按顺序分配
+            $checkedMachines.each(function(index) {
+                let machineVal = $(this).val();
+                if (index < blocks.length) {
+                    $('.machine-blocks[data-machine="' + machineVal + '"]').text(' (' + blocks[index] + ')');
+                }
+            });
+        }
+
+        function isConsecutiveInOriginalOrder(numArray) {
+
+
+            // 1. 边界校验：确保输入是有效数组
+            if (!Array.isArray(numArray)) {
+                console.error('输入必须是数组类型');
+                return false;
+            }
+
+            // 2. 校验数组元素是否全为有效数字
+            const hasInvalidElement = numArray.some(item => {
+                return typeof item !== 'number' || isNaN(item) || !Number.isInteger(item);
+            });
+            if (hasInvalidElement) {
+                console.error('数组中包含非整数/无效数字元素');
+                return false;
+            }
+
+            // 3. 规则：长度≤1 直接返回true
+            if (numArray.length <= 1) {
+                return true;
+            }
+
+            // 4. 核心校验：按原始顺序，每个元素必须等于前一个元素 + 1
+            for (let i = 1; i < numArray.length; i++) {
+                if (numArray[i] !== numArray[i - 1] + 1) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        $('#sendSelectBtn').click(function() {
+
+            var points = [];
+            var pointIDs = [];
+            // points：从DOM收集选中的方块名称（用于机器匹配，不需要排序）
+            $('#blocksContainer td.block-selected').each(function(index, dom){
+                points.push($(dom).attr('name-id'));
+            })
+
+            // pointIDs：按点击顺序（selectedBlocks插入顺序）收集数据库ID
+            selectedBlocks.forEach(function(blockId) {
+                let $td = $('td[name-id="' + blockId + '"]');
+                if ($td.length > 0) {
+                    pointIDs.push(Number($td.prop('id')));
+                }
+            });
+
+            var machines = [];
+            $('input[name="machine"]:checked').each(function(index, dom){
+
+                machines.push(Number($(dom).val()));
+
+            })
+
+            if(points.length == 0 || machines.length == 0)
+            {
+                alert('没有选择任何工作点或机器');
+                return;
+            }
+
+            if(points.length != machines.length)
+            {
+                alert('选中的工作点和机器数量不一致');
+                return;
+            }
+
+
+            // var numArray = [];
+            // $(points).each(function(index, dom){
+
+            //     numArray.push(Number(dom.slice(-3)));
+
+            // })
+
+            // var isCon = isConsecutiveInOriginalOrder(numArray);
+            // if(!isCon)
+            // {
+            //     alert('选中的工作点不是连续的');
+            //     return;
+            // }
+
+                    // ===== 新增确认弹窗 =====
+            // 构建提示信息，机器与工作点按顺序一一匹配
+            var matchLines = [];
+            var checkedArr = $('input[name="machine"]:checked').toArray();
+            var blockArr = Array.from(selectedBlocks);
+            for (var mi = 0; mi < checkedArr.length; mi++) {
+                var pLabel = mi < blockArr.length ? blockArr[mi] : '-';
+                matchLines.push($(checkedArr[mi]).val() + ' → ' + pLabel);
+            }
+            var confirmMsg = '确定操作？\n' + matchLines.join('\n');
+
+            // 显示确认弹窗，用户点击"取消"则直接返回，不执行后续请求
+            if(!confirm(confirmMsg)) {
+                return;
+            }
+
+
+            const formData = {
+                        pointList: pointIDs,
+                        machineList: machines
+                    };
+
+
+            $.ajax({
+                        url: '/Work/Improve/WorkAreaPointHandle', // 替换为你的实际后端接口地址
+                        type: 'POST',
+                        contentType: 'application/json; charset=utf-8', // 指定JSON格式
+                        dataType: 'json',
+                        data: JSON.stringify(formData), // 转换为JSON字符串
+                        success: function(response) {
+
+                            if(response.Success)
+                            {
+                                WorkAreaPointInfo(dataID);
+                                selectedBlocks.clear();
+                            }
+                            else
+                            {
+                                alert('数据错误');
+                            }
+
+                        },
+                        error: function(xhr, status, error) {
+                            // 请求失败处理
+                            console.error('查询失败：', error);
+                            //alert(`保存失败！\n错误状态：${status}\n错误信息：${xhr.responseText || '网络异常，请重试'}`);
+                        },
+                        complete: function() {
+                            // 无论成功失败都执行的逻辑（可选）
+                            // 例如：隐藏加载中状态
+                        }
+                    });
+
+
+        });
+
+
+    </script>
+</body>
+</html>

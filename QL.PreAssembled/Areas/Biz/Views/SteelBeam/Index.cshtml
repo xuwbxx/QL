@@ -1,0 +1,79 @@
+﻿@{
+    Layout = "_LayoutModelEP";
+    ViewData["Title"] = "钢梁管理";
+}
+
+@section Styles {
+    <style>
+        .steel-beam-container {
+            padding: 20px;
+            background: #fff;
+        }
+        .steel-beam-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        .search-area {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .pagination-area {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 16px;
+        }
+    </style>
+}
+
+<div id="app" class="steel-beam-container">
+    <!-- 搜索栏 -->
+    <div class="steel-beam-header">
+        <div class="search-area">
+            <el-select v-model="searchProjID" placeholder="请选择所属项目" clearable style="width: 220px;" @@change="onProjectChange">
+                <el-option v-for="item in projectOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
+            </el-select>
+            <el-select v-model="searchBridgeID" placeholder="请选择所属桥梁" clearable style="width: 220px;" :disabled="!searchProjID">
+                <el-option v-for="item in bridgeOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
+            </el-select>
+            <el-button type="primary" @@click="handleSearch">搜索</el-button>
+            <el-button @@click="handleReset">重置</el-button>
+        </div>
+    </div>
+
+    <!-- 数据表格 -->
+    <el-table v-loading="loading" :data="tableData" border stripe style="width: 100%;">
+        <el-table-column label="序号" width="80" align="center">
+            <template #default="scope">{{ indexMethod(scope.$index) }}</template>
+        </el-table-column>
+        <el-table-column label="所属项目" min-width="200">
+            <template #default="scope">{{ scope.row.projectName || scope.row.ProjectName || '-' }}</template>
+        </el-table-column>
+        <el-table-column label="所属桥梁" min-width="200">
+            <template #default="scope">{{ scope.row.bridgeName || scope.row.BridgeName || '-' }}</template>
+        </el-table-column>
+        <el-table-column label="操作" width="150" align="center">
+            <template #default="scope">
+                <el-button type="primary" link @@click="handleLinearControl(scope.row)">线性管控</el-button>
+            </template>
+        </el-table-column>
+    </el-table>
+
+    <!-- 分页 -->
+    <div class="pagination-area">
+        <el-pagination background
+                       layout="total, sizes, prev, pager, next, jumper"
+                       :total="total"
+                       :page-size="pageSize"
+                       :current-page="pageIndex"
+                       :page-sizes="[10, 20, 50, 100]"
+        @@size-change="handleSizeChange"
+        @@current-change="handlePageChange" />
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/Biz/steel-beam-index.js" asp-append-version="true"></script>
+}

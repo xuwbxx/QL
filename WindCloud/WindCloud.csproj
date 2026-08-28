@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup Label="Globals">
+    <SccProjectName>SAK</SccProjectName>
+    <SccProvider>SAK</SccProvider>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="AppStart\" />
+    <Folder Include="Areas\BackManage\Data\" />
+    <Folder Include="Areas\BackManage\Models\" />
+    <Folder Include="Areas\Base\Data\" />
+    <Folder Include="Areas\Base\Models\" />
+    <Folder Include="Areas\Base\Views\" />
+    <Folder Include="Areas\CCSHJ\Data\" />
+    <Folder Include="Areas\CCSHJ\Models\" />
+    <Folder Include="Areas\Cloud\Data\" />
+    <Folder Include="Areas\Cloud\Models\" />
+    <Folder Include="Areas\Towing\Data\" />
+    <Folder Include="Areas\Towing\Models\" />
+    <Folder Include="Areas\Towing\Views\" />
+    <Folder Include="Areas\WindDoor\Data\" />
+    <Folder Include="Areas\WindDoor\Models\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.23" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Service\Service.csproj" />
+    <ProjectReference Include="..\Tool\Tool.csproj" />
+  </ItemGroup>
+
+</Project>

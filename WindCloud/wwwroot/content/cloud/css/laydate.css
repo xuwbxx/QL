@@ -1,0 +1,131 @@
+﻿/** 
+ 
+ @Name： laydate 核心样式
+ @Author：贤心
+ @Site：http://sentsin.com/layui/laydate
+**/
+html{_background-image:url(about:blank); _background-attachment:fixed;}
+
+.laydate-icon{background-image:url("../img/icon_rl.png")!important;background-position: 97% 50%!important;}
+
+.laydate_body .laydate_box, .laydate_body .laydate_box *{margin:0; padding:0;}
+.laydate-icon,
+.laydate-icon-default,
+.laydate-icon-danlan,
+.laydate-icon-dahong,
+.laydate-icon-molv{height:3.6vh; line-height:3.6vh;width: 100%; padding-left:0.6vw; border: 1px solid #0079fe; background-repeat:no-repeat; background-position:right center; background-color: rgba(8,11,50,0.6);outline:0;}
+/*
+.laydate-icon-default{ background-image:url(../skins/default/icon.png)}
+.laydate-icon-danlan{border:1px solid #B1D2EC; background-image:url(../skins/danlan/icon.png)}
+.laydate-icon-dahong{background-image:url(../skins/dahong/icon.png)}
+.laydate-icon-molv{background-image:url(../skins/molv/icon.png)}
+*/
+.laydate_body .laydate_box{width:12.6vw; font:1.2vh '\5B8B\4F53'; z-index:99999999; *margin:-2px 0 0 -2px;margin-top: 0.1vh; *overflow:hidden; _margin:0; _position:absolute!important; border:0px solid #B1D2EC;background-color:rgba(32,96,161,0.8); color:#fff;}
+.laydate_body .laydate_box li{list-style:none;}
+.laydate_body .laydate_box .laydate_void{cursor:text!important;}
+.laydate_body .laydate_box a,.laydate_body .laydate_box a:hover{text-decoration:none; blr:expression(this.onFocus=this.blur()); cursor:pointer;}
+.laydate_body .laydate_box a:hover{text-decoration:none;}
+.laydate_body .laydate_box cite, .laydate_body .laydate_box label{position:absolute; width:0; height:0; border-width:5px; border-style:dashed; border-color:transparent; overflow:hidden; cursor:pointer;}
+.laydate_body .laydate_box .laydate_yms, .laydate_body .laydate_box .laydate_time{display:none;}
+.laydate_body .laydate_box .laydate_show{display:block;background:rgba(0,0,0,0.76);}
+.laydate_body .laydate_box input{outline:0; font-size:1.4vh;}
+.laydate_body .laydate_top{position:relative; height:2.6vh; padding:5px; *width:100%; z-index:99;margin-bottom: 1vh;}
+.laydate_body .laydate_ym{position:relative; float:left; height:24px; cursor:pointer;}
+.laydate_body .laydate_ym input{float:left; height:24px; line-height:24px; text-align:center; border:none; cursor:pointer;}
+.laydate_body .laydate_ym .laydate_yms{position:absolute; left: -1px; top: 24px; height:181px;}
+.laydate_body .laydate_y{width:5.5vw; margin-right:6px;}
+.laydate_body .laydate_y input{width:3.31vw; margin-right:0px;}
+.laydate_body .laydate_y .laydate_yms{width:121px; text-align:center;}
+.laydate_body .laydate_y .laydate_yms a{position:relative; display:block; height:21px;}
+.laydate_body .laydate_y .laydate_yms ul{height:139px; padding:0; *overflow:hidden;}
+.laydate_body .laydate_y .laydate_yms ul li{float:left; width:60px; height:20px; line-height: 20px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;}
+.laydate_body .laydate_m{width:5.5vw;}
+.laydate_body .laydate_m .laydate_yms{width:99px; padding:0;}
+.laydate_body .laydate_m input{width:3.31vw; margin-right:0px;}
+.laydate_body .laydate_m .laydate_yms span{display:block; float:left; width:42px; margin: 5px 0 0 5px; line-height:24px; text-align:center; _display:inline;}
+.laydate_body .laydate_choose{display:block; float:left; position:relative; width:1vw; height:22px;}
+.laydate_body .laydate_choose cite, .laydate_body .laydate_tab cite{left:50%; top:50%;}
+.laydate_body .laydate_chtop cite{margin:-7px 0 0 -5px; border-bottom-style:solid;}
+.laydate_body .laydate_chdown cite, .laydate_body .laydate_ym label{top:50%; margin:-2px 0 0 -5px; border-top-style:solid;}
+.laydate_body .laydate_chprev cite{margin:-5px 0 0 -7px;}
+.laydate_body .laydate_chnext cite{margin:-5px 0 0 -2px;}
+.laydate_body .laydate_ym label{right:1.2vw;}
+.laydate_body .laydate_table{ width:12vw;; margin:0 5px; border-collapse:collapse; border-spacing:0px; }
+.laydate_body .laydate_table td{width:28px; height:19px; line-height:19px; text-align: center; cursor:pointer; font-size: 1.2vh;}
+.laydate_body .laydate_table thead{height:22px; line-height:22px;}
+.laydate_body .laydate_table thead th{font-weight:400; font-size:1.4vh;color: #fff; text-align:center;}
+.laydate_body .laydate_bottom{position:relative; height:32px; line-height:30px; padding:5px; font-size:1.2vh;}
+.laydate_body .laydate_bottom #laydate_hms{position: relative; z-index: 1; float:left; }
+.laydate_body .laydate_time{ position:absolute; left:5px; bottom: 26px;z-index: 999; width:129px; height:125px; *overflow:hidden;}
+.laydate_body .laydate_time .laydate_hmsno{ padding:5px 0 0 5px;}
+.laydate_body .laydate_time .laydate_hmsno span{display:block; float:left; width:24px; height:19px; line-height:19px; text-align:center; cursor:pointer; *margin-bottom:-5px;}
+.laydate_body .laydate_time1{width:228px; height:154px;}
+.laydate_body .laydate_time1 .laydate_hmsno{padding: 6px 0 0 8px;}
+.laydate_body .laydate_time1 .laydate_hmsno span{width:21px; height:20px; line-height:20px;}
+.laydate_body .laydate_msg{left:49px; bottom:67px; width:141px; height:auto; overflow: hidden;}
+.laydate_body .laydate_msg p{padding:5px 10px;}
+.laydate_body .laydate_bottom li{float:left; height:20px; line-height:20px; border-right:none; font-weight:900;}
+.laydate_body .laydate_bottom .laydate_sj{width:1.6vw; text-align:center; font-weight:400;}
+.laydate_body .laydate_bottom input{float:left; width:21px; height:20px; line-height:20px;text-align:center; cursor:pointer; font-size:1.4vh;font-weight:400;border: 0px solid #fff;}
+.laydate_body .laydate_bottom .laydte_hsmtex{height:20px; line-height:20px; text-align:center;}
+.laydate_body .laydate_bottom .laydte_hsmtex span{position:absolute; width:20px; top:0; right:0px; cursor:pointer;}
+.laydate_body .laydate_bottom .laydte_hsmtex span:hover{font-size:14px;}
+.laydate_body .laydate_bottom .laydate_btn{position:absolute; right:5px; top:5px;}
+.laydate_body .laydate_bottom .laydate_btn a{float:left; height:22px;line-height: 22px; padding:0 6px; _padding:0 5px;font-size: 1.2vh;}
+.laydate_body .laydate_bottom .laydate_v{position:absolute; left:10px; top:6px; font-family:Courier; z-index:0;}
+.laydate_body .laydate_box{}
+.laydate_body .laydate_ym{border:1px solid rgba(31,176,184,0.6);}
+.laydate_body .laydate_bottom #laydate_hms{border:1px solid rgba(31,176,184,0.6);}
+/*
+.laydate_body .laydate_ym .laydate_yms,
+.laydate_body .laydate_table,
+.laydate_body .laydate_table td,
+.laydate_body .laydate_time,
+
+*/
+
+/*
+.laydate_body .laydate_y .laydate_yms a,
+.laydate_body .laydate_choose,
+.laydate_body .laydate_table thead{}
+
+.laydate_body .laydate_box, 
+.laydate_body .laydate_ym .laydate_yms,
+.laydate_body .laydate_time{box-shadow: 2px 2px 5px rgba(0,0,0,.1);}
+*/
+.laydate_body .laydate_bottom .laydate_btn{border:1px solid rgba(31,176,184,0.6);}
+.laydate_body .laydate_box{}
+.laydate_body .laydate_box input{color:#fff;background: rgba(0,0,0,0);}
+.laydate_body .laydate_box .laydate_void{color:#BDD8EE!important;}
+.laydate_body .laydate_box .laydate_void:hover{background-color:#333!important}
+.laydate_body .laydate_box a{background:rgba(25,66,108,0.4);color: #fff;}
+.laydate_body .laydate_box a:hover{color:#fff;}
+.laydate_body .laydate_click{background-color:#e89121!important;}
+.laydate_body .laydate_top{border-top:1px solid rgba(31,176,184,0.6);;}
+/*.laydate_body .laydate_ym .laydate_yms{}}*/
+.laydate_body .laydate_y .laydate_yms a{border-bottom:1px solid rgba(31,176,184,0.6);}
+.laydate_body .laydate_y .laydate_yms .laydate_chdown{border-top:1px solid rgba(31,176,184,0.6);; border-bottom:none;}
+.laydate_body .laydate_y .laydate_yms ul li:hover, 
+.laydate_body .laydate_m .laydate_yms span:hover{color:#00e4ff!important;}
+.laydate_body .laydate_choose{border-left:1px solid rgba(31,176,184,0.6);;}
+.laydate_body .laydate_chprev{border-left:none; border-right:1px solid rgba(31,176,184,0.6);}
+.laydate_body .laydate_chtop cite{border-bottom-color:#fff;}
+.laydate_body .laydate_chdown cite, .laydate_body .laydate_ym label{border-top-color:#fff;}
+.laydate_body .laydate_chprev cite{border-right-style:solid; border-right-color:#fff;}
+.laydate_body .laydate_chnext {float: right;}
+.laydate_body .laydate_chnext cite{border-left-style:solid; border-left-color:#fff;}
+.laydate_body .laydate_table td{color:#fff;}
+.laydate_body .laydate_table .laydate_nothis{color:rgba(255,255,255,0.5);}
+.laydate_body .laydate_table thead{color:#163A58;}
+.laydate_body .laydate_bottom{border-bottom:1px solid rgba(31,176,184,0.6);}
+.laydate_body .laydate_bottom #laydate_hms{}
+.laydate_body .laydate_time{}
+.laydate_body .laydate_bottom .laydate_sj{border-right:1px solid rgba(31,176,184,0.6);}
+.laydate_body .laydate_bottom input{color: #fff;}
+.laydate_body .laydate_bottom .laydte_hsmtex{border-bottom:1px solid rgba(31,176,184,0.6);}
+.laydate_body .laydate_bottom .laydate_btn{border-right:0px solid #B1D2EC;}
+.laydate_body .laydate_bottom .laydate_v{color:#75AEDD}
+.laydate_body .laydate_bottom .laydate_btn a{ border-right:1px solid rgba(31,176,184,0.6);}
+
+
+

@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - QL.PreAssembled</title>
+    <!-- 本地样式，无外网依赖 -->
+    <link rel="stylesheet" href="/lib/element-plus/index.css" />
+
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/QL.PreAssembled.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    @RenderBody();
+
+    <!-- 加载顺序：Vue → ElementPlus主库 → 语言包 -->
+    <!-- 1. Vue 3 -->
+    <script src="~/lib/vue/vue.global.prod.js"></script>
+
+    <!-- 2. Element Plus 组件库 + 样式 -->
+    <link rel="stylesheet" href="~/lib/element-plus/index.css" />
+    <script src="~/lib/element-plus/index.full.min.js"></script>
+
+    <!-- 3. Element Plus 语言包（两个都保留，用于动态切换） -->
+    <script src="~/lib/element-plus/locale/zh-cn.min.js"></script>
+    <script src="~/lib/element-plus/locale/en.min.js"></script>
+
+    <!-- 4. Element Plus 图标库 -->
+    <script src="~/lib/element-plus-icons-vue/index.iife.min.js"></script>
+
+    <!-- 5. Vue I18n（业务文本国际化） -->
+    <script src="~/lib/vue-i18n/vue-i18n.global.prod.js"></script>
+
+    <!-- 6. Day.js + 插件 -->
+    <script src="~/lib/dayjs/dayjs.min.js"></script>
+    <script src="~/lib/dayjs/plugin/utc.min.js"></script>
+    <script src="~/lib/dayjs/plugin/timezone.min.js"></script>
+
+    <!-- 7. Axios -->
+    <script src="~/lib/axios/axios.min.js"></script>
+        
+    <!-- 非引入组件 -->
+    <!-- 1. 语言包（先加载各个语言文件，再加载 index.js） -->
+    <script src="~/js/common/i18n/zh-cn.js" asp-append-version="true"></script>
+    <script src="~/js/common/i18n/en.js" asp-append-version="true"></script>
+    <script src="~/js/common/i18n/index.js" asp-append-version="true"></script>
+
+    <!-- 2. 辅助函数 -->
+    <script src="~/js/common/i18n-utils.js" asp-append-version="true"></script>
+    <script src="~/js/httpUtils.js" asp-append-version="true"></script>
+    <script src="~/js/site-utils.js" asp-append-version="true"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

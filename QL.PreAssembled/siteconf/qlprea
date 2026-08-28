@@ -1,0 +1,58 @@
+######################
+# Web Site: QL.PreAssembled 
+########################################
+
+port=8666
+root=/ /var/www/qlprea
+hosts=*
+
+# User=www-data
+
+# AspNet.Workers=4       # Set the number of asp.net worker processes. Defauit is 1.
+# AspNet.MaxCpuTime=3600 # Cpu time used by each worker process
+# AspNet.MaxMemory=256   # Memory used by each working process
+
+addr=0.0.0.0
+reproxy=/ http://127.0.0.1:5001/
+# CheckQuery=false
+NoLog=false
+
+# NoFile=/index.aspx
+# Keep_Alive=false
+# UseGZIP=false
+
+# UseHttps=true
+# ssl.certificate=/website/conf/cert/scs1693807532724_Nginx/scs1693807532724_server.crt  # crt or pem
+# ssl.certificatekey=/website/conf/cert/scs1693807532724_Nginx/scs1693807532724_server.key
+# ssl.protocol=TLSv1 TLSv1.1 TLSv1.2 TLSv1.3
+# ssl.ciphers=ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4:!DH:!DHE#ECDHE-RSA-AES256-GCM-SHA384:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4:!DH:!DHE 
+# ResponseHandler.Add=Strict-Transport-Security:max-age=15768000  #for HSTS
+
+# DenyFrom=192.168.0.233, 192.168.1.*, 192.168.2.0/24
+# AllowFrom=192.168.*.*
+# DenyDirs=~/cgi, ~/upfiles
+# indexes=myindex.aspx
+
+# Deny asp ...
+# rewrite=^/.+?\.(asp|cgi|pl|sh|bash|dll)(\?.*|)$  /.deny->$1
+
+# Reproxy:
+# reproxy=/bbs/ 192.168.1.112:8080/bbs/, 192.168.1.113:8080/bbs/
+
+# Forwarding bound IPv4 address list:
+# forward_bind=192.168.254.251,192.168.254.252
+
+# host.Redirect=abc.com www.abc.com  301
+
+# ResponseHandler.Add=myKey:myValue
+ResponseHandler.Add=X-Frame-Options:SAMEORIGIN
+
+# Jexus php fastcgi address is '/var/run/jexus/phpsvr'
+#######################################################
+# fastcgi.add=php|socket:/var/run/jexus/phpsvr
+
+# php-fpm listen address is '127.0.0.1:9000'
+############################################
+# fastcgi.add=php|tcp:127.0.0.1:9000
+
+

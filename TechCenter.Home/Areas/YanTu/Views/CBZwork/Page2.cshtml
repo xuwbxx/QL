@@ -1,0 +1,155 @@
+﻿
+@{
+    ViewData["Title"] = "模型定义";
+    Layout = "~/Views/Shared/Tech/cbzLayout.cshtml";
+}
+
+<div class="main-content">
+	<div class="breadcrumbs" id="breadcrumbs">
+		<script type="text/javascript">
+			try{ace.settings.check('breadcrumbs' , 'fixed')}catch(e){}
+		</script>
+		<ul class="breadcrumb">
+			<li>
+				<!--								<i class="icon-home home-icon"></i>-->
+				<span>模型定义</span>
+			</li>
+		</ul>
+	</div>
+
+	<div class="page-content">
+		<div class="row">
+
+			<div class="col-xs-12 height_">
+				<div>问题名称：<span>桩靴插拔作业风险评估</span></div>
+				<div>问题层数：<select class="select-cs"><option>2</option></select></div>
+			</div>
+
+			<div class="col-xs-5">
+				<table class="table table-bordered center">
+					<thead>
+						<tr>
+							<th>层</th>
+							<th>编号</th>
+							<th>项目名称</th>
+							<th>上层编号</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>1</td>
+							<td>1001</td>
+							<td>地质情况</td>
+							<td>0</td>
+						</tr>
+						<tr>
+							<td>1</td>
+							<td>1002</td>
+							<td>平台船情况</td>
+							<td>0</td>
+						</tr>
+						<tr>
+							<td>1</td>
+							<td>1003</td>
+							<td>作业情况</td>
+							<td>0</td>
+						</tr>
+						<tr>
+							<td>1</td>
+							<td>1004</td>
+							<td>施工荷载情况</td>
+							<td>0</td>
+						</tr>
+						<tr>
+							<td>2</td>
+							<td>2001</td>
+							<td>表层土性</td>
+							<td>1001</td>
+						</tr>
+						<tr>
+							<td>2</td>
+							<td>2002</td>
+							<td>破坏模式</td>
+							<td>1001</td>
+						</tr>
+						<tr>
+							<td>2</td>
+							<td>2003</td>
+							<td>土体性质指标</td>
+							<td>1001</td>
+						</tr>
+						<tr>
+							<td>2</td>
+							<td>2004</td>
+							<td>经验参数</td>
+							<td>1001</td>
+						</tr>
+						<tr>
+							<td>2</td>
+							<td>2005</td>
+							<td>桩腿类型</td>
+							<td>1002</td>
+						</tr>
+						<tr>
+							<td>2</td>
+							<td>2006</td>
+							<td>桩靴型式</td>
+							<td>1002</td>
+						</tr>
+						<tr>
+							<td>2</td>
+							<td>2007</td>
+							<td>接地比压</td>
+							<td>1002</td>
+						</tr>
+						<tr>
+							<td>2</td>
+							<td>2008</td>
+							<td>冲桩减阻</td>
+							<td>1002</td>
+						</tr>
+						<tr>
+							<td>2</td>
+							<td>2009</td>
+							<td>插拔桩作业</td>
+							<td>1003</td>
+						</tr>
+						<tr>
+							<td>2</td>
+							<td>2010</td>
+							<td>保压作业</td>
+							<td>1003</td>
+						</tr>
+						<tr>
+							<td>2</td>
+							<td>2011</td>
+							<td>站桩作业</td>
+							<td>1003</td>
+						</tr>
+						<tr>
+							<td>2</td>
+							<td>2012</td>
+							<td>吊重载荷</td>
+							<td>1004</td>
+						</tr>
+						<tr>
+							<td>2</td>
+							<td>2013</td>
+							<td>极端工况</td>
+							<td>1004</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="col-xs-7 text-center"><div style="padding: 1.4vw 1vw;border: 1px solid #ccc;"><img src="/Web/cbz/assets/images/img01.png"></div></div>
+
+			<div class="col-xs-12">
+				<div>项目编号：中间层的每个项目应设定唯一编号，用于设定上下层关系</div>
+				<div>上级编号：当前项目的上一级项目的编号，第一层项目的上级编号=0</div>
+			</div>
+
+		</div>
+	</div>
+</div>
+

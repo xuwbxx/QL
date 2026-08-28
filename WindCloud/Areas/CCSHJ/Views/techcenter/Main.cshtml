@@ -1,0 +1,57 @@
+﻿
+@{
+    ViewBag.Title = "技术中心平台集成";
+    Layout = "~/Views/Shared/BlankLayout.cshtml";
+}
+
+<input type="hidden" id="hid_PostToken" value="@ViewData["PostToken"].ToString()" />
+
+<input type="button" value="风电云服务平台" onclick="OpenPlat(1);">
+
+<input type="button" value="环境配方库平台" onclick="OpenPlat(2);">
+
+
+<script>
+    $(document).ready(function () {
+
+        ParamInit();
+
+    })
+
+    var Param = {};
+    var ParamInit = function () {
+        Param.PageIndex = 1;
+        Param.PageSize = 10;
+        Param.TotalPage = 0;
+        Param.TotalCount = 0;
+
+    }
+
+    var OpenPlat = function (PlatID) {
+
+        Param.PlatID = PlatID;
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('GetUrl', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+
+                    if (data.Success) {
+
+                        var Url = data.Data;
+
+                        window.open(Url, '_blank')
+
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+                //Pagination();
+            });
+
+    }
+
+</script>
+

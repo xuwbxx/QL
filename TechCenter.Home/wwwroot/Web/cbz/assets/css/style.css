@@ -1,0 +1,22 @@
+@charset "utf-8";
+/* CSS Document */
+body{font-size: 1.4vh;}
+.navbar{background: rgba(0,0,0,0.25);min-height: 6.6vh;padding-top: 1vh;}
+th{text-align: center;}
+.height_{}
+.height_  div{margin-bottom: 1.5vh;}
+.height_  div span{display: inline-block;padding: 0.5vw 0.5vw 0.5vw 0;width: 88%;border-bottom:1px solid rgba(0,0,0,0.1);}
+small {font-weight: bold;}
+.select-cs{height: 3.2vh;line-height: 3.2vh;width: 8vw;}
+.breadcrumb li span{font-weight: bold;}
+.header_img{padding-top: 0.95vh;position: absolute;left: 12vw;}
+.header_img img {height: 1.5vw;margin-right: 0.5vw;}
+.top_header{height: 3vh;line-height: 3vh;background: #f5f5f5;padding-left: 0.5vw;}
+.top_header span{margin-right: 1vw;}
+input[type="radio"], input[type="checkbox"]{margin: 0;}
+.table_ts{background: #f5f5f5}
+.table_ts thead tr th:first-child{background: #fff;}
+.table_ts tbody tr td:first-child{background: #fff;}
+select{display: block;}
+.img_fc_box{text-align: center;}
+.img_fc_box img{width: 65vw;}

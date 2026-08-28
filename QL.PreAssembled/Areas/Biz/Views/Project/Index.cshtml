@@ -1,0 +1,180 @@
+﻿@{
+    Layout = "_LayoutModelEP";
+    ViewData["Title"] = "项目管理";
+}
+
+@section Styles {
+    <style>
+        .project-container {
+            padding: 20px;
+            background: #fff;
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .search-area {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+    </style>
+}
+
+<div id="app" class="project-container">
+    <!-- 顶部操作栏 -->
+    <div class="project-header">
+        <div class="search-area">
+            <el-input v-model="searchName" placeholder="请输入项目名称" clearable style="width: 220px;" @@keyup.enter="handleSearch"></el-input>
+            <el-select v-model="searchProgressStatus" placeholder="项目状态" clearable style="width: 140px;">
+                <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+            </el-select>
+            <el-button type="primary" @@click="handleSearch">查询</el-button>
+            <el-button @@click="handleReset">重置</el-button>
+        </div>
+        <el-button type="success" @@click="openAddDialog">新增项目</el-button>
+    </div>
+
+    <!-- 数据表格（树形） -->
+    <el-table v-loading="loading"
+              :data="tableData"
+              row-key="rowKey"
+              :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
+              border stripe
+              default-expand-all
+              style="width: 100%;">
+
+        <el-table-column prop="name" label="项目名称" min-width="200" show-overflow-tooltip></el-table-column>
+
+        <el-table-column label="项目状态" width="100" align="center">
+            <template #default="scope">
+                <el-tag v-if="scope.row.isProject" :type="getStatusTagType(scope.row.progressStatus)">{{ getStatusLabel(scope.row.progressStatus) }}</el-tag>
+            </template>
+        </el-table-column>
+
+        <el-table-column label="梁类型" width="100" align="center">
+            <template #default="scope">
+                <el-tag v-if="scope.row.isBridge" :type="getBeamTypeTagType(scope.row.beamType)">{{ getBeamTypeLabel(scope.row.beamType) }}</el-tag>
+            </template>
+        </el-table-column>
+
+        <el-table-column label="项目负责人" width="120" align="center">
+            <template #default="scope">
+                {{ scope.row.isProject ? scope.row.managerName : '' }}
+            </template>
+        </el-table-column>
+
+        <el-table-column label="操作" width="360" align="center" fixed="right">
+            <template #default="scope">
+                <!-- 项目行操作按钮 -->
+                <template v-if="scope.row.isProject">
+                    <el-button type="success" link @@click="openAddSubDialog(scope.row)">新增子项</el-button>
+                    <el-button type="warning" link @@click="handleAuthorize(scope.row)">授权</el-button>
+                    <el-button type="primary" link @@click="openEditDialog(scope.row)">编辑</el-button>
+                    <el-button type="danger" link @@click="handleDelete(scope.row)">删除</el-button>
+                </template>
+                <!-- 桥梁子项行操作按钮 -->
+                <template v-else-if="scope.row.isBridge">
+                    <el-button v-if="scope.row.beamType === 1" type="success" link @@click="openAddCastDialog(scope.row)">新增子项</el-button>
+                    <el-button type="primary" link @@click="openEditSubDialog(scope.row)">编辑</el-button>
+                    <el-button type="danger" link @@click="handleDeleteSub(scope.row)">删除</el-button>
+                </template>
+                <!-- 浇筑分组行操作按钮 -->
+                <template v-else-if="scope.row.isCastingGroup">
+                    <el-button type="primary" link @@click="openEditCastDialog(scope.row)">编辑</el-button>
+                    <el-button type="danger" link @@click="handleDeleteCast(scope.row)">删除</el-button>
+                </template>
+            </template>
+        </el-table-column>
+    </el-table>
+
+    <!-- 分页 -->
+    <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+        <el-pagination background
+                       layout="total, sizes, prev, pager, next, jumper"
+                       :total="total"
+                       :page-size="pageSize"
+                       :current-page="currentPage"
+                       :page-sizes="[10, 20, 50, 100]"
+            @@size-change="handleSizeChange"
+            @@current-change="handlePageChange">
+        </el-pagination>
+    </div>
+
+    <!-- 项目 新增/编辑 弹窗 -->
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="520px" :close-on-click-modal="false">
+        <el-form :model="formData" label-width="100px" status-icon>
+            <el-form-item label="项目名称" required>
+                <el-input v-model="formData.name" placeholder="请输入项目名称"></el-input>
+            </el-form-item>
+            <el-form-item label="项目状态" required>
+                <el-select v-model="formData.progressStatus" placeholder="请选择项目状态" style="width: 100%;">
+                    <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="项目负责人" required>
+                <el-select v-model="formData.managerId" placeholder="请选择项目负责人" style="width: 100%;" filterable @@change="handleManagerChange">
+                    <el-option v-for="item in managerOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                </el-select>
+            </el-form-item>
+        </el-form>
+        <template #footer>
+            <span class="dialog-footer">
+                <el-button @@click="dialogVisible = false">取 消</el-button>
+                <el-button type="primary" :loading="submitting" @@click="saveData">确 定</el-button>
+            </span>
+        </template>
+    </el-dialog>
+
+    <!-- 子项（桥梁） 新增/编辑 弹窗 -->
+    <el-dialog v-model="subDialogVisible" :title="subDialogTitle" width="520px" :close-on-click-modal="false">
+        <el-form :model="subFormData" label-width="100px" status-icon>
+            <el-form-item label="项目名称">
+                <el-input v-model="subFormData.projName" disabled></el-input>
+            </el-form-item>
+            <el-form-item label="桥梁名称" required>
+                <el-input v-model="subFormData.name" placeholder="请输入桥梁名称"></el-input>
+            </el-form-item>
+            <el-form-item label="梁类型" required>
+                <el-select v-model="subFormData.beamType" placeholder="请选择梁类型" style="width: 100%;">
+                    <el-option v-for="item in beamTypeOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                </el-select>
+            </el-form-item>
+        </el-form>
+        <template #footer>
+            <span class="dialog-footer">
+                <el-button @@click="subDialogVisible = false">取 消</el-button>
+                <el-button type="primary" :loading="subSubmitting" @@click="saveSubItem">确 定</el-button>
+            </span>
+        </template>
+    </el-dialog>
+
+    <!-- 子项（浇筑分组） 新增/编辑 弹窗 -->
+    <el-dialog v-model="castDialogVisible" :title="castDialogTitle" width="520px" :close-on-click-modal="false">
+        <el-form :model="castFormData" label-width="100px" status-icon>
+            <el-form-item label="项目名称">
+                <el-input v-model="castFormData.projName" disabled></el-input>
+            </el-form-item>
+            <el-form-item label="桥梁名称">
+                <el-input v-model="castFormData.bridgeName" disabled></el-input>
+            </el-form-item>
+            <el-form-item label="浇筑分组" required>
+                <el-input v-model="castFormData.name" placeholder="请输入浇筑分组名称"></el-input>
+            </el-form-item>
+        </el-form>
+        <template #footer>
+            <span class="dialog-footer">
+                <el-button @@click="castDialogVisible = false">取 消</el-button>
+                <el-button type="primary" :loading="castSubmitting" @@click="saveCastItem">确 定</el-button>
+            </span>
+        </template>
+    </el-dialog>
+</div>
+
+@section Scripts {
+    <script src="~/js/Biz/project-index.js"></script>
+}

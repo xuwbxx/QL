@@ -1,0 +1,291 @@
+﻿
+@{
+	ViewData["Title"] = "技术中心首页";
+	Layout = "~/Views/Shared/Tech/HomeLayout.cshtml";
+}
+@{
+	var Departs = Model as List<Model.TechCenter.TC_DepartInfo>;
+}
+
+<script>
+	var departDataList = @Html.Raw(Json.Serialize(Departs));
+</script>
+
+<div class="top">
+	<div class="top_wrapper clearfix">
+
+		<div class="top_title">
+			<img src="/Web/Home/img/login-header-pm.jpg">@* <span>中交第三航务工程局有限公司</span> *@
+		</div>
+		<div class="top_information">
+			<ul class="clearfix">
+				<li id="li_DepartHtml">@ViewData["Depart"].ToString()</li>
+				<li><img src="/Web/Home/img/icon_user.png">&nbsp;&nbsp;<a id="a_UserNameHtml">@ViewData["RealName"].ToString()</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+<!--	   header end-->
+
+<div class="index_wapper">
+	<div class="banner">
+		<div class="banner_title">技术中心集成平台</div>
+		<ul id="ul_Depart">
+			<li data-ID="0">
+				<span><img src="/Web/Home/img/icon_jszx.png"></span>
+				<span>技术中心</span>
+			</li>
+			<li data-ID="1">
+				<span><img src="/Web/Home/img/icon_zongbu.png"></span>
+				<span>总部</span>
+			</li>
+			<li data-ID="4">
+				<span><img src="/Web/Home/img/icon_sygc.png"></span>
+				<span>水运工程</span>
+			</li>
+			<li data-ID="5">
+				<span><img src="/Web/Home/img/icon_zbzdh.png"></span>
+				<span>装备自动化</span>
+			</li>
+			<li data-ID="6">
+				<span><img src="/Web/Home/img/icon_ytsd.png"></span>
+				<span>岩土隧道</span>
+			</li>
+			<li data-ID="7">
+				<span><img src="/Web/Home/img/icon_hygc.png"></span>
+				<span>海洋工程</span>
+			</li>
+			<li data-ID="8">
+				<span><img src="/Web/Home/img/icon_BIM.png"></span>
+				<span>BIM中心</span>
+			</li>
+			<li data-ID="9">
+				<span><img src="/Web/Home/img/icon_qlgc.png"></span>
+				<span>桥梁工程</span>
+			</li>
+			<li data-ID="10">
+				<span><img src="/Web/Home/img/icon_jsfa.png"></span>
+				<span>技术方案</span>
+			</li>
+			<li data-ID="11">
+				<span><img src="/Web/Home/img/icon_zhb.png"></span>
+				<span>综合部</span>
+			</li>
+			<li data-ID="12">
+				<span><img src="/Web/Home/img/icon_hjgc.png"></span>
+				<span>环境工程</span>
+			</li>
+			<li data-ID="13">
+				<span><img src="/Web/Home/img/icon_fdyfzx.png"></span>
+				<span>风电研发中心</span>
+			</li>
+		</ul>
+	</div>
+	<div class="clearfix mar_t08">
+		<div class="col-xs-7 pl_0">
+			<div class="unify_box">
+				<div class="content_title">
+					<span></span>系统名称
+				</div>
+
+				<div class="mod" id="div_softwareHtml">
+
+
+					@* <div class="mod_con">
+						<div><img src="/Web/Home/img/img_zjs.png" class="img-rounded img-thumbnail"></div>
+						<div>土壤修复剂工程应用平台</div>
+						<div><button class="button_color01">进入</button><button class="button_color02">详情</button></div>
+					</div>
+					<div class="mod_con">
+						<div><img src="/Web/Home/img/img_ql.jpg" class="img-rounded img-thumbnail"></div>
+						<div>桥梁数字孪生系统</div>
+						<div><button class="button_color01">进入</button><button class="button_color02">详情</button></div>
+					</div>
+					<div class="mod_con">
+						<div><img src="/Web/Home/img/img_ypt.png" class="img-rounded img-thumbnail"></div>
+						<div>风电云服务平台</div>
+						<div><button class="button_color01">进入</button><button class="button_color02">详情</button></div>
+					</div>
+					<div class="mod_con">
+						<div><img src="/Web/Home/img/img_sjk.png" class="img-rounded img-thumbnail"></div>
+						<div>填海与深基坑监测平台</div>
+						<div><button class="button_color01">进入</button><button class="button_color02">详情</button></div>
+					</div>
+					<div class="mod_con">
+						<div><img src="/Web/Home/img/img_qljc.png" class="img-rounded img-thumbnail"></div>
+						<div>桥梁施工监测平台</div>
+						<div><button class="button_color01">进入</button><button class="button_color02">详情</button></div>
+					</div>
+					 *@
+				</div>
+
+			</div>
+		</div>
+		<div class="col-xs-5 p_0">
+			<div class="unify_box">
+				<div class="content_title">
+					<span></span>平台信息
+				</div>
+
+				<div class="detail_box">
+					<div class="detail_title" id="div_SoftwareName">填海与深基坑监测平台</div>
+					<p>
+						<span>软件简介：</span>
+						<span id="span_SoftwareInfo">
+							基坑与填海工程沉降监测数字化系统是一套高效、灵活、专业的监测数据管理平台，平台以监测数据为基础，依托数据处理与数值分析建立沉位移的计算模型，预测后续施工的变形值，提前预警，以此实现基坑与填海工程动态施工。平台功能包含多项目管理、在线监测、监测分析、模型上传与可视化、分区管理、基坑监测数据、监测趋势分析、监测预警中心等。本系统面向三航局技术中心与项目部管理人员使用。
+						</span>
+					</p>
+					<p>
+						<span>软件负责人：</span>
+						<span id="span_Manager">
+							谢锦波、陆骁尤
+						</span>
+					</p>
+					<p>
+						<span>推出时间：</span>
+						<span id="span_UseTime">
+							2023年5月
+						</span>
+					</p>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+	<div class="modal-dialog">
+		<div class="modal-content">
+
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					&times;
+				</button>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+
+<script>
+	$(document).ready(function() {
+
+		$('#myModal').modal('show'); // 页面加载时自动显示模态框
+
+		DataInit();
+
+	});
+
+	var DataInit = function(){
+	
+		var softwareHtml = '';
+		var firstSoftwareID = 0;
+		$(departDataList).each(function(index, dom){
+
+			$(dom.Softwares).each(function(index2, dom2){
+
+					if(firstSoftwareID == 0)
+					{
+						firstSoftwareID = dom2.SoftwareID;
+					}
+					softwareHtml += '<div class="mod_con"><div><img src="' + dom2.Img + '" class="img-rounded img-thumbnail"></div><div>' + dom2.SoftwareName + '</div><div><button class="button_color01" onclick="PlatRedirect(' + dom2.SoftwareID + ')">进入</button><button class="button_color02" onclick="PlatInfo(' + dom2.SoftwareID + ')">详情</button></div></div>';
+
+				});
+
+		});
+		$('#div_softwareHtml').html(softwareHtml);
+		PlatInfo(firstSoftwareID);
+
+	}
+
+	$('#ul_Depart').children('li').click(function(dom){
+	
+		var DepartID = $(this).attr('data-ID');
+		//alert(DepartID);
+		ChooseDepart(DepartID);
+	});
+
+	var ChooseDepart = function(DepartID){
+	
+		if(DepartID == null || DepartID == '')
+		{
+			return;
+		}
+		
+		var softwareHtml = '';
+		var firstSoftwareID = 0;
+		$(departDataList).each(function(index, dom){
+		
+			if(dom.DepartID == DepartID || DepartID == 0)
+			{
+				$(dom.Softwares).each(function(index2, dom2){
+				
+					if(firstSoftwareID == 0)
+					{
+						firstSoftwareID = dom2.SoftwareID;
+					}
+					softwareHtml += '<div class="mod_con"><div><img src="' + dom2.Img + '" class="img-rounded img-thumbnail"></div><div>' + dom2.SoftwareName + '</div><div><button class="button_color01" onclick="PlatRedirect(' + dom2.SoftwareID + ')">进入</button><button class="button_color02" onclick="PlatInfo(' + dom2.SoftwareID + ')">详情</button></div></div>';
+
+				});
+			}
+
+		});
+		$('#div_softwareHtml').html(softwareHtml);
+		PlatInfo(firstSoftwareID);
+	}
+
+	var PlatInfo = function(SoftwareID){
+	
+		$('#div_SoftwareName').html('');
+		$('#span_SoftwareInfo').html('');
+		$('#span_Manager').html('');
+		$('#span_UseTime').html('');
+
+		if(SoftwareID == null || SoftwareID == '' || SoftwareID == 0)
+		{
+			return;
+		}
+
+		
+		$(departDataList).each(function(index, dom){
+		
+			let IsBreak = false;
+			$(dom.Softwares).each(function(index2, dom2){
+			
+				if(dom2.SoftwareID == SoftwareID)
+				{
+					$('#div_SoftwareName').html(dom2.SoftwareName);
+					$('#span_SoftwareInfo').html(dom2.Info);
+					$('#span_Manager').html(dom2.Manager);
+					$('#span_UseTime').html(dom2.UseTime);
+					IsBreak = true;
+					return false;
+				}
+
+			});
+			if(IsBreak) 
+			{
+				return false;
+			}
+
+		});
+
+	}
+
+	var PlatRedirect = function(SoftwareID){
+	
+		if(SoftwareID == null || SoftwareID == '' || SoftwareID == 0)
+		{
+			return;
+		}
+
+		//打开新页面
+		window.open('/Tech/Home/PlatRedirect?SoftwareID=' + SoftwareID, '_blank');
+
+	}
+
+
+</script>

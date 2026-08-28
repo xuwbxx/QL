@@ -1,0 +1,157 @@
+﻿@{
+    Layout = "_LayoutEP";
+    ViewData["Title"] = "Home Page";
+}
+@section Styles {
+    <link href="~/css/Home/home-index.css" rel="stylesheet" />
+}
+<div id="app">
+    <el-container>
+        <!-- 左侧侧边栏 -->
+        <el-aside :class="{ 'aside-collapse': isCollapsed }" :width="isCollapsed ? '64px' : '240px'">
+            <div class="sidebar-logo">
+                <div class="logo-line2">节段拼装梁预制<span>安装</span></div>
+                <div class="logo-text">线性控制平台</div>
+            </div>
+
+            <div class="sidebar-menu-wrapper">
+                <el-menu class="sidebar-menu"
+                         :default-active="activeMenuId"
+                         :collapse="isCollapsed"
+                         :collapse-transition="false"
+                         v-on:select="handleMenuSelect"
+                         router="false"
+                         background-color="#304156"
+                         text-color="#bfcbd9"
+                         active-text-color="#fff"
+                         unique-opened>
+                    <template v-for="item in menuTree" :key="item.id">
+                        <!-- 一级目录菜单 -->
+                        <el-sub-menu v-if="item.menuType !== 'button' && hasChildren(item)" :index="String(item.id)">
+                            <template #title>
+                                <el-icon v-if="item.icon">
+                                    <component :is="$formatIconName(item.icon)" />
+                                </el-icon>
+                                <span>{{ $t(`dyn.menu.menu_${item.id}`) }}</span>
+                            </template>
+                            <template v-for="child in item.children" :key="child.id">
+                                <el-sub-menu v-if="child.menuType !== 'button' && hasChildren(child)" :index="String(child.id)">
+                                    <template #title>
+                                        <el-icon v-if="child.icon">
+                                            <component :is="iconMap[$formatIconName(child.icon)]" />
+                                        </el-icon>
+                                        <span>{{ $t(`dyn.menu.menu_${child.id}`) }}</span>
+                                    </template>
+                                    <el-menu-item v-for="grandChild in child.children"
+                                                  :key="grandChild.id"
+                                                  :index="String(grandChild.id)">
+                                        <template v-if="grandChild.menuType !== 'button'">
+                                            <el-icon v-if="grandChild.icon">
+                                                <component :is="iconMap[$formatIconName(grandChild.icon)]" />
+                                            </el-icon>
+                                            <span>{{ $t(`dyn.menu.menu_${grandChild.id}`) }}</span>
+                                        </template>
+                                    </el-menu-item>
+                                </el-sub-menu>
+                                <el-menu-item v-else-if="child.menuType !== 'button'" :index="String(child.id)">
+                                    <el-icon v-if="child.icon">
+                                        <component :is="iconMap[$formatIconName(child.icon)]" />
+                                    </el-icon>
+                                    <span>{{ $t(`dyn.menu.menu_${child.id}`) }}</span>
+                                </el-menu-item>
+                            </template>
+                        </el-sub-menu>
+                        <!-- 一级独立菜单 -->
+                        <el-menu-item v-else-if="item.menuType !== 'button'" :index="String(item.id)">
+                            <el-icon v-if="item.icon">
+                                <component :is="$formatIconName(item.icon)" />
+                            </el-icon>
+                            <span>{{ $t(`dyn.menu.menu_${item.id}`) }}</span>
+                        </el-menu-item>
+                    </template>
+                </div>
+                <!-- 收起/展开按钮 -->
+                <div class="collapse-btn" v-on:click="toggleCollapse">
+                    <el-icon>
+                        <component :is="isCollapsed ? iconMap['Expand'] : iconMap['Fold']" />
+                    </el-icon>
+                </div>
+            </el-aside>
+
+            <el-container>
+                <!-- 顶部header -->
+                <el-header class="header-bar">
+                    <div></div>
+                    <div class="header-right-group" style="display: flex;align-items: center;gap: 20px;">
+                        <span>{{$t('common.selectlang')}}</span>
+                        <el-button @@click ="switchGlobalLang(currentLang === 'zh-cn' ? 'en' : 'zh-cn')">
+                            <span v-text="currentLang === 'zh-cn' ? 'switch to English' : '切换中文'"></span>
+                        </el-button>
+                        <div class="user-info">
+                            <span>{{ $t('app.welcome') }} {{ userInfo.userName }}</span>
+                            <button class="logout-btn" @@click ="logout">{{ $t('app.logout') }}</button>
+                        </div>
+                    </div>
+                </el-header>
+
+                <!-- 主内容Tab区域 -->
+                <el-main>
+                    <el-tabs v-model="activeTabKey" type="card" @@tab-remove ="handleTabRemove">
+                        <!-- 固定首页Tab：不可关闭，内置页面，无iframe -->
+                        <el-tab-pane name="home" :closable="false" :label="$t('common.homeTab')">
+                            <!-- 首页原生内容区域，自定义看板、统计、快捷入口 -->
+                            <div class="home-dashboard">
+                                <h2>{{ $t('common.welcomeTitle') }}</h2>
+                                <p>{{ $t('common.homeDesc') }}</p>
+                                <!-- 可自行添加统计卡片、快捷功能按钮、项目概览等 -->
+                                @* <el-row :gutter="20" style="margin-top:20px;">
+                                    <el-col :span="6">
+                                        <el-card shadow="hover">
+                                            <h3>项目总数</h3>
+                                            <p style="font-size:24px;color:#409EFF;">0</p>
+                                        </el-card>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-card shadow="hover">
+                                            <h3>在建节段</h3>
+                                            <p style="font-size:24px;color:#67C23A;">0</p>
+                                        </el-card>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-card shadow="hover">
+                                            <h3>今日浇筑</h3>
+                                            <p style="font-size:24px;color:#E6A23C;">0</p>
+                                        </el-card>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-card shadow="hover">
+                                            <h3>异常任务</h3>
+                                            <p style="font-size:24px;color:#F56C6C;">0</p>
+                                        </el-card>
+                                    </el-col>
+                                </el-row> *@
+                            </div>
+                        </el-tab-pane>
+
+                        <!-- 动态菜单打开的iframe标签页 -->
+                        <el-tab-pane v-for="tab in tabList"
+                                     :key="tab.action"
+                                     :name="tab.action"
+                                     :closable="true">
+                            <template #label>
+                                <span v-if="tab.id != null">
+                                    {{ $t(`dyn.menu.menu_${tab.id}`) }}
+                                </span>
+                                <span v-else>{{ tab.title }}</span>
+                            </template>
+                            <iframe class="iframe-container" :src="tab.action"></iframe>
+                        </el-tab-pane>
+                    </el-tabs>
+                </el-main>
+            </el-container>
+        </el-container>
+    </div>
+
+    @section Scripts {
+        <script src="~/js/Home/home-index.js" asp-append-version="true"></script>
+    }

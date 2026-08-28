@@ -1,0 +1,34 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="~/Content/WindRedirect/img/title-logo.ico" type="image/x-icon" />
+    <link rel="stylesheet" type="text/css" href="~/Content/WindRedirect/css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="~/Content/WindRedirect/css/style.css?t=@DateTime.Now.Ticks" />
+
+</head>
+<body>
+
+    @*@Html.Action("MainBoard", "Main", new { area = "WindDoor" })*@
+
+    <header class="header_box">
+        <span><img src="~/Content/WindRedirect/img/logo.png">@ViewData["Title"].ToString()</span>
+
+        <div class="fzr_user">
+            @*<span>板块负责人：杜宇</span>*@
+        </div>
+        <div class="login_user">
+            <img src="~/Content/WindRedirect/img/icon_user.png"><span>@ViewData["Name"].ToString()</span>
+        </div>
+    </header>
+
+    @RenderBody()
+
+</body>
+</html>

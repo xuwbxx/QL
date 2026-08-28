@@ -1,0 +1,257 @@
+﻿@{
+    Layout = "_LayoutModelEP";
+    ViewData["Title"] = "系统菜单管理";
+}
+
+@section Styles {
+    <style>
+        .menu-container {
+            padding: 20px;
+            background: #fff;
+        }
+
+        .menu-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .search-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            margin-right: 8px;
+        }
+        /* 树形表格缩进样式 */
+        .el-table__row .cell {
+            display: flex;
+            align-items: center;
+        }
+
+        .tree-icon {
+            margin-right: 5px;
+            color: #909399;
+            cursor: pointer;
+        }
+
+            .tree-icon.is-expanded {
+                transform: rotate(90deg);
+            }
+
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 10px;
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        .icon-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 4px;
+            border: 1px solid #e4e7ed;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+            .icon-item:hover {
+                background: #f5f7fa;
+                border-color: #409eff;
+            }
+
+        .icon-name {
+            font-size: 11px;
+            color: #606266;
+            margin-top: 4px;
+            word-break: break-all;
+            text-align: center;
+        }
+    </style>
+}
+
+<div id="app" class="menu-container" v-cloak>
+    <!-- 顶部操作栏 -->
+    <div class="menu-header">
+        <div class="search-area">
+            <el-input v-model="searchKeyword"
+                      :placeholder="$t('sys.menu.searchKeywordPlaceholder')"
+                      clearable
+                      style="width: 200px;"></el-input>
+            <el-button type="primary" v-on:click="handleSearch">{{$t('common.search')}}</el-button>
+        </div>
+        <el-button type="success" v-on:click="openAddDialog">{{$t('sys.menu.newMenu')}}</el-button>
+    </div>
+
+    <!-- 树形数据表格 -->
+    <el-table :data="tableData"
+              style="width: 100%"
+              row-key="id"
+              default-expand-all
+              :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
+              border
+              stripe>
+        <el-table-column prop="name" :label="$t('sys.menu.tableName')" width="200"></el-table-column>
+        <el-table-column prop="menuType" :label="$t('sys.menu.tableType')" width="100">
+            <template #default="scope">
+                <el-tag v-if="scope.row.menuType === 'directory'" type="warning">
+                    {{ $t('sys.menu.typeDirectory') }}
+                </el-tag>
+                <el-tag v-else-if="scope.row.menuType === 'menu'" type="primary">
+                    {{ $t('sys.menu.typeMenu') }}
+                </el-tag>
+                <el-tag v-else type="info">
+                    {{ $t('sys.menu.typeButton') }}
+                </el-tag>
+            </template>
+        </el-table-column>
+        <el-table-column prop="icon" :label="$t('sys.menu.tableIcon')" width="100">
+            <template #default="scope">
+                <el-icon v-if="scope.row.icon">
+                    <component :is="$formatIconName(scope.row.icon)" />
+                </el-icon>
+            </template>
+        </el-table-column>
+        <el-table-column prop="action" :label="$t('sys.menu.tableRoute')" min-width="200" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="sort" :label="$t('sys.menu.tableSort')" align="center" width="80"></el-table-column>
+
+        <el-table-column :label="$t('sys.menu.tableOperate')" width="180" align="center" fixed="right">
+            <template #default="scope">
+                <el-button size="small" link type="primary" v-on:click="openEditDialog(scope.row)">
+                    {{ $t('common.edit') }}
+                </el-button>
+                <el-button size="small" link type="danger" v-on:click="handleDelete(scope.row)">
+                    {{ $t('common.delete') }}
+                </el-button>
+            </template>
+        </el-table-column>
+    </el-table>
+
+    @*     <!-- 分页 -->
+    <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+        <el-pagination background
+                       layout="total, prev, pager, next"
+                       :total="totalCount"
+                       :page-size="pageSize"
+                       :current-page="currentPage"
+                       v-on:current-change="handlePageChange">
+        </el-pagination>
+    </div> *@
+
+    <!-- 新增/编辑弹窗 -->
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px">
+        <el-form :model="formData" label-width="120px" status-icon :rules="formRules">
+            <!-- 1. 父级菜单 -->
+            <el-form-item :label="$t('sys.menu.formParentMenu')">
+                <el-tree-select v-model="formData.parentID"
+                                :data="tableData"
+                                :props="{ label: 'name', value: 'id', children: 'children' }"
+                                :placeholder="$t('sys.menu.parentPlaceholder')"
+                                check-strictly
+                                clearable
+                                style="width: 100%;">
+                </el-tree-select>
+            </el-form-item>
+
+            <!-- 2. 菜单名称 -->
+            <el-form-item :label="$t('sys.menu.formMenuName')" required>
+                <el-input v-model="formData.name"
+                          :placeholder="$t('sys.menu.namePlaceholder')"></el-input>
+            </el-form-item>
+            <el-form-item :label="$t('sys.menu.formMenuEnName')" required>
+                <el-input v-model="formData.enName"
+                          :placeholder="$t('sys.menu.enNamePlaceholder')"></el-input>
+            </el-form-item>
+
+            <!-- 3. 菜单类型 -->
+            <el-form-item :label="$t('sys.menu.formMenuType')">
+                <el-radio-group v-model="formData.menuType">
+                    <el-radio label="directory">{{ $t('sys.menu.typeDirectory') }}</el-radio>
+                    <el-radio label="menu">{{ $t('sys.menu.typeMenu') }}</el-radio>
+                    <el-radio label="button">{{ $t('sys.menu.typeButton') }}</el-radio>
+                </el-radio-group>
+            </el-form-item>
+
+            <!-- 4. 路由/地址 -->
+            <el-form-item :label="$t('sys.menu.formRoute')"
+                          v-if="formData.menuType === 'menu'"
+                          :required="formData.menuType === 'menu'">
+                <el-input v-model="formData.action"
+                          :placeholder="$t('sys.menu.routePlaceholder')"></el-input>
+            </el-form-item>
+
+            <!-- 5. 权限标识 -->
+            <el-form-item :label="$t('sys.menu.formPermission')"
+                          v-if="formData.menuType !== 'directory'">
+                <el-input v-model="formData.permissionFlag"
+                          :placeholder="$t('sys.menu.permissionPlaceholder')"></el-input>
+            </el-form-item>
+
+            <!-- 6. 图标 -->
+            <el-form-item :label="$t('sys.menu.formIcon')">
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <el-input v-model="formData.icon"
+                              :placeholder="$t('sys.menu.iconPlaceholder')"
+                              style="flex:1">
+                        <template #prefix>
+                            <el-icon v-if="formData.icon">
+                                <component :is="$formatIconName(formData.icon)" />
+                            </el-icon>
+                        </template>
+                    </el-input>
+                    <el-button type="primary" v-on:click ="openIconSelectDialog = true">
+                        {{$t('sys.menu.selectIcon')}}
+                    </el-button>
+                </div>
+
+                <!-- 图标选择弹窗 -->
+                <el-dialog v-model="openIconSelectDialog" :title="$t('sys.menu.selectIcon')" width="680px">
+                    <el-input v-model="iconSearchKeyword" placeholder="搜索图标" clearable style="margin-bottom:12px;"></el-input>
+                    <div class="icon-grid">
+                        <div class="icon-item"
+                             v-for="iconKey in filteredIconList"
+                             :key="iconKey"
+                             v-on:click="onIconSelected(iconKey)">
+                            <el-icon :size="22">
+                                <component :is="iconKey" />
+                            </el-icon>
+                            <div class="icon-name">{{iconKey}}</div>
+                        </div>
+                    </div>
+                    <template #footer>
+                        <el-button v-on:click="openIconSelectDialog=false">{{$t('common.cancel')}}</el-button>
+                    </template>
+                </el-dialog>
+            </el-form-item>
+
+            <!-- 7. 排序号 -->
+            <el-form-item :label="$t('sys.menu.formSortNum')">
+                <el-input-number v-model="formData.sort" :min="0" style="width: 100%;"></el-input-number>
+            </el-form-item>
+
+            <!-- 8. 描述 -->
+            <el-form-item :label="$t('sys.menu.formDescription')">
+                <el-input v-model="formData.description"
+                          type="textarea"
+                          :rows="2"
+                          :placeholder="$t('sys.menu.descPlaceholder')"></el-input>
+            </el-form-item>
+        </el-form>
+
+        <template #footer>
+            <span class="dialog-footer">
+                <el-button v-on:click="dialogVisible = false">{{ $t('common.cancel') }}</el-button>
+                <el-button type="primary" v-on:click="saveData">{{ $t('common.confirm') }}</el-button>
+            </span>
+        </template>
+    </el-dialog>
+</div>
+
+@section Scripts {
+    <!-- 引入你的独立 JS 文件 -->
+    <script src="~/js/Sys/menu-index.js"></script>
+}

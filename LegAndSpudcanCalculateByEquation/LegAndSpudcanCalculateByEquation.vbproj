@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup Label="Globals">
+    <SccProjectName>SAK</SccProjectName>
+    <SccProvider>SAK</SccProvider>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RootNamespace>LegAndSpudcanCalculateByEquation</RootNamespace>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="EasyPlot">
+      <HintPath>dll\EasyPlot.dll</HintPath>
+    </Reference>
+    <Reference Include="EsBase">
+      <HintPath>dll\EsBase.dll</HintPath>
+    </Reference>
+    <Reference Include="EsTool">
+      <HintPath>dll\EsTool.dll</HintPath>
+    </Reference>
+    <Reference Include="EsWord">
+      <HintPath>dll\EsWord.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpZipLib.NETStandard">
+      <HintPath>dll\SharpZipLib.NETStandard.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

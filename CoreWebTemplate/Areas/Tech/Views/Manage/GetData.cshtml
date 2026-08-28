@@ -1,0 +1,18 @@
+﻿
+@{
+    ViewData["Title"] = "GetData";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    var dataList = Model as List<DataFactory.KingBase.TestDbUsers>;
+
+    string str = Tool.JsonUtils.Serialize(dataList);
+
+}
+
+<h1 id="v1">@str</h1>
+
+
+
+

@@ -1,0 +1,133 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+
+    <link rel="icon" href="" type="image/x-icon" />
+    <link rel="stylesheet" type="text/css" href="@(Url.Content("~/Content/Cloud/css/font-awesome.4.6.0.css"))" />
+    <link rel="stylesheet" type="text/css" href="@(Url.Content("~/Content/Cloud/css/animate.css"))" />
+    <link rel="stylesheet" type="text/css" href="@(Url.Content("~/Content/Cloud/css/laydate.css"))" />
+    <link rel="stylesheet" type="text/css" href="@(Url.Content("~/Content/Cloud/css/bootstrap.css"))" />
+    <link rel="stylesheet" type="text/css" href="@(Url.Content("~/Content/Cloud/css/jquery.pagination.css"))" />
+    <link rel="stylesheet" type="text/css" href="@(Url.Content("~/Content/Cloud/css/style.css?v=") + DateTime.Now.Ticks)" />
+
+
+    <script type="text/javascript" src="@(Url.Content("~/js/jquery1.12.4.min.js?v=") + DateTime.Now.Ticks)"></script>
+    <script type="text/javascript" src="@(Url.Content("~/Content/Cloud/js/bootstrap.js"))"></script>
+    <script type="text/javascript" src="@(Url.Content("~/Content/Cloud/js/wow.min.js"))"></script>
+    <script type="text/javascript" src="@(Url.Content("~/Content/Cloud/js/owl.carousel.js"))"></script>
+    <script type="text/javascript" src="@(Url.Content("~/Content/Cloud/js/laydate.js"))"></script>
+    <script type="text/javascript" src="@(Url.Content("~/Content/Cloud/js/jquery.pagination.min.js"))"></script>
+    <script type="text/javascript" src="@(Url.Content("~/Content/Cloud/js/script.js?v=") + DateTime.Now.Ticks)"></script>
+    <script type="text/javascript" src="@(Url.Content("~/js/CommonJS.js?v=") + DateTime.Now.Ticks)"></script>
+</head>
+<body>
+    
+    @inject Service.Wind.Layout.IBoardHeaderService BoardHeaderService
+@{
+    var board = BoardHeaderService.GetBoardInfo();
+    //把数据塞到ViewData，传给CloudBoard分部视图
+    ViewData["Name"] = board.Name;
+    ViewData["FirstName"] = board.FirstName;
+    ViewData["DepartName"] = board.DepartName;
+}
+
+    @Html.Partial("~/Areas/Cloud/Views/CloudBase/CloudBoard.cshtml")
+
+    @RenderBody()
+
+
+    <!--提示框弹框-->
+    <div class="modal fade" id="ts_tk_Information" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog modal-dialog-tks">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title tihicolor modal-title-s">
+                        <img src="~/Content/Cloud/img/icon_tishi.png">提示
+                    </h4>
+                </div>
+                <div class="modal-body modal-body-s">
+                    <div class="text-center" id="ts_tk_Information_Content">是否要保存？</div>
+                </div>
+                <div class="modal-footer tishi_footer_tk">
+                    <button type="button" class="btn btn-primary" id="ModalSubmit">确认</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--成功弹框-->
+    <div class="modal fade" id="ts_tk_Success" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog modal-dialog-tks">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title chenggongcolor modal-title-s">
+                        <img src="~/Content/Cloud/img/icon_chenggong.png">提示
+                    </h4>
+                </div>
+                <div class="modal-body modal-body-s">
+                    <div class="text-center" id="ts_tk_Success_Content">成功</div>
+                </div>
+                <div class="modal-footer tishi_footer_tk">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--失败弹框-->
+    <div class="modal fade" id="ts_tk_Error" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog modal-dialog-tks">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title shibaicolor modal-title-s">
+                        <img src="~/Content/Cloud/img/icon_cuowu.png">失败
+                    </h4>
+                </div>
+                <div class="modal-body modal-body-s">
+                    <div class="text-center" id="ts_tk_Error_Content">用户名不能为空</div>
+                </div>
+                <div class="modal-footer tishi_footer_tk">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="ts_tk_Error_CBZ" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog-cbz">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title shibaicolor modal-title-s">
+                        <img src="~/Content/Cloud/img/icon_cuowu.png">插拔桩计算错误
+                    </h4>
+                </div>
+                <div class="modal-body modal-body-s">
+                    <div class="text-center" id="ts_tk_Error_CBZ_Content">用户名不能为空</div>
+                </div>
+                <div class="modal-footer tishi_footer_tk">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mask"></div>
+
+</body>
+</html>

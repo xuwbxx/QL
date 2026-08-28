@@ -1,0 +1,48 @@
+{
+  "version": "3.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "provider": "cdnjs",
+      "library": "element-plus@2.13.5",
+      "destination": "wwwroot/lib/element-plus/",
+      "files": [
+        "index.css",
+        "locale/en.min.js",
+        "locale/zh-cn.min.js",
+        "index.full.min.js",
+        "index.min.css"
+      ]
+    },
+    {
+      "provider": "cdnjs",
+      "library": "axios@1.18.1",
+      "destination": "wwwroot/lib/axios/"
+    },
+    {
+      "provider": "cdnjs",
+      "library": "dayjs@1.11.21",
+      "destination": "wwwroot/lib/dayjs/"
+    },
+    {
+      "provider": "cdnjs",
+      "library": "vue@3.5.41",
+      "destination": "wwwroot/lib/vue/"
+    },
+    {
+      "provider": "cdnjs",
+      "library": "element-plus-icons-vue@2.3.2",
+      "destination": "wwwroot/lib/element-plus-icons-vue/"
+    },
+    {
+      "provider": "cdnjs",
+      "library": "vue-i18n@11.4.8",
+      "destination": "wwwroot/lib/vue-i18n/"
+    },
+    {
+      "provider": "cdnjs",
+      "library": "crypto-js@4.2.0",
+      "destination": "wwwroot/lib/crypto-js/"
+    }
+  ]
+}

@@ -1,0 +1,229 @@
+﻿@page
+@model QL.PreAssembled.Views.Home.LoginModel
+@{
+    Layout = "_LayoutModelEP";
+}
+@section Styles {
+    <style>
+        /* 全局重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .login-container {
+            width: 420px;
+            padding: 48px 40px 40px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+            color: #303133;
+            margin-bottom: 8px;
+        }
+
+        .login-subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: #909399;
+            margin-bottom: 32px;
+        }
+
+        .login-form .el-form-item {
+            margin-bottom: 22px;
+        }
+
+        .login-btn {
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #909399;
+        }
+
+            .login-footer a {
+                color: #667eea;
+                text-decoration: none;
+            }
+
+                .login-footer a:hover {
+                    text-decoration: underline;
+                }
+    </style>
+}
+<div id="app">
+    <div class="login-container">
+        <div class="login-title">系统管理平台</div>
+        <div class="login-subtitle">欢迎登录，请填写以下信息</div>
+
+        <el-form ref="loginFormRef"
+                 :model="loginForm"
+                 :rules="loginRules"
+                 class="login-form"
+                 v-on:submit.prevent="handleLogin">
+            <!-- 账号 -->
+            <el-form-item prop="account">
+                <el-input v-model="loginForm.account"
+                          placeholder="请输入账号"
+                          size="large"
+                          clearable>
+                    <template #prefix>
+                        <el-icon><User /></el-icon>
+                    </template>
+                </el-input>
+            </el-form-item>
+
+            <!-- 密码 -->
+            <el-form-item prop="password">
+                <el-input v-model="loginForm.password"
+                          type="password"
+                          placeholder="请输入密码"
+                          size="large"
+                          show-password
+                          clearable
+                          v-on:keyup.enter="handleLogin">
+                    <template #prefix>
+                        <el-icon><Lock /></el-icon>
+                    </template>
+                </el-input>
+            </el-form-item>
+
+            <!-- 按钮 -->
+            <el-form-item>
+                <el-button class="login-btn"
+                           type="primary"
+                           size="large"
+                           v-bind:loading="loading"
+                           v-on:click="handleLogin">
+                    {{ loading ? '登录中...' : '登 录' }}
+                </el-button>
+            </el-form-item>
+        </el-form>
+
+        <div class="login-footer">
+            演示账号：admin / 密码：shjgwY#829
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="~/lib/crypto-js/crypto-js.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const { createApp, ref, reactive, computed } = Vue;
+            const { ElMessage } = ElementPlus;
+
+            const app = createApp({
+                setup() {
+                    // 表单引用
+                    const loginFormRef = ref(null);
+
+                    // 加载状态
+                    const loading = ref(false);
+
+                    // 当前语言（从公共函数读取偏好）
+                    var currentLocale = Vue.ref(loadLanguagePreference());
+
+                    // 登录表单数据
+                    const loginForm = reactive({
+                        account: '',
+                        password: ''
+                    });
+
+                    // 表单验证规则
+                    const loginRules = {
+                        account: [
+                            { required: true, message: '请输入账号', trigger: 'blur' },
+                            { min: 2, max: 20, message: '账号长度在 2 到 20 个字符', trigger: 'blur' }
+                        ],
+                        password: [
+                            { required: true, message: '请输入密码', trigger: 'blur' },
+                            { min: 6, max: 30, message: '密码长度在 6 到 30 个字符', trigger: 'blur' }
+                        ]
+                    };
+
+                    // 登录提交
+                    var handleLogin = function () {
+                        if (!loginFormRef.value) return;
+
+                        loginFormRef.value.validate(function (valid) {
+                            if (!valid) return;
+
+                            loading.value = true;
+                            var lang = currentLocale.value;
+
+                            // ✅ 前端 MD5 加密
+                            var pwdHashed = CryptoJS.MD5(loginForm.password).toString();
+
+                            fetch('/api/sys/Auth/Login', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    account: loginForm.account,
+                                    password: pwdHashed  // ← 发送 MD5 加密后的密码
+                                })
+                            })
+                            .then(function (response) {
+                                return response.json().then(function (result) {
+                                    if (result.success === true) {
+                                        if (result.redirectUrl) {
+                                            window.location = result.redirectUrl;
+                                        } else {
+                                            window.location = '/';
+                                        }
+                                    }
+                                    return { status: response.status, data: data };
+                                });
+                            })
+                            .then(function (result) {
+
+                            })
+                            .catch(function (error) {
+                                // ...
+                            })
+                            .finally(function () {
+                                loading.value = false;
+                            });
+                        });
+                    };
+
+                    return {
+                        loginFormRef,
+                        loginForm,
+                        loginRules,
+                        loading,
+                        handleLogin
+                    };
+                }
+            });
+
+            // 注册 Element Plus 图标组件
+            app.component('User', ElementPlusIconsVue.User);
+            app.component('Lock', ElementPlusIconsVue.Lock);
+
+            // 挂载应用
+            app.use(ElementPlus);
+            app.mount('#app');
+        });
+    </script>
+}

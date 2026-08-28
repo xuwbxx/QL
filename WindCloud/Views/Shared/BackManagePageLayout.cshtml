@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="shortcut icon" href="@Url.Content("~/Content/Manage/images/title-logo.ico")" type="image/x-icon" />
+    <link rel="stylesheet" type="text/css" href="@Url.Content("~/Content/Manage/css/jquery.pagination.css")">
+    <link rel="stylesheet" type="text/css" href="@Url.Content("~/Content/Manage/css/font-awesome.4.6.0.css")">
+    <link rel="stylesheet" type="text/css" href="@Url.Content("~/Content/Manage/css/bootstrap.min.css")">
+    <link rel="stylesheet" type="text/css" href="@Url.Content("~/Content/Manage/css/style.css")">
+
+    <script type="text/javascript" src="@(Url.Content("~/js/jquery1.12.4.min.js?timestamp=") + DateTime.Now.Ticks)"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Manage/js/bootstrap.min.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Manage/js/script.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Manage/js/jquery.pagination.min.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Manage/js/laydate.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/js/CommonJS.js")"></script>
+</head>
+<body>
+    @RenderBody()
+
+    <!--提示框弹框-->
+    <div class="modal fade" id="ts_tk_Information" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog modal-dialog-ss">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title tishi_title_tk">
+                        <img src="~/Content/Cloud/img/icon_tishi.png">提示
+                    </h4>
+                </div>
+                <div class="modal-body tishi_body_tk">
+                    <div class="text-center font_16" id="ts_tk_Information_Content">是否要保存？</div>
+                </div>
+                <div class="modal-footer tishi_footer_tk">
+                    <button type="button" class="btn btn-primary" id="ModalSubmit">确认</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--成功弹框-->
+    <div class="modal fade" id="ts_tk_Success" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog modal-dialog-ss">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title xinxi_title_tk">
+                        <img src="~/Content/Cloud/img/icon_chenggong.png">提示
+                    </h4>
+                </div>
+                <div class="modal-body tishi_body_tk">
+                    <div class="text-center font_16" id="ts_tk_Success_Content">成功</div>
+                </div>
+                <div class="modal-footer tishi_footer_tk">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--失败弹框-->
+    <div class="modal fade" id="ts_tk_Error" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog modal-dialog-ss">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title shibai_title_tk">
+                        <img src="~/Content/Cloud/img/icon_cuowu.png">失败
+                    </h4>
+                </div>
+                <div class="modal-body tishi_body_tk">
+                    <div class="text-center font_16" id="ts_tk_Error_Content">用户名不能为空</div>
+                </div>
+                <div class="modal-footer tishi_footer_tk">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+</html>

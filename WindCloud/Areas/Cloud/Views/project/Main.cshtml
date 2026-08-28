@@ -1,0 +1,148 @@
+﻿
+@{
+    ViewBag.Title = "跳转";
+    Layout = "~/Views/Shared/BlankLayout.cshtml";
+}
+
+<input type="hidden" id="hid_Token" value="@ViewData["Token"].ToString()" />
+
+<h2>跳转中......</h2>
+
+<script>
+    $(document).ready(function () {
+
+        var token = $('#hid_Token').val();
+
+        //if (token == '')
+        //    return;
+
+        //if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+        //    // 当前设备是移动设备e
+
+        //    window.location.href = "/Mobile/Project/Redirect?paramString=" + token;
+
+        //}
+        //else
+        //{
+        //    window.location.href = "/Cloud/Project/Redirect?paramString=" + token;
+        //}
+
+        debugger;
+
+        //var deviceType = detectDevice();
+
+        //const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+        //if (isTouchDevice) {
+        //    window.location.href = "/Cloud/Project/Redirect?paramString=" + token + "&device=tablet";
+        //}
+        //else
+        //{
+        //    window.location.href = "/Cloud/Project/Redirect?paramString=" + token + "&device=desktop";
+        //}
+
+        //if (deviceType == 'tablet') {
+        //    window.location.href = "/Cloud/Project/Redirect?paramString=" + token + "&device=tablet";
+        //}
+        //else if (deviceType == 'mobile')
+        //{
+        //    //window.location.href = "/Mobile/Project/Redirect?paramString=" + token;
+        //    window.location.href = "/Cloud/Project/Redirect?paramString=" + token + "&device=tablet";
+        //}
+        //else if (deviceType == 'desktop') {
+        //    window.location.href = "/Cloud/Project/Redirect?paramString=" + token + "&device=desktop";
+        //}
+
+        // 获取屏幕宽度（考虑旋转情况）
+        const width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+
+        // 定义设备宽度阈值（可根据需求调整）
+        //const MOBILE_MAX_WIDTH = 767;    // 手机最大宽度
+        const TABLET_MAX_WIDTH = 700;
+        //pad 582 648
+        //交建通 944 573
+        // 判断设备类型
+
+        if (width > TABLET_MAX_WIDTH) {
+            window.location.href = "/Cloud/Project/Redirect?paramString=" + token + "&device=desktop";
+        }
+        else {
+            window.location.href = "/Cloud/Project/Redirect?paramString=" + token + "&device=tablet";
+        }
+
+        return;
+    })
+
+    function detectDevice() {
+
+        const userAgent = navigator.userAgent.toLowerCase();
+        const screenWidth = window.innerWidth;//944
+        const screenHeight = window.innerHeight;//573
+        //pad 582 648
+        //交建通 944 573
+        alert(screenWidth + ',' + screenHeight);
+
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+        var s1 = 'ontouchstart' in window;
+        var s2 = navigator.maxTouchPoints > 0;
+
+        alert(s1);
+        alert(s2);
+
+        // 1. 明确的移动设备检测
+        const isMobile = /mobile|android|iphone|ipod/i.test(userAgent);
+        //pad 582 648
+        //交建通 944 573
+        // 2. 平板特征检测（结合触控和尺寸）
+        const isTablet =
+            (/tablet|ipad/i.test(userAgent) ||
+                (isTouchDevice && screenWidth > 767)) &&
+            !isMobile; // 排除明确的移动设备
+
+        // 3. 使用媒体查询检测桌面设备
+        const isDesktop = window.matchMedia('(min-width: 1025px) and (hover: hover)').matches;
+
+        // 最终判断逻辑
+        if (isTablet) {
+            return 'tablet';
+        } else if (isMobile || (!isDesktop && screenWidth <= 1024)) {
+            return 'mobile';
+        } else {
+            return 'desktop';
+        }
+
+    }
+
+
+    function detectDevice2() {
+
+        // 获取屏幕宽度（考虑旋转情况）
+        const width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+
+        // 定义设备宽度阈值（可根据需求调整）
+        //const MOBILE_MAX_WIDTH = 767;    // 手机最大宽度
+        const TABLET_MAX_WIDTH = 700;   
+        //pad 582 648
+        //交建通 944 573
+        // 判断设备类型
+
+        if (width > TABLET_MAX_WIDTH) {
+            window.location.href = "/Cloud/Project/Redirect?paramString=" + token + "&device=desktop";
+        }
+        else
+        {
+            window.location.href = "/Cloud/Project/Redirect?paramString=" + token + "&device=tablet";
+        }
+
+        //if (width <= MOBILE_MAX_WIDTH) {
+        //    return 'mobile';  // 手机
+        //} else if (width <= TABLET_MAX_WIDTH) {
+        //    return 'pad';     // 平板
+        //} else {
+        //    return 'pc';      // 电脑
+        //}
+
+    }
+
+</script>

@@ -1,0 +1,190 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+
+	<meta charset="utf-8" />
+
+	<title>@ViewBag.Title</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link href="/Web/cbz/assets/css/bootstrap.min.css" rel="stylesheet" />
+	<link rel="stylesheet" type="text/css" href="/css/font-awesome-4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="/Web/cbz/assets/css/ace.min.css" />
+	<link rel="stylesheet" href="/Web/cbz/assets/css/ace-rtl.min.css" />
+	<link rel="stylesheet" href="/Web/cbz/assets/css/ace-skins.min.css" />
+	<link rel="stylesheet" href="/Web/cbz/assets/css/style.css" />
+	<script src="/Web/cbz/assets/js/ace-extra.min.js"></script>
+
+	<script src="/Web/cbz/assets/js/jquery-2.0.3.min.js"></script>
+	<script type="text/javascript">
+		window.jQuery || document.write("<script src='/Web/cbz/assets/js/jquery-2.0.3.min.js'>"+"<"+"/script>");
+	</script>
+	<script type="text/javascript">
+		if("ontouchend" in document) document.write("<script src='/Web/cbz/assets/js/jquery.mobile.custom.min.js'>"+"<"+"/script>");
+	</script>
+	<script src="/Web/cbz/assets/js/bootstrap.min.js"></script>
+	<script src="/Web/cbz/assets/js/typeahead-bs2.min.js"></script>
+	<script src="/Web/cbz/assets/js/ace-elements.min.js"></script>
+	<script src="/Web/cbz/assets/js/ace.min.js"></script>
+
+</head>
+<body>
+
+	<div class="top_header"><span>文件(F)</span><span>输入(I)</span><span>报告输出(X)</span><span>帮助(H)</span></div>
+	<div class="navbar navbar-default" id="navbar">
+		<script type="text/javascript">
+			try{ace.settings.check('navbar' , 'fixed')}catch(e){}
+		</script>
+
+		<div class="navbar-container" id="navbar-container">
+			<div class="navbar-header pull-left">
+				<a href="#" class="navbar-brand">
+					<small>桩靴插拔计算分析</small>
+				</a>
+			</div>
+		</div>
+		<div class="header_img">
+			<img src="/Web/cbz/assets/images/icon1.png">
+			<img src="/Web/cbz/assets/images/icon2.png">
+			<img src="/Web/cbz/assets/images/icon3.png">
+			<img src="/Web/cbz/assets/images/icon4.png">
+		</div>
+	</div>
+
+
+	<div class="main-container" id="main-container">
+		<script type="text/javascript">
+			try{ace.settings.check('main-container' , 'fixed')}catch(e){}
+		</script>
+		<div class="main-container-inner">
+
+			<a class="menu-toggler" id="menu-toggler" href="#">
+				<span class="menu-text"></span>
+			</a>
+
+			<div class="sidebar" id="sidebar">
+					<script type="text/javascript">
+						try{ace.settings.check('sidebar' , 'fixed')}catch(e){}
+					</script>
+
+
+					 <ul class="nav nav-list">
+
+						<li>
+							<a href="#">
+								<i class="fa fa-book"></i>
+								<span class="menu-text">风险评估</span>
+							</a>
+						</li>
+						<li>
+							<a href="#" class="dropdown-toggle">
+								<i class="fa fa-desktop"></i>
+								<span class="menu-text"> 分析模型 </span>
+								<b class="arrow fa fa-angle-down"></b>
+							</a>
+							<ul class="submenu">
+								<li  class="active">
+									<a href="/YanTu/cbzWork/Page2">
+										<i class="fa fa-double-angle-right"></i>
+										预评估模型
+									</a>
+								</li>
+								<li>
+									<a href="/YanTu/cbzWork/Page2">
+										<i class="fa fa-double-angle-right"></i>
+										远程分析模型
+									</a>
+								</li>
+
+							</ul>
+
+						</li>
+
+						<li>
+							<a href="#" class="dropdown-toggle">
+								<i class="fa fa-star-half-full"></i>
+								<span class="menu-text"> 评价打分 </span>
+								<b class="arrow fa fa-angle-down"></b>
+							</a>
+							<ul class="submenu">
+
+								<li>
+									<a href="#" class="dropdown-toggle">
+										<i class="fa fa-double-angle-right"></i>
+										预评估模型
+										<b class="arrow fa fa-angle-down"></b>
+									</a>
+									<ul class="submenu">
+										<li>
+											<a href="#">
+												<i class="fa fa-leaf"></i>
+												准则层
+											</a>
+										 </li>
+										 <li>
+											<a href="#">
+												<i class="fa fa-leaf"></i>
+												指标层
+											</a>
+										  </li>
+									 </ul>
+
+								  </li>
+
+								  <li>
+									<a href="#" class="dropdown-toggle">
+										<i class="fa fa-double-angle-right"></i>
+										远程分析模型
+										<b class="arrow fa fa-angle-down"></b>
+									</a>
+									<ul class="submenu">
+										<li>
+											<a href="#">
+												<i class="fa fa-leaf"></i>
+												准则层
+											</a>
+										 </li>
+										 <li>
+											<a href="#">
+												<i class="fa fa-leaf"></i>
+												指标层
+											</a>
+										  </li>
+									 </ul>
+
+								  </li>
+
+							</ul>
+
+						</li>	  
+
+						<li>
+							<a href="#">
+								<i class="fa fa-adjust"></i>
+								<span class="menu-text"> 分析结果</span>
+							</a>
+						</li>
+					</ul>
+
+
+
+					<script type="text/javascript">
+
+						try{ace.settings.check('sidebar' , 'collapsed')}catch(e){}
+
+					</script>
+
+				</div>
+
+
+			@RenderBody()
+			
+
+
+		</div>
+
+	</div>
+
+	
+</body>
+</html>

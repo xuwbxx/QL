@@ -1,0 +1,70 @@
+﻿
+@{
+    ViewBag.Title = "船舶管理";
+    Layout = "~/Views/Shared/BackManagePageLayout.cshtml";
+}
+
+<input type="hidden" id="hid_PostToken" value="@ViewData["PostToken"].ToString()" />
+
+<div class="div_body">
+
+    <div class="div_form">
+
+        <form class="form-inline">
+            <div class="form-group">
+                <input type="text" class="form-control" placeholder="请输入船舶名称" name="txt_ShipName_Query">
+            </div>
+            <div class="form-group">
+                <select class="form-control" name="select_ShipConfirm_Query">
+                    <option value="0">是否确认</option>
+                    <option value="1">已确认</option>
+                    <option value="2">未确认</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" onclick="ShipJS.DoQuery();">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="div_table">
+        <table class="table table-hover table_chongzhi">
+            <thead>
+                <tr>
+                    <th width="40%">船名</th>
+                    <th width="30%">是否确认</th>
+                    <th width="40%">操作</th>
+                </tr>
+            </thead>
+            <tbody id="html_ShipList">
+                <tr>
+                    <td>项目部业务员申请</td>
+                    <td>节点类型</td>
+                    <td>
+                        <button type="button" class="btn btn-primary-s" onClick="PopupConfiguration();"><i class="icon iconfont table_icon">&#xe66e;</i>配置节点人员</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>项目部总工审批</td>
+                    <td class="redcolor">否</td>
+                    <td>节点类型</td>
+                    <td>
+                        <button type="button" class="btn btn-primary-s"><i class="icon iconfont table_icon">&#xe66e;</i>配置节点人员</button>
+                    </td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+        <div class="text-center">
+
+            <div id="Pagination">
+            </div>
+        </div>
+
+    </div>
+</div>
+

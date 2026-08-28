@@ -1,0 +1,110 @@
+﻿
+@{
+    ViewBag.Title = "其他设置";
+    Layout = "~/Views/Shared/BackManagePageLayout.cshtml";
+}
+
+<input type="hidden" id="hid_PostToken" value="@ViewData["PostToken"].ToString()" />
+
+<div class="div_body">
+
+    <div class="div_form">
+
+        <form class="form-inline">
+
+            <span>项目编号修改：</span>
+
+            <div class="form-group">
+                <input type="text" class="form-control" placeholder="项目原来编号" name="txt_ProjectCodeOld">
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control" placeholder="项目新编号" name="txt_ProjectCodeNew">
+            </div>
+        </form>
+    </div>
+
+    <div class="div_btn">
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="" onclick="SettingJS.Modify();"><i class="fa zdy_icon"></i>编号修改</button>
+    </div>
+
+</div>
+
+
+<script>
+    var SettingJS = function ($) {
+
+        $(document).ready(function () {
+            //ParamInit();
+            //Query();
+        })
+
+        var Param = {};
+        
+
+        var Modify = function () {
+
+            var OldCode = $('input[name="txt_ProjectCodeOld"]').val();
+            var NewCode = $('input[name="txt_ProjectCodeNew"]').val();
+
+            if (OldCode == '' || NewCode == '')
+            {
+                ModalPopup('error', '新编号和旧编号都不能为空');
+            }
+
+            ModalPopup('information', '是否保存?');
+
+            $("#ModalSubmit").unbind('click').bind('click', function () {
+                SaveData();
+            });
+
+            return;
+
+        }
+
+
+        //保存
+        var SaveData = function () {
+
+            Param.OldProjectCode = $('input[name="txt_ProjectCodeOld"]').val();
+            Param.NewProjectCode = $('input[name="txt_ProjectCodeNew"]').val();
+
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('DataSave', Param)
+                .success(function (data, statusText, jqXRH) {
+
+                    if (data) {
+                        //$('#myModal').modal('hide');
+
+                        if (data.Success) {
+                            ModalPopup('success', '修改成功');
+                        }
+                        else {
+
+                            ModalPopup('error', data.Message);
+                        }
+
+
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                    ModalClose('information');
+                });
+        }
+
+
+
+        return {
+            HomeSiteInit: function () {
+                Init();
+            },
+            Modify: Modify,
+            field: {
+
+            }
+        }
+
+    }(jQuery);
+</script>

@@ -1,0 +1,335 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>中交三航局海上风电施工分析云平台</title>	
+<link rel="icon" href="img/title-logo.ico" type="image/x-icon"/>
+<link rel="stylesheet" type="text/css" href="css/font-awesome.4.6.0.css" />
+<link rel="stylesheet" href="css/animate.css">	
+<link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
+<link rel="stylesheet" type="text/css" href="css/laydate.css" />	
+<link rel="stylesheet" type="text/css" href="css/style.css" />
+<script type="text/javascript" src="js/jquery1.12.4.min.js"></script>
+<script type="text/javascript" src="js/bootstrap.js"></script>
+<script type="text/javascript" src="js/wow.min.js"></script>
+<script type="text/javascript" src="js/owl.carousel.js"></script>	
+<script type="text/javascript" src="js/laydate.js"></script>	
+<script type="text/javascript" src="js/script.js"></script>
+</head>
+
+<body>
+	   <div class="xm_header clearfix">
+	        <h3><img src="img/logo.png">中交三航局海上风电施工分析云平台</h3>
+		    <div class="login_ryxx">程</div>
+		    <div class="ryxx_box">
+				 <ul class="ryxx_box_ul">
+					 <li>程伟</li>
+					 <li>三航局-技术中心-总部-BIM中心</li>
+				</ul>
+				<ul class="ryxx_box_ul02">
+					 <li>出生日期：1984-06-24</li>
+					 <li>邮箱：Johny chengw@163.com</li>
+					 <li>手机号：13918863121</li>
+				</ul>
+				<ul class="ryxx_box_ul02">
+					 <li><a href="#">退出</a></li>
+					 
+				</ul>
+		    </div>
+	   </div>
+	   
+	   <div class="content">
+		     <div class="box_mode">
+				   <div class="title"><i class="fa fa-file-text"></i>项目列表</div>
+				  <div class="clearfix box_table_top"> 
+						<div class="search_box pull-left">
+							  <input type="text" class="form-control" placeholder="请输入项目名称"><button class="btn btn-primary search_btn"><i class="fa fa-search"></i></button>
+						</div>
+					   <div class="btn_box pull-right">
+							<button class="btn btn-primary" onClick="PopupProject();"><i class="icon iconfont">&#xe62b;</i>创建项目</button><button class="btn btn-primary"> <i class="icon iconfont">&#xe9ac;</i>工作任务</button> 
+					   </div>
+				   </div>
+		           <table class="table table_project">
+							   <thead>
+							          <tr>
+								          <th width="10%">项目号</th>
+										  <th width="30%">项目名</th>
+										  <th width="8%">申请人</th>
+										  <th width="8%">项目负责人</th>
+										  <th width="12%">申请时间</th>
+										  <th width="12%">当前节点</th>
+										   <th width="10%">状态</th>
+										   <th width="10%">操作</th>
+								      </tr>
+							   </thead>
+							   <tbody>
+								   <tr>
+									   <td class="xm_zt_orange">未完成</td>
+									   <td>宁波舟山港基础设施重点项目</td>
+									   <td class="relative_position">
+											<a href="#" class="xm_zt_blue table_ryxx_box">
+												<span>刘杰</span>
+												<div class="hover_ryxx">
+													 <ul>
+														 <li><i class="icon iconfont">&#xe752;</i>部门：三航局-技术中心-总部-BIM中心</li>
+														 <li> <i class="icon iconfont">&#xe607;</i>手机号：15621459809</li>
+														 <li> <i class="icon iconfont">&#xe673;</i>职位：高级工程师</li>
+													 </ul>
+											     </div>
+											</a>
+									    </td>
+									    <td><a href="#" class="xm_zt_blue">王刚</a></td>
+									    <td>2023-05-22 10:10</td>
+									    <td>分子公司总工审批：<a href="#" class="xm_zt_blue">李强</a></td>
+									   <td><a class="zt_red" href="#">退回</a></td>	
+								       <td><a class="cz_blue" href="#">查看</a></td>	
+								   </tr>
+
+								    <tr>
+									   <td class="xm_zt_green">000001</td>
+									   <td>宁波舟山港基础设施重点项目</td>
+								       <td><a href="#" class="xm_zt_blue">王刚</a></td>
+									    <td><a href="#" class="xm_zt_blue">王刚</a></td>
+									    <td>2023-05-22 10:10</td>
+									    <td>分子公司总工审批：<a href="#" class="xm_zt_blue">李强</a></td>	
+									    <td><a class="zt_orange" href="#">审核中</a></td>
+									   <td><a class="cz_blue" href="#">查看</a></td>		
+								   </tr>
+				                    <tr>
+									   <td class="xm_zt_green">000001</td>
+									   <td>宁波舟山港基础设施重点项目</td>
+									     <td><a href="#" class="xm_zt_blue">刘杰</a></td>
+									    <td><a href="#" class="xm_zt_blue">王刚</a></td>
+									    <td>2023-05-22 10:10</td>
+									    <td>分子公司总工审批：<a href="#" class="xm_zt_blue">李强</a></td>	
+									    <td><a class="zt_green" href="#">激活</a></td>
+									    <td><a class="cz_blue" href="#">审批</a></td>	
+								   </tr>
+								  
+							   </tbody>	   
+					    </table>
+				        <ul class="pagination">
+							<li class="first disabled"><a href="javascript:;">首页</a></li>
+							<li class="prev disabled"><a href="javascript:;"><i class="fa fa-angle-double-left mr"></i>上一页</a></li>
+							<li class="page active"><a href="javascript:;">1</a></li>
+							<li class="page"><a href="javascript:;">2</a></li>
+							<li class="page"><a href="javascript:;">3</a></li>
+							<li class="page"><a href="javascript:;">4</a></li>
+							<li class="page"><a href="javascript:;">5</a></li>
+							<li class="page"><a href="javascript:;">6</a></li>
+							<li class="page"><a href="javascript:;">7</a></li>
+							<li class="next"><a href="javascript:;">下一页<i class="fa fa-angle-double-right ml"></i></a></li>
+							<li class="last"><a href="javascript:;">末页</a></li>
+				      </ul>
+				        
+		     </div>
+	   </div>
+	
+	    <!--创建弹框-->
+	    <div class="modal fade" id="tk_Project" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+			<div class="modal-dialog">
+				<div class="modal-content" >
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+							&times;
+						</button>
+						<h4 class="modal-title">
+							创建项目
+						</h4>
+					</div>
+					<div class="modal-body">
+						 
+						  
+						   <div class="sqzl_box"> 
+								  <form class="form-horizontal form-horizontal_sqrjzl">
+									  <div class="form-group">
+											<label class="col-md-2 control-label">风场名</label>
+											<div class="col-md-10">
+												<input type="text" class="form-control" placeholder="请输入风场名">
+											</div>	
+									  </div>
+									  <div class="form-group">
+											<label class="col-md-2 control-label control-label_position">风场坐标</label>
+											<div class="col-md-10">
+												 <div class="liru_box">（提示：可以选择excel文件导入方式或者手动添加方式）</div> 
+												 <div class="zdtj_box clearfix">
+														<div class="col-md-7 zdtj_box_son">
+															<span>文件导入方式：</span><input type="file" class="form-control pull-left"><button class="btn btn-success">上传</button>
+														</div> 
+														<div class="col-md-5 zdtj_box_son text-right"><button class="btn btn-primary">模板下载</button> </div>
+												 </div>
+												 <div class="table_project_box">
+														<table class="table table_project table_fcjzb">
+															<thead>
+																   <tr>
+																	   <th width="13%">序号</th>
+																	   <th width="37%">经度</th> 
+																	   <th width="37%">纬度</th> 
+																	   <th width="13%">操作</th> 
+																  </tr>
+															</thead>
+															<tbody>
+																   <tr>
+																	   <td>1</td>
+																	   <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+																	   <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+																	   <td><a href="#" class="xm_zt_red">删除</a></td>
+																  </tr>
+																  <tr>
+																	   <td>2</td>
+																	   <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+																	   <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+																	   <td><a href="#" class="xm_zt_red">删除</a></td>
+																  </tr>
+																  <tr>
+																	   <td>3</td>
+																	   <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+																	   <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+																	   <td><a href="#" class="xm_zt_red">删除</a></td>
+																  </tr>
+																<tr>
+																	   <td>4</td>
+																	   <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+																	   <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+																	   <td><a href="#" class="xm_zt_red">删除</a></td>
+																  </tr>
+															</tbody> 
+													 </table>
+												</div>
+												<div class="sdtj_box"><button class="btn">手动添加方式</button></div>
+											</div>
+									  </div>
+									   <div class="form-group">
+											<label class="col-md-2 control-label control-label_position">风机坐标</label>
+											<div class="col-md-10">
+												 <div class="liru_box">（提示：可以选择excel文件导入方式或者手动添加方式）</div> 
+												  <div class="zdtj_box clearfix">
+														<div class="col-md-7 zdtj_box_son"><span>文件导入方式：</span><input type="file" class="form-control pull-left"><button class="btn btn-success">上传</button></div> 
+														<div class="col-md-5 zdtj_box_son text-right"><button class="btn btn-primary">模板下载</button> </div>
+												 </div>
+												 <div class="table_project_box">
+													  <table class="table table_project table_fcjzb">
+														<thead>
+															   <tr>
+																   <th width="13%">机位号</th>
+																   <th width="37%">经度</th> 
+																   <th width="37%">纬度</th> 
+																   <th width="13%">操作</th> 
+															  </tr>
+														</thead>
+														<tbody>
+															   <tr>
+																   <td>机位号1</td>
+																   <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+																   <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+																   <td><a href="#" class="xm_zt_red">删除</a></td>
+															  </tr>
+															  <tr>
+																   <td>机位号2</td>
+																   <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+																   <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+																   <td><a href="#" class="xm_zt_red">删除</a></td>
+															  </tr>
+															  <tr>
+																   <td>机位号3</td>
+																   <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+																   <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+																   <td><a href="#" class="xm_zt_red">删除</a></td>
+															  </tr>
+															<tr>
+																   <td>机位号4</td>
+																   <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+																   <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+																   <td><a href="#" class="xm_zt_red">删除</a></td>
+															  </tr>
+														</tbody> 
+												 </table>
+												 </div>
+												 <div class="sdtj_box"><button class="btn">手动添加方式</button></div>
+											</div>
+									  </div>
+									  <div class="form-group">
+											<label class="col-md-2 control-label">项目管理员</label>
+											<div class="col-md-5">
+													<div class="nice-select">
+														<input id="customerId" type="text" class="form-control" oninput="searchList(this.value)" placeholder="搜索" />
+														<ul id="list">
+															<li>
+																<h3>张三</h3>
+																<div>港湾院-常设公司-港湾院-数智工程设计研究所</div>
+															</li>
+															<li>
+																<h3>李四</h3>
+																<div>港湾院-常设公司-港湾院-数智工程设计研究所</div>
+															</li>
+															<li>
+																<h3>李四</h3>
+																<div>港湾院-常设公司-港湾院-数智工程设计研究所</div>
+															</li>
+															<li>
+																<h3>李四</h3>
+																<div>港湾院-常设公司-港湾院-数智工程设计研究所</div>
+															</li>
+															<li>
+																<h3>李四（E）</h3>
+																<div>港湾院-常设公司-港湾院-数智工程设计研究所</div>
+															</li>
+															<li>
+																<h3>王刚</h3>
+																<div>港湾院-常设公司-港湾院-数智工程设计研究所</div>
+															</li>
+															<li>
+																<h3>王</h3>
+																<div>港湾院-常设公司-港湾院-数智工程设计研究所</div>
+															</li>
+
+															<li>
+																<h3>姜</h3>
+																<div>三航局-常设公司-港湾院-数智工程设计研究所</div>
+															</li>
+														</ul>
+													</div> 
+											</div>
+											<div class="col-md-5">
+												 <select class="form-control">
+														 <option>项目角色</option>
+														 <option>项目经理</option>
+														 <option>开发人员</option>
+												 </select>
+											</div>
+									  </div>
+									  <div class="form-group">
+											<label class="col-md-2 control-label">云平台使用期限</label>
+											<div class="col-md-5">
+												  <input placeholder="开始时间" class="laydate-icon timeUstyle stateUTime form-control" onclick="laydate({istime: true,format:'YYYY-MM-DD hh:mm'})">
+
+											</div>
+											<div class="col-md-5">
+												  <input placeholder="结束时间" class="laydate-icon timeUstyle stateUTime form-control" onclick="laydate({istime: true,format:'YYYY-MM-DD hh:mm'})">
+
+											</div> 
+									  </div>
+									</form>
+							 </div>
+
+							 <div class="text-center sqzl_btn_box">
+								 <button class="btn btn-primary">预览</button><button class="btn btn-success">申请</button>  
+							</div>
+						
+						
+						
+					</div>
+
+				</div>
+			</div>
+		</div>
+	   <script>
+	          var PopupProject = function () {
+				  
+				  $('#tk_Project').modal('show');
+				  
+			  }
+	  </script>
+
+</body>
+</html>

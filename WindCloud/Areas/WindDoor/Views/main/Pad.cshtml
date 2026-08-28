@@ -1,0 +1,94 @@
+﻿
+@{
+    ViewBag.Title = "三航局技术中心风电数字化板块";
+    Layout = "~/Views/Shared/WindDoorPadLayout.cshtml";
+}
+
+<header class="header_box">
+    <span><img src="~/Content/Pad/img/logo.png">三航局技术中心风电数字化板块</span>
+
+
+    <div class="login_user">
+        <img src="~/Content/Pad/img/icon_user.png"><span>程伟</span>
+    </div>
+</header>
+
+
+<div class="content clearfix">
+
+
+    <div class="col-lg-6 col-sm-6 col-xs-12 p0" style="padding-right: 0.5vw!important;">
+        <div class="mod01">
+
+            <div class="mod_content clearfix">
+                <div class="img_box"><img src="~/Content/WindRedirect/img/pic1.png"></div>
+                <div class="jianjie_box">
+                    <div class="mod_title">海上风电云平台系统</div>
+                    <p>
+                        海上风电施工云服务平台是一种基于网络云技术的大型综合应用平台，它将涵盖许多独立的子系统、软件平台、风电业务系统、数据系统等，通过互联网将各个平台系统和服务全部整合起来，专门用于服务海上风电施工业务，可以为用户提供便捷丰富的海上风电服务资源。
+                    </p>
+                    <div class="text-center box_btn_enter"><button class="btn_enter" onclick="OpenWindCloud();">进入平台</button></div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 col-sm-6 col-xs-12 p0" style="padding-left: 0.5vw!important;">
+        <div class="mod01">
+
+            <div class="mod_content clearfix">
+                <div class="img_box"><img src="~/Content/Pad/img/towing.png"></div>
+                <div class="jianjie_box">
+                    <div class="mod_title">三峡阳江16兆瓦漂浮式风电项目</div>
+                    <p>项目是为创造独特的产品、服务或成果而进行的临时性工作，需通过人力、财务、材料等资源的组织达成预定目3。其核心参数包括范围、质量、成本、时间与资。项目是为创造独特的产品、服务或成果而进行的临时性工作，需通过人力、财务、材料等资项目是为创造独特的产品...</p>
+                    <div class="text-center box_btn_enter"><button class="btn_enter" onclick="OpenIOT('Towing', 65);">进入平台</button></div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    @*<div class="col-lg-6 col-sm-6 col-xs-12 p0" style="padding-right: 0.5vw!important;">
+            <div class="mod01">
+
+                <div class="mod_content clearfix">
+                    <div class="img_box"><img src="~/Content/Pad/img/img01.png"></div>
+                    <div class="jianjie_box">
+                        <div class="mod_title">海上风电云平台系统</div>
+                        <p>项目是为创造独特的产品、服务或成果而进行的临时性工作，需通过人力、财务、材料等资源的组织达成预定目3。其核心参数包括范围、质量、成本、时间与资。项目是为创造独特的产品、服务或成果而进行的临时性工作，需通过人力、财务、材料等资项目是为创造独特的产品...</p>
+                        <div class="text-center box_btn_enter"><button class="btn_enter">进入平台</button></div>
+
+                    </div>
+                </div>
+            </div>
+        </div>*@
+
+    <div class="col-lg-12 col-sm-12 col-xs-12 p0">
+
+
+        <div class="btn_cxgx">正在建设中......</div>
+
+
+    </div>
+
+</div>
+
+<script>
+    var OpenIOT = function (type, ProjectID) {
+
+        if (type == 'Towing') {
+            window.open('/Towing/Main/Pad?ProjectID=' + ProjectID, '_blank');
+        }
+
+
+    }
+
+    var OpenWindCloud = function () {
+
+        window.open('/Mobile/Project/Index', '_blank');
+
+    }
+</script>
+

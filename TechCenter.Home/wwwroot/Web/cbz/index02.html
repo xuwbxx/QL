@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+	<head>
+
+		<meta charset="utf-8" />
+
+		<title>桩靴插拔计算分析</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link href="assets/css/bootstrap.min.css" rel="stylesheet" />
+		<link rel="stylesheet" type="text/css" href="http://cdn.bootcss.com/font-awesome/3.2.1/css/font-awesome.min.css">
+		<link rel="stylesheet" href="assets/css/ace.min.css" />
+		<link rel="stylesheet" href="assets/css/ace-rtl.min.css" />
+		<link rel="stylesheet" href="assets/css/ace-skins.min.css" />
+		<link rel="stylesheet" href="assets/css/style.css" />
+		<script src="assets/js/ace-extra.min.js"></script>
+		
+	</head>
+
+
+
+	<body>
+
+		<div class="top_header"><span>文件(F)</span><span>输入(I)</span><span>报告输出(X)</span><span>帮助(H)</span></div>   
+		<div class="navbar navbar-default" id="navbar">
+			<script type="text/javascript">
+				try{ace.settings.check('navbar' , 'fixed')}catch(e){}
+			</script>
+			
+			<div class="navbar-container" id="navbar-container">
+				<div class="navbar-header pull-left">
+					<a href="#" class="navbar-brand">
+						<small>桩靴插拔计算分析</small>
+					</a>
+				</div>
+			</div>
+			<div class="header_img">
+			     <img src="assets/images/icon1.png">
+				 <img src="assets/images/icon2.png">
+				 <img src="assets/images/icon3.png">
+				 <img src="assets/images/icon4.png">
+			</div> 
+		</div>
+
+
+
+		<div class="main-container" id="main-container">
+			<script type="text/javascript">
+				try{ace.settings.check('main-container' , 'fixed')}catch(e){}
+			</script>
+			<div class="main-container-inner">
+				
+				<a class="menu-toggler" id="menu-toggler" href="#">
+					<span class="menu-text"></span>
+				</a>
+				
+				<div class="sidebar" id="sidebar">
+					<script type="text/javascript">
+						try{ace.settings.check('sidebar' , 'fixed')}catch(e){}
+					</script>
+					<ul class="nav nav-list">
+
+						<li>
+							<a href="#">
+								<i class="icon-book"></i>
+								<span class="menu-text">风险评估</span>
+							</a>
+						</li>
+						<li>
+							<a href="#" class="dropdown-toggle">
+								<i class="icon-desktop"></i>
+								<span class="menu-text"> 分析模型 </span>
+								<b class="arrow icon-angle-down"></b>
+							</a>
+							<ul class="submenu">
+								<li>
+									<a href="elements.html">
+										<i class="icon-double-angle-right"></i>
+										预评估模型
+									</a>
+								</li>
+								<li>
+									<a href="buttons.html">
+										<i class="icon-double-angle-right"></i>
+										远程分析模型
+									</a>
+								</li>
+
+							</ul>
+
+						</li>
+                        
+					    <li>
+							<a href="#" class="dropdown-toggle">
+								<i class="icon-star-half-full"></i>
+								<span class="menu-text"> 评价打分 </span>
+								<b class="arrow icon-angle-down"></b>
+							</a>
+							<ul class="submenu">
+						
+								<li>
+									<a href="#" class="dropdown-toggle">
+										<i class="icon-double-angle-right"></i>
+										预评估模型
+										<b class="arrow icon-angle-down"></b>
+									</a>
+									<ul class="submenu">
+										<li class="active">
+											<a href="#">
+												<i class="icon-leaf"></i>
+												准则层
+											</a>
+										 </li>
+						                 <li>
+											<a href="#">
+												<i class="icon-leaf"></i>
+												指标层
+											</a>
+										  </li>
+									 </ul>
+
+								  </li>
+								  
+								  <li>
+									<a href="#" class="dropdown-toggle">
+										<i class="icon-double-angle-right"></i>
+										远程分析模型
+										<b class="arrow icon-angle-down"></b>
+									</a>
+									<ul class="submenu">
+										<li>
+											<a href="#">
+												<i class="icon-leaf"></i>
+												准则层
+											</a>
+										 </li>
+						                 <li>
+											<a href="#">
+												<i class="icon-leaf"></i>
+												指标层
+											</a>
+										  </li>
+									 </ul>
+
+								  </li>
+
+							</ul>
+
+						</li>	  
+
+						<li>
+							<a href="#">
+								<i class="icon-adjust"></i>
+								<span class="menu-text"> 分析结果</span>
+							</a>
+						</li>
+					</ul>
+
+
+
+					<div class="sidebar-collapse" id="sidebar-collapse">
+
+						<i class="icon-double-angle-left" data-icon1="icon-double-angle-left" data-icon2="icon-double-angle-right"></i>
+
+					</div>
+
+
+
+					<script type="text/javascript">
+
+						try{ace.settings.check('sidebar' , 'collapsed')}catch(e){}
+
+					</script>
+
+				</div>
+
+
+
+				<div class="main-content">
+<!--
+					<div class="breadcrumbs" id="breadcrumbs">
+						<script type="text/javascript">
+							try{ace.settings.check('breadcrumbs' , 'fixed')}catch(e){}
+						</script>
+						<ul class="breadcrumb">
+							<li>
+								<span>模型定义</span>
+							</li>
+						</ul>
+					</div>
+-->
+
+					<div class="page-content">
+						<div class="row">
+							
+							
+							<div class="col-xs-2" style="padding-right: 0;">
+                                 <table class="table table-bordered center">
+								        <thead>
+									           <tr>
+											        <th>项目</th>
+											   </tr>
+									    </thead>
+									    <tbody>
+											   <tr>
+												   <td>桩靴插拔作业风险评估</td>
+											   </tr>
+									           <tr>
+												   <td>地质情况</td>
+											   </tr>
+											   <tr>
+												   <td>平台船情况</td>
+											   </tr>
+											   <tr>
+												   <td>作业情况</td>
+											   </tr>
+											   <tr>
+												   <td>施工荷载情况</td>
+											   </tr>
+									    </tbody> 
+								 </table> 
+							</div>
+							<div class="col-xs-6" style="height: 28.1vh;padding: 0;border: 1px solid #ccc;background: #f5f5f5;">
+								 <div style="height: 3.8vh;line-height: 3.8vh;background: linear-gradient(to bottom, #f8f8f8 0, #ececec 100%);color: #707070;text-align: center;font-weight: bold;border-bottom: 2px solid #ddd;">评分矩阵</div>
+								 <div style="background: #fff;height: 2.6vh;line-height: 2.6vh;border: 1px solid #ddd; text-align: right;">
+									 <img src="assets/images/icon_xiala.png">
+								 </div>
+								
+								 <div style="color: #0E06C8;padding-left: 1vw;">λmax=5.072,一致性CR=0.016，CI=0.018，满足一致性要求</div>
+                                 <table class="table table-bordered center" style="background: #f5f5f5;">
+									     <thead>
+									           <tr>
+												   <th width="20%">名称</th>
+												   <th width="20%">地质情况</th>
+												   <th width="20%">平台船情况</th>
+												   <th width="20%">作业情况</th>
+												   <th width="20%">施工荷载情况</th>
+											   </tr>
+									    </thead>
+									    <tbody>
+	
+											   <tr>
+												   <td>地质情况</td>
+												   <td>
+												       1
+												   </td>
+												   <td>1/2</td>
+												   <td>
+												        <select style="height: 2.2vh;padding: 0;width: 100%;">
+															 
+															   <option>1同样重要</option>
+															   <option>2稍稍微重要</option>
+															    <option>3稍微重要</option>
+															   <option>4稍微比较重要</option>
+															   <option>5比较重要</option>
+															   <option>6稍微特别重要</option>
+															   <option>7特别重要</option> 
+															   <option>8稍微绝对重要</option>
+															   <option>9绝对重要</option>
+															   <option>1/9绝对不重要</option>
+															   <option>1/8稍微绝对不重要</option>
+															   <option>1/7特别不重要</option>
+															   <option>1/6稍微特别不重要</option>
+															   <option>1/5比较不重要</option> 
+															   <option>1/4稍微比较不重要</option>
+															   <option>1/3稍微不重要</option>
+															   <option>1/2稍稍微不重要</option>
+													   </select>
+												   </td>
+												   <td>3</td>
+											   </tr>
+											   <tr>
+												   <td>平台船情况</td>
+												   <td>
+												       2
+												   </td>
+												   <td>1</td>
+												   <td>7</td>
+												   <td>5</td>
+											   </tr>
+											   <tr>
+												   <td>作业情况</td>
+												   <td>
+												       1/3
+												   </td>
+												   <td>1/7</td>
+												   <td>1</td>
+												   <td>1/3</td>
+											   </tr>
+											   <tr>
+												   <td>施工荷载情况</td>
+												   <td>
+												       1/3
+												   </td>
+												   <td>1/5</td>
+												   <td>3</td>
+												   <td>1</td>
+											   </tr>
+									    </tbody> 
+								 </table> 
+							</div>
+							
+						    <div class="col-xs-4" style="padding-left: 0;">
+                                 <table class="table table-bordered center">
+								        <thead>
+									           <tr>
+											        <th>λmax特征值</th>
+												    <th>一致性CI系数</th>
+												    <th>一致性CR系数</th>
+												    <th>一致性CR是否满足</th>
+											   </tr>
+									    </thead>
+									    <tbody>
+									           <tr>
+												   <td>5.072</td>
+												   <td>0.018</td>
+												   <td>0.016</td>
+												   <td><input type="checkbox" checked></td>
+											   </tr>
+											   <tr>
+												   <td>4.204</td>
+												   <td>0.068</td>
+												   <td>0.076</td>
+												   <td><input type="checkbox" checked></td>
+											   </tr>
+											   <tr>
+												   <td>4.698</td>
+												   <td>0.233</td>
+												   <td>0.261</td>
+												   <td><input type="checkbox"></td>
+											   </tr>
+											   <tr>
+												   <td>2</td>
+												   <td>0</td>
+												   <td>0</td>
+												   <td><input type="checkbox"></td>
+											   </tr>
+											   <tr>
+												   <td>2</td>
+												   <td>0</td>
+												   <td>0</td>
+												   <td><input type="checkbox"></td>
+											   </tr>
+<!--
+											   <tr>
+												   <td>2</td>
+												   <td>0</td>
+												   <td>0</td>
+												   <td><input type="checkbox"></td>
+											   </tr>
+-->
+									    </tbody> 
+								 </table> 
+							</div>
+							 
+							<div class="col-xs-12" style="margin-top:6.6vh;">
+								 <div>(不可能=概率P<0.01%,很少发生=0.01%<=概率P<0.1%,偶尔发生=0.1%<=概率P<1%,可能发生=1%<=概率P<10%,频繁=概率P>=10%)</div>
+							     <table class="table table-bordered center table_ts">
+								        <thead>
+									           <tr>
+											        <th>项目</th>
+												    <th>风险发生概率</th>
+												    <th>风险损失后果</th>
+											   </tr>
+									    </thead>
+									    <tbody>
+											   <tr>
+												   <td>表层土性</td>
+												   <td>很少发生</td>
+												   <td>
+												       <select style="height: 2.2vh;padding: 0;width: 100%;">
+															 
+															   <option>安全</option>
+															   <option>较低风险</option>
+															    <option>中等风险</option>
+															   <option>较高风险</option>
+															   <option>危险</option>
+												
+													   </select>
+												   </td>
+											   </tr>
+									           <tr>
+												   <td>破坏模式</td>
+												   <td>很少发生</td>
+												   <td>较高风险</td>
+											   </tr>
+											   <tr>
+												   <td>土体性质指标</td>
+												   <td>偶尔发生</td>
+												   <td>中等风险</td>
+											   </tr>
+											   <tr>
+												   <td>经验参数</td>
+												   <td>不可能</td>
+												   <td>较低风险</td>
+											   </tr>
+											   <tr>
+												   <td>桩腿类型</td>
+												   <td>频繁</td>
+												   <td>中等风险</td>
+											   </tr>
+											   <tr>
+												   <td>桩靴型式</td>
+												   <td>可能发生</td>
+												   <td>危险</td>
+											   </tr>
+											   <tr>
+												   <td>接地比压</td>
+												   <td>偶尔发生</td>
+												   <td>较低风险</td>
+											   </tr>
+											   <tr>
+												   <td>冲桩减阻</td>
+												   <td>不可能</td>
+												   <td>中等风险</td>
+											   </tr>
+											   <tr>
+												   <td>插拔桩作业</td>
+												   <td>偶尔发生</td>
+												   <td>较低风险</td>
+											   </tr>
+											   <tr>
+												   <td>保压作业</td>
+												   <td>可能发生</td>
+												   <td>危险</td>
+											   </tr>
+											   <tr>
+												   <td>站桩作业</td>
+												   <td>不可能</td>
+												   <td>安全</td>
+											   </tr>
+											   <tr>
+												   <td>吊重载荷</td>
+												   <td>很少发生</td>
+												   <td>较低风险</td>
+											   </tr>
+											   <tr>
+												   <td>极端工况</td>
+												   <td>很少发生</td>
+												   <td>中等风险</td>
+											   </tr>
+									    </tbody> 
+								 </table> 
+							</div>
+							
+						</div>
+					</div>
+				</div>
+
+
+			</div>
+
+		</div>
+		<script src="http://www.jq22.com/jquery/jquery-2.1.1.js"></script>
+		<script type="text/javascript">
+			window.jQuery || document.write("<script src='assets/js/jquery-2.0.3.min.js'>"+"<"+"/script>");
+		</script>
+		<script type="text/javascript">
+			if("ontouchend" in document) document.write("<script src='assets/js/jquery.mobile.custom.min.js'>"+"<"+"/script>");
+		</script>
+		<script src="http://www.jq22.com/jquery/bootstrap-3.3.4.js"></script>
+		<script src="assets/js/typeahead-bs2.min.js"></script>
+		<script src="assets/js/ace-elements.min.js"></script>
+		<script src="assets/js/ace.min.js"></script>
+</body>
+
+</html>
+

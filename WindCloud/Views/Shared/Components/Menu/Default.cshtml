@@ -1,0 +1,216 @@
+@model int
+
+<div class="left-nav">
+    <div id="side-nav">
+
+        @{
+            var RoleID = Model;
+
+            if (RoleID == 1)
+            {
+                <ul id="nav">
+
+                    <li>
+                        <a href="javascript:;">
+                            <span class="icon_leftmenu icon_leftmenubg01"><i class="icon iconfont">&#xe658;</i></span>
+                            <cite>云平台配置</cite>
+                            <i class="iconfont nav_right">&#xe697;</i>
+                        </a>
+                        <ul class="sub-menu">
+                            <li>
+                                <a _href="/BackManage/Project/Index">
+                                    <i class="fa fa-laptop"></i>
+                                    <cite>项目配置</cite>
+                                </a>
+                            </li>
+                            <li>
+                                <a _href="/BackManage/Platform/Software">
+                                    <i class="fa fa-laptop"></i>
+                                    <cite>软件配置</cite>
+                                </a>
+                            </li>
+                            <li>
+                                <a _href="/BackManage/Platform/Company">
+                                    <i class="fa fa-laptop"></i>
+                                    <cite>分公司配置</cite>
+                                </a>
+                            </li>
+                            <li>
+                                <a _href="/BackManage/Library/Ship">
+                                    <i class="fa fa-laptop"></i>
+                                    <cite>平台船库</cite>
+                                </a>
+                            </li>
+                            <li>
+                                <a _href="/BackManage/Library/DK">
+                                    <i class="fa fa-laptop"></i>
+                                    <cite>地勘库</cite>
+                                </a>
+                            </li>
+                            <li>
+                                <a _href="/BackManage/PlatRole/Index">
+                                    <i class="fa fa-laptop"></i>
+                                    <cite>平台浏览角色</cite>
+                                </a>
+                            </li>
+                            <li>
+                                <a _href="/BackManage/CopyInform/Index">
+                                    <i class="fa fa-laptop"></i>
+                                    <cite>抄送通知</cite>
+                                </a>
+                            </li>
+                            <li>
+                                <a _href="/BackManage/Setting/Index">
+                                    <i class="fa fa-laptop"></i>
+                                    <cite>其他设置</cite>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="javascript:;">
+                            <span class="icon_leftmenu icon_leftmenubg02"><i class="icon iconfont">&#xe6b0;</i></span>
+                            <cite>流程设置</cite>
+                            <i class="iconfont nav_right">&#xe697;</i>
+                        </a>
+                        <ul class="sub-menu">
+                            <li>
+                                <a _href="/BackManage/Flow/Node">
+                                    <i class="icon iconfont">&#xe67c;</i>
+                                    <cite>流程节点配置</cite>
+                                </a>
+                            </li>
+
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="javascript:;">
+                            <span class="icon_leftmenu icon_leftmenubg02"><i class="icon iconfont">&#xe6b0;</i></span>
+                            <cite>WebGis设置</cite>
+                            <i class="iconfont nav_right">&#xe697;</i>
+                        </a>
+                        <ul class="sub-menu">
+                            <li>
+                                <a _href="/BackManage/WebGis/Ship">
+                                    <i class="icon iconfont">&#xe67c;</i>
+                                    <cite>船舶配置</cite>
+                                </a>
+                            </li>
+
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="javascript:;">
+                            <span class="icon_leftmenu icon_leftmenubg03"><i class="icon iconfont">&#xe653;</i></span>
+                            <cite>项目角色</cite>
+                            <i class="iconfont nav_right">&#xe697;</i>
+                        </a>
+                        <ul class="sub-menu">
+                            <li>
+                                <a _href="/BackManage/ProjectRole/Index">
+                                    <i class="icon iconfont">&#xe63a;</i>
+                                    <cite>项目成员</cite>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="javascript:;">
+                            <span class="icon_leftmenu icon_leftmenubg03"><i class="icon iconfont">&#xe653;</i></span>
+                            <cite>报告推送设置</cite>
+                            <i class="iconfont nav_right">&#xe697;</i>
+                        </a>
+                        <ul class="sub-menu">
+                            <li>
+                                <a _href="/BackManage/KZYReport/Index">
+                                    <i class="icon iconfont">&#xe63a;</i>
+                                    <cite>起重船基础施工可作业性预报</cite>
+                                </a>
+                            </li>
+                            <li>
+                                <a _href="/BackManage/TowingReport/Index">
+                                    <i class="icon iconfont">&#xe63a;</i>
+                                    <cite>拖航可行性报告</cite>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="javascript:;">
+                            <span class="icon_leftmenu icon_leftmenubg01"><i class="icon iconfont">&#xe658;</i></span>
+                            <cite>平台设置</cite>
+                            <i class="iconfont nav_right">&#xe697;</i>
+                        </a>
+                        <ul class="sub-menu">
+                            <li>
+                                <a _href="/BackManage/Towing/Index">
+                                    <i class="fa fa-laptop"></i>
+                                    <cite>拖航监控</cite>
+                                </a>
+                            </li>
+
+                        </ul>
+                    </li>
+                </ul>
+            }
+            else if (RoleID == 2)
+            {
+                <ul id="nav">
+                    <li>
+                        <a href="javascript:;">
+                            <span class="icon_leftmenu icon_leftmenubg03"><i class="icon iconfont">&#xe653;</i></span>
+                            <cite>项目角色</cite>
+                            <i class="iconfont nav_right">&#xe697;</i>
+                        </a>
+                        <ul class="sub-menu">
+                            <li>
+                                <a _href="/BackManage/ProjectRole/Index">
+                                    <i class="icon iconfont">&#xe63a;</i>
+                                    <cite>项目成员</cite>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            }
+        }
+
+
+    </div>
+</div>
+
+
+<!-- ====================== 修复版：URL自动打开菜单（无报错） ====================== -->
+<script>
+    // 等待 layui 完全加载 + 初始化 element 后再执行
+    layui.use(['element', 'layer'], function () {
+        var element = layui.element;
+        var $ = layui.jquery;
+
+        $(function () {
+            var targetUrl = getQueryString("target");
+            if (!targetUrl) return;
+
+            var $menu = $("a[_href='" + targetUrl + "']");
+            if ($menu.length === 0) return;
+
+            // 展开父菜单
+            $menu.parents(".sub-menu").show();
+            //$menu.parents("li").addClass("layui-nav-itemed");
+            element.init(); // 刷新layui组件
+
+            // 延迟执行点击，确保 xadmin 完全就绪
+            setTimeout(function () {
+                $menu.trigger("click");
+            }, 100);
+        });
+
+        // 获取URL参数
+        function getQueryString(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return decodeURIComponent(r[2]);
+            return null;
+        }
+    });
+</script>

@@ -1,0 +1,63 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup Label="Globals">
+    <SccProjectName>SAK</SccProjectName>
+    <SccProvider>SAK</SccProvider>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="CaculateNet.cs" />
+    <Compile Remove="DB.cs" />
+    <Compile Remove="Report.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="10.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EasySpudcanCalculateClassVB\EasySpudcanCalculateClassVB.vbproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="EasyDiaGram">
+      <HintPath>import\vb\EasyDiaGram.dll</HintPath>
+    </Reference>
+    <Reference Include="EasyFiniteElement">
+      <HintPath>import\vb\EasyFiniteElement.dll</HintPath>
+    </Reference>
+    <Reference Include="EasyFiniteElementSolver">
+      <HintPath>import\vb\EasyFiniteElementSolver.dll</HintPath>
+    </Reference>
+    <Reference Include="EasyPlot">
+      <HintPath>import\vb\EasyPlot.dll</HintPath>
+    </Reference>
+    <Reference Include="EsAPI">
+      <HintPath>import\vb\EsAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="EsBase">
+      <HintPath>import\vb\EsBase.dll</HintPath>
+    </Reference>
+    <Reference Include="EsMatrixSolver">
+      <HintPath>import\vb\EsMatrixSolver.dll</HintPath>
+    </Reference>
+    <Reference Include="EsTool">
+      <HintPath>import\vb\EsTool.dll</HintPath>
+    </Reference>
+    <Reference Include="EsUI">
+      <HintPath>import\vb\EsUI.dll</HintPath>
+    </Reference>
+    <Reference Include="EsWord">
+      <HintPath>import\vb\EsWord.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,114 @@
+﻿/* 基础重置 - 无@符号 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 自定义工具类 - 纯原生CSS */
+.content-auto {
+    content-visibility: auto;
+}
+
+.sidebar-shadow {
+    box-shadow: 2vw 0 2vw rgba(0, 0, 0, 0.1);
+}
+
+.transition-all-300 {
+    transition: all 0.3s ease;
+}
+
+.menu-item-active {
+    background-color: rgba(52, 152, 219, 0.2);
+    color: #3498db;
+    border-left: 0.5vw solid #3498db;
+}
+
+/* 基础布局 - 100%视口单位 */
+body {
+    overflow-x: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-size: 1vw;
+}
+
+.sidebar {
+    width: 20vw;
+    flex-shrink: 0;
+    transition: width 0.3s ease;
+    height: 100%;
+}
+
+    .sidebar.collapsed {
+        width: 5vw;
+    }
+
+        .sidebar.collapsed .menu-text {
+            display: none;
+        }
+
+        .sidebar.collapsed .menu-collapse-icon {
+            display: none;
+        }
+
+        .sidebar.collapsed .sidebar-header-text {
+            display: none;
+        }
+
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* 三层菜单展开/折叠样式 */
+.menu-subitem-level1, .menu-subitem-level2 {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+    .menu-subitem-level1.expanded {
+        max-height: 80vh;
+    }
+
+    .menu-subitem-level2.expanded {
+        max-height: 50vh;
+    }
+
+/* 响应式断点 - 移除@media中的@符号影响，纯原生写法 */
+@media screen and (max-width: 768px) {
+    body {
+        font-size: 3vw;
+    }
+
+    .sidebar {
+        width: 80vw;
+        position: absolute;
+        z-index: 999;
+    }
+
+        .sidebar.collapsed {
+            width: 15vw;
+        }
+}
+
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+    body {
+        font-size: 1.5vw;
+    }
+
+    .sidebar {
+        width: 25vw;
+    }
+
+        .sidebar.collapsed {
+            width: 7vw;
+        }
+}
+
+@media screen and (min-width: 1920px) {
+    body {
+        font-size: 0.8vw;
+    }
+}

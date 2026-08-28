@@ -1,0 +1,97 @@
+@charset "utf-8";
+/* CSS Document */
+body{font-size: 1.6vh;background:#f5f7fd!important; font-family: "微软雅黑";color: #515a6e;}
+*{padding: 0;margin: 0;}
+ul li{list-style: none;padding: 0;margin: 0;}
+label{font-weight: normal;}
+.mar_l0{margin-left: 0;}
+.mar_r04{margin-right: 0.4vw;}
+.mar_t05{margin-top: 0.5vh;}
+.mar_t08{margin-top: 0.8vh;}
+.mar_t1{margin-top: 1vh;}
+.mar_t2{margin-top: 2vh;}
+.mar_t3{margin-top: 3vh;}
+.mar_t4{margin-top: 4vh;}
+.mar_t5{margin-top: 5vh;}
+@font-face {font-family: 'fzzzh';/*这里填写字体名*/src: url(../fonts/fzzzh.ttf);}
+/*头部*/
+.top{height:6.2vh;line-height: 6.2vh;background:#ffffff;}
+.top_wrapper{width: 98vw;margin: 0 auto;}
+.top_title{float: left;font-size: 1.8vh;}
+.top_title img{margin-right: 0.5vw;height:5vh;}
+.top_title span{font-size: 1.8vh;font-weight: bold;color: #0b318f;}
+.top_information{float: right;}
+.top_information ul li{float: left;color: #333;font-size: 1.7vh;}
+.top_information ul li:first-child{margin-right: 1.5vw;}
+.top_information ul li a{color: #555;}
+.top_information ul li a:hover{color: #555;}
+.top_information ul li img{border-radius: 50%;height: 1.7vw;width: 1.7vw;}
+/*内容*/
+/*index*/
+.p_0{padding: 0!important;}
+.pl_0{padding-left: 0!important;}
+.pr_0{padding-right: 0!important;}
+.pl_05{padding-left: 0.5%!important;}
+.pr_05{padding-right: 0.5%!important;}
+.plr_05{padding: 0 0.5vw!important;}
+.index_wapper{width: 98vw;margin: 0 auto;}
+.banner{background: url("../img/banner4.png") no-repeat center;height: 26vh;padding-left: 1vw;position: relative;}
+.banner ul {position: absolute;bottom: 0.3vh;}
+.banner ul li{float: left;height: 12vh;width: 5vw;/*background: rgba(0,0,0,0.35);border: 1px solid rgba(255,255,255,0.15);*/border-radius:10px;margin-right: 0.6vw;cursor: pointer;}
+.banner ul li span{display: block;text-align: center;}
+.banner ul li span:first-child{padding: 1.2vh 0 0.8vh 0;}
+.banner ul li span:first-child img{height: 3.4vw;}
+.banner ul li span:last-child{font-size: 1.4vh;color: rgba(255,255,255,0.88);}
+.banner_title{font-family: 'fzzzh';text-align: center;color: #fff;font-style: oblique;font-size: 4.2vh;padding-top: 3vh;letter-spacing: 0.3vw;}
+
+.unify_box{background: #fff;border-radius: 8px;box-shadow: 3px 3px 2px 0px rgba(0,0,0,0.05);height: 66vh;}
+.content_title{font-size: 1.8vh;color: #666;padding: 1.5vh 0 1.5vh 2vw;border-bottom: 1px solid rgba(0,0,0,0.1);position: relative;}
+.content_title span{display: block;width: 0.32vw;height: 2.6vh;background: #069eff;position: absolute;left: 1vw;}
+.mod{padding: 0.8vw 0.8vw 0 0.8vw;max-height: 59vh;overflow-y: scroll;}
+.mod > div{width:24.25%;margin-right: 1%;text-align: center;}
+.mod > div:nth-of-type(4n){margin-right: 0;}
+.mod_con{border:1px solid rgba(0,0,0,0.06);float: left;padding: 1.5vh 0;border-radius: 6px;box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.05);margin-bottom: 0.8vw;}
+.mod_con div:nth-of-type(1){margin-bottom: 1vh;width: 86%;margin: 0 auto;}
+.mod_con div:nth-of-type(1) img{width:100%;height: 12vh;}
+.mod_con div:nth-of-type(2){margin: 1.2vh 0;padding: 0 1vw;font-size: 1.6vh;height: 4.6vh;color: #555555;font-weight: bold;}
+.mod_con div:nth-of-type(3){}
+.mod_con div:nth-of-type(3) button{margin-right: 0.5vw;border: none;padding: 0.2vh 1vw;font-size: 1.4vh;font-weight: bold;}
+.button_color01{background: #e4f4fe;color:#069eff; }
+.button_color02{background: #fcf8ec;color:#ffba00;}
+.detail_box{}
+.detail_title{font-size: 2.4vh;color: #333;font-weight: bold;text-align: center;padding:2.2vh 0;font-style: oblique;letter-spacing: 0.05vw;}
+.detail_box p{padding: 0 1.8vw;line-height: 1.8;font-size: 1.6vh;color: #666;}
+.detail_box p span:first-child{font-weight: bold;font-size: 1.8vh;}
+/*默认弹框*/
+.modal-content{background: url("../img/secrecy-warn.jpeg") no-repeat;height: 32vh;background-size: 100% 100%;margin-top: 25vh;}
+.modal-header{border-bottom: none;}
+.modal-header .close {margin-top: -3.2vh;margin-right: -1.29vw;color: #fff;opacity: 0.7;font-size: 3vh;}
+/*滚动条*/
+::-webkit-scrollbar{ width:0.3vw; height:0.9vh; background:rgba(255,255,255,0.5);}
+::-moz-scrollbar{ width:0.3vw; height:0.9vh; background:rgba(255,255,255,0.5);}
+::-ms-scrollbar{ width:0.3vw; height:0.9vh; background:rgba(255,255,255,0.5);}
+::-o-scrollbar{ width:0.3vw; height:0.9vh; background:rgba(255,255,255,0.5);}
+::-webkit-scrollbar-thumb{background:#eaeaea;}
+::-moz-scrollbar-thumb{background:#eaeaea;}
+::-mswebkit-scrollbar-thumb{background:#eaeaea;}
+::-o-scrollbar-thumb{background:#eaeaea;}
+div{
+	scrollbar-arrow-color: #eaeaea; /**//*三角箭头的颜色*/ 
+	scrollbar-face-color: #eaeaea; /**//*立体滚动条的颜色*/ 
+	scrollbar-3dlight-color: #eaeaea; /**//*立体滚动条亮边的颜色*/ 
+	scrollbar-highlight-color: rgba(255,255,255,1); /**//*滚动条空白部分的颜色*/ 
+	scrollbar-shadow-color: #eaeaea; /**//*立体滚动条阴影的颜色*/ 
+	scrollbar-darkshadow-color: #eaeaea; /**//*立体滚动条强阴影的颜色*/ 
+	scrollbar-track-color: #4e657b; /**//*立体滚动条背景颜色*/ 
+	scrollbar-base-color:#f8f8f8; /**//*滚动条的基本颜色*/ 
+}
+
+
+
+
+
+
+
+
+
+

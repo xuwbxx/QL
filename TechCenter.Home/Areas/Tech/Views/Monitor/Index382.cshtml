@@ -1,0 +1,815 @@
+﻿
+@{
+	ViewData["Title"] = "技术中心监测系统";
+    Layout = "~/Views/Shared/Tech/MonitorLayout.cshtml";
+}
+
+<header class="header_box">
+	<span id="span_projectName">技术中心智慧化监测系统</span>
+</header>
+
+<input hidden id="hid_projectID" value="@(ViewData["pid"].ToString())" />
+
+<div class="content clearfix">
+
+	<!--		start   left-->
+	<div class="col-lg-3 col-sm-3 col-xs-12">
+
+		<div class="left01 clearfix">
+			<div class="GYtitle">监测点部署情况</div>
+
+			<div class="left01_contnet clearfix">
+				<div class="left01_list clearfix">
+					<div class="pull-left">
+						<img src="~/Web/Monitor/img/icon_thgc.png">
+					</div>
+					<div class="pull-left">
+						<div>地表竖向位移</div>
+						<div id="div_thProjectCount">20</div>
+					</div>
+				</div>
+				<div class="left01_list clearfix">
+					<div class="pull-left">
+						<img src="~/Web/Monitor/img/icon_jkgc.png">
+					</div>
+					<div class="pull-left">
+						<div>支撑轴力</div>
+						<div id="div_jkProjectCount">20</div>
+					</div>
+				</div>
+				<div class="left01_list clearfix">
+					<div class="pull-left">
+						<img src="~/Web/Monitor/img/icon_hjgc.png">
+					</div>
+					<div class="pull-left">
+						<div>深层水平位移</div>
+						<div id="div_hjProjectCount">20</div>
+					</div>
+				</div>
+				<div class="left01_list clearfix">
+					<div class="pull-left">
+						<img src="~/Web/Monitor/img/icon_qlgc.png">
+					</div>
+					<div class="pull-left">
+						<div>地下水位</div>
+						<div id="div_qlProjectCount">20</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+
+		<div class="left02">
+			<div class="GYtitle">监测正常点数量</div>
+
+			<div class="left02_contnet" style="height:25vh;" id="div_NormalProjectChart">
+				@* <img src="~/Web/Monitor/img/img_TB01.png"> *@
+			</div>
+
+		</div>
+		<div class="left03">
+			<div class="GYtitle">项目测点一览</div>
+
+			<div class="left03_contnet">
+				<ul id="ul_NormalProjectList">
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+
+				</ul>
+
+			</div>
+
+		</div>
+	</div>
+	<!--end   left-->
+	<!--start  center-->
+	<div class="col-lg-6 col-sm-6 col-xs-12" style="padding: 0;">
+
+		<div class="center01">
+			<img src="~/Web/Monitor/img/center_bg.png">
+			<div class="data clearfix">
+				<div><p class="time" id="time">00:00:00</p></div>
+				<div class="s_line"></div>
+				<div>
+					<p class="date" id="date"></p>
+					<p class="year" id="year"></p>
+				</div>
+			</div>
+
+			<div class="center01_content">
+				<ul class="clearfix">
+					<li class="bg01" onclick="OpenProject('TH');">
+						<span><img src="~/Web/Monitor/img/img_thgc.png"></span>
+						<span>地表竖向位移</span>
+					</li>
+					<li class="bg02" onclick="OpenProject('JK');">
+						<span><img src="~/Web/Monitor/img/img_jkgc.png"></span>
+						<span>支撑轴力</span>
+					</li>
+					<li class="bg03" onclick="OpenProject('HJ');">
+						<span><img src="~/Web/Monitor/img/img_hjgc.png"></span>
+						<span>深层水平位移</span>
+					</li>
+					<li class="bg04" onclick="OpenProject('QL');">
+						<span><img src="~/Web/Monitor/img/img_qlgc.png"></span>
+						<span>地下水位</span>
+					</li>
+				</ul>
+			</div>
+
+
+			<div class="center01_content_son clearfix" id="thgc_son">
+				<span class="JT_box"><img src="~/Web/Monitor/img/icon_jiantou.png"></span>
+				<div class="pull-left center01_content_son_left"><img id="img_ProjectImg" src="~/Web/Monitor/img/BannerPic/TH/1.png"></div>
+				<div class="pull-left">
+					<div class="center01_content_son_tit">
+						<span id="span_ProjectName">填海工程</span>
+
+						<button id="exit">退出</button>
+						<button id="btn_OpenProject" data-url="" onclick="OpenProjectPlat(this);">进入平台</button>
+					</div>
+					<ul id="ul_ProjectList">
+						<li class="clearfix th"><span>项目名称</span><span>报警数量</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>12</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>32</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>12</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>32</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>12</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>32</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>12</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>32</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>12</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>32</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>12</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>32</span></li>
+					</ul>
+				</div>
+			</div>
+
+
+
+
+
+			<!--start	轮播-->
+			<div id="marquee1" class="marquee1" style="width: 100%; overflow: hidden; position: relative;">
+
+				<ul style="margin:0; padding:0; list-style:none; white-space: nowrap; display: flex;">
+					<li><img src="/Web/Monitor/img/BannerPic/382/1.png" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/382/2.png" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/382/3.png" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/382/4.png" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/382/5.png" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/382/6.png" class="zoomable-img"></li>
+				</ul>
+
+			</div>
+
+			<script>
+
+			</script>
+			<!--end 轮播-->
+		</div>
+
+	</div>
+	<!--end center-->
+	<!--start right-->
+	<div class="col-lg-3 col-sm-3 col-xs-12">
+
+		<div class="right01 clearfix">
+			<div class="GYtitle">监测异常点分类数量</div>
+
+			<div class="right01_content" style="height:30vh;" id="div_AbnormalProjectChart">
+				@* <img src="~/Web/Monitor/img/img_TB02.png"> *@
+			</div>
+
+		</div>
+
+
+		<div class="right02">
+			<div class="GYtitle">监测异常点列表</div>
+
+			<div class="right02_contnet">
+				<ul id="ul_AbnormalProjectPointList">
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+				</ul>
+
+			</div>
+
+		</div>
+
+
+	</div>
+	<!--end right-->
+
+</div>
+
+<script>
+
+	$(document).ready(function(){
+
+		QueryData();
+
+	})
+
+
+	var OpenProject = function(ProjectCode){
+
+		if(ProjectCode == null || ProjectCode == '')
+		{
+			return;
+		}
+
+		var ProjectListHtml = '<li class="clearfix th"><span>测点名称</span><span>报警数量</span></li>';
+
+		if(ProjectCode == 'TH')
+		{
+			$('#img_ProjectImg').attr('src', '/Web/Monitor/img/BannerPic/TH/1.png');
+
+			$('#span_ProjectName').html('地表竖向位移');
+
+			$(WebQueryData.thProject.Projects).each(function(index, dom){
+
+				ProjectListHtml += '<li class="clearfix"><span>' + dom.ProjectName + '</span><span>' + dom.AlarmCount + '</span></li>';
+
+			});
+
+			$('#btn_OpenProject').attr('data-url', 'https://www.baidu.com/');
+
+		}
+		else if(ProjectCode == 'JK')
+		{
+			$('#img_ProjectImg').attr('src', '/Web/Monitor/img/BannerPic/JK/1.png');
+
+			$('#span_ProjectName').html('支撑轴力');
+
+			$(WebQueryData.jkProject.Projects).each(function(index, dom){
+
+				ProjectListHtml += '<li class="clearfix"><span>' + dom.ProjectName + '</span><span>' + dom.AlarmCount + '</span></li>';
+
+			});
+
+			$('#btn_OpenProject').attr('data-url', 'https://www.baidu.com/');
+		}
+		else if(ProjectCode == 'HJ')
+		{
+			$('#img_ProjectImg').attr('src', '/Web/Monitor/img/BannerPic/HJ/1.png');
+
+			$('#span_ProjectName').html('深层水平位移');
+
+			$(WebQueryData.hjProject.Projects).each(function(index, dom){
+
+				ProjectListHtml += '<li class="clearfix"><span>' + dom.ProjectName + '</span><span>' + dom.AlarmCount + '</span></li>';
+
+			});
+
+			$('#btn_OpenProject').attr('data-url', 'https://www.baidu.com/');
+		}
+		else if(ProjectCode == 'QL')
+		{
+			$('#img_ProjectImg').attr('src', '/Web/Monitor/img/BannerPic/QL/1.png');
+
+			$('#span_ProjectName').html('地下水位');
+
+			$(WebQueryData.qlProject.Projects).each(function(index, dom){
+
+				ProjectListHtml += '<li class="clearfix"><span>' + dom.ProjectName + '</span><span>' + dom.AlarmCount + '</span></li>';
+
+			});
+
+			$('#btn_OpenProject').attr('data-url', 'https://www.baidu.com/');
+		}
+
+		$('#ul_ProjectList').html(ProjectListHtml);
+
+		$('#marquee1').hide();
+		$('#thgc_son').show();
+
+	}
+
+	var OpenProjectPlat = function(dom){
+
+		PlatRedirect(3);
+
+		return;
+
+		if(dom == null)
+		{
+			return;
+		}
+
+		var URL = $(dom).attr('data-url');
+		if(URL == '')
+		{
+			return;
+		}
+
+		window.open(URL, '_blank');
+
+	}
+
+
+	var WebQueryData = {};
+
+	var QueryData = function(){
+
+		var Param = {};
+		Param.ID = $('#hid_projectID').val();
+
+		$.ajax({
+			url: 'GetProjectInfo_KuLun',
+			method: "POST",  // 或 "GET"、"PUT" 等
+			dataType: "json",
+			//timeout: 5000,
+			data: Param,
+			success: function(response)
+			{
+				//var user = 123;
+
+				if(response.Success)
+				{
+					var Data = response.Data;
+
+					WebQueryData = Data;
+
+					$('#span_projectName').html(Data.ProjectName);
+
+					//已完工监控项目数量
+					$('#div_thProjectCount').html(Data.thProject.ProjectFinishedCount);
+					$('#div_jkProjectCount').html(Data.jkProject.ProjectFinishedCount);
+					$('#div_hjProjectCount').html(Data.hjProject.ProjectFinishedCount);
+					$('#div_qlProjectCount').html(Data.qlProject.ProjectFinishedCount);
+
+					//监控正常项目列表
+					var NormalProjectListHtml = '';
+					$(Data.NormalProjects).each(function(index, dom){
+
+						NormalProjectListHtml += '<li><a>' + dom.PointName + '(' + dom.Type + ')</a><span>正常</span></li>';
+
+					});
+					$('#ul_NormalProjectList').html(NormalProjectListHtml);
+
+
+					//监控异常项目列表
+					var AbnormalProjectPointsHtml = '';
+					$(Data.AbnormalProjectPoints).each(function(index, dom){
+
+						AbnormalProjectPointsHtml += '<li><a>' + dom.ProjectPoint + '<span>' + dom.Time + '</span></a></li>';
+
+					});
+					$('#ul_AbnormalProjectPointList').html(AbnormalProjectPointsHtml);
+
+					//监控正常项目数量
+					DrawNormalProjecrChart(Data);
+					//监控异常项目数量
+					DrawAbnormalProjectChart(Data);
+				}
+
+			},
+			error: function(error)
+			{
+				console.log(error);
+			},
+			complete: function()
+			{
+				//alert(111);
+			},
+
+			// 更多配置...
+		})
+
+	}
+
+	var DrawNormalProjecrChart = function(data){
+
+		// var option = {
+		//   tooltip: {
+		// 	trigger: 'axis',
+		// 	axisPointer: {
+		// 	  type: 'shadow'
+		// 	}
+		//   },
+		//   legend: {
+
+		// 	  textStyle:{
+
+		// 		  color: '#fff',
+
+		// 	  }
+
+		//   },
+		//   grid: {
+		// 	left: '0%',
+		// 	right: '0%',
+		// 	top: '20%',
+		// 	bottom: '0%',
+		// 	containLabel: true
+		//   },
+		//   xAxis: [
+		// 	{
+
+		// 	  type: 'category',
+		// 	  data: [],
+		// 	  axisLabel: {
+		// 			show: true,
+		// 			color: '#fff' 设置文字颜色为蓝色
+		// 		},
+		// 	}
+		//   ],
+		//   yAxis: [
+		// 	{
+		// 	  type: 'value',
+		// 	  axisLabel: {
+		// 			show: true,
+		// 			color: '#fff' 设置文字颜色为蓝色
+		// 		},
+		// 	  splitLine: {
+		// 		show: true, 确保显示分割线
+		// 		lineStyle: {
+		// 		或者使用 rgba 控制透明度（更浅）
+		// 		color: 'rgba(255, 255, 255, 0.3)',
+		// 		width: 1,     线宽
+		// 		type: 'dashed'  线型，可以是'solid'、'dashed'、'dotted'
+		// 		}
+		// 	  }
+		// 	}
+		//   ],
+		//   series: [
+		// 	{
+		// 	  name: 'Direct',
+		// 	  type: 'bar',
+		// 	  emphasis: {
+		// 		focus: 'series'
+		// 	  },
+		// 	  data: [320, 332, 301, 334, 390, 330, 320]
+		// 	},
+
+		//   ]
+		// };
+
+
+		var option = {
+	  tooltip: {
+		trigger: 'axis',
+		axisPointer: {
+		  type: 'shadow'
+		}
+	  },
+	  // 修复：图例固定在顶部
+	  legend: {
+		  textStyle:{
+			  color: '#fff',
+		  },
+		  top: '5%', // 图例位置：顶部5%处
+		  left: 'center', // 水平居中
+	  },
+	  grid: {
+		left: '5%',   // 给左右留一点边距，避免柱子贴边
+		right: '5%',
+		top: '20%',   // 给图例和标题留出空间
+		bottom: '10%',
+		containLabel: true
+	  },
+	  xAxis: [
+		{
+		  type: 'category',
+		  data: [],
+		  axisLabel: {
+				show: true,
+				color: '#fff'
+			},
+		  // 修复：同组内柱子的间距
+		  barGap: '20%', // 同一系列组内柱子间距（百分比，相对于barWidth）
+		  barCategoryGap: '30%', // 不同分类（年份）之间的间距
+		}
+	  ],
+	  yAxis: [
+		{
+		  type: 'value',
+		  axisLabel: {
+				show: true,
+				color: '#fff'
+			},
+		  splitLine: {
+			show: true,
+			lineStyle: {
+			  color: 'rgba(255, 255, 255, 0.3)',
+			  width: 1,
+			  type: 'dashed'
+			}
+		  }
+		}
+	  ],
+	  series: []
+	};
+
+
+		var thSerie = {
+			  name: '地表竖向位移',
+			  type: 'bar',
+			  roundCap: true,
+			  itemStyle: {
+					borderRadius: [10, 10, 0, 0]  // 可选的圆角效果
+				},
+			  barWidth: '15%',
+			  emphasis: {
+				focus: 'series'
+			  },
+			  data: []
+			};
+		$(data.thProject.YearNormalProjectCountChart).each(function(index, dom){
+
+			option.xAxis[0].data.push(dom.Year + '年');
+
+			thSerie.data.push(dom.ProjectCount);
+
+		});
+		option.series.push(thSerie);
+
+		var jkSerie = {
+			  name: '支撑轴力',
+			  type: 'bar',
+			  roundCap: true,
+			  itemStyle: {
+					borderRadius: [10, 10, 0, 0]  // 可选的圆角效果
+				},
+			  barWidth: '15%',
+			  emphasis: {
+				focus: 'series'
+			  },
+			  data: []
+			};
+		$(data.jkProject.YearNormalProjectCountChart).each(function(index, dom){
+
+			jkSerie.data.push(dom.ProjectCount);
+
+		});
+		option.series.push(jkSerie);
+
+		var hjSerie = {
+			  name: '地下水位',
+			  type: 'bar',
+			  roundCap: true,
+			  itemStyle: {
+					borderRadius: [10, 10, 0, 0]  // 可选的圆角效果
+				},
+			  barWidth: '15%',
+			  emphasis: {
+				focus: 'series'
+			  },
+			  data: []
+			};
+		$(data.hjProject.YearNormalProjectCountChart).each(function(index, dom){
+
+			hjSerie.data.push(dom.ProjectCount);
+
+		});
+		option.series.push(hjSerie);
+
+		var qlSerie = {
+			  name: '深层水平位移',
+			  type: 'bar',
+			  roundCap: true,
+			  itemStyle: {
+					borderRadius: [10, 10, 0, 0]  // 可选的圆角效果
+				},
+			  barWidth: '15%',
+			  emphasis: {
+				focus: 'series'
+			  },
+			  data: []
+			};
+		$(data.qlProject.YearNormalProjectCountChart).each(function(index, dom){
+
+			qlSerie.data.push(dom.ProjectCount);
+
+		});
+		option.series.push(qlSerie);
+
+		var chartDom = document.getElementById('div_NormalProjectChart');
+		var myChart = echarts.init(chartDom);
+		option && myChart.setOption(option);
+
+	}
+
+
+	var DrawAbnormalProjectChart = function(data){
+
+		// var option = {
+		//   tooltip: {
+		// 	trigger: 'item',
+		// 	formatter: '{a} <br/>{b}: {c} ({d}%)'
+		//   },
+		//   grid:{
+		// 	left: '1%',
+		// 	right: '30%'
+		//   },
+		//   legend: {
+		// 	  textStyle:{
+		// 		  color: '#fff',
+		// 	  },
+		// 	  orient: 'vertical',
+		// 	  right: 2,
+		// 	data: [
+		// 	  '填海异常',
+		// 	  '基坑异常',
+		// 	  '环境异常',
+		// 	  '桥梁异常',
+		// 	  '填海工程',
+		// 	  '基坑工程',
+		// 	  '环境工程',
+		// 	  '桥梁工程'
+		// 	]
+		//   },
+		//   series: [
+		// 	{
+		// 	  name: '异常',
+		// 	  type: 'pie',
+		// 	  center: ['35%', '50%'],
+		// 	  selectedMode: 'single',
+		// 	  radius: [0, '30%'],
+		// 	  label:{
+		// 		show:false
+		// 	  },
+		// 	  labelLine: {
+		// 		show: false
+		// 	  },
+		// 	  data: [
+				
+		// 	  ]
+		// 	},
+		// 	{
+		// 	  name: '项目数',
+		// 	  type: 'pie',
+		// 	  center: ['35%', '50%'],
+		// 	  radius: ['40%', '60%'],
+		// 	  label: {
+				
+		// 		show: true,
+		// 		  formatter: function(params) {
+		// 			return params.name.substring(0, 2) + '\n' + params.name.substring(2, 4);  截断长文本
+		// 		  }
+		// 	  },
+		// 	  data: [
+				
+		// 	  ]
+		// 	}
+		//   ]
+		// };
+
+			var option = {
+	  tooltip: {
+		trigger: 'item',
+		formatter: '{a} <br/>{b}: {c} ({d}%)'
+	  },
+	  // 饼图不需要grid，直接删掉
+	  legend: {
+		textStyle: {
+		  color: '#fff',
+		  fontSize: 12, // 标题字体再缩小，和截图更匹配
+		  lineHeight: 16 // 行高避免文字挤在一起
+		},
+		orient: 'vertical',
+		right: '2%', // 图例再靠右，和截图对齐
+		top: 'center', // 垂直居中
+		itemWidth: 20, // 图例方块宽度
+		itemHeight: 14, // 图例方块高度
+		data: [
+		  '地表竖向位移异常',
+		  '支撑轴力异常',
+		  '深层水平位移异常',
+		  '地下水位异常',
+		  '地表竖向位移',
+		  '支撑轴力',
+		  '深层水平位移',
+		  '地下水位'
+		]
+	  },
+	  series: [
+		{
+		  name: '异常',
+		  type: 'pie',
+		  center: ['35%', '50%'],
+		  selectedMode: 'single',
+		  radius: [0, '22%'], // 内层饼图再缩小一点，给右侧图例留空间
+		  label: {
+			show: false
+		  },
+		  labelLine: {
+			show: false
+		  },
+		  data: [
+			// 这里放你的异常数据
+		  ]
+		},
+		{
+		  name: '项目数',
+		  type: 'pie',
+		  center: ['35%', '50%'],
+		  radius: ['30%', '48%'], // 外层饼图也同步缩小，整体更紧凑
+		  label: {
+			show: true,
+			fontSize: 14, // 饼图上的文字也缩小，和整体协调
+			color: '#fff',
+			formatter: function(params) {
+			  // 保持你的换行逻辑，适配截图里的短标签
+			  return params.name.substring(0, 2) + '\n' + params.name.substring(2, 4);
+			}
+		  },
+		  labelLine: {
+			show: true,
+			lineStyle: {
+			  color: '#fff',
+			  width: 1
+			}
+		  },
+		  data: [
+			// 这里放你的项目数数据
+		  ]
+		}
+	  ]
+	};
+
+
+		//填海工程
+		option.series[0].data.push({ value: data.thProject.AbnormalProjectCount, name: '地表竖向位移异常' });
+		option.series[1].data.push({ value: data.thProject.ProjectUnfinishedCount, name: '地表竖向位移' });
+
+		//基坑工程
+		option.series[0].data.push({ value: data.jkProject.AbnormalProjectCount, name: '支撑轴力异常' });
+		option.series[1].data.push({ value: data.jkProject.ProjectUnfinishedCount, name: '支撑轴力' });
+
+		//环境工程
+		option.series[0].data.push({ value: data.hjProject.AbnormalProjectCount, name: '深层水平位移异常' });
+		option.series[1].data.push({ value: data.hjProject.ProjectUnfinishedCount, name: '深层水平位移' });
+
+		//环境工程
+		option.series[0].data.push({ value: data.qlProject.AbnormalProjectCount, name: '地下水位异常' });
+		option.series[1].data.push({ value: data.qlProject.ProjectUnfinishedCount, name: '地下水位' });
+
+
+		var chartDom = document.getElementById('div_AbnormalProjectChart');
+		var myChart = echarts.init(chartDom);
+		option && myChart.setOption(option);
+
+	}
+
+
+		// 调用方法
+	window.onload = function(){
+		PlayBanner();
+	}
+
+	var PlayBanner = function(){
+		$('#marquee1').kxbdMarquee({
+			direction: 'left',
+			scrollAmount: 1,
+			scrollDelay: 40
+		});
+	};
+
+
+	var PlatRedirect = function(SoftwareID){
+
+		if(SoftwareID == null || SoftwareID == '' || SoftwareID == 0)
+		{
+			return;
+		}
+
+		//打开新页面
+		window.open('/Tech/Home/PlatRedirect?SoftwareID=' + SoftwareID, '_blank');
+
+	}
+
+</script>
+

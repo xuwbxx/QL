@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+	<head>
+
+		<meta charset="utf-8" />
+
+		<title>桩靴插拔计算分析</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link href="assets/css/bootstrap.min.css" rel="stylesheet" />
+		<link rel="stylesheet" type="text/css" href="http://cdn.bootcss.com/font-awesome/3.2.1/css/font-awesome.min.css">
+		<link rel="stylesheet" href="assets/css/ace.min.css" />
+		<link rel="stylesheet" href="assets/css/ace-rtl.min.css" />
+		<link rel="stylesheet" href="assets/css/ace-skins.min.css" />
+		<link rel="stylesheet" href="assets/css/style.css" />
+		<script src="assets/js/ace-extra.min.js"></script>
+		
+	</head>
+
+
+
+	<body>
+
+		<div class="top_header"><span>文件(F)</span><span>输入(I)</span><span>报告输出(X)</span><span>帮助(H)</span></div>   
+		<div class="navbar navbar-default" id="navbar">
+			<script type="text/javascript">
+				try{ace.settings.check('navbar' , 'fixed')}catch(e){}
+			</script>
+			
+			<div class="navbar-container" id="navbar-container">
+				<div class="navbar-header pull-left">
+					<a href="#" class="navbar-brand">
+						<small>桩靴插拔计算分析</small>
+					</a>
+				</div>
+			</div>
+			<div class="header_img">
+			     <img src="assets/images/icon1.png">
+				 <img src="assets/images/icon2.png">
+				 <img src="assets/images/icon3.png">
+				 <img src="assets/images/icon4.png">
+			</div> 
+		</div>
+
+
+
+		<div class="main-container" id="main-container">
+			<script type="text/javascript">
+				try{ace.settings.check('main-container' , 'fixed')}catch(e){}
+			</script>
+			<div class="main-container-inner">
+				
+				<a class="menu-toggler" id="menu-toggler" href="#">
+					<span class="menu-text"></span>
+				</a>
+				
+				<div class="sidebar" id="sidebar">
+					<script type="text/javascript">
+						try{ace.settings.check('sidebar' , 'fixed')}catch(e){}
+					</script>
+					<ul class="nav nav-list">
+
+						<li>
+							<a href="#">
+								<i class="icon-book"></i>
+								<span class="menu-text">风险评估</span>
+							</a>
+						</li>
+						<li>
+							<a href="#" class="dropdown-toggle">
+								<i class="icon-desktop"></i>
+								<span class="menu-text"> 分析模型 </span>
+								<b class="arrow icon-angle-down"></b>
+							</a>
+							<ul class="submenu">
+								<li>
+									<a href="elements.html">
+										<i class="icon-double-angle-right"></i>
+										预评估模型
+									</a>
+								</li>
+								<li>
+									<a href="buttons.html">
+										<i class="icon-double-angle-right"></i>
+										远程分析模型
+									</a>
+								</li>
+
+							</ul>
+
+						</li>
+                        
+					    <li>
+							<a href="#" class="dropdown-toggle">
+								<i class="icon-star-half-full"></i>
+								<span class="menu-text"> 评价打分 </span>
+								<b class="arrow icon-angle-down"></b>
+							</a>
+							<ul class="submenu">
+						
+								<li>
+									<a href="#" class="dropdown-toggle">
+										<i class="icon-double-angle-right"></i>
+										预评估模型
+										<b class="arrow icon-angle-down"></b>
+									</a>
+									<ul class="submenu">
+										<li>
+											<a href="#">
+												<i class="icon-leaf"></i>
+												准则层
+											</a>
+										 </li>
+						                 <li>
+											<a href="#">
+												<i class="icon-leaf"></i>
+												指标层
+											</a>
+										  </li>
+									 </ul>
+
+								  </li>
+								  
+								  <li>
+									<a href="#" class="dropdown-toggle">
+										<i class="icon-double-angle-right"></i>
+										远程分析模型
+										<b class="arrow icon-angle-down"></b>
+									</a>
+									<ul class="submenu">
+										<li>
+											<a href="#">
+												<i class="icon-leaf"></i>
+												准则层
+											</a>
+										 </li>
+						                 <li>
+											<a href="#">
+												<i class="icon-leaf"></i>
+												指标层
+											</a>
+										  </li>
+									 </ul>
+
+								  </li>
+
+							</ul>
+
+						</li>	  
+
+						<li>
+							<a href="#">
+								<i class="icon-adjust"></i>
+								<span class="menu-text"> 分析结果</span>
+							</a>
+						</li>
+					</ul>
+
+
+
+					<div class="sidebar-collapse" id="sidebar-collapse">
+
+						<i class="icon-double-angle-left" data-icon1="icon-double-angle-left" data-icon2="icon-double-angle-right"></i>
+
+					</div>
+
+
+
+					<script type="text/javascript">
+
+						try{ace.settings.check('sidebar' , 'collapsed')}catch(e){}
+
+					</script>
+
+				</div>
+
+
+
+				<div class="main-content">
+					<div class="breadcrumbs" id="breadcrumbs">
+						<script type="text/javascript">
+							try{ace.settings.check('breadcrumbs' , 'fixed')}catch(e){}
+						</script>
+						<ul class="breadcrumb">
+							<li>
+<!--								<i class="icon-home home-icon"></i>-->
+								<span>模型定义</span>
+							</li>
+						</ul>
+					</div>
+
+					<div class="page-content">
+						<div class="row">
+							
+							<div class="col-xs-12 height_">
+							     <div>问题名称：<span>桩靴插拔作业风险评估</span></div>
+								 <div>问题层数：<select class="select-cs"><option>2</option></select></div>
+							</div>
+							
+							<div class="col-xs-5">
+                                 <table class="table table-bordered center">
+								        <thead>
+									           <tr>
+											        <th>层</th>
+												    <th>编号</th>
+												    <th>项目名称</th>
+												    <th>上层编号</th>
+											   </tr>
+									    </thead>
+									    <tbody>
+									           <tr>
+												   <td>1</td>
+												   <td>1001</td>
+												   <td>地质情况</td>
+												   <td>0</td>
+											   </tr>
+											   <tr>
+												   <td>1</td>
+												   <td>1002</td>
+												   <td>平台船情况</td>
+												   <td>0</td>
+											   </tr>
+											   <tr>
+												   <td>1</td>
+												   <td>1003</td>
+												   <td>作业情况</td>
+												   <td>0</td>
+											   </tr>
+											   <tr>
+												   <td>1</td>
+												   <td>1004</td>
+												   <td>施工荷载情况</td>
+												   <td>0</td>
+											   </tr>
+											   <tr>
+												   <td>2</td>
+												   <td>2001</td>
+												   <td>表层土性</td>
+												   <td>1001</td>
+											   </tr>
+											   <tr>
+												   <td>2</td>
+												   <td>2002</td>
+												   <td>破坏模式</td>
+												   <td>1001</td>
+											   </tr>
+											   <tr>
+												   <td>2</td>
+												   <td>2003</td>
+												   <td>土体性质指标</td>
+												   <td>1001</td>
+											   </tr>
+											   <tr>
+												   <td>2</td>
+												   <td>2004</td>
+												   <td>经验参数</td>
+												   <td>1001</td>
+											   </tr>
+											   <tr>
+												   <td>2</td>
+												   <td>2005</td>
+												   <td>桩腿类型</td>
+												   <td>1002</td>
+											   </tr>
+											   <tr>
+												   <td>2</td>
+												   <td>2006</td>
+												   <td>桩靴型式</td>
+												   <td>1002</td>
+											   </tr>
+											   <tr>
+												   <td>2</td>
+												   <td>2007</td>
+												   <td>接地比压</td>
+												   <td>1002</td>
+											   </tr>
+											   <tr>
+												   <td>2</td>
+												   <td>2008</td>
+												   <td>冲桩减阻</td>
+												   <td>1002</td>
+											   </tr>
+											   <tr>
+												   <td>2</td>
+												   <td>2009</td>
+												   <td>插拔桩作业</td>
+												   <td>1003</td>
+											   </tr>
+											   <tr>
+												   <td>2</td>
+												   <td>2010</td>
+												   <td>保压作业</td>
+												   <td>1003</td>
+											   </tr>
+											   <tr>
+												   <td>2</td>
+												   <td>2011</td>
+												   <td>站桩作业</td>
+												   <td>1003</td>
+											   </tr>
+											   <tr>
+												   <td>2</td>
+												   <td>2012</td>
+												   <td>吊重载荷</td>
+												   <td>1004</td>
+											   </tr>
+											   <tr>
+												   <td>2</td>
+												   <td>2013</td>
+												   <td>极端工况</td>
+												   <td>1004</td>
+											   </tr>
+									    </tbody> 
+								 </table> 
+							</div>
+							 
+							<div class="col-xs-7 text-center"><div style="padding: 1.4vw 1vw;border: 1px solid #ccc;"><img src="assets/images/img01.png" ></div></div>
+							
+							<div class="col-xs-12">
+							     <div>项目编号：中间层的每个项目应设定唯一编号，用于设定上下层关系</div>
+								 <div>上级编号：当前项目的上一级项目的编号，第一层项目的上级编号=0</div>
+							</div>
+							
+						</div>
+					</div>
+				</div>
+
+
+			</div>
+
+		</div>
+
+
+		<script src="http://www.jq22.com/jquery/jquery-2.1.1.js"></script>
+		<script type="text/javascript">
+			window.jQuery || document.write("<script src='assets/js/jquery-2.0.3.min.js'>"+"<"+"/script>");
+		</script>
+		<script type="text/javascript">
+			if("ontouchend" in document) document.write("<script src='assets/js/jquery.mobile.custom.min.js'>"+"<"+"/script>");
+		</script>
+		<script src="http://www.jq22.com/jquery/bootstrap-3.3.4.js"></script>
+		<script src="assets/js/typeahead-bs2.min.js"></script>
+		<script src="assets/js/ace-elements.min.js"></script>
+		<script src="assets/js/ace.min.js"></script>
+</body>
+
+</html>
+

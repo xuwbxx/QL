@@ -1,0 +1,32 @@
+﻿
+@{
+    ViewBag.Title = "跳转";
+    Layout = "~/Views/Shared/BlankLayout.cshtml";
+}
+
+<input type="hidden" id="hid_Token" value="@ViewData["Token"].ToString()" />
+
+<h2>跳转中......</h2>
+
+<script>
+    $(document).ready(function () {
+
+        var token = $('#hid_Token').val();
+
+        if (token == '')
+            return;
+
+        if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+            // 当前设备是移动设备
+
+            window.location.href = "/Mobile/Project/Index";
+
+        }
+        else
+        {
+            window.location.href = "/Cloud/Project/Redirect?paramString=" + token;
+        }
+
+    })
+
+</script>

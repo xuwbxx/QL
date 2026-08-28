@@ -1,0 +1,316 @@
+﻿
+@{
+    ViewBag.Title = "项目配置";
+    Layout = "~/Views/Shared/BackManagePageLayout.cshtml";
+}
+
+<input type="hidden" id="hid_PostToken" value="@ViewData["PostToken"].ToString()" />
+
+<div class="div_body">
+
+    <div class="div_form">
+
+        <form class="form-inline">
+            <div class="form-group">
+                <input type="text" class="form-control" placeholder="请输入项目名称" name="txt_ProjectName_Query">
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" onclick="ProjectJS.DoQuery();">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+
+
+    <div class="div_table">
+        <table class="table table-hover table_chongzhi">
+            <thead>
+                <tr>
+                    <th width="10%">项目编号</th>
+                    <th width="30%">项目名称</th>
+                    <th width="10%">状态</th>
+                    <th width="15%">开始时间</th>
+                    <th width="15%">结束时间</th>
+                    <th width="20%">操作</th>
+                </tr>
+            </thead>
+            <tbody id="html_ProjectList">
+                <tr>
+                    <td>项目部业务员申请</td>
+                    <td>节点类型</td>
+                    <td>
+                        <button type="button" class="btn btn-primary-s" onClick="PopupConfiguration();"><i class="icon iconfont table_icon">&#xe66e;</i>配置节点人员</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>项目部总工审批</td>
+                    <td class="redcolor">否</td>
+                    <td>节点类型</td>
+                    <td>
+                        <button type="button" class="btn btn-primary-s"><i class="icon iconfont table_icon">&#xe66e;</i>配置节点人员</button>
+                    </td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+        <div class="text-center">
+
+            <div id="Pagination">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<div class="modal fade" id="tk_Project" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-s">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="popup_ProjectName">
+                    
+                </h4>
+                <input type="hidden" id="hid_ProjectID" />
+            </div>
+            <div class="modal-body">
+
+                <div class="div_btn mar_b20">
+                    <button type="button" class="btn btn-primary" onclick="ProjectJS.Export();"><i class="fa fa-arrow-down"></i>提取资料</button>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                
+                <button type="button" class="btn btn-default" onclick="ProjectJS.DoBack();"><i class="fa fa-reply"></i>返回</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    var ProjectJS = function ($) {
+
+        $(document).ready(function () {
+            ParamInit();
+            Query();
+        })
+
+        var Param = {};
+        var ParamInit = function () {
+            Param.PageIndex = 1;
+            Param.PageSize = 10;
+            Param.TotalPage = 0;
+            Param.TotalCount = 0;
+
+            Param.ProjectName = $("input[name='txt_ProjectName_Query']").val();
+
+        }
+
+        //查询
+        var Query = function () {
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('ProjectListQuery', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        if (data.Success) {
+
+                            var ListHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                ListHtml += '<tr><td>' + dom.ProjectCode + '</td><td>' + dom.ProjectName + '</td><td>' + dom.StatusName + '</td><td>' + dom.StartTime + '</td><td>' + dom.EndTime + '</td><td><button type="button" class="btn btn-primary-s" onclick="ProjectJS.Edit(' + dom.ID + ');"><i class="icon iconfont table_icon">&#xe66e;</i>生成项目文件夹</button></td></tr>';
+
+                            })
+                            $('#html_ProjectList').html(ListHtml);
+
+                            //分页
+                            Param.TotalPage = data.TotalPage;
+                            Param.TotalCount = data.TotalCount;
+                            Param.PageIndex = data.PageIndex;
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                    Pagination();
+                    //CloseMaskLayout();
+                });
+
+        }
+
+        var DoQuery = function () {
+
+            Param.ProjectName = $("input[name='txt_ProjectName_Query']").val();
+            Query();
+        }
+
+        //分页
+        var Pagination = function () {
+            $("#Pagination").pagination({
+                currentPage: Param.PageIndex,
+                totalPage: Param.TotalPage,
+                isShow: true,
+                totalCount: Param.TotalCount,
+                count: 7,
+                homePageText: "首页",
+                endPageText: "尾页",
+                prevPageText: "上一页",
+                nextPageText: "下一页",
+                callback: function (current) {
+                    Param.PageIndex = current;
+                    Query();
+                }
+            });
+        }
+
+        //打开模态框
+        var Save = function () {
+
+            var DirectoryPath = $('#popup_ProjectDirectory').val();
+
+            ModalPopup('information', '是否将资料保存到 ' + DirectoryPath + ' ?');
+
+            $("#ModalSubmit").unbind('click').bind('click', function () {
+                SaveData();
+            });
+        }
+
+        //保存
+        var Export = function () {
+
+            var ProjectID = $('#hid_ProjectID').val();
+            if (ProjectID == null || ProjectID == '' || ProjectID == 0)
+                return;
+
+
+            window.location.href = "ProjectFileExport?" + "ProjectID=" + ProjectID;
+            
+        }
+
+        //打开删除提示框
+        //var Delete = function (dom) {
+        //    if (dom == null) {
+        //        return;
+        //    }
+        //    var ID = $(dom).attr('data-id');
+        //    var Name = $(dom).attr('data-name');
+        //    ModalPopup('information', '是否删除 ' + Name + " ?");
+
+
+
+        //    $("#ModalSubmit").bind('click', function () {
+        //        var DeleteParam = {};
+        //        DeleteParam.ID = ID;
+        //        DoDelete(DeleteParam);
+        //    })
+
+        //}
+
+        //删除数据
+        //var DoDelete = function (dom) {
+
+        //    $.post('DataDelete', dom)
+        //        .success(function (data, statusText, jqXRH) {
+        //            if (data) {
+        //                if (data.Success) {
+        //                    ModalPopup('success', '删除成功');
+        //                    DoQuery();
+        //                }
+        //                else {
+        //                    ModalPopup('error', data.Message);
+        //                }
+        //            }
+        //        })
+        //        .fail(function (jqXHR, statusText, errorMessage) {
+        //            //console.error(arguments);
+        //        })
+        //        .always(function (data) {
+        //            ModalClose('information');
+        //        });
+        //}
+
+        //编辑
+        var Edit = function (ID) {
+
+            if (ID == null || ID == '' || ID == 0)
+                return;
+
+            DataModalClear();
+            Param.ProjectID = ID;
+            $('#tk_Project').modal('show');
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('ProjectDataQuery', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+
+                            $('#popup_ProjectName').html(data.Data.ProjectName);
+
+                            $('#hid_ProjectID').val(data.Data.ID);
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+
+                });
+
+        }
+
+        //数据生成
+        var DataModalCreate = function () {
+
+            Param.ProjectID = $('#hid_ProjectID').val();
+
+
+        }
+
+        //清除模态框
+        var DataModalClear = function () {
+
+            $('#popup_ProjectName').html('');
+
+            $('#hid_ProjectID').val(0);
+
+            $('#popup_ProjectDirectory').val('');
+
+        }
+
+
+
+        var DoBack = function () {
+
+            $('#tk_Project').modal('hide');
+
+        }
+
+        return {
+            HomeSiteInit: function () {
+                Init();
+            },
+            DoQuery: DoQuery,
+            Edit: Edit,
+            Export: Export,
+            DoBack: DoBack,
+            field: {
+
+            }
+        }
+
+    }(jQuery);
+</script>

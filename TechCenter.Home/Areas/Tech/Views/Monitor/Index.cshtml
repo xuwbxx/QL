@@ -1,0 +1,727 @@
+﻿
+@{
+	ViewData["Title"] = "技术中心监测系统";
+    Layout = "~/Views/Shared/Tech/MonitorLayout.cshtml";
+}
+<header class="header_box">
+	<span>技术中心智慧化监测系统</span>
+</header>
+
+
+<div class="content clearfix">
+
+	<!--		start   left-->
+	<div class="col-lg-3 col-sm-3 col-xs-12">
+
+		<div class="left01 clearfix">
+			<div class="GYtitle">已完工监控项目数量</div>
+
+			<div class="left01_contnet clearfix">
+				<div class="left01_list clearfix">
+					<div class="pull-left">
+						<img src="~/Web/Monitor/img/icon_thgc.png">
+					</div>
+					<div class="pull-left">
+						<div>填海工程</div>
+						<div id="div_thProjectCount">20</div>
+					</div>
+				</div>
+				<div class="left01_list clearfix">
+					<div class="pull-left">
+						<img src="~/Web/Monitor/img/icon_jkgc.png">
+					</div>
+					<div class="pull-left">
+						<div>基坑工程</div>
+						<div id="div_jkProjectCount">20</div>
+					</div>
+				</div>
+				<div class="left01_list clearfix">
+					<div class="pull-left">
+						<img src="~/Web/Monitor/img/icon_hjgc.png">
+					</div>
+					<div class="pull-left">
+						<div>环境工程</div>
+						<div id="div_hjProjectCount">20</div>
+					</div>
+				</div>
+				<div class="left01_list clearfix">
+					<div class="pull-left">
+						<img src="~/Web/Monitor/img/icon_qlgc.png">
+					</div>
+					<div class="pull-left">
+						<div>桥梁工程</div>
+						<div id="div_qlProjectCount">20</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+
+		<div class="left02">
+			<div class="GYtitle">监控正常项目数量</div>
+
+			<div class="left02_contnet" style="height:25vh;" id="div_NormalProjectChart">
+				@* <img src="~/Web/Monitor/img/img_TB01.png"> *@
+			</div>
+
+		</div>
+		<div class="left03">
+			<div class="GYtitle">监控正常项目列表</div>
+
+			<div class="left03_contnet">
+				<ul id="ul_NormalProjectList">
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+					<li><a>大连金州湾国际机场工程（航站区）</a><span>正常</span></li>
+
+				</ul>
+
+			</div>
+
+		</div>
+	</div>
+	<!--end   left-->
+	<!--start  center-->
+	<div class="col-lg-6 col-sm-6 col-xs-12" style="padding: 0;">
+
+		<div class="center01">
+			<img src="~/Web/Monitor/img/center_bg.png">
+			<div class="data clearfix">
+				<div><p class="time" id="time">00:00:00</p></div>
+				<div class="s_line"></div>
+				<div>
+					<p class="date" id="date"></p>
+					<p class="year" id="year"></p>
+				</div>
+			</div>
+
+			<div class="center01_content">
+				<ul class="clearfix">
+					<li class="bg01" onclick="OpenProject('TH');">
+						<span><img src="~/Web/Monitor/img/img_thgc.png"></span>
+						<span>填海工程</span>
+					</li>
+					<li class="bg02" onclick="OpenProject('JK');">
+						<span><img src="~/Web/Monitor/img/img_jkgc.png"></span>
+						<span>基坑工程</span>
+					</li>
+					<li class="bg03" onclick="OpenProject('HJ');">
+						<span><img src="~/Web/Monitor/img/img_hjgc.png"></span>
+						<span>环境工程</span>
+					</li>
+					<li class="bg04" onclick="OpenProject('QL');">
+						<span><img src="~/Web/Monitor/img/img_qlgc.png"></span>
+						<span>桥梁工程</span>
+					</li>
+				</ul>
+			</div>
+
+
+			<div class="center01_content_son clearfix" id="thgc_son">
+				<span class="JT_box"><img src="~/Web/Monitor/img/icon_jiantou.png"></span>
+				<div class="pull-left center01_content_son_left"><img id="img_ProjectImg" src="~/Web/Monitor/img/BannerPic/TH/1.png"></div>
+				<div class="pull-left">
+					<div class="center01_content_son_tit">
+						<span id="span_ProjectName">填海工程</span>
+
+						<button id="exit">退出</button>
+						<button id="btn_OpenProject" data-url="" onclick="OpenProjectPlat(this);">进入平台</button>
+					</div>
+					<ul id="ul_ProjectList">
+						<li class="clearfix th"><span>项目名称</span><span>报警数量</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>12</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>32</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>12</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>32</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>12</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>32</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>12</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>32</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>12</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>32</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>12</span></li>
+						<li class="clearfix"><span>大连金州湾国际机场工程（航站区</span><span>32</span></li>
+					</ul>
+				</div>
+			</div>
+
+
+
+
+
+			<!--start	轮播-->
+			<div id="marquee1" class="marquee1">
+
+				<ul>
+					<li><img src="/Web/Monitor/img/BannerPic/TH/1.png" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/TH/2.jpg" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/TH/3.jpg" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/TH/4.png" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/TH/5.jpg" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/TH/6.png" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/TH/7.png" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/TH/8.png" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/TH/9.png" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/TH/10.jpg" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/JK/1.png" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/JK/2.png" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/JK/3.png" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/JK/4.png" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/JK/5.png" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/JK/6.png" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/JK/7.png" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/JK/8.png" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/JK/9.png" class="zoomable-img"></li>
+					<li><img src="/Web/Monitor/img/BannerPic/JK/10.png" class="zoomable-img"></li>
+				</ul>
+
+			</div>
+
+			<script>
+
+			</script>
+			<!--end 轮播-->
+		</div>
+
+	</div>
+	<!--end center-->
+	<!--start right-->
+	<div class="col-lg-3 col-sm-3 col-xs-12">
+
+		<div class="right01 clearfix">
+			<div class="GYtitle">监控异常项目数量</div>
+
+			<div class="right01_content" style="height:30vh;" id="div_AbnormalProjectChart">
+				@* <img src="~/Web/Monitor/img/img_TB02.png"> *@
+			</div>
+
+		</div>
+
+
+		<div class="right02">
+			<div class="GYtitle">监控异常项目列表</div>
+
+			<div class="right02_contnet">
+				<ul id="ul_AbnormalProjectPointList">
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+					<li><a>大连金州湾国际机场工程（航站区） <span>2021-09-23</span></a></li>
+				</ul>
+
+			</div>
+
+		</div>
+
+
+	</div>
+	<!--end right-->
+
+</div>
+
+<script>
+
+	$(document).ready(function(){
+
+		QueryData();
+
+	})
+
+
+	var OpenProject = function(ProjectCode){
+
+		if(ProjectCode == null || ProjectCode == '')
+		{
+			return;
+		}
+
+		var ProjectListHtml = '<li class="clearfix th"><span>项目名称</span><span>报警数量</span></li>';
+
+		if(ProjectCode == 'TH')
+		{
+			$('#img_ProjectImg').attr('src', '/Web/Monitor/img/BannerPic/TH/1.png');
+
+			$('#span_ProjectName').html('填海工程');
+
+			$(WebQueryData.thProject.Projects).each(function(index, dom){
+
+				ProjectListHtml += '<li class="clearfix"><span>' + dom.ProjectName + '</span><span>' + dom.AlarmCount + '</span></li>';
+
+			});
+
+			$('#btn_OpenProject').attr('data-url', 'https://www.baidu.com/');
+
+		}
+		else if(ProjectCode == 'JK')
+		{
+			$('#img_ProjectImg').attr('src', '/Web/Monitor/img/BannerPic/JK/1.png');
+
+			$('#span_ProjectName').html('基坑工程');
+
+			$(WebQueryData.jkProject.Projects).each(function(index, dom){
+
+				ProjectListHtml += '<li class="clearfix"><span>' + dom.ProjectName + '</span><span>' + dom.AlarmCount + '</span></li>';
+
+			});
+
+			$('#btn_OpenProject').attr('data-url', 'https://www.baidu.com/');
+		}
+		else if(ProjectCode == 'HJ')
+		{
+			$('#img_ProjectImg').attr('src', '/Web/Monitor/img/BannerPic/HJ/1.png');
+
+			$('#span_ProjectName').html('环境工程');
+
+			$(WebQueryData.hjProject.Projects).each(function(index, dom){
+
+				ProjectListHtml += '<li class="clearfix"><span>' + dom.ProjectName + '</span><span>' + dom.AlarmCount + '</span></li>';
+
+			});
+
+			$('#btn_OpenProject').attr('data-url', 'https://www.baidu.com/');
+		}
+		else if(ProjectCode == 'QL')
+		{
+			$('#img_ProjectImg').attr('src', '/Web/Monitor/img/BannerPic/QL/1.png');
+
+			$('#span_ProjectName').html('桥梁工程');
+
+			$(WebQueryData.qlProject.Projects).each(function(index, dom){
+
+				ProjectListHtml += '<li class="clearfix"><span>' + dom.ProjectName + '</span><span>' + dom.AlarmCount + '</span></li>';
+
+			});
+
+			$('#btn_OpenProject').attr('data-url', 'https://www.baidu.com/');
+		}
+
+		$('#ul_ProjectList').html(ProjectListHtml);
+
+		$('#marquee1').hide();
+		$('#thgc_son').show();
+
+	}
+
+	var OpenProjectPlat = function(dom){
+
+		if(dom == null)
+		{
+			return;
+		}
+
+		var URL = $(dom).attr('data-url');
+		if(URL == '')
+		{
+			return;
+		}
+
+		window.open(URL, '_blank');
+
+	}
+
+
+	var WebQueryData = {};
+
+	var QueryData = function(){
+
+		var Param = {};
+		Param.Name = "程伟";
+
+		$.ajax({
+			url: 'GetProjectInfo',
+			method: "POST",  // 或 "GET"、"PUT" 等
+			dataType: "json",
+			//timeout: 5000,
+			data: Param,
+			success: function(response)
+			{
+				//var user = 123;
+
+				if(response.Success)
+				{
+					var Data = response.Data;
+
+					WebQueryData = Data;
+
+					//已完工监控项目数量
+					$('#div_thProjectCount').html(Data.thProject.ProjectFinishedCount);
+					$('#div_jkProjectCount').html(Data.jkProject.ProjectFinishedCount);
+					$('#div_hjProjectCount').html(Data.hjProject.ProjectFinishedCount);
+					$('#div_qlProjectCount').html(Data.qlProject.ProjectFinishedCount);
+
+					//监控正常项目列表
+					var NormalProjectListHtml = '';
+					$(Data.NormalProjects).each(function(index, dom){
+
+						NormalProjectListHtml += '<li><a>' + dom.ProjectName + '</a><span>正常</span></li>';
+
+					});
+					$('#ul_NormalProjectList').html(NormalProjectListHtml);
+
+
+					//监控异常项目列表
+					var AbnormalProjectPointsHtml = '';
+					$(Data.AbnormalProjectPoints).each(function(index, dom){
+
+						AbnormalProjectPointsHtml += '<li><a>' + dom.ProjectPoint + '<span>' + dom.Time + '</span></a></li>';
+
+					});
+					$('#ul_AbnormalProjectPointList').html(AbnormalProjectPointsHtml);
+
+					//监控正常项目数量
+					DrawNormalProjecrChart(Data);
+					//监控异常项目数量
+					DrawAbnormalProjectChart(Data);
+				}
+
+			},
+			error: function(error)
+			{
+				console.log(error);
+			},
+			complete: function()
+			{
+				//alert(111);
+			},
+
+			// 更多配置...
+		})
+
+	}
+
+	var DrawNormalProjecrChart = function(data){
+
+		var option = {
+		  tooltip: {
+			trigger: 'axis',
+			axisPointer: {
+			  type: 'shadow'
+			}
+		  },
+		  legend: {
+
+			  textStyle:{
+
+				  color: '#fff',
+
+			  }
+
+		  },
+		  grid: {
+			left: '0%',
+			right: '0%',
+			top: '20%',
+			bottom: '0%',
+			containLabel: true
+		  },
+		  xAxis: [
+			{
+
+			  type: 'category',
+			  data: [],
+			  axisLabel: {
+					show: true,
+					color: '#fff' // 设置文字颜色为蓝色
+				},
+			}
+		  ],
+		  yAxis: [
+			{
+			  type: 'value',
+			  axisLabel: {
+					show: true,
+					color: '#fff' // 设置文字颜色为蓝色
+				},
+			  splitLine: {
+				show: true, // 确保显示分割线
+				lineStyle: {
+				// 或者使用 rgba 控制透明度（更浅）
+				color: 'rgba(255, 255, 255, 0.3)',
+				width: 1,     // 线宽
+				type: 'dashed'  // 线型，可以是'solid'、'dashed'、'dotted'
+				}
+			  }
+			}
+		  ],
+		  series: [
+			// {
+			//   name: 'Direct',
+			//   type: 'bar',
+			//   emphasis: {
+			// 	focus: 'series'
+			//   },
+			//   data: [320, 332, 301, 334, 390, 330, 320]
+			// },
+
+		  ]
+		};
+
+
+		var thSerie = {
+			  name: '填海工程',
+			  type: 'bar',
+			  roundCap: true,
+			  itemStyle: {
+					borderRadius: [10, 10, 0, 0]  // 可选的圆角效果
+				},
+			  barWidth: '15%',
+			  emphasis: {
+				focus: 'series'
+			  },
+			  data: []
+			};
+		$(data.thProject.YearNormalProjectCountChart).each(function(index, dom){
+
+			option.xAxis[0].data.push(dom.Year + '年');
+
+			thSerie.data.push(dom.ProjectCount);
+
+		});
+		option.series.push(thSerie);
+
+		var jkSerie = {
+			  name: '基坑工程',
+			  type: 'bar',
+			  roundCap: true,
+			  itemStyle: {
+					borderRadius: [10, 10, 0, 0]  // 可选的圆角效果
+				},
+			  barWidth: '15%',
+			  emphasis: {
+				focus: 'series'
+			  },
+			  data: []
+			};
+		$(data.jkProject.YearNormalProjectCountChart).each(function(index, dom){
+
+			jkSerie.data.push(dom.ProjectCount);
+
+		});
+		option.series.push(jkSerie);
+
+		var hjSerie = {
+			  name: '环境工程',
+			  type: 'bar',
+			  roundCap: true,
+			  itemStyle: {
+					borderRadius: [10, 10, 0, 0]  // 可选的圆角效果
+				},
+			  barWidth: '15%',
+			  emphasis: {
+				focus: 'series'
+			  },
+			  data: []
+			};
+		$(data.hjProject.YearNormalProjectCountChart).each(function(index, dom){
+
+			hjSerie.data.push(dom.ProjectCount);
+
+		});
+		option.series.push(hjSerie);
+
+		var qlSerie = {
+			  name: '桥梁工程',
+			  type: 'bar',
+			  roundCap: true,
+			  itemStyle: {
+					borderRadius: [10, 10, 0, 0]  // 可选的圆角效果
+				},
+			  barWidth: '15%',
+			  emphasis: {
+				focus: 'series'
+			  },
+			  data: []
+			};
+		$(data.qlProject.YearNormalProjectCountChart).each(function(index, dom){
+
+			qlSerie.data.push(dom.ProjectCount);
+
+		});
+		option.series.push(qlSerie);
+
+		var chartDom = document.getElementById('div_NormalProjectChart');
+		var myChart = echarts.init(chartDom);
+		option && myChart.setOption(option);
+
+	}
+
+
+	var DrawAbnormalProjectChart = function(data){
+
+		var option = {
+		  tooltip: {
+			trigger: 'item',
+			formatter: '{a} <br/>{b}: {c} ({d}%)'
+		  },
+		  grid:{
+			left: '1%',
+			right: '30%'
+		  },
+		  legend: {
+			  textStyle:{
+				  color: '#fff',
+			  },
+			  orient: 'vertical',
+			  right: 2,
+			  // height: '60%',       // 限制高度
+			  // itemGap: 10,         // 图例项之间的间隔
+			data: [
+			  '填海异常',
+			  '基坑异常',
+			  '环境异常',
+			  '桥梁异常',
+			  '填海工程',
+			  '基坑工程',
+			  '环境工程',
+			  '桥梁工程'
+			]
+		  },
+		  series: [
+			{
+			  name: '异常',
+			  type: 'pie',
+			  center: ['35%', '50%'],
+			  selectedMode: 'single',
+			  radius: [0, '30%'],
+			  label:{
+				show:false
+			  },
+			  labelLine: {
+				show: false
+			  },
+			  data: [
+				// { value: 1548, name: 'Search Engine' },
+				// { value: 775, name: 'Direct' },
+				// { value: 679, name: 'Marketing', selected: true }
+			  ]
+			},
+			{
+			  name: '项目数',
+			  type: 'pie',
+			  center: ['35%', '50%'],
+			  radius: ['40%', '60%'],
+			 //   label: {
+				//   show: true,
+				//   formatter: function(params) {
+				// 	return params.name.substring(0, 2) + '\n' + params.name.substring(2, 4);  // 截断长文本
+				//   }
+				// },
+			  label: {
+				// formatter: '{a|{a}}{abg|}\n{hr|}\n  {b|{b}：}{c}  {per|{d}%}  ',
+				// backgroundColor: '#F6F8FC',
+				// borderColor: '#8C8D8E',
+				// borderWidth: 1,
+				// borderRadius: 4,
+				// rich: {
+				//   a: {
+				// 	color: '#6E7079',
+				// 	lineHeight: 22,
+				// 	align: 'center'
+				//   },
+				//   hr: {
+				// 	borderColor: '#8C8D8E',
+				// 	width: '100%',
+				// 	borderWidth: 1,
+				// 	height: 0
+				//   },
+				//   b: {
+				// 	color: '#4C5058',
+				// 	fontSize: 14,
+				// 	fontWeight: 'bold',
+				// 	lineHeight: 33
+				//   },
+				//   per: {
+				// 	color: '#fff',
+				// 	backgroundColor: '#4C5058',
+				// 	padding: [3, 4],
+				// 	borderRadius: 4
+				//   }
+				// },
+				show: true,
+				  formatter: function(params) {
+					return params.name.substring(0, 2) + '\n' + params.name.substring(2, 4);  // 截断长文本
+				  }
+			  },
+			  data: [
+				// { value: 1048, name: 'Baidu' },
+				// { value: 335, name: 'Direct' },
+				// { value: 310, name: 'Email' },
+				// { value: 251, name: 'Google' },
+				// { value: 234, name: 'Union Ads' },
+				// { value: 147, name: 'Bing' },
+				// { value: 135, name: 'Video Ads' },
+				// { value: 102, name: 'Others' }
+			  ]
+			}
+		  ]
+		};
+
+		//option.series[0]
+
+		//填海工程
+		option.series[0].data.push({ value: data.thProject.AbnormalProjectCount, name: '填海异常' });
+		option.series[1].data.push({ value: data.thProject.ProjectUnfinishedCount, name: '填海工程' });
+
+		//基坑工程
+		option.series[0].data.push({ value: data.jkProject.AbnormalProjectCount, name: '基坑异常' });
+		option.series[1].data.push({ value: data.jkProject.ProjectUnfinishedCount, name: '基坑工程' });
+
+		//环境工程
+		option.series[0].data.push({ value: data.hjProject.AbnormalProjectCount, name: '环境异常' });
+		option.series[1].data.push({ value: data.hjProject.ProjectUnfinishedCount, name: '环境工程' });
+
+		//环境工程
+		option.series[0].data.push({ value: data.qlProject.AbnormalProjectCount, name: '桥梁异常' });
+		option.series[1].data.push({ value: data.qlProject.ProjectUnfinishedCount, name: '桥梁工程' });
+
+
+		var chartDom = document.getElementById('div_AbnormalProjectChart');
+		var myChart = echarts.init(chartDom);
+		option && myChart.setOption(option);
+
+	}
+
+
+	window.onload = function(){
+		PlayBanner();
+	}
+
+	var PlayBanner = function(){
+
+		$('#marquee1').kxbdMarquee({
+			direction: 'left',
+			scrollAmount: 2,
+			scrollDelay: 30
+		});
+
+	}
+
+</script>
+
