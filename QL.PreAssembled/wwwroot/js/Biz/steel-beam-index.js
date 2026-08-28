@@ -9,7 +9,7 @@
             var tableData = Vue.ref([]);
             var total = Vue.ref(0);
             var pageIndex = Vue.ref(1);
-            var pageSize = Vue.ref(10);
+            var pageSize = Vue.ref(20);
             var searchProjID = Vue.ref(null);
             var searchBridgeID = Vue.ref(null);
             var projectOptions = Vue.ref([]);
@@ -86,7 +86,6 @@
 
             function handleLinearControl(row) {
                 var id = row.id || row.ID;
-                var url = '/Biz/SteelBeam/LinearControl?id=' + id;
                 window.location.href = '/Biz/SteelBeam/LinearControl?id=' + id;
             }
 

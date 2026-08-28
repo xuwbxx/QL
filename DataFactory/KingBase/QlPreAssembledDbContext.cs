@@ -160,9 +160,13 @@ namespace DataFactory.KingBase
         #region biz tables
 
         public DbSet<biz_project> biz_project { get; set; }
+        public DbSet<biz_project_user> biz_project_user { get; set; }
         public DbSet<biz_project_bridge> biz_project_bridge { get; set; }
 
         public DbSet<biz_project_bridge_castingGroup> biz_project_bridge_castingGroup { get; set; }
+        public DbSet<biz_steel_beam_theoretical> biz_steel_beam_theoretical { get; set; }
+        public DbSet<biz_steel_beam_measure_batch> biz_steel_beam_measure_batch { get; set; }
+        public DbSet<biz_steel_beam_measured> biz_steel_beam_measured { get; set; }
 
         #endregion
     }

@@ -1,331 +1,145 @@
-﻿@{
+@{
     Layout = "_LayoutModelEP";
-    ViewData["Title"] = "线性管控";
+    ViewData["Title"] = "线形管控";
     var bridgeID = ViewBag.BridgeID ?? 0;
 }
 
 @section Styles {
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-        }
-
-        .lc-container {
-            background: #f0f2f5;
-            min-height: 100%;
-        }
-
-        .lc-header {
-            background: #fff;
-            padding: 16px 24px;
-            border-bottom: 1px solid #e8e8e8;
-            display: flex;
-            align-items: center;
-        }
-
-        .lc-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1890ff;
-            text-align: center;
-            flex: 1;
-        }
-
-        .lc-tabs-bar {
-            background: #fff;
-            padding: 0 24px;
-            border-bottom: 1px solid #e8e8e8;
-            display: flex;
-            gap: 0;
-        }
-
-        .lc-tab-btn {
-            padding: 12px 24px;
-            cursor: pointer;
-            font-size: 14px;
-            color: #606266;
-            border-bottom: 2px solid transparent;
-            transition: all 0.2s;
-        }
-
-            .lc-tab-btn:hover {
-                color: #1890ff;
-            }
-
-            .lc-tab-btn.active {
-                color: #1890ff;
-                border-bottom-color: #1890ff;
-                font-weight: 600;
-            }
-
-        .lc-tab-panel {
-            padding: 20px 24px;
-            background: #fff;
-        }
-
-        .lc-search-area {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 16px;
-            align-items: center;
-        }
-
-        .lc-search-left {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .lc-pagination {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 16px;
-        }
-
-        .lc-import-dialog .el-dialog__body {
-            padding: 0 20px;
-        }
-
-        .lc-import-tips {
-            background: #f0f7ff;
-            border: 1px solid #d6e8ff;
-            border-radius: 4px;
-            padding: 12px 16px;
-            margin-bottom: 20px;
-        }
-
-            .lc-import-tips ul {
-                margin: 0;
-                padding: 0;
-                list-style: none;
-            }
-
-            .lc-import-tips li {
-                font-size: 13px;
-                color: #606266;
-                line-height: 1.8;
-                position: relative;
-                padding-left: 14px;
-            }
-
-                .lc-import-tips li::before {
-                    content: '';
-                    width: 6px;
-                    height: 6px;
-                    border-radius: 50%;
-                    background: #1890ff;
-                    position: absolute;
-                    left: 0;
-                    top: 9px;
-                }
-
-        .lc-upload-zone {
-            width: 100%;
-        }
-
-            .lc-upload-zone .el-upload-dragger {
-                width: 100%;
-                height: 200px;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-            }
-
-                .lc-upload-zone .el-upload-dragger .el-icon--upload {
-                    font-size: 48px;
-                    color: #1890ff;
-                    margin-bottom: 8px;
-                }
-
-            .lc-upload-zone .el-upload__text {
-                font-size: 14px;
-                color: #606266;
-            }
-
-                .lc-upload-zone .el-upload__text em {
-                    color: #1890ff;
-                    font-style: normal;
-                }
+        [v-cloak] { display: none; }
+        .lc-container { background: #f0f2f5; min-height: 100%; }
+        .lc-header { background: #fff; padding: 16px 24px; border-bottom: 1px solid #e8e8e8; display: flex; align-items: center; }
+        .lc-title { flex: 1; text-align: center; color: #1677c8; font-size: 18px; font-weight: 600; }
+        .lc-tabs { display: flex; gap: 8px; padding: 0 24px; background: #fff; border-bottom: 1px solid #e8e8e8; }
+        .lc-tab { padding: 13px 22px; cursor: pointer; color: #606266; border-bottom: 2px solid transparent; }
+        .lc-tab.active { color: #1677c8; border-bottom-color: #1677c8; font-weight: 600; }
+        .lc-panel { background: #fff; padding: 18px 24px; min-height: 520px; }
+        .lc-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 16px; }
+        .lc-toolbar-left, .lc-toolbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .lc-pagination { display: flex; justify-content: flex-end; margin-top: 16px; }
+        .lc-import-tip { padding: 12px 16px; margin-bottom: 16px; background: #f5f8fc; border-radius: 4px; color: #606266; line-height: 1.8; }
+        .lc-import-fields { display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px; margin-bottom: 16px; }
+        .lc-field-label { margin-bottom: 6px; color: #606266; font-size: 14px; }
+        .lc-upload .el-upload, .lc-upload .el-upload-dragger { width: 100%; }
+        .lc-empty-panel { min-height: 480px; }
+        .lc-coordinate-input { width: 120px; }
     </style>
 }
 
-<div id="app" class="lc-container">
+<div id="app" class="lc-container" v-cloak>
     <div class="lc-header">
         <el-button type="primary" plain size="small" @@click="goBack">返回</el-button>
         <div class="lc-title">{{ pageTitle }}</div>
     </div>
 
-    <div class="lc-tabs-bar">
-        <div v-for="tab in tabs" :key="tab.name"
-             :class="['lc-tab-btn', { active: activeTab === tab.name }]"
-            @@click="onTabChange(tab.name)">
-            {{ tab.label }}
-        </div>
+    <div class="lc-tabs">
+        <div v-for="tab in tabs" :key="tab.name" :class="['lc-tab', { active: activeTab === tab.name }]" @@click="onTabChange(tab.name)">{{ tab.label }}</div>
     </div>
 
-    <!-- 理论数据 -->
-    <div class="lc-tab-panel" v-show="activeTab === 'theoretical'">
-        <div class="lc-search-area">
-            <div class="lc-search-left">
-                <el-select v-model="searchPointCode" placeholder="请选择测点编号" clearable style="width: 200px;">
-                    <el-option v-for="item in pointOptions" :key="item" :label="item" :value="item"></el-option>
+    <div class="lc-panel" v-show="activeTab === 'theoretical'">
+        <div class="lc-toolbar">
+            <div class="lc-toolbar-left">
+                <el-select v-model="theoryQuery.pointCode" filterable clearable placeholder="请选择测点编号" style="width:220px">
+                    <el-option v-for="item in pointOptions" :key="item" :label="item" :value="item" />
                 </el-select>
-                <el-select v-model="searchSegment" placeholder="请选择梁段号" clearable style="width: 200px;">
-                    <el-option v-for="item in segmentOptions" :key="item" :label="item" :value="item"></el-option>
+                <el-select v-model="theoryQuery.segmentNo" filterable clearable placeholder="请选择梁段号" style="width:200px">
+                    <el-option v-for="item in segmentOptions" :key="item" :label="item" :value="item" />
                 </el-select>
-                <el-button type="primary" @@click="handleSearch">搜索</el-button>
-                <el-button @@click="handleReset">重置</el-button>
+                <el-button type="primary" @@click="searchTheory">搜索</el-button>
+                <el-button @@click="resetTheory">重置</el-button>
             </div>
-            <el-button type="primary" @@click="handleImport">导入理论数据</el-button>
+            <div class="lc-toolbar-right">
+                <el-button plain type="primary" @@click="downloadTemplate('theoretical')">下载理论数据模板</el-button>
+                <el-tooltip :disabled="!state.hasMeasured" content="已存在实测数据，理论数据不可修改">
+                    <span><el-button type="primary" :disabled="state.hasMeasured" @@click="openImport('theoretical')">导入理论数据</el-button></span>
+                </el-tooltip>
+            </div>
         </div>
-        <el-table v-loading="loading" :data="tableData" border stripe style="width: 100%;">
-
-            <el-table-column label="测点编号" min-width="120" align="center">
-                <template #default="scope">{{ scope.row.pointCode || '-' }}</template>
-            </el-table-column>
-
-            <!-- 多级表头：设计坐标(m) 包含 X Y Z -->
+        <el-table v-loading="loading" :data="rows" border stripe>
+            <el-table-column prop="pointCode" label="测点编号" min-width="140" align="center" />
             <el-table-column label="设计坐标(m)" align="center">
-                <el-table-column label="x" width="110" align="center">
-                    <template #default="scope">{{ scope.row.designX || '-' }}</template>
+                <el-table-column label="X" width="150" align="center">
+                    <template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.x" class="lc-coordinate-input" /> <span v-else>{{ formatDecimal(scope.row.designX) }}</span></template>
                 </el-table-column>
-                <el-table-column label="y" width="110" align="center">
-                    <template #default="scope">{{ scope.row.designY || '-' }}</template>
+                <el-table-column label="Y" width="150" align="center">
+                    <template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.y" class="lc-coordinate-input" /> <span v-else>{{ formatDecimal(scope.row.designY) }}</span></template>
                 </el-table-column>
-                <el-table-column label="z" width="110" align="center">
-                    <template #default="scope">{{ scope.row.designZ || '-' }}</template>
+                <el-table-column label="Z" width="150" align="center">
+                    <template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.z" class="lc-coordinate-input" /> <span v-else>{{ formatDecimal(scope.row.designZ) }}</span></template>
                 </el-table-column>
             </el-table-column>
-
-            <el-table-column label="预拱度(m)" width="110" align="center">
-                <template #default="scope">{{ scope.row.preCamber || '-' }}</template>
-            </el-table-column>
-            <el-table-column label="权值" width="80" align="center">
-                <template #default="scope">{{ scope.row.weight || '-' }}</template>
-            </el-table-column>
-            <el-table-column label="所属梁段号" width="120" align="center">
-                <template #default="scope">{{ scope.row.segmentNo || '-' }}</template>
-            </el-table-column>
-            <el-table-column label="测位名称" min-width="120" align="center">
-                <template #default="scope">{{ scope.row.positionName || '-' }}</template>
-            </el-table-column>
-
-            <el-table-column label="操作" width="100" align="center">
+            <el-table-column prop="preCamber" label="预拱度(m)" width="120" align="center" />
+            <el-table-column prop="weight" label="权值" width="90" align="center" />
+            <el-table-column prop="segmentNo" label="所属梁段号" width="130" align="center" />
+            <el-table-column prop="positionName" label="测位名称" min-width="130" align="center" />
+            <el-table-column label="操作" width="130" align="center">
                 <template #default="scope">
-                    <el-button type="primary" link @@click="handleEdit(scope.row)">编辑</el-button>
+                    <template v-if="editingId === scope.row.id"><el-button link type="primary" @@click="saveEdit(scope.row)">保存</el-button><el-button link @@click="cancelEdit">取消</el-button></template>
+                    <el-button v-else-if="scope.row.canEdit" link type="primary" @@click="startEdit(scope.row)">编辑</el-button>
                 </template>
             </el-table-column>
         </el-table>
-        <div class="lc-pagination">
-            <el-pagination background layout="total, sizes, prev, pager, next, jumper"
-                           :total="total" :page-size="pageSize" :current-page="pageIndex"
-                           :page-sizes="[10, 20, 50]" @@size-change="handleSizeChange" @@current-change="handlePageChange" />
-        </div>
+        <div class="lc-pagination"><el-pagination background layout="total, sizes, prev, pager, next, jumper" :total="total" v-model:current-page="theoryQuery.pageIndex" v-model:page-size="theoryQuery.pageSize" :page-sizes="[20,50,100]" @@current-change="loadTheory" @@size-change="onTheorySize" /></div>
     </div>
 
-    <!-- 实测数据 -->
-    <div class="lc-tab-panel" v-show="activeTab === 'measured'">
-        <div class="lc-search-area">
-            <div class="lc-search-left">
-                <el-select v-model="searchPushCount" placeholder="请选择顶推次数" clearable style="width: 200px;">
-                    <el-option v-for="item in pushCountOptions" :key="item" :label="item" :value="item"></el-option>
+    <div class="lc-panel" v-show="activeTab === 'measured'">
+        <div class="lc-toolbar">
+            <div class="lc-toolbar-left">
+                <el-select v-model="measuredQuery.pushCount" placeholder="请选择顶推次数" clearable style="width:190px" @@change="onPushChange">
+                    <el-option label="请选择" :value="null" />
+                    <el-option v-for="item in state.queryPushCounts" :key="item" :label="item" :value="item" />
                 </el-select>
-                <el-date-picker v-model="searchMeasureTime" type="datetime" placeholder="选择测量时间" value-format="YYYY-MM-DD HH:mm:ss" style="width: 220px;"></el-date-picker>
-                <el-button type="primary" @@click="handleSearch">搜索</el-button>
-                <el-button @@click="handleReset">重置</el-button>
+                <el-select v-model="measureTimeValue" placeholder="全部时间" style="width:220px">
+                    <el-option label="全部时间" value="" />
+                    <el-option v-for="item in measureTimeOptions" :key="item" :label="formatMeasureTime(item)" :value="item" />
+                </el-select>
+                <el-button type="primary" @@click="searchMeasured">搜索</el-button>
+                <el-button @@click="resetMeasured">重置</el-button>
             </div>
-            <div>
-                <el-button type="primary" @@click="handleImport">导入实测数据</el-button>
-                <el-button type="primary" plain @@click="handleDownloadMeasured">下载实测数据</el-button>
-                <el-button type="primary" plain @@click="handleDownloadTemplate">下载模板</el-button>
+            <div class="lc-toolbar-right">
+                <el-button type="primary" :disabled="!state.hasTheoretical" @@click="openImport('measured')">导入实测数据</el-button>
+                <el-button plain type="primary" :disabled="!state.hasMeasured" @@click="downloadMeasured">下载实测数据</el-button>
+                <el-button plain type="primary" @@click="downloadTemplate('measured')">下载模板</el-button>
             </div>
         </div>
-        <el-table v-loading="loading" :data="tableData" border stripe style="width: 100%;">
-            <el-table-column label="测点编号" min-width="150" align="center">
-                <template #default="scope">{{ scope.row.pointCode || '-' }}</template>
-            </el-table-column>
-
-            <!-- 多级表头：设计坐标(m) 包含 X Y Z -->
+        <el-table v-loading="loading" :data="rows" border stripe :span-method="measuredSpanMethod">
+            <el-table-column prop="pointCode" label="测点编号" min-width="150" align="center" />
             <el-table-column label="实测坐标(m)" align="center">
-                <el-table-column label="x" width="110" align="center">
-                    <template #default="scope">{{ scope.row.measuredX || '-' }}</template>
-                </el-table-column>
-                <el-table-column label="y" width="110" align="center">
-                    <template #default="scope">{{ scope.row.measuredY || '-' }}</template>
-                </el-table-column>
-                <el-table-column label="z" width="110" align="center">
-                    <template #default="scope">{{ scope.row.measuredZ || '-' }}</template>
-                </el-table-column>
+                <el-table-column label="X" width="150" align="center"><template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.x" class="lc-coordinate-input" /><span v-else>{{ formatDecimal(scope.row.measuredX) }}</span></template></el-table-column>
+                <el-table-column label="Y" width="150" align="center"><template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.y" class="lc-coordinate-input" /><span v-else>{{ formatDecimal(scope.row.measuredY) }}</span></template></el-table-column>
+                <el-table-column label="Z" width="150" align="center"><template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.z" class="lc-coordinate-input" /><span v-else>{{ formatDecimal(scope.row.measuredZ) }}</span></template></el-table-column>
             </el-table-column>
-
-            <el-table-column label="操作" width="100" align="center">
+            <el-table-column prop="pushCount" label="顶推次数" width="100" align="center" />
+            <el-table-column label="测量时间" width="180" align="center"><template #default="scope">{{ formatMeasureTime(scope.row.measureTime) }}</template></el-table-column>
+            <el-table-column label="操作" width="130" align="center">
                 <template #default="scope">
-                    <el-button type="primary" link @@click="handleEdit(scope.row)">编辑</el-button>
+                    <template v-if="editingId === scope.row.id"><el-button link type="primary" @@click="saveEdit(scope.row)">保存</el-button><el-button link @@click="cancelEdit">取消</el-button></template>
+                    <el-button v-else-if="scope.row.canEdit" link type="primary" @@click="startEdit(scope.row)">编辑</el-button>
                 </template>
             </el-table-column>
         </el-table>
-        <div class="lc-pagination">
-            <el-pagination background layout="total, sizes, prev, pager, next, jumper"
-                           :total="total" :page-size="pageSize" :current-page="pageIndex"
-                           :page-sizes="[10, 20, 50]" @@size-change="handleSizeChange" @@current-change="handlePageChange" />
-        </div>
+        <div class="lc-pagination"><el-pagination background layout="total, sizes, prev, pager, next, jumper" :total="total" v-model:current-page="measuredQuery.pageIndex" v-model:page-size="measuredQuery.pageSize" :page-sizes="[20,50,100]" @@current-change="loadMeasured" @@size-change="onMeasuredSize" /></div>
     </div>
 
-    <!-- 监控计算 -->
-    <div class="lc-tab-panel" v-show="activeTab === 'monitoring'">
-    </div>
+    <div class="lc-panel lc-empty-panel" v-show="activeTab === 'monitoring'"></div>
+    <div class="lc-panel lc-empty-panel" v-show="activeTab === 'analysis'"></div>
 
-    <!-- 误差分析 -->
-    <div class="lc-tab-panel" v-show="activeTab === 'analysis'">
-    </div>
-
-    <!-- 导入对话框 -->
-    <el-dialog v-model="importDialogVisible" :title="importDialogTitle" width="520px" class="lc-import-dialog" :close-on-click-modal="false">
-        <div class="lc-import-tips">
-            <ul>
-                <li v-if="activeTab === 'theoretical'">测点编号可以是数字+符号+字母格式，例如GS-Z-1-4；</li>
-                <li v-if="activeTab === 'theoretical'">权值是测点的重要程度，范围0~1，默认取值1，例如快车道测点权值取1，人行道测点取0.5，若取0表示不计算该测点；</li>
-                <li v-if="activeTab === 'theoretical'">坐标及预拱度单位均为m。</li>
-                <li v-if="activeTab === 'measured'">只录入未发生变形的测点，若测点所在梁段已离开支架发生变形，则不录入。</li>
-            </ul>
+    <el-dialog v-model="importDialogVisible" :title="importType === 'theoretical' ? '导入理论数据' : '导入实测数据'" width="560px" :close-on-click-modal="false" :close-on-press-escape="!importLoading" :show-close="!importLoading">
+        <div class="lc-import-tip" v-if="importType === 'theoretical'">测点编号、设计坐标、预拱度、权值、所属梁段号和测位名称均为必填；坐标及预拱度单位为 m，权值范围为 0～1。</div>
+        <div class="lc-import-tip" v-else>只录入未发生变形的测点；若测点所在梁段已离开支架并发生变形，则不录入。</div>
+        <div class="lc-import-fields" v-if="importType === 'measured'">
+            <div><div class="lc-field-label">顶推次数</div><el-select v-model="importPushCount" style="width:100%"><el-option v-for="item in state.importPushCounts" :key="item" :label="item" :value="item" /></el-select></div>
+            <div><div class="lc-field-label">测量时间</div><el-date-picker v-model="importMeasureTime" type="datetime" format="YYYY-MM-DD HH:00" value-format="YYYY-MM-DD HH:00" placeholder="请选择年月日和小时" :disabled-date="disableFutureDate" style="width:100%" /></div>
         </div>
-        <div v-if="activeTab === 'measured'" style="margin-bottom: 20px;">
-            <div style="display: flex; gap: 20px; margin-bottom: 16px;">
-                <div style="flex: 1;">
-                    <div style="margin-bottom: 6px; font-size: 14px; color: #606266;">顶推次数</div>
-                    <el-select v-model="importPushCount" placeholder="请选择顶推次数" style="width: 100%;">
-                        <el-option v-for="item in pushCountOptions" :key="item" :label="item" :value="item"></el-option>
-                    </el-select>
-                </div>
-                <div style="flex: 1;">
-                    <div style="margin-bottom: 6px; font-size: 14px; color: #606266;">测量时间</div>
-                    <el-date-picker v-model="importMeasureTime" type="datetime" placeholder="选择测量时间" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%;"></el-date-picker>
-                </div>
-            </div>
-        </div>
-        <el-upload class="lc-upload-zone" drag :auto-upload="false" :limit="1" :on-change="onFileChange" :on-exceed="onFileExceed" accept=".xlsx,.xls,.csv">
-            <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
-            <div class="el-upload__text">将文件拖曳到此区域，或<em>点击添加</em></div>
-            <template #tip>
-                <div style="font-size: 12px; color: #909399; text-align: center; margin-top: 4px;">支持 .xlsx / .xls / .csv 格式文件</div>
-            </template>
+        <el-upload ref="uploadRef" class="lc-upload" drag :auto-upload="false" :limit="1" :on-change="onFileChange" :on-remove="onFileRemove" :on-exceed="onFileExceed" accept=".xlsx" :disabled="importLoading">
+            <el-icon class="el-icon--upload"><UploadFilled /></el-icon><div class="el-upload__text">将文件拖曳到此区域，或<em>点击添加</em></div>
+            <template #tip><div class="el-upload__tip">仅支持 .xlsx，最大 20 MB，第一个工作表最多 50,000 条数据。</div></template>
         </el-upload>
-        <template #footer>
-            <el-button @@click="importDialogVisible = false">取消</el-button>
-            <el-button type="primary" @@click="confirmImport" :loading="importLoading">确定</el-button>
-        </template>
+        <template #footer><el-button :disabled="importLoading" @@click="importDialogVisible=false">取消</el-button><el-button type="primary" :loading="importLoading" @@click="confirmImport">确定</el-button></template>
     </el-dialog>
 </div>
 
 @section Scripts {
+    <script>window.__bridgeID = @bridgeID;</script>
     <script src="~/js/Biz/steel-beam-linear-control.js" asp-append-version="true"></script>
 }
