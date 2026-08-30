@@ -40,10 +40,10 @@
         <div class="lc-toolbar">
             <div class="lc-toolbar-left">
                 <el-select v-model="theoryQuery.pointCode" filterable clearable placeholder="请选择测点编号" style="width:220px">
-                    <el-option v-for="item in pointOptions" :key="item" :label="item" :value="item" />
+                    <el-option v-for="item in pointOptions" :key="item" :label="item" :value="item"></el-option>
                 </el-select>
                 <el-select v-model="theoryQuery.segmentNo" filterable clearable placeholder="请选择梁段号" style="width:200px">
-                    <el-option v-for="item in segmentOptions" :key="item" :label="item" :value="item" />
+                    <el-option v-for="item in segmentOptions" :key="item" :label="item" :value="item"></el-option>
                 </el-select>
                 <el-button type="primary" @@click="searchTheory">搜索</el-button>
                 <el-button @@click="resetTheory">重置</el-button>
@@ -56,22 +56,22 @@
             </div>
         </div>
         <el-table v-loading="loading" :data="rows" border stripe>
-            <el-table-column prop="pointCode" label="测点编号" min-width="140" align="center" />
+            <el-table-column prop="pointCode" label="测点编号" min-width="140" align="center"></el-table-column>
             <el-table-column label="设计坐标(m)" align="center">
                 <el-table-column label="X" width="150" align="center">
-                    <template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.x" class="lc-coordinate-input" /> <span v-else>{{ formatDecimal(scope.row.designX) }}</span></template>
+                    <template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.x" class="lc-coordinate-input"></el-input> <span v-else>{{ formatDecimal(scope.row.designX) }}</span></template>
                 </el-table-column>
                 <el-table-column label="Y" width="150" align="center">
-                    <template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.y" class="lc-coordinate-input" /> <span v-else>{{ formatDecimal(scope.row.designY) }}</span></template>
+                    <template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.y" class="lc-coordinate-input"></el-input> <span v-else>{{ formatDecimal(scope.row.designY) }}</span></template>
                 </el-table-column>
                 <el-table-column label="Z" width="150" align="center">
-                    <template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.z" class="lc-coordinate-input" /> <span v-else>{{ formatDecimal(scope.row.designZ) }}</span></template>
+                    <template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.z" class="lc-coordinate-input"></el-input> <span v-else>{{ formatDecimal(scope.row.designZ) }}</span></template>
                 </el-table-column>
             </el-table-column>
-            <el-table-column prop="preCamber" label="预拱度(m)" width="120" align="center" />
-            <el-table-column prop="weight" label="权值" width="90" align="center" />
-            <el-table-column prop="segmentNo" label="所属梁段号" width="130" align="center" />
-            <el-table-column prop="positionName" label="测位名称" min-width="130" align="center" />
+            <el-table-column prop="preCamber" label="预拱度(m)" width="120" align="center"></el-table-column>
+            <el-table-column prop="weight" label="权值" width="90" align="center"></el-table-column>
+            <el-table-column prop="segmentNo" label="所属梁段号" width="130" align="center"></el-table-column>
+            <el-table-column prop="positionName" label="测位名称" min-width="130" align="center"></el-table-column>
             <el-table-column label="操作" width="130" align="center">
                 <template #default="scope">
                     <template v-if="editingId === scope.row.id"><el-button link type="primary" @@click="saveEdit(scope.row)">保存</el-button><el-button link @@click="cancelEdit">取消</el-button></template>
@@ -79,19 +79,19 @@
                 </template>
             </el-table-column>
         </el-table>
-        <div class="lc-pagination"><el-pagination background layout="total, sizes, prev, pager, next, jumper" :total="total" v-model:current-page="theoryQuery.pageIndex" v-model:page-size="theoryQuery.pageSize" :page-sizes="[20,50,100]" @@current-change="loadTheory" @@size-change="onTheorySize" /></div>
+        <div class="lc-pagination"><el-pagination background layout="total, sizes, prev, pager, next, jumper" :total="total" v-model:current-page="theoryQuery.pageIndex" v-model:page-size="theoryQuery.pageSize" :page-sizes="[20,50,100]" @@current-change="loadTheory" @@size-change="onTheorySize"></el-pagination></div>
     </div>
 
     <div class="lc-panel" v-show="activeTab === 'measured'">
         <div class="lc-toolbar">
             <div class="lc-toolbar-left">
                 <el-select v-model="measuredQuery.pushCount" placeholder="请选择顶推次数" clearable style="width:190px" @@change="onPushChange">
-                    <el-option label="请选择" :value="null" />
-                    <el-option v-for="item in state.queryPushCounts" :key="item" :label="item" :value="item" />
+                    <el-option label="请选择" :value="null"></el-option>
+                    <el-option v-for="item in state.queryPushCounts" :key="item" :label="item" :value="item"></el-option>
                 </el-select>
                 <el-select v-model="measureTimeValue" placeholder="全部时间" style="width:220px">
-                    <el-option label="全部时间" value="" />
-                    <el-option v-for="item in measureTimeOptions" :key="item" :label="formatMeasureTime(item)" :value="item" />
+                    <el-option label="全部时间" value=""></el-option>
+                    <el-option v-for="item in measureTimeOptions" :key="item" :label="formatMeasureTime(item)" :value="item"></el-option>
                 </el-select>
                 <el-button type="primary" @@click="searchMeasured">搜索</el-button>
                 <el-button @@click="resetMeasured">重置</el-button>
@@ -103,13 +103,13 @@
             </div>
         </div>
         <el-table v-loading="loading" :data="rows" border stripe :span-method="measuredSpanMethod">
-            <el-table-column prop="pointCode" label="测点编号" min-width="150" align="center" />
+            <el-table-column prop="pointCode" label="测点编号" min-width="150" align="center"></el-table-column>
             <el-table-column label="实测坐标(m)" align="center">
-                <el-table-column label="X" width="150" align="center"><template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.x" class="lc-coordinate-input" /><span v-else>{{ formatDecimal(scope.row.measuredX) }}</span></template></el-table-column>
-                <el-table-column label="Y" width="150" align="center"><template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.y" class="lc-coordinate-input" /><span v-else>{{ formatDecimal(scope.row.measuredY) }}</span></template></el-table-column>
-                <el-table-column label="Z" width="150" align="center"><template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.z" class="lc-coordinate-input" /><span v-else>{{ formatDecimal(scope.row.measuredZ) }}</span></template></el-table-column>
+                <el-table-column label="X" width="150" align="center"><template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.x" class="lc-coordinate-input"></el-input><span v-else>{{ formatDecimal(scope.row.measuredX) }}</span></template></el-table-column>
+                <el-table-column label="Y" width="150" align="center"><template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.y" class="lc-coordinate-input"></el-input><span v-else>{{ formatDecimal(scope.row.measuredY) }}</span></template></el-table-column>
+                <el-table-column label="Z" width="150" align="center"><template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.z" class="lc-coordinate-input"></el-input><span v-else>{{ formatDecimal(scope.row.measuredZ) }}</span></template></el-table-column>
             </el-table-column>
-            <el-table-column prop="pushCount" label="顶推次数" width="100" align="center" />
+            <el-table-column prop="pushCount" label="顶推次数" width="100" align="center"></el-table-column>
             <el-table-column label="测量时间" width="180" align="center"><template #default="scope">{{ formatMeasureTime(scope.row.measureTime) }}</template></el-table-column>
             <el-table-column label="操作" width="130" align="center">
                 <template #default="scope">
@@ -118,7 +118,7 @@
                 </template>
             </el-table-column>
         </el-table>
-        <div class="lc-pagination"><el-pagination background layout="total, sizes, prev, pager, next, jumper" :total="total" v-model:current-page="measuredQuery.pageIndex" v-model:page-size="measuredQuery.pageSize" :page-sizes="[20,50,100]" @@current-change="loadMeasured" @@size-change="onMeasuredSize" /></div>
+        <div class="lc-pagination"><el-pagination background layout="total, sizes, prev, pager, next, jumper" :total="total" v-model:current-page="measuredQuery.pageIndex" v-model:page-size="measuredQuery.pageSize" :page-sizes="[20,50,100]" @@current-change="loadMeasured" @@size-change="onMeasuredSize"></el-pagination></div>
     </div>
 
     <div class="lc-panel lc-empty-panel" v-show="activeTab === 'monitoring'"></div>
@@ -128,8 +128,8 @@
         <div class="lc-import-tip" v-if="importType === 'theoretical'">测点编号、设计坐标、预拱度、权值、所属梁段号和测位名称均为必填；坐标及预拱度单位为 m，权值范围为 0～1。</div>
         <div class="lc-import-tip" v-else>只录入未发生变形的测点；若测点所在梁段已离开支架并发生变形，则不录入。</div>
         <div class="lc-import-fields" v-if="importType === 'measured'">
-            <div><div class="lc-field-label">顶推次数</div><el-select v-model="importPushCount" style="width:100%"><el-option v-for="item in state.importPushCounts" :key="item" :label="item" :value="item" /></el-select></div>
-            <div><div class="lc-field-label">测量时间</div><el-date-picker v-model="importMeasureTime" type="datetime" format="YYYY-MM-DD HH:00" value-format="YYYY-MM-DD HH:00" placeholder="请选择年月日和小时" :disabled-date="disableFutureDate" style="width:100%" /></div>
+            <div><div class="lc-field-label">顶推次数</div><el-select v-model="importPushCount" style="width:100%"><el-option v-for="item in state.importPushCounts" :key="item" :label="item" :value="item"></el-option></el-select></div>
+            <div><div class="lc-field-label">测量时间</div><el-date-picker v-model="importMeasureTime" type="datetime" format="YYYY-MM-DD HH:00" value-format="YYYY-MM-DD HH:00" placeholder="请选择年月日和小时" :disabled-date="disableFutureDate" style="width:100%"></el-date-picker></div>
         </div>
         <el-upload ref="uploadRef" class="lc-upload" drag :auto-upload="false" :limit="1" :on-change="onFileChange" :on-remove="onFileRemove" :on-exceed="onFileExceed" accept=".xlsx" :disabled="importLoading">
             <el-icon class="el-icon--upload"><UploadFilled /></el-icon><div class="el-upload__text">将文件拖曳到此区域，或<em>点击添加</em></div>
