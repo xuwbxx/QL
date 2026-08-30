@@ -160,7 +160,6 @@ namespace DataFactory.KingBase
         #region biz tables
 
         public DbSet<biz_project> biz_project { get; set; }
-        public DbSet<biz_project_user> biz_project_user { get; set; }
         public DbSet<biz_project_bridge> biz_project_bridge { get; set; }
 
         public DbSet<biz_project_bridge_castingGroup> biz_project_bridge_castingGroup { get; set; }
@@ -832,20 +831,6 @@ namespace DataFactory.KingBase
         public DateTime? UpdatedTime { set; get; }
     }
 
-    /// <summary>
-    /// 项目权限表（？是否用项目里的Manager替代？）
-    /// </summary>
-    public class biz_project_user
-    {
-        public int ID { set; get; }
-        public int UserID { set; get; }
-        public int ProjID { set; get; }
-        public int Status { set; get; }
-        public string? CreatedBy { set; get; }
-        public DateTime? CreatedTime { set; get; }
-        public string? UpdatedBy { set; get; }
-        public DateTime? UpdatedTime { set; get; }
-    }
     /// <summary>
     /// 项目桥梁子表
     /// </summary>

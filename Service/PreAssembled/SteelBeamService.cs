@@ -419,17 +419,12 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         try { if (File.Exists(path)) File.Delete(path); } catch { }
     }
 
-    private async Task<HashSet<int>?> GetAllowedProjectIds()
+    private Task<HashSet<int>?> GetAllowedProjectIds()
     {
-        var account = GetCurrentAccount();
-        var user = await Db.Query<sys_userinfo>().FirstOrDefaultAsync(a => a.Status != -1 && a.Account == account)
-                   ?? throw new UnauthorizedAccessException("当前登录用户不存在");
-        var isAdmin = await (from ur in Db.Query<sys_user_role>().Where(a => a.Status != -1 && a.UserID == user.ID)
-                             join role in Db.Query<sys_role>().Where(a => a.Status != -1 && a.Code == "ADMIN") on ur.RoleID equals role.ID
-                             select role.ID).AnyAsync();
-        if (isAdmin) return null;
-        return (await Db.Query<biz_project_user>().Where(a => a.Status != -1 && a.UserID == user.ID)
-            .Select(a => a.ProjID).Distinct().ToListAsync()).ToHashSet();
+        // 当前系统通过菜单权限控制钢梁管理入口，数据库中没有项目与用户关联表。
+        // 返回 null 表示已登录用户可访问全部项目，保持与现有项目管理模块一致。
+        GetCurrentAccount();
+        return Task.FromResult<HashSet<int>?>(null);
     }
 
     private async Task EnsureProjectAccess(int projID)
