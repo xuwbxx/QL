@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Model.tech.QL.DTO.BizProject;
 using System.Security.Claims;
+using Tool;
 
 namespace Service.PreAssembled;
 

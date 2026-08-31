@@ -2,7 +2,7 @@ using ClosedXML.Excel;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace Service.PreAssembled;
+namespace Tool;
 
 public sealed record SteelBeamTheoreticalImportRow(
     int ExcelRow, string PointCode, decimal DesignX, decimal DesignY, decimal DesignZ,
