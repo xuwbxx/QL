@@ -1,4 +1,5 @@
 ﻿using DataFactory.Factory;
+using DataFactory.SqlServer.Towing;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataFactory.SqlServer

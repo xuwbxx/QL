@@ -1,0 +1,2847 @@
+﻿
+@{
+    ViewBag.Title = "风电WebGIS";
+    Layout = "~/Views/Shared/WebGISLayout.cshtml";
+}
+
+<script src="https://api.shipxy.com/h5/api/?v=3.0&k=@(ViewData["PXYKey"].ToString())"></script>
+<script src="~/Content/leaflet/dist/leaflet-ant-path.js"></script>
+<input type="hidden" id="PXYKey" value="@ViewData["PXYKey"].ToString()" />
+<input type="hidden" id="hid_ProjectID" value="@ViewData["ProjectID"].ToString()" />
+<input type="hidden" id="hid_ProjectLon" value="@ViewData["ProjectLon"].ToString()" />
+<input type="hidden" id="hid_ProjectLat" value="@ViewData["ProjectLat"].ToString()" />
+
+<style>
+    .map {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        margin: 0 auto;
+        background-color: rgb(126, 206, 244);
+        background-size: cover;
+    }
+
+    .mapmin {
+        width: 100vw;
+        height: 100vh;
+    }
+
+    .leaflet-top {
+        top: 6vh;
+    }
+
+
+    .div_btn {
+        position: absolute;
+        /*top: 150px;*/
+        left: 10px;
+        z-index: 888;
+        width: 32px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        bottom: 200px;
+    }
+
+    .btn_weather {
+        width: 32px;
+        height: 32px;
+        line-height: 32px;
+        text-decoration: none;
+        cursor: pointer;
+        text-align: center;
+        border: 0;
+        opacity: 1;
+        cursor: pointer;
+        background-color: #fff;
+        border-bottom: 1px solid #ccc;
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-size: 90%;
+        padding: 0;
+        margin: 0;
+    }
+
+        .btn_weather:first-child {
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+        }
+
+        .btn_weather:last-child {
+            border-bottom-left-radius: 4px;
+            border-bottom-right-radius: 4px;
+            border-bottom: 0px solid #ccc;
+        }
+
+        .btn_weather:active, .btn_weather:focus, .btn_weather.active {
+            background-color: #48505c;
+        }
+
+        .btn_weather:hover {
+            background-color: #ff8573;
+        }
+
+        .btn_weather.qiwen {
+            background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADj0lEQVRYR+2XYWhVZRzGn+ecO++UbffcTOlDaXP3XA2pDyuCUgYNFCOi0i8ZQ4ySuXMWqRBRslrRoC9RLM+5KYGEaTEEB30JLIImlIYgJhHnvasILHKLc7brltfde/5xZAO33O7ZHSuInc8vz/N7////+7zvIf7jj9X4G4e8FmhsJrA8BPIsJk4H+xuDarTmB9CrGgwdH5N4fLqZXIboT/t205n5QswLwHC9kwR3COQLgh+FQFETPiCQFwkUi4maDePtd/8+H4jYAGlncDMYDojI6cDObr3ZJJXzdmjCkwIcCyxz16IAGK56jcAbIdg+YmWOTDPpVUkjgTECl33LXLsoAGlHHQGxR8jtQUfm1EwTw/GGSa70LTN2VSON2IuXAGZWIO2qtwXyXMjEY6Md68796y1IO94AyM0Q2L5tuksASxX4/1fAcNUxAm1TSTjrKbhWuwIH7vorbhzHSkLD8bpIvglIQQQtgZ298A8AV31JoFWA82U93FZoXz8cB6IigJFTr1PQDZGzxbB2+/gLa36LhGcCoE90Yzh/MLqwBFCBpJphr75aCWJOgIbcTw/qUj4Lwfd+ff1D2HXHWMrN369BekSwhYQGYATAB76e6UI7J9KuehVAjwAfBpa5Z0EAU/FbFnlm1M5+Un/45w16qXSBRHKmsAiOB7bZhl6VTOu4Aojmr6hZhWcbr80FMWcF0q73I8D1pXD57YXOO/80XPUOgQOzCYZYdtuItdY3XHWKwJOA3uJb6waqBjAcbwJgObDN2sm+nwC5czbBCQ0br+41fzBc9S6BfRC0+bZ5vGqAtKMugdhY0sNV0VRXqoA/eQQNR/WTeKIU4uFCp/lN9QBuPgfIXgGfCqxMf30uvykhcuuXr+Bz3zYfjcyiVARYFwxl6tDNUtUADY63UydPAPjWv5LZhG6GKVe9TKCHgD4lLJCL1/Vl26IXseF4u0keFcFXgW22LugUTE70dyDuFUhXYGXfigTrHO+eBPk8BE2hxk9H/2jquwH3/i+Nmj5xSYAkQmkNOrNfLwwgCpzDg2tQDi8K0ABhb1BMvnKrqE05aiuJKK5XC7A/sMz3KpnHfpSmDqlmanKU4H0AfhXgMxEOiAZqEmYAPhLFMIBxAQ7GNY8NcGMnfaKnhwY7hLKPQNO03YmMCdh/PVHz0qL9Gd1sGLUlLIVbAFkZQjtTGGo6V2naZ2tHxcsoTh8XsuZv2135MLmJV2cAAAAASUVORK5CYII=);
+        }
+
+        .btn_weather.qiya {
+            background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFcUlEQVRYR+2XW2wUZRTH/2dmW7aFdmcDJUSrQNlZNBU0QVREMCaCyMUIcvGpPpnamdKkmhgwjZZYESWigrNLSQxKoolAonLRACoasQp4iRA03dl2o1VUCpnZdqHtdnaOmW2n6X23fSEm7kuznXP5zf8753xnCdf5Q9c5P/5DALWcWzC5qUoUeSWDS8FUQOBcgAhgm0CdNtt/AMK78ZzAdpRTdzbqZlaglgXfFH0riJ4hggfMYNBlAv5hoB2MJBHlM7FEjJlEEJlhM/jjOKQyqFMTo4GMCiC9HpOQ2/0VEc1l5oRNwis2YU+iInBp2KB7Y15fh/U0Ac8S4GNmCySsM5XARyNBjAggvRVZTEQfgJACxJcNpUTLRtK0zX4WCy81vypQSgWRhxmPx1X54HD+wwI4yUF0EkBz0pOz+Fr5jL9c50ItGiBwNRFKATCYDRDFbObvmfOPt1cWX3Ft87ToTV7iTxi4FcAaU5EPDYYYApC/6/cbcsXO8wS0Wnb+QjegFNLvJ2AzgId6g3Qy8CuANmIWGTQfQA4IYXR5aszqmWbarv5ivpS6epTA8zpZKO1QAy39IYYA+EP6N2Ce0WV751/bePNFx1jS9GoQXgPYIghvg+k9o7WkAbVk9wXb9/dEKdG2noAXnSrtFmlJ4in5F+d5QX3jFI8lnAcQM1oD9/X3GwDg0/SlAuEYGI8Yqnw4nTwcqSKmNxn8M4v0WLxcbhq1Fna05Pm9nXsBXp4CLW1T5O8c+0Itukwk/tS2sSFeKe93YwwAkDT9rPPAVGVHThSGm+8SONUAcINp0RJUyV3ZFqI/pO8H88MWi/PaK2dFepU8SwSvochzhgBMCkdvy2E+z0RrzIrAh46BP6SfYkaQKXd2XJluZJs8bbc35vV3WBFmnDZVeV06nqavAuGQxbSwXQ00OP/rU0AKRWqI6TmjKClhfWmyMKTfIwLfMlBtKvIbY0rea+zTok8KxHvsVE5JfOOMGGrZIxVFEwTUGqq8bRCAfpKYrxlqcEVarpDuFN1GszPPh7bibqlIjxChxlCC72cNs6MlT/J2mMRUbahyqEeFyFHnr5unnwK6c07HTUWu7JWrAQTTUOTlzndfSN8qAJuZscVU5dpsISRN/8JpaUOVN/TWwQ6AHzXVYMkABfxapB0Qthlq4KUew0gzCEdMJVjlJnMkJeIwgQ8YU7qfcI4qE4gU0vcRI2Co8r09XaW/AOZKUwkWDQZIMGGbqQTr0m+sReqY6IjbRm4iSYs+QLCdiXYBRCYDLbDFOrOy5LfhYJzWBvHtcSW4vVfZTQDXGGpw0sAa0PRGEE64RzDamxWEows9zKdcG2a0IukJ9k2/UZz9WmQ3iBYZiuyM8v5doH9O4A5DCa7MJKszH0ROne5vlyLx7raKkjOZfKVQ5ARACVORVw8GeJ4Ym9w2HC2Qv77Jx1aqiYgmO3bMfAXJnEBGBXpmgwGmOrfW+rrAv6tpDkT7HINWj3Z/u2B54cYbJ7CQ7oYusms7Kmb/mfHttWgZiN9JpiYUu/fMwFEc0n8koMtQ5AWZgo3nec+o57ipBh90/QcA+MORlWA6nCIsa6uQj40nyUg+Pk1fKxAOpIAF/TtryHUsaZEzAE1F0nNHxjPNkjC92k3o/gHAT6YSXNvfbQhA3k692CvCuRXPGarsLh9ZphrGzFlIrMSXIJrexXRnxoUkPSxCzXPBqa8Z/JlZUFiGsmlXx0MwUYtNyyXrIMBzu21akKiULwyOM+JSWlAfu0W0rMMEtiwPL2ovn315LBC9e6WziNo2hFVt6qz0rpE1QNpwp17oF3m3RZ4t7UpJ45gAtMhxZ/RbKVqRqJJbR/LN/MNkLFnHYfs/wL8cDGU/ejQTCgAAAABJRU5ErkJggg==);
+        }
+
+        .btn_weather.haifeng {
+            background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADZUlEQVRYR8WWS2wbVRSG/3/GjxISZwYRJBCEtokpAQmJSCwQKuIhwQIoErtWYkMNBie81AWCRal4VoKCVJhxIvUhRYJF1yDYIMGGTZRKqA1CHqflGQIIbCdtADeeH42pQ9za9cSOzMib8T3nP9953HuH+J8fdiO+5Xp5QIMQT5DG3kJm6ONa3K4BEBhak2y2YA4/izTPdQXAdryHBNxH6BGQ1wQgEg4Xx5KprgCsZn7QS1gmpkg8XIUgRrsLEESdWrjcOrP4PcErJBzpPgAA2/X2A3hB0ulQAL0HvYFIFDe3s2OKscoMdt+4tNbXynqPUpiC8GcoANv1PgVwfzsAgH4qxP2RtRC242VAOIL+CAvwAYBd7QAIKhfj/pWrAPtkWAP5aRKjAL4MBQCJfe7c7aah2HohKkZkYSm95Zuan+3ms4Ce/Hcr6rlwAOuN2sDeynq3wtdbJO+tLgsLhb83ba0D6Jn89uqYf+4J+NgwMAIjgm4juWWVSzpbgXn34tjQdF2gftd7wwBe3ICEm0pImlaEO0vp5FxgVAfQl83fYUqvXfh/x0BCEcRxwpgp/Lr1E+yj39XL6FIJbFiv260SLTf3KsDt7QqE9pPKIE+Uzejby+nNP6+2wHK9XwhcFVqoY0Mt+T5TpfHkseoQJpz8sEHtgmB0rN1MgBiE8CCJgZqJoMeKmRuOdm8GJud7rJUzewDsJRkJjuiyGdvcFKD/fW+UJhKtqlJeieeWnx6cb2VXW084uZ0m+eH503B/Q4BeJzcSJb8OKwphVqh+Yr0bxsd2cx8BfADAyYYAiYm5pOlXZgD2hRH8r694uZhJvtLKp9/JpQ1yAkCp4xnoc09ti2DlQJCRBL/sx69r1ZI1HySLHQNUs33nh8us+F/fBVMu8JliZvi9S1XBcrxDJHY3bUGrEjZat5zcFyTv9IE3S5nkS800bPfUdqnyOQkDQuMhXDfAsdmY9Vvsx6ACvpAqjSUPX6Rx9PQme7mSAvQ6iETLbRgWwsp6d0F4nsAOSGdX1HP90vi1v2NyvifhL+8woG3wdQvAe0hYNV0feLyUSR7qbAYk2tl89WpV8CNSxaeSR4L33gnvpqiP2YsTueAoDptpQ7vzAIK+km/uKY0PfVazqwMQFkUchzBTjkQP1F1GHQFsgPM/hY9NxpbPQn4AAAAASUVORK5CYII=);
+        }
+
+        .btn_weather.fengchang {
+            background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAC7klEQVRYR8WWXUgUURTH/2dW11LCmQctAiFtdyl6KOylT4KCniUqksDoU3NSMAIjevAhqIjqpVkT8iGDhMCgAqPeil6DwhRpxl4E21Dc0VirdWdOzNCGq7szd93N7uO99/zP755z7rmXUOjoi1WgaV1iuTK0XMO0XWXUOCeBt8VT6EB7+Fe+eoUDaJ+bJaL7YAzZxA0zrZEv+UAUD8DxyohZoL2zasgQhSgugAvBE8lgSX3ibN03EYjiA7gM/MEsL92Jk7U//SD+CYDj1GZEZ9Sw+t8AGGCypK3xto1DXhDeEeiLVSiJ703M3Eig7QDKF4ldsZmn3VuQZTDjnqmG2/IHYCY5qp8A0U0Cqj0EPAHAPBpXI5vzA+iZKJetxAsC9vvlD4A3ADAXbw1XiAM8GQ7KU8GXgs4dXe8UgJNma6RMDKCLJbnaGCCgQeDk6S3FA5A1/QERTufhHAxqtwEjAB7MWoSiEZA1o4mIH+bj3Ol4zCW7zKnacaVKHwbRpsX2LA6gdwCoFAUgwqQVXNU/e6Zm2rXpHV0jJwPONc0cFtvmhchbsRrIsct5bol5fcYyYTYZKO2fa97w1Z13iney7BjAdaKHAHHKTNEt31Ysa/p7ItQvDS/iZEn74mvrRpQp4x2AHcLO3VbNLTNqpGfZAK4zxg1QYBCwPMO8BJ5x21TDl5z5ggCcVkvAaxCei56ewQPm+fAREPGKAzDjmTkZOowuSqWBfSOgRHUnv7uz3vM8IsDMT82q+UYc3ZJcqOULIGt6LxFOFQAwx4yrphq+m01DAGDsEJE9kAvAYjwOSLiesc6cJMJHhvRpngOvEmptLFeN+AKgh0vllDFChFCWavZ97/2K0x8AgKKN7WHYb4ggLRQU+XAUBcARUTT9Migz1CsK4EJEjW6AW9KnWnEAuF814xERjruNUODPV7QU/BViJiVqdDLhGhjdfp/O4gP8UazU9IMS6EBcDXX6OfFaF7oFOQXujK/GxZofhQD8BjY8W6St5DVzAAAAAElFTkSuQmCC);
+        }
+
+        .btn_weather.taifeng {
+            background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFpElEQVRYR7VXa4hUZRh+nnNmnbG23TOBZlSU7Z5JogtYGUmlJdLFglC70Q8xNN1zovsPf1TrWlAQWazN8VJihN0sCiQLzKKLJt0ou0DMmbVAotBqzuias+7OeeKMzTqzc9amjc6/c973ed/nvNfvI4719PptVoJXSpptEFMFTaQwEaAJYp+EvYC+I7htsIyt/XfZ+45pL0bIOMD4Xv/UZALLICwikWzGqISQwPpyMrVs/6LT/mgGE+nUE5BoeX09YOgS2CmhDwb6wrKZN4gUqFOgsJPgRQKmjkKuGELLik5mzUgSravzE/tT5n4snFyqyo4S6PWT7QktjEJbTLVsqVWqKK/cMz6dLC0UMB3UuQCmEBx3jD99qVBKLcJ9px0a1qn8YL47cO3ljQRGsxTVgam7Qd5LIN1saCM9SV8zYc4sLOkoVnFpL/dEGcb7+53OdxpTMMJ6e9afbwCrQEz6N45rdQV8Gah9JtyJ/dH39mf8qaTWBG5m2ugE1qolPZTfCOKmsTqux2lLwclcV/1mebnDAGcHjv1hYxf0+knL1BaSs+KcCyhD+pbkTkDbJbNEhlMEXQFhJslELE7GvMDteCOSWZ6fJ/R5wcnc2tAFaS//Noir443oIxgtC4KuyT/FyY9b+9PJyaHD3QIXkzDqdIRfCwOpM6OitLK5D0meX+jqTNcRsDz/YQI9McaLENyCa7/YTEosz59BYTOItrp6EBcEbucLaS/3MsBbhshLhwmckM1PN6ntHDEbKiEHZkX5asb5cLVn/dtAbKyPgrYX3Mxllpd7neA8EM4wASvrf07iwpFOBKwMHPv+f+N8uNiy/mYS19dhTeN0lcMNBK4UsKJCoM3LX2NCb8c4L5fNcNKBJWf9NhYCrWv8s1tCfF+LDUPcTAOPErABrasQsDz/TQI3NBLQtsDJzB6L85pUfALikup7KHgG4VTepbXEJpnpfX4R5PENBISe2rE5FiJW1l9OonsYKx2s+pLQw3S271Iw/DjOeAgsLjr2c2NxXMW0Z/OLDWpdvH11Mb3a74Lg/V8ELM+/h8BTcfbLwCW0svkVpB76Oyf9IFurylGVBo59NHxjCIXl5Z4nuKABKh0sOPYJtDz/WQKLjihwDaClR/OFnQXXnj4Gv8MQy8vtInheY33pzcDNzGXay60FeIcAn9BygHXTbjDEOf132nWt1Cyhdi9/QTTzRw63CF8Gr41WMi0v9wjBBwW8LxN3GGXkax0IeitwMvXDpBkGEtOr898AOCemvT8LnMzFlZins/k7Qa2S9EbgZualPX8HolNPzRMCNxUd+7Vm/FZ1qnZjWjskjBkFt2N7hUC0AxLUDkCvROvRWu3fTmF9PVAHQphzi07HtmZItGXzV5sMN0XmG/8e3YFjr6h+J46EqiBpV+BmZlTOfqlDfQBPrk8FRGndQGJcz59LzvgllkgFW3oSQFecXNK7gWNfBVJHCQCI1qOAaYGT6YgE7Z5/owFsijUCDUL4KLoLCEZORpmGmJGUATCD5ORRnL8XlDkHd9kDtfIju+CZ3OUg3gvcTEtVaGVzW0n+pz1QtVWpr4R9C5ZwcCS5mnWc+0ym6RSXdnxRUcrubbUY7Ijr4Wbq4IiOfgll3Ft0O18dDTNMIFrJhjQrcO0Hqsptz+050RwofQAiugc0/Uj6HQZX0TCerj2SxxkYeSTrCbo6l9cWSVSUVrL0Aon5ozEQdBjADwS/g7izMJBcX3chiYAr94xvT5bmGAYmFFKJDdWLT/2hdMOPqdZSua2/q3PvSGdpz3cBPRbXWgBKEL4S8SnA3RB/JjEg6EwIHaQygi6GjGzgdHQ3dEGzsW3t9SckTDwOYmHceI2v/ogI1g8mWh6Na9/Y2/E/ETr+2d0njRscmiXwGghTAEwAMInQkIC9JKM5sUvg1kBt26q3oji7fwHuh2W2R+KtWAAAAABJRU5ErkJggg==);
+        }
+
+        .btn_weather.hailang {
+            background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAF0klEQVRYR61XbWxTZRR+nveusOHWtQQhEQUZvTUBA4oK4heoP/AzEDVEDEYBEXoLqEMBo6JRE4MuEoG2IKj80CgakPBL/ICE8AP8AAFR6O0GOEWcxt7qcJtr7zG3rF233m4l4f57ez7e55zznPOeEmV8vtUnfBiYnkvBNFAmA6zJmQnQQsC0BYdI+baD8nlb6Ipfy3CbVWF/it5IfJYCoyR8/ek6cgEygGy3wYa/DX1ffzZ9AvBGzesVsJeA1p+j3nJxsIistQZ5lmPOqPZS9n0C8EXiB0ledb6X99AXOfYfPLeeDY864+anJIDqWGKoR+T3QiOn3gIsSg0JbMNMZhxZzYbjQzRbXUnBTAgeBVFVlA1BIp3BDa1L9D96y0oCqI0mrlGQb3sYZNS45OLRR0plxBc7cTmkcy3Be4p0BEeTqL0e4aGthbKSAGrWNQYrlH08ryw4kgzr4/LnN5urais7HlaQKQJcAiCRVljdulD/sTYSX6bIVS5AdyZDgTtBSk7WNwei5gECV2fZLbLHCgenZA03iMeXMb8hON4l0o3JPwIL/RebUZALXMpRb4X11WUB8EebxolkviYxUCD/pakuaw0FWnyR+AsEDRB/ARhTHKk0JNurVvoq234hOLgnj+RPq71qBOovaytrDlSvM8d6iI0gJgPYkmwJzPYOOzHh71Dd144D76bmwaqzfTEFL+UuclpQlJpI276XwMreAG1gRcrQsyXqdxDljKvXm2MqBEOBipNWaNTJ3k59kcRSUhq6QchWW9QKjWIWlQFy2DKC2fKVDaAU87tJKvTHEj/kSiIiaWuQp8bX1tlMcEhv+47MwOH/Lh5x+sIBAOCLJh4hZHPuMpu8nSLPEbjNpQzzU4a+6YICqIodH14p6peCMswFcDfB+4u7ga9Y4cDKCwoAHx8d4P9zQEc+A8JnSBlPYHYxD7DJMvT5rgB8kfgTBOeBGC2CsyQaRbATor1nLao7VZIPkZZqP1P/5AFAlinBVJB3FWdAPrXCwfuKAPii5moCT7pd4jy1TlslQ4HXCqdZTte7vlHXbDueL4GNGaQ8C3KSy0B61wrr83oAuGhj0zBPZ+Y39tMdArxoGfrLvZ16Y4kHNZEPuwFol5OZn9weKACrkoa+ogcAf7TpZiCzR4DtoiSKtGZD2bdRsNSZhnnHApsValRyweifC0H4IuY7JBziOYtJSwbaLRXIHHPPJpdYRmCtWwaWWYa+tNDIG2m8TsHeR0J1E0yWp8LB1wv1/BGzGcSlzm+2IArwe0V5250z2vikUXe4mIQbxIMF7Oxt5I+YW0DM7M6CbLPCwXx7edfFJ2mK+RUsTd6k2fIKiVtd6m9ZYd1/XpPQHzNDyEZ17hNgl2Xot+fO/qj5GYBp54Sy37YHzKLW2ejOJ65PGoHQeQGojSSeVpQ3CgDssAx9unP2xpomapLZn5cREyBwhsyMouidTtJUXY4/ZQ8iXyT+Fskl3QDkVcsIvpDdDdIJhx8TumQxQPYC/MCVfCJrrHDwiZysbAD+qOkMoBGFUVoh/aA/ajplyaZTIIeEqp62vZNkhUv0plVVMa5wSy4LQG3EfEARn3Q7lI+SRnCWPxp/KBdpdmEVPq8gDSC8RdGLnO0UTmpdpB8tlPULwHlgBtrqOxLDugh2LAnfdX6kpgtkc1ekzQLsgCBU2KrdHQNbNLkjtTD4RW9gfQKoXmNe7NGwG8TYrstPt3dUTaysbF8MYPk5wuMUgda8TnHe20A8njT09904URKAN5IIKMiXJEY6+yBExTKQrzSinsBUiJwFeQJAHYBBroQDdsHW5vb1gBUBcHY8raP9GaE8DoGX4NZOyO4K8DES1xa0oZR8M0RO21D1qXBgixswVw5kay2cA+ApgmdsMA7J1CiqGwFU9ueoqwtOEmxIprEJS/T8XtCX7bkMxJqH12TawwoYScURgEzu6w+ps++BPAWRJoA/C+U4lLY7dabuAF6iXQ7YnM7/dWJqP6xjPk8AAAAASUVORK5CYII=);
+        }
+
+        .btn_weather.jiangshui {
+            background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACl0lEQVRYR+2WPWgTYRjH/89dqEETcsUPRAqVJncKBengIk5acNJBsSJ0EEWouTOTWHBQHN0EuTup9WuQgog4aAdx0KVUUMTBguZiMig4iNzFYjokd48UbIgxuS8buvTG5573//ze/z3v8x5hjR9a4/pYB1h3ILIDGf3zqCB4E8x8FEQE8AIx5j1RvF09l30btalDA6RulrYlPG+GiEa7F+FZz+0rVAs7K2FBQgFIenmQyH0NwvZgYV50icZ+5uXnwbkIdwwls/iUQIfDCC7nMGAz+rJVddAOWhPoQMawDgmEULtpLcbAA3g87WLjwuL5gR/dQAIBJMN6RITjQTvp9p4BF8yG812+gKvUaM/rDHCvkpRq9YsAjhHRSNzifzvCj528PAYibo3/C8BMkmm98O/2uEg8bqvKjC+AZJYKBL4Rt4TfOma8dDT5oC9Av2F9AGG4FwAAarYqb/IHMK0lAMmeADD/sjUlFeTAFxAGegHAwCtHlQ8E9IB1l4DTvQDwmE5WtdxDX4CMWRwSQO8AZFYZYsZW5fFQc0AyiiNEpAPY/78QzChBoEknn3vSSct3Eqb1r5uBJUUUsSEOCHlCw946NI8T5MYexWnd2ickhHr7XR81HgsgPfVpi+gKRWKItiY3eyJq3M89308gGdYdIpxh8DNHVY6sCEmmNU3A2Q7xPyeIZ21VCXV9dwVIm+VdCbgfGVxnYHdVVcrLAP1meQ/DfQ9wozXeLT+od7oCZKasLDUwB+JpR1UuN3dvWG+IsBeMa7YmX1qJN/NBtxwtdyWo8Mr7wP+BViHJLJ0i8H2Av9liKoeJHbWwhWI1YfsiybR0ArROEy0uSDQHrlckN+kOL+Zzc3ELhpqEqyUeRieSA2EEo+b8BlxqAzDkVT2jAAAAAElFTkSuQmCC);
+        }
+
+        .btn_weather.chaoxi {
+            background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADQklEQVRYR+2WWWgTURSG/3Oni1XbzIigDypqmyiiICgogoioIAqi0gdFUNxokwgquOCGBRdEsOAy0xZFfRAEoRRB8UERBDfwQRAXzKQttYIr7aSx0mpyj6TSYpqZzsUovjhPYc7//+ebc+/cCeEfX/SP++M/wP8J/PEJ6GZsZgro/RINvVLZ4OoAzBRoaJlFLEcyUzJRor3Axkk9vzYxrNhVgNZk7kmIJYlI+R0/CF+AkjP2uOIC3gNgLYFG9wcyc4qImtJAbVck+Ljv/hm7WNdggTA/RbT6S7ji+e8DNHChLuP7wXyAQIVeQcxwQDjiRIK1fs3c6p4T0C27iYCVbiZmfCKgVhLdTnwsf4oakr/TPONxBdBNeycRXJ+IgaeyaNjiri3jO1ybXntRpH8q2g/BHcy4kYiEWoaCywEIWG2GwLe3AIbnGJm7UaBN66wqfzNUqGHaz0CYkdknEFTlhIMXvfQuAPZxAezzGP0pJxrc5Tdu3YpvIPDljI4ZbU40OFEZwLDsNgAT3AySaFEiXHHXDyBT163YEWLawkCDEw3WKAEYZ5tnQJPPvMRpIUJd1eW2CoCqJmsJAlasWoDqvMwpiXnJbcFHquEquiwA3bIvErDR850HH3UioUN+wYZpr2PiVQB9TTPVJ6MVD9WWwIw9BtGcIQA6nJFlE7B+bLeXxrBiJwHa/bNO9SnClWS44kGWvoZF/9mRNQHDtNtBGDf0E/LNzpLCysHfgYwnYNl7BXAi81syH0tEQwdzsjLHdQHmOpHgvT7EAQEz6XXxNHkcToOC2hl8WArtfle69J3OiUUQ2EnAgn7dt0JtbPfWyR8GA+hmbDsLvE2EQ41ZACPOt4wp+p5+77e+qvXO4nQZNk9N/qovu9A+SuvtaZWCN+UAlJ5rDhUI+Vq1gZ+OmXc40dDpAd2l1mHG1++NIFomiStzAAL1zbOFlE/8glXrzJBEaGTGSwKVMMlKAk3u2x9uALoZX0jESqecKoSXzhWgzIwv1Yhv5Ruu4ncFMKzm5YC8oRKQr8Z9CSx7BQHX8w1X8XsAxFcSuEklIF+NK0Bpw+vRmhTT8w1X8aeFfJ6smvI5+yRUcf4Fje/f8r/QMyvyB2EHQzCmPTpEAAAAAElFTkSuQmCC);
+        }
+
+        .btn_weather.yubao {
+            background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAgCAYAAABgrToAAAAEp0lEQVRYR9WXX2gcdRDHv7N79RKT3O09tAht1Ka3p7VKjeCLQotWaYhQfagUC5a2D5rbTYvxP5aUCJWikWLj7aahqPighpYipo3UghYqKhRNrZWCt3dX1CCaors5U2LavR3Za67cJXe3m+Qq+HvcnfnOZ+f3m/nNEua5Inqyl0Exy8aT2Cln5ynj6UaeFmUMGhPGqkUCfnRfOcQbx+OxI/PR8eMzL0Cp32glxogbIMe8OavGPvITbD42/0PAfb/WS8GpvUTOaVOJfVjuq/1mUNJSD4B4s020ayIeHatJBqV+Yzsx3nHFGOiyFPmtmcJ+zqCkGxvAfISIAgD3mkrsxZoA1vcZy4IiRoiwOC9IUMy43D9TXNKM9wGIViC6DU/TleL3xXDMmHIEcU023nK6JoCuSNPAhdtF2z5VgGTQVkuJukCeS0ok14DwuZs5F44Fah+PR7/wdKxgULFI8pA5+2sCIsw4aanyg3mNHg6EFmdaCXw3kWPbJAwXny9JNxIEqLWAu7qBVVaTnrlNhP0aIbDfVFq+lHTjGQJ6AIQLbpw/qjgKQo8Vl8/U9/+0tM6hXiYatBR5aL6ZK/j5bjMRLbULxHsqBWRmmyB0mWo0sVCoYn9fgGHdeFwADvkJzA6vtTpjp/zY+rHxBRjRjXMA7vQSZOYLDoud2c4Vn3rZ+n2fBwxp6XsFwWkocfon8L3Vtdxq1JIrFxGd9xbkXnNMfgU9ZF+z7WEhvMS4lYjC1h/RcyXvvAXzFiTpqccI/PFMe2YctVR5QyiRbhcFZ7iqHuOgqcpP5W0OsRi+mN5O4A4Aq4gQdB8z+DKBvmXmg1ZA/mBm76ykT5KW3EpE780CBIYsRX40fCD5sODQicrFgZOWEl0HIg7rP0cEXD4G4D6PDxqFI7SbO1a4R6fqIjBTRM/cz4ITKLZkvuHsuHKLGdJSUZHYKKfCwFjOqb/j785lf6LPCEoBfENAq1fQqxmFSTlhrRekvyLRjB9AuGt2lrnbUmL51iNpxttE6PQDd82GMWpO1cXwbPNkxS32I+jerQR8UpphOFcQWHpJXf67dCCzGk7uDHk0/vKxqg8SvjKYz5BuvErAbrchg2jQFrB3okPOV7ekJ/sItMPPx1Y8y+C/iHHYhPQ81CUTBbvqV10iHRMF52UI4n6ro+Wsm8kpGyOTO+XR4kARLXkeRCsXAljwZSDtMLVl1WjKfVZ9WJieaEqGhWmlyED6Zs7ltoDdeQ/dRBBqAThdQGmrsWk1ttx0qSxg1XGrzwiGA9hNjOcKPa5WYCVnHLzHUmLdswDrtVRzEPxdpYE1oiePAfTI9YAq0XQrXJWbZwFKenIbgd6dTnXJyB/qN9aLjOPXHW46gCk2NMzeYvenqW7ydWbhl3E1+mZJMejGIIBN/xUgTwUivtuMCxXRja88r7Ea0TPDsS5Gg3MClDTjMBE21oihugzjhKnK6+cEGNKST4hEZf+Vaw2dI7Rl4/JncwLMb7OWHAZRe62BSiuY3jDV6EtVG3VFgIHfbpTsiSEiWldrSPfcEfE+U4m94OuqqwYQ0lJtAvghAPdgIbcIwwGQIWDEIT4+rsQyxXH/BbZb7cpUlO3/AAAAAElFTkSuQmCC);
+        }
+
+    table tbody tr td:nth-child(1) {
+        text-align: center;
+    }
+
+
+    .leaflet-labelfan {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        pointer-events: none;
+        white-space: nowrap;
+    }
+
+    .leaflet-labelship {
+        background-color: aqua;
+        /*background-clip: padding-box;*/
+        color: yellow;
+        /*-webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        pointer-events: none;
+        white-space: nowrap;*/
+    }
+
+
+    /*滚动条*/
+    ::-webkit-scrollbar {
+        width: 0.24vw !important;
+        height: 10px;
+        background: rgba(0,0,0,0.8);
+    }
+
+    ::-moz-scrollbar {
+        width: 0.24vw;
+        height: 10px;
+        background: rgba(0,0,0,0.8);
+    }
+
+    ::-ms-scrollbar {
+        width: 0.24vw;
+        height: 10px;
+        background: rgba(0,0,0,0.8);
+    }
+
+    ::-o-scrollbar {
+        width: 0.24vw;
+        height: 10px;
+        background: rgba(0,0,0,0.8);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #2c98ff;
+    }
+
+    ::-moz-scrollbar-thumb {
+        background: #2c98ff;
+    }
+
+    ::-mswebkit-scrollbar-thumb {
+        background: #2c98ff;
+    }
+
+    ::-o-scrollbar-thumb {
+        background: #2c98ff;
+    }
+
+    div {
+        scrollbar-arrow-color: #2c98ff; /**/ /*三角箭头的颜色*/
+        scrollbar-face-color: #2c98ff; /**/ /*立体滚动条的颜色*/
+        scrollbar-3dlight-color: #2c98ff; /**/ /*立体滚动条亮边的颜色*/
+        scrollbar-highlight-color: rgba(255,255,255,1); /**/ /*滚动条空白部分的颜色*/
+        scrollbar-shadow-color: #2c98ff; /**/ /*立体滚动条阴影的颜色*/
+        scrollbar-darkshadow-color: #2c98ff; /**/ /*立体滚动条强阴影的颜色*/
+        scrollbar-track-color: #4e657b; /**/ /*立体滚动条背景颜色*/
+        scrollbar-base-color: #f8f8f8; /**/ /*滚动条的基本颜色*/
+    }
+</style>
+
+<input type="hidden" id="hid_PostToken" value="@ViewData["PostToken"].ToString()" />
+
+<!--背景 start-->
+<div class="bim-content">
+    <div class="map">
+        <div id="map" class="mapmin ma-map">
+            <div class="div_btn">
+                <p id="btn_qiwen" class="btn_weather qiwen" title="气温" />
+
+                <p id="btn_qiya" class="btn_weather qiya" title="气压" />
+
+                <p id="btn_haifeng" class="btn_weather haifeng" title="海风" />
+
+                <p id="btn_taifeng" class="btn_weather taifeng" title="台风" />
+
+                <p id="btn_fengchang" class="btn_weather fengchang" title="风场" />
+
+                <p id="btn_hailang" class="btn_weather hailang" title="海浪" />
+
+                <p id="btn_chaoxi" class="btn_weather chaoxi" title="潮汐" />
+
+                <p id="btn_haiquyubao" class="btn_weather yubao" title="预报" />
+            </div>
+        </div>
+    </div>
+</div>
+<!--背景 end-->
+<!--header start-->
+<div class="box-header clearfix">
+    <div class="title_l"><img src="~/Content/Cloud/img/logo.png">海上风电WebGIS平台</div>
+    <div class="title_fc_name">@ViewData["ProjectName"].ToString()</div>
+    <div class="fhsyy_box" onclick="DoProjectFanBack();">
+        <img src="~/Content/Cloud/img/bg_icon_fhsyy.png">
+        <span><a>返回</a></span>
+    </div>
+</div>
+<!--header end-->
+
+
+@*风机信息弹框*@
+<div class="fjxx_map_tk01 hide">
+    <div class="title"><img src="~/Content/Cloud/img/icon_fjxq.png"><span id="popup_span_FanName">项目资料</span></div>
+    <!--		 <img src="img/fjtitle_zs.png" class="fjtitle_zs">-->
+
+    <div class="fjxx_tkclose" title="关闭窗口" onclick="CloseDKPopup();"><i class="fa fa-close"></i></div>
+
+    <section class="tab ggys_tab">
+        <header class="panel-heading">
+            <ul class="nav nav-tabs nav-justified ggys_ul">
+                <li class="active">
+                    <a data-toggle="tab" href="#li_dkzl">地勘资料</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#li_cba">桩锤资料</a>
+                </li>
+            </ul>
+        </header>
+        <div class="panel-body">
+            <div class="tab-content tasi-tab">
+
+                <div id="li_dkzl" class="tab-pane fade in active">
+
+                    <div class="tab-vertical">
+                        <ul id="myTab01" class="nav nav-tabs dkzl_tab_header clearfix" style="height:37.5vh;overflow-y:auto;">
+                            <li class="tab-item active zm"><a href="#qu01" data-toggle="tab"><span>G</span><span>S</span><span>K</span><span>0</span><span>1</span></a></li>
+                            <li class="tab-item zm"><a href="#qu02" data-toggle="tab"><i>地勘资料</i></a></li>
+                            <li class="tab-item"><a href="#qu03" data-toggle="tab"><i>地勘资料</i></a></li>
+                        </ul>
+                        <div class="tab-content dkzl_tab-body">
+                            <div class="tab-pane fade in active row" id="qu01">
+
+                                <div class="dk_infor_box">
+
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>序号</th>
+                                                <th>地层编号</th>
+                                                <th>土层编号</th>
+                                                <th>层底标高(m)</th>
+                                                <th>土层类型</th>
+                                                <th>不排水抗剪强度cu(kPa)</th>
+                                                <th>砂土摩擦角°</th>
+                                                <th>有效重度</th>
+                                                <th>标贯击数</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>1</td>
+                                                <td>-</td>
+                                                <td>泥面</td>
+                                                <td>-2</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>①2</td>
+                                                <td>淤泥质土</td>
+                                                <td>-5</td>
+                                                <td>粘土</td>
+                                                <td>9</td>
+                                                <td>0</td>
+                                                <td>8.1</td>
+                                                <td>0</td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>①2</td>
+                                                <td>淤泥质土</td>
+                                                <td>-5</td>
+                                                <td>粘土</td>
+                                                <td>9</td>
+                                                <td>0</td>
+                                                <td>8.1</td>
+                                                <td>0</td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>①2</td>
+                                                <td>淤泥质土</td>
+                                                <td>-5</td>
+                                                <td>粘土</td>
+                                                <td>9</td>
+                                                <td>0</td>
+                                                <td>8.1</td>
+                                                <td>0</td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>①2</td>
+                                                <td>淤泥质土</td>
+                                                <td>-5</td>
+                                                <td>粘土</td>
+                                                <td>9</td>
+                                                <td>0</td>
+                                                <td>8.1</td>
+                                                <td>0</td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>①2</td>
+                                                <td>淤泥质土</td>
+                                                <td>-5</td>
+                                                <td>粘土</td>
+                                                <td>9</td>
+                                                <td>0</td>
+                                                <td>8.1</td>
+                                                <td>0</td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>①2</td>
+                                                <td>淤泥质土</td>
+                                                <td>-5</td>
+                                                <td>粘土</td>
+                                                <td>9</td>
+                                                <td>0</td>
+                                                <td>8.1</td>
+                                                <td>0</td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>①2</td>
+                                                <td>淤泥质土</td>
+                                                <td>-5</td>
+                                                <td>粘土</td>
+                                                <td>9</td>
+                                                <td>0</td>
+                                                <td>8.1</td>
+                                                <td>0</td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>①2</td>
+                                                <td>淤泥质土</td>
+                                                <td>-5</td>
+                                                <td>粘土</td>
+                                                <td>9</td>
+                                                <td>0</td>
+                                                <td>8.1</td>
+                                                <td>0</td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>①2</td>
+                                                <td>淤泥质土</td>
+                                                <td>-5</td>
+                                                <td>粘土</td>
+                                                <td>9</td>
+                                                <td>0</td>
+                                                <td>8.1</td>
+                                                <td>0</td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>①2</td>
+                                                <td>淤泥质土</td>
+                                                <td>-5</td>
+                                                <td>粘土</td>
+                                                <td>9</td>
+                                                <td>0</td>
+                                                <td>8.1</td>
+                                                <td>0</td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>①2</td>
+                                                <td>淤泥质土</td>
+                                                <td>-5</td>
+                                                <td>粘土</td>
+                                                <td>9</td>
+                                                <td>0</td>
+                                                <td>8.1</td>
+                                                <td>0</td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>①2</td>
+                                                <td>淤泥质土</td>
+                                                <td>-5</td>
+                                                <td>粘土</td>
+                                                <td>9</td>
+                                                <td>0</td>
+                                                <td>8.1</td>
+                                                <td>0</td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>①2</td>
+                                                <td>淤泥质土</td>
+                                                <td>-5</td>
+                                                <td>粘土</td>
+                                                <td>9</td>
+                                                <td>0</td>
+                                                <td>8.1</td>
+                                                <td>0</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                </div>
+
+
+                            </div>
+                            <div class="tab-pane fade row" id="qu02">
+                                地勘资料22222222
+                            </div>
+                            <div class="tab-pane fade row" id="qu03">
+                                地勘资料333333333
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div id="li_cba" class="tab-pane fade">
+                    暂无
+                </div>
+
+                @*<div id="gj" class="tab-pane fade">
+            内容待定
+        </div>
+        <div id="lxfs" class="tab-pane fade">
+            内容待定
+        </div>
+        <div id="fdazcsb" class="tab-pane fade">
+            内容待定
+        </div>
+        <div id="dcry" class="tab-pane fade">
+            内容待定
+        </div>*@
+
+
+
+            </div>
+        </div>
+    </section>
+
+
+</div>
+
+<div class="fjxx_map_tk02 hide">
+    <div class="title"><img src="~/Content/Cloud/img/icon_fjxq.png">云服务计算报告</div>
+    <!--		 <img src="img/fjtitle_zs.png" class="fjtitle_zs">-->
+
+    <div class="fjxx_tk02close" title="关闭窗口" onclick="CloseReportPopup();"><i class="fa fa-close"></i></div>
+
+    <section class="tab ggys_tab">
+        <header class="panel-heading">
+            <ul class="nav nav-tabs nav-justified ggys_ul">
+                <li class="active">
+                    <a data-toggle="tab" href="#div_ProjectFile">项目文件资料</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#div_CBZReport">插拔桩计算报告</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#div_KZYReport">起重船基础施工可作业性预报</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#div_PileReport">桩锤计算报告</a>
+                </li>
+            </ul>
+        </header>
+        <div class="panel-body">
+            <div class="tab-content tasi-tab">
+                <div id="div_ProjectFile" class="tab-pane fade in active">
+
+                    <div class="tab-vertical">
+                        <ul id="myTab02" class="nav nav-tabs dkzl_tab_header clearfix">
+                            <li class="tab-item active zm"><a href="#ProjectFile01" data-toggle="tab"><i>相关文件</i></a></li>
+                            
+                        </ul>
+                        <div class="tab-content dkzl_tab-body">
+                            <div class="tab-pane fade in active row" id="ProjectFile01">
+                                
+                                <div class="dk_infor_box dk_infor_box01">
+
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th width="10%">类型</th>
+                                                <th width="50%">文件名</th>
+                                                <th width="25%">时间</th>
+                                                <th width="15%">操作</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody id="report_ProjectFile">
+                                            <tr>
+                                                <td>1</td>
+                                                <td>文件名文件名文件名文件名文件名文件名文件名文件名</td>
+                                                <td>2025-01-02</td>
+                                                <td><button class="btn btn-download">下载</button></td>
+                                            </tr>
+
+                                            <tr>
+                                                <td>1</td>
+                                                <td>文件名文件名文件名文件名文件名文</td>
+                                                <td>2025-01-02</td>
+                                                <td><button class="btn btn-download">下载</button></td>
+
+                                            </tr>
+
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                </div>
+
+                <div id="div_CBZReport" class="tab-pane fade">
+                    <div class="tab-vertical">
+                        <ul id="myTab03" class="nav nav-tabs dkzl_tab_header clearfix">
+                            <li class="tab-item active zm"><a href="#DKFileExport" data-toggle="tab"><i>输出文件</i></a></li>
+                            <li class="tab-item"><a href="#DKFileImport" data-toggle="tab"><i>输入文件</i></a></li>
+                        </ul>
+                        <div class="tab-content dkzl_tab-body">
+                            <div class="tab-pane fade in active row" id="DKFileExport">
+                                <div class="dk_infor_box02 clearfix">
+
+                                    <div class="wd_box clearfix col-lg-3">
+                                        <div class="left_wdicon">
+                                            <img src="~/Content/Cloud/img/icon_pdf.png">
+                                        </div>
+                                        <div class="right_edxiangqing">
+                                            <div><a>文档名称文档名称文档名称.pdf</a></div>
+                                            <div>2025-02-12</div>
+                                        </div>
+                                    </div>
+                                    <div class="wd_box clearfix col-lg-3">
+                                        <div class="left_wdicon">
+                                            <img src="~/Content/Cloud/img/icon_word.png">
+                                        </div>
+                                        <div class="right_edxiangqing">
+                                            <div><a>文档名称文档名称文档名称.docx</a></div>
+                                            <div>2025-02-12</div>
+                                        </div>
+                                    </div>
+                                    <div class="wd_box clearfix col-lg-3">
+                                        <div class="left_wdicon">
+                                            <img src="~/Content/Cloud/img/icon_excel.png">
+                                        </div>
+                                        <div class="right_edxiangqing">
+                                            <div><a>文档名称文档名称文档名称.xlsx</a></div>
+                                            <div>2025-02-12</div>
+                                        </div>
+                                    </div>
+                                    <div class="wd_box clearfix col-lg-3">
+                                        <div class="left_wdicon">
+                                            <img src="~/Content/Cloud/img/icon_qtwd.png">
+                                        </div>
+                                        <div class="right_edxiangqing">
+                                            <div><a>文档名称文档名称文档名称.ppt</a></div>
+                                            <div>2025-02-12</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade row" id="DKFileImport">
+                                地勘资料22222222
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="div_KZYReport" class="tab-pane fade">
+                    <div class="tab-vertical">
+                        <ul id="myTab04" class="nav nav-tabs dkzl_tab_header clearfix">
+                            <li class="tab-item active zm"><a href="#KZYFileExport" data-toggle="tab"><i>输出文件</i></a></li>
+                            <li class="tab-item"><a href="#KZYFileImport" data-toggle="tab"><i>输入文件</i></a></li>
+                        </ul>
+                        <div class="tab-content dkzl_tab-body">
+                            <div class="tab-pane fade in active row" id="KZYFileExport">
+                                <div class="dk_infor_box02 clearfix">
+
+                                    <div class="wd_box clearfix col-lg-3">
+                                        <div class="left_wdicon">
+                                            <img src="~/Content/Cloud/img/icon_pdf.png">
+                                        </div>
+                                        <div class="right_edxiangqing">
+                                            <div><a>文档名称文档名称文档名称.pdf</a></div>
+                                            <div>2025-02-12</div>
+                                        </div>
+                                    </div>
+                                    <div class="wd_box clearfix col-lg-3">
+                                        <div class="left_wdicon">
+                                            <img src="~/Content/Cloud/img/icon_word.png">
+                                        </div>
+                                        <div class="right_edxiangqing">
+                                            <div><a>文档名称文档名称文档名称.docx</a></div>
+                                            <div>2025-02-12</div>
+                                        </div>
+                                    </div>
+                                    <div class="wd_box clearfix col-lg-3">
+                                        <div class="left_wdicon">
+                                            <img src="~/Content/Cloud/img/icon_excel.png">
+                                        </div>
+                                        <div class="right_edxiangqing">
+                                            <div><a>文档名称文档名称文档名称.xlsx</a></div>
+                                            <div>2025-02-12</div>
+                                        </div>
+                                    </div>
+                                    <div class="wd_box clearfix col-lg-3">
+                                        <div class="left_wdicon">
+                                            <img src="~/Content/Cloud/img/icon_qtwd.png">
+                                        </div>
+                                        <div class="right_edxiangqing">
+                                            <div><a>文档名称文档名称文档名称.ppt</a></div>
+                                            <div>2025-02-12</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade row" id="KZYFileImport">
+                                地勘资料22222222
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="div_PileReport" class="tab-pane fade">
+                    <div class="tab-vertical">
+                        <ul id="myTab05" class="nav nav-tabs dkzl_tab_header clearfix">
+                            <li class="tab-item active zm"><a href="#PileFileExport" data-toggle="tab"><i>输出文件</i></a></li>
+                            <li class="tab-item"><a href="#PileFileImport" data-toggle="tab"><i>输入文件</i></a></li>
+                        </ul>
+                        <div class="tab-content dkzl_tab-body">
+                            <div class="tab-pane fade in active row" id="PileFileExport">
+                                <div class="dk_infor_box02 clearfix">
+
+                                    <div class="wd_box clearfix col-lg-3">
+                                        <div class="left_wdicon">
+                                            <img src="~/Content/Cloud/img/icon_pdf.png">
+                                        </div>
+                                        <div class="right_edxiangqing">
+                                            <div><a>文档名称文档名称文档名称.pdf</a></div>
+                                            <div>2025-02-12</div>
+                                        </div>
+                                    </div>
+                                    <div class="wd_box clearfix col-lg-3">
+                                        <div class="left_wdicon">
+                                            <img src="~/Content/Cloud/img/icon_word.png">
+                                        </div>
+                                        <div class="right_edxiangqing">
+                                            <div><a>文档名称文档名称文档名称.docx</a></div>
+                                            <div>2025-02-12</div>
+                                        </div>
+                                    </div>
+                                    <div class="wd_box clearfix col-lg-3">
+                                        <div class="left_wdicon">
+                                            <img src="~/Content/Cloud/img/icon_excel.png">
+                                        </div>
+                                        <div class="right_edxiangqing">
+                                            <div><a>文档名称文档名称文档名称.xlsx</a></div>
+                                            <div>2025-02-12</div>
+                                        </div>
+                                    </div>
+                                    <div class="wd_box clearfix col-lg-3">
+                                        <div class="left_wdicon">
+                                            <img src="~/Content/Cloud/img/icon_qtwd.png">
+                                        </div>
+                                        <div class="right_edxiangqing">
+                                            <div><a>文档名称文档名称文档名称.ppt</a></div>
+                                            <div>2025-02-12</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade row" id="PileFileImport">
+                                地勘资料22222222
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+</div>
+
+
+<!--气象详情-->
+<div class="qt_qxxq">
+    <div class="right_title qxxq_font"><img src="~/Content/Cloud/img/icon_stqxxq.png">未来七天气象预报<div class="qxxq_onoff"></div></div>
+    <div class="qxxq_con_none">
+        <section class="tab FJXQ_tab">
+            <header class="panel-heading">
+                <ul class="nav nav-tabs nav-justified FJXX_xq" id="ul_WeatherDate">
+                    @*<li class="active">
+                            <a data-toggle="tab" href="#dyit">9月1日</a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#dert">9月2日</a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#dsant">9月3日</a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#dsit">9月4日</a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#dwut">9月5日</a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#dliut">9月6日</a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#dqit">9月7日</a>
+                        </li>*@
+                </ul>
+            </header>
+            <div class="panel-body tab_panel-body">
+                <div class="tab-content tasi-tab" id="div_WeatherDateInfo">
+                    @*<div id="dyit" class="tab-pane fade in active">
+                            <div class="qt_qxxq_con clearfix">
+                                <div class="qx_zhu_box clearfix">
+                                    <div class="sjz_box">
+                                        <ul class="sjz_box_ul">
+                                            <li class="active">4:00</li>
+                                            <li>8:00</li>
+                                            <li>12:00</li>
+                                            <li>16:00</li>
+                                            <li>16:00</li>
+                                        </ul>
+                                    </div>
+                                    <div class="qxxq_zhu">
+                                        <ul class="qxxq_zhu_ul active clearfix">
+                                            <li class="active"><img src="~/Content/Cloud/img/icon_qxxx_fs.png">风速<span>24</span><i>m/s</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_fx.png">风向<span>55.6</span><i>度</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_tf.png">台风<span>5</span><i>级</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_lg.png">浪高<span>64</span><i>m</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_yx.png">涌向<span>98</span><i>度</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_yg.png">涌高<span>98</span><i>m</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_yzq.png">涌周期<span>56</span><i>s</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_wd.png">温度<span>14.8</span><i>℃</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_njd.png">能见度<span>46</span><i>米</i></li>
+                                        </ul>
+                                        <ul class="qxxq_zhu_ul  clearfix">
+                                            <li class="active"><img src="~/Content/Cloud/img/icon_qxxx_fs.png">风速<span>55</span><i>m/s</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_fx.png">风向<span>55.6</span><i>度</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_tf.png">台风<span>5</span><i>级</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_lg.png">浪高<span>64</span><i>m</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_yx.png">涌向<span>98</span><i>度</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_yg.png">涌高<span>98</span><i>m</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_yzq.png">涌周期<span>56</span><i>s</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_wd.png">温度<span>14.8</span><i>℃</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_njd.png">能见度<span>46</span><i>米</i></li>
+                                        </ul>
+                                        <ul class="qxxq_zhu_ul  clearfix">
+                                            <li class="active"><img src="~/Content/Cloud/img/icon_qxxx_fs.png">风速<span>67</span><i>m/s</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_fx.png">风向<span>55.6</span><i>度</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_tf.png">台风<span>5</span><i>级</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_lg.png">浪高<span>64</span><i>m</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_yx.png">涌向<span>98</span><i>度</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_yg.png">涌高<span>98</span><i>m</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_yzq.png">涌周期<span>56</span><i>s</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_wd.png">温度<span>14.8</span><i>℃</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_njd.png">能见度<span>46</span><i>米</i></li>
+                                        </ul>
+                                        <ul class="qxxq_zhu_ul  clearfix">
+                                            <li class="active"><img src="~/Content/Cloud/img/icon_qxxx_fs.png">风速<span>98</span><i>m/s</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_fx.png">风向<span>55.6</span><i>度</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_tf.png">台风<span>5</span><i>级</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_lg.png">浪高<span>64</span><i>m</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_yx.png">涌向<span>98</span><i>度</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_yg.png">涌高<span>98</span><i>m</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_yzq.png">涌周期<span>56</span><i>s</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_wd.png">温度<span>14.8</span><i>℃</i></li>
+                                            <li><img src="~/Content/Cloud/img/icon_qxxx_njd.png">能见度<span>46</span><i>米</i></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <ul class="qxxq_con_ul clearfix">
+                                    <li><span>压强</span><span></span><span>1071百帕</span></li>
+                                    <li><span>高程气压</span><span></span><span>103.25mb</span></li>
+                                    <li><span>湿度</span><span></span><span>71%</span></li>
+                                    <li><span>流向</span><span></span><span>56107.5度</span></li>
+                                    <li><span>流速</span><span></span><span>24m/s</span></li>
+                                </ul>
+                                <div class="qxxq_tb_box"></div>
+
+                            </div>
+                        </div>
+                        <div id="dert" class="tab-pane fade">
+                            22222222222
+                        </div>
+                        <div id="dsant" class="tab-pane fade">
+                            33333333333333
+                        </div>
+                        <div id="dsit" class="tab-pane fade">
+                            33333333333333
+                        </div>
+                        <div id="dwut" class="tab-pane fade">
+                            33333333333333
+                        </div>
+                        <div id="dliut" class="tab-pane fade">
+                            33333333333333
+                        </div>
+                        <div id="dqit" class="tab-pane fade">
+                            33333333333333
+                        </div>*@
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+
+<div class="cblb_tk">
+    <div class="yj_title"><img src="~/Content/Cloud/img/icon_cb_tk.png">船舶列表</div>
+    <div class="cblb_tkclose" title="关闭窗口" onclick="CloseShipList();"><i class="fa fa-close"></i></div>
+    <div class="search_box clearfix">
+        <div class="col-md-4 col-sm-6 pad_l">
+            <select class="form-control" id="popup_html_ShipType">
+                <option>船舶类型</option>
+                <option>施工船</option>
+                <option>运维母船</option>
+                <option>运维船</option>
+            </select>
+        </div>
+        <div class="col-md-6 col-sm-6 pad_0">
+            <input type="text" class="form-control" placeholder="请输入关键字" id="popup_txt_ShipName">
+
+        </div>
+        <div class="col-md-2 col-sm-6 pad_0">
+            <input type="button" class="form-control" value="搜索" onclick="QueryShipKeyWord();">
+        </div>
+    </div>
+    <div class="cblb_box">
+        <table class="table table-striped table_zdy">
+            <thead>
+                <tr>
+                    <th>船舶名称</th>
+                    <th>船舶类别</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="table_html_ShipList">
+                <tr>
+                    <td>三航风和</td>
+                    <td>施工船</td>
+                    <td><button type="button" class="table_btn_ljcl">查看详情</button></td>
+                </tr>
+                <tr>
+                    <td>三航风和</td>
+                    <td>施工船</td>
+                    <td><button type="button" class="table_btn_ljcl">查看详情</button></td>
+                </tr>
+                <tr>
+                    <td>三航风和</td>
+                    <td>施工船</td>
+                    <td><button type="button" class="table_btn_ljcl">查看详情</button></td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<div class="cbxq_tk move_box">
+    <div class="yj_title"><img src="~/Content/Cloud/img/icon_cb_tk.png"><span id="ShipInfo_ShipName">三峡能源001</span></div>
+    <input id="hid_ShipID" type="hidden" />
+    <div class="cbxq_tkclose" title="关闭窗口" onclick="CloseShipInfo();"><i class="fa fa-close"></i></div>
+    <section class="tab ZXYJ_tab">
+        <header class="panel-heading">
+            <ul class="nav nav-tabs nav-justified ZXYJ_xq">
+                <li class="active">
+                    <a data-toggle="tab" href="#zl">总览</a>
+                </li>
+                <li class="">
+                    <a data-toggle="tab" href="#ais">AIS</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#gj">轨迹</a>
+                </li>
+            </ul>
+        </header>
+        <div class="panel-body tab_panel-body cbxq_body">
+            <div class="tab-content tasi-tab">
+                <div id="zl" class="tab-pane fade in active">
+                    <ul class="cbxq_zl">
+                        <li>
+                            <div id="ShipInfo_ShipType">自有船</div>
+                            <div>船舶类型</div>
+                        </li>
+                        <li>
+                            <div id="ShipInfo_Dest">支腿船</div>
+                            <div>目的地</div>
+                        </li>
+                        <li>
+                            <div id="ShipInfo_Status">停泊</div>
+                            <div>状态</div>
+                        </li>
+                        <li>
+                            <div id="ShipInfo_Length">156<span>米</span></div>
+                            <div>型长</div>
+                        </li>
+                        <li>
+                            <div id="ShipInfo_Width">123<span>米</span></div>
+                            <div>型宽</div>
+                        </li>
+                        <li>
+                            <div id="ShipInfo_Draught">36<span>米</span></div>
+                            <div>吃水</div>
+                        </li>
+                    </ul>
+                </div>
+                <div id="ais" class="tab-pane fade">
+                    <ul class="cbxq_con_ul clearfix">
+                        <li><span>MMSI</span><span></span><span id="span_MMSI"></span></li>
+                        <li><span>呼号</span><span></span><span id="span_CallSign"></span></li>
+                        <li><span>IMO</span><span></span><span id="span_IMO"></span></li>
+
+                        <li><span>航速</span><span></span><span id="span_Speed"></span></li>
+                        <li><span>经度</span><span></span><span id="span_Lon"></span></li>
+                        <li><span>纬度</span><span></span><span id="span_Lat"></span></li>
+
+                        <li><span>目的地</span><span></span><span id="span_Dest"></span></li>
+                        <li><span>预到时间</span><span></span><span id="span_ArriveTime"></span></li>
+                        <li><span>当前状态</span><span></span><span id="span_NaviStat"></span></li>
+
+                        <li><span>船首向</span><span></span><span id="span_Degree"></span>度</li>
+                        <li><span>左旋距</span><span></span><span id="span_Left"></span>米</li>
+                        <li><span>尾距</span><span></span><span id="span_Trail"></span>米</li>
+
+                        <li><span>简称</span><span></span><span id="span_ShipCode"></span></li>
+                        <li><span>更新时间</span><span></span><span id="span_UpdateTime"></span></li>
+                    </ul>
+                </div>
+                <div id="gj" class="tab-pane fade">
+                    <div class="search_box clearfix">
+                        <div class="col-md-6 col-sm-6  pad_l clearfix">
+                            <label class="label_gj col-md-3 pad_0 text-center">开始时间：</label><div class="col-md-9 pad_0"><input placeholder="请输入日期" class="laydate-icon timeUstyle stateUTime" onclick="laydate({istime: true,format:'YYYY-MM-DD hh:mm'})" id="ShipTrackStartTime"></div>
+                        </div>
+                        <div class="col-md-6 col-sm-6  pad_0  clearfix">
+                            <label class="label_gj col-md-3 pad_0 text-center">结束时间：</label><div class="col-md-9 pad_0"><input placeholder="请输入日期" class="laydate-icon timeUstyle stateUTime" onclick="laydate({istime: true,format:'YYYY-MM-DD hh:mm'})" id="ShipTrackEndTime"></div>
+                        </div>
+                    </div>
+                    <div class="btn_ckgj_box clearfix">
+                        <div class="col-md-6 col-sm-6 text-right">
+                            <button type="button" class="table_btn_ckgj" onclick="ShipHelper.ShowShipTrack();">查询轨迹</button>
+                        </div>
+                        <div class="col-md-6 col-sm-6 text-left">
+                            <button type="button" class="table_btn_qxgj" onclick="ShipHelper.ClearShipTrack();">取消轨迹</button>
+                        </div>
+                    </div>
+                    <!--
+                                                        <ul class="zxyj_con_ul clearfix">
+                                                            <li><span>船舶类型</span><span></span><span>支腿船</span></li>
+                                                            <li><span>船舶性质</span><span></span><span>自有船</span></li>
+                                                            <li><span>船舶系列</span><span></span><span>三系列</span></li>
+                                                        </ul>
+                    -->
+                </div>
+
+
+
+
+
+
+            </div>
+        </div>
+    </section>
+</div>
+
+
+<!--底部菜单 start-->
+<div class="bottom_main">
+    <div class="bottom_bar"></div>
+    <div class="bottom_menu clearfix">
+
+        <div class="bottom_menu_son"> <span><i class="fa fa-ship"></i>船舶</span>  <input type="checkbox" checked id="cb_chuanbo" onchange="DisplayShip();"></div>
+        <div class="bottom_menu_son"><span><i class="fa fa-th-list"></i>锚地</span>  <input type="checkbox" id="maodi" onclick="DisplayAnchor();"></div>
+        <div class="bottom_menu_son"><span><i class="fa fa-th-list"></i>天气</span>  <input type="checkbox" id="cb_weather" onchange="DisplayWeather();"></div>
+        <div class="bottom_menu_son"><span><i class="fa fa-th-list"></i>资料</span>  <input type="checkbox" id="cb_shujuziliao" onchange="DisplayDataResource();"></div>
+        <div class="bottom_menu_son"><span><i class="fa fa-th-list"></i>报告</span>  <input type="checkbox" id="cb_baogao" onchange="DisplayReport();"></div>
+
+    </div>
+</div>
+<!--底部菜单 end-->
+@*地图初始化*@
+<script>
+    $(document).ready(function () {
+        MapInit();
+    })
+    var _map;
+    var Setting = false;
+    var popup_options = {
+        className: "shipxy_popup",
+        closeButton: false,
+    };
+    var options = {
+        ak: $("input#PXYKey").val(),
+        mapTypes: ['MT_SEA', 'MT_GOOGLE', 'MT_SATELLITE'],// 显示地图类型，'MT_SEA'，MT_GOOGLE,MT_SATELLITE,
+        // 默认展示地图类型
+        defaultMapType: 'MT_SATELLITE',
+        //初始中心点坐标
+        centerPoint: [Number($('#hid_ProjectLat').val()), Number($('#hid_ProjectLon').val())],
+        //centerPoint: [19.724857, 109.188154],
+        //初始缩放级别
+        zoom: 6,
+        // 最小缩放级别
+        minZoom: 2,
+        // 最大缩放级别
+        maxZoom: 14,
+        // 公司版权信息( 支持html )，默认Elane Inc.
+        attribution: { isShow: false, emptyString: '&copy;2018 <a class="shipxy_small"></a>&nbsp;<a>Elane Inc.</a>' },
+        // 测距控件
+        measureCtrl: {
+            // 是否开启测距控件，默认：true
+            isShow: true,
+            // 是否显示测距按钮，默认：true
+            showMeasurementsMeasureControl: true,
+            // 是否显示删除按钮，默认：true
+            showMeasurementsClearControl: true,
+            // 是否显示切换单位按钮，默认：true
+            showUnitControl: false,
+            position: 'bottomleft'
+        },
+        //鼠标移动悬浮经纬度控件
+        mousePostionCtrl: { isShow: true, position: 'bottomleft' },
+        //缩放工具控件的显示隐藏
+        zoomControlElane: { isShow: false, position: 'topright' },
+        // 缩放级别显示控件
+        zoomviewControl: { isShow: false, position: 'topleft' },
+        //地图切换控件的位置
+        basemapsControl: { isShow: false, position: 'topleft' },
+        // 比例尺，控件
+        scaleCtrl: { isShow: true, position: "bottomleft" },
+    };
+    var MapInit = function () {
+
+        // 创建地图示例
+        _map = new ShipxyAPI.Map("map", options);
+
+        ShipxyAPI.WeatherService(_map);
+
+        // 自定义按钮-测距
+        $("#btn_ceju").on("click", function (e) {
+            e.stopPropagation();
+            _map.PolylineMeasureControl._toggleMeasure();
+        });
+        // 自定义按钮-切换单位
+        $("#btn_ceju_unit").on("click", function (e) {
+            e.stopPropagation();
+            // 是否，开启了测距
+            // var isCeju = elane_map.PolylineMeasureControl._measuring();
+            // 切换单位
+            _map.PolylineMeasureControl._changeUnit();
+        });
+        // 自定义按钮-移除
+        $("#btn_ceju_remove").on("click", function (e) {
+            e.stopPropagation();
+            _map.PolylineMeasureControl._clearAllMeasurements();
+            _map.PolylineMeasureControl._toggleMeasure();// 更新测距控件状态
+        });
+
+        ShipxyAPI.TrackService(_map);
+        //延时加载
+        setTimeout(function () {
+
+
+
+        }, 1000);
+
+        _map.on('click', onMapClick);
+    }
+
+    //监听鼠标点击事件，弹出经纬度
+    function onMapClick(e) {
+        //L.popup().setLatLng(e.latlng)
+        //    .setContent('经纬度' + e.latlng.toString())
+        //    .openOn(_map);
+        //console.log(e.latlng)
+        if (Setting) {
+            //console.log(e.latlng.lat);
+            //var Position = {};
+            //Position.Lat = e.latlng.lat;
+            //Position.Lon = e.latlng.lng;
+
+            //SettingWarningPositions.push(Position);
+
+            //AddPositionMarker(Position);
+        }
+
+    };
+
+
+    function setActive(obj) {
+        $(".btn_weather").each(function (obj, index) {
+            if ($(this).attr("is_show") == "1") {
+                $(this).addClass("active");
+            } else {
+                $(this).removeClass("active");
+            }
+        });
+    }
+
+
+    var IsCustomerActive = false;
+    var WeatherPreviousDay = function () {
+        ThisWeatherDate.setDate(ThisWeatherDate.getDate() - 1);
+
+        $('div#div_WeatherDate').html(CanvasShipUtils.dataFormat(ThisWeatherDate, "yyyy-MM-dd"))
+
+        $(".btn_weather").each(function (index, dom) {
+            if ($(dom).attr("is_show") == "1") {
+                IsCustomerActive = true;
+                $(dom).click();
+            }
+        });
+    }
+
+    var WeatherNextDay = function () {
+        ThisWeatherDate.setDate(ThisWeatherDate.getDate() + 1);
+
+        $('div#div_WeatherDate').html(CanvasShipUtils.dataFormat(ThisWeatherDate, "yyyy-MM-dd"))
+
+        $(".btn_weather").each(function (index, dom) {
+            if ($(dom).attr("is_show") == "1") {
+                IsCustomerActive = true;
+                $(dom).click();
+            }
+        });
+    }
+
+
+    var ThisWeatherDate = new Date();
+    // 气温
+    $("#btn_qiwen").on("click", function (e) {
+        $('img#img_weatherLogo').attr('src', '');
+        e.stopPropagation();
+        if ($(this).attr("is_show") != null && $(this).attr("is_show") == "1") {
+            $(this).attr("is_show", "0");
+            _map.weatherService.hideTempTile();
+        } else {
+            $(this).attr("is_show", "1");
+            $("#btn_qiya").attr("is_show", "0");
+            // 显示
+            //_map.weatherService.showTempTile(CanvasShipUtils.dataFormat(new Date(), "yyyy-MM-dd") + " 20:00:00");
+            _map.weatherService.showTempTile(CanvasShipUtils.dataFormat(ThisWeatherDate, "yyyy-MM-dd") + " 20:00:00");
+
+            $('img#img_weatherLogo').attr('src', '/Content/WindPowerInfo/img/temperature.png');
+        }
+        setActive($(this));
+        //alert('111');
+    });
+    // 气压
+    $("#btn_qiya").on("click", function (e) {
+        $('img#img_weatherLogo').attr('src', '');
+        e.stopPropagation();
+        if ($(this).attr("is_show") != null && $(this).attr("is_show") == "1") {
+            $(this).attr("is_show", "0");
+            _map.weatherService.hidePressureTile();
+        } else {
+            $(this).attr("is_show", "1");
+            $("#btn_qiwen").attr("is_show", "0");
+            // 显示
+            //_map.weatherService.showPressureTile(CanvasShipUtils.dataFormat(new Date(), "yyyy-MM-dd") + " 20:00:00");
+            _map.weatherService.showPressureTile(CanvasShipUtils.dataFormat(ThisWeatherDate, "yyyy-MM-dd") + " 20:00:00");
+
+            $('img#img_weatherLogo').attr('src', '/Content/WindPowerInfo/img/pressure.png');
+        }
+        setActive($(this));
+    });
+    // 海风
+    $("#btn_haifeng").on("click", function (e) {
+        $('img#img_weatherLogo').attr('src', '');
+        e.stopPropagation();
+        if ($(this).attr("is_show") != null && $(this).attr("is_show") == "1") {
+            $(this).attr("is_show", "0");
+            _map.weatherService.hideSeaBreezes();
+        } else {
+            $(this).attr("is_show", "1");
+            //var yubao_date = CanvasShipUtils.dataFormat(new Date(), "yyyy-MM-dd") + " 20:00:00";
+            // 显示
+            _map.weatherService.showSeaBreezes(CanvasShipUtils.dataFormat(ThisWeatherDate, "yyyy-MM-dd") + " 20:00:00");
+        }
+        setActive($(this));
+    });
+
+
+    // 海浪
+    $("#btn_hailang").on("click", function (e) {
+        $('img#img_weatherLogo').attr('src', '');
+        e.stopPropagation();
+
+        if (IsCustomerActive) {
+            _map.weatherService.showSeaWaves(CanvasShipUtils.dataFormat(ThisWeatherDate, "yyyy-MM-dd") + " 20:00:00");
+            setActive($(this));
+            IsCustomerActive = false;
+            return;
+        }
+
+        if ($(this).attr("is_show") != null && $(this).attr("is_show") == "1") {
+            $(this).attr("is_show", "0");
+            _map.weatherService.hideSeaWaves();
+        } else {
+            $(this).attr("is_show", "1");
+            // 显示
+
+            _map.weatherService.showSeaWaves(CanvasShipUtils.dataFormat(ThisWeatherDate, "yyyy-MM-dd") + " 20:00:00");
+
+            $('img#img_weatherLogo').attr('src', '/Content/WindPowerInfo/img/wave.png');
+        }
+        //        CanvasShipUtils.closeLoadingPopup();
+        setActive($(this));
+    });
+    // 风场
+    $("#btn_fengchang").on("click", function (e) {
+        $('img#img_weatherLogo').attr('src', '');
+        e.stopPropagation();
+        if ($(this).attr("is_show") != null && $(this).attr("is_show") == "1") {
+            $(this).attr("is_show", "0");
+            _map.weatherService.hideWindFiel();
+        } else {
+            $(this).attr("is_show", "1");
+            //var yubao_date = CanvasShipUtils.dataFormat(new Date(), "yyyy-MM-dd") + " 20:00:00";
+            //yubao_date = "2018-06-19 14:00:00";
+            // 显示
+            _map.weatherService.showWindFiel(CanvasShipUtils.dataFormat(ThisWeatherDate, "yyyy-MM-dd") + " 20:00:00");
+        }
+        setActive($(this));
+    });
+    // 海区预报
+    $("#btn_haiquyubao").on("click", function (e) {
+        $('img#img_weatherLogo').attr('src', '');
+        e.stopPropagation();
+        if ($(this).attr("is_show") != null && $(this).attr("is_show") == "1") {
+            $(this).attr("is_show", "0");
+            _map.weatherService.hideSeaAreaForecasts();
+        } else {
+            $(this).attr("is_show", "1");
+            // 显示
+            _map.weatherService.showSeaAreaForecasts();
+        }
+        setActive($(this));
+    });
+    // 台风
+    $("#btn_taifeng").on("click", function (e) {
+        $('img#img_weatherLogo').attr('src', '');
+        e.stopPropagation();
+        if ($(this).attr("is_show") != null && $(this).attr("is_show") == "1") {
+            $(this).attr("is_show", "0");
+            _map.weatherService.hideTyphoonInfoList();
+        }
+        else {
+            $(this).attr("is_show", "1");
+            // 显示
+            _map.weatherService.showTyphoonInfoList(function () {
+                console.log("showTyphoonInfoList is close!")
+            }, true, null,
+                {
+                    showWarningLine: true, autoLocation: true, showTimeTipMinZoom: 6
+                });
+        }
+        setActive($(this));
+    });
+    // 潮汐
+    $("#btn_chaoxi").on("click", function (e) {
+        $('img#img_weatherLogo').attr('src', '');
+        e.stopPropagation();
+        if ($(this).attr("is_show") != null && $(this).attr("is_show") == "1") {
+            $(this).attr("is_show", "0");
+            _map.weatherService.hideTides();
+        } else {
+            $(this).attr("is_show", "1");
+            // 显示
+            _map.weatherService.showTides();
+        }
+        setActive($(this));
+    });
+
+
+
+
+
+</script>
+
+@*风场业务*@
+<script>
+
+    $(document).ready(function () {
+        GetProjectInfo();
+
+        //GetProjectWeathers();
+        GetShipAnchor();
+        //GetPoints();
+        QueryDaraResource();
+
+        QueryReport();
+    })
+
+    var ViewInfo = {};
+    ViewInfo.Project = {};
+    ViewInfo.Project.Areas = [];
+    ViewInfo.Project.Fans = [];
+    ViewInfo.Ship = [];
+    ViewInfo.Point = [];
+    ViewInfo.Anchor = [];
+
+    var Param = {};
+
+    var GetProjectInfo = function () {
+
+        Param.ProjectID = $('#hid_ProjectID').val();
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('GetProjectInfo', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+                    if (data.Success) {
+
+                        if (data.Data == null) {
+                            return;
+                        }
+
+                        ViewInfo.Project.ID = data.Data.ID;
+                        ViewInfo.Project.ProjectName = data.Data.ProjectName;
+                        ViewInfo.Project.Lon = Number(data.Data.Lon);
+                        ViewInfo.Project.Lat = Number(data.Data.Lat);
+                        ViewInfo.Project.Status = Number(data.Data.Status);
+                        ViewInfo.Project.StatusName = data.Data.StatusName;
+
+                        $(data.Data.Areas).each(function (index, dom) {
+
+                            var Area = {};
+                            Area.ID = dom.ID;
+                            Area.Lon = dom.Lon;
+                            Area.Lat = dom.Lat;
+                            ViewInfo.Project.Areas.push(Area);
+                        })
+
+                        $(data.Data.Fans).each(function (index, dom) {
+
+                            var Fan = {};
+                            Fan.ID = dom.ID;
+                            Fan.Lon = dom.Lon;
+                            Fan.Lat = dom.Lat;
+                            Fan.FanName = dom.FanName;
+                            Fan.Status = Number(dom.Status);
+                            Fan.StatusName = dom.StatusName;
+                            ViewInfo.Project.Fans.push(Fan);
+                        })
+
+
+                        SetProjectPosition();
+                        AddProjectMarker();
+                        AddProjectFanMarker();
+                        AddProjectAreaMarker();
+
+                        //初始化
+
+
+                        GetProjectWeathers();
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+            });
+
+    }
+
+
+
+    var GetPoints = function () {
+
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('GetPoints', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+                    if (data.Success) {
+
+                        $(data.Data).each(function (index, dom) {
+
+                            var Ship = {};
+                            Ship.ID = dom.ID;
+                            Ship.Lon = Number(dom.LonValue);
+                            Ship.Lat = Number(dom.LatValue);
+                            Ship.LonStr = dom.Lon;
+                            Ship.LatStr = dom.Lat;
+                            Ship.ShipName = dom.ShipName;
+                            ViewInfo.Point.push(Ship);
+                        });
+
+                        AddPointMarker();
+
+                        //MarkerHelper.showAllShips();
+                    }
+                    else {
+
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+            });
+
+    }
+
+    var SetProjectPosition = function () {
+
+        if (ViewInfo.Project.Lon == null || ViewInfo.Project.Lat == null || ViewInfo.Project.Lon == '' || ViewInfo.Project.Lat == '')
+            return;
+
+        MapHelper.mapZoomToPosition(7, ViewInfo.Project.Lat, ViewInfo.Project.Lon);
+
+    }
+
+    //添加风场标记
+    var AddProjectMarker = function () {
+        if (ViewInfo == null || ViewInfo.Project == null)
+            return;
+
+        if (ViewInfo.Project.Lat == null || ViewInfo.Project.Lon == null || ViewInfo.Project.Lat == '' || ViewInfo.Project.Lon == '') {
+            return;
+        }
+
+        var IconUrl = "../../Content/Cloud/img/icon_fcwj.gif";
+        if (ViewInfo.Project.Status == 0 || ViewInfo.Project.Status == 5) {
+            IconUrl = "../../Content/Cloud/img/icon_fcwj.gif";
+        }
+        else if (ViewInfo.Project.Status == 1 || ViewInfo.Project.Status == 2 || ViewInfo.Project.Status == 3 || ViewInfo.Project.Status == 6) {
+            IconUrl = "../../Content/Cloud/img/icon_fczj.gif";
+        }
+        else {
+            IconUrl = "../../Content/Cloud/img/icon_fcyj.gif";
+        }
+
+        var introduceHtml = '<div class="map_box"><div class="map_fjicon" onclick="DisplayProject(this);"><a><img src="' + IconUrl + '"></a></div>'
+            + '<div class="map_popover clearfix" id="Project' + ViewInfo.Project.ID + '"><div class="map_popover_right"><div class="map_img_zx_box"><img src="../../Content/Cloud/img/map_img_zx.png"></div>'
+            + '<div class="map_popover_info"><div class="map_popover_info_tit">' + ViewInfo.Project.ProjectName + '</div><div><div class="map_img_box"><img src="../../Content/Cloud/img/fc_img.jpg"></div>'
+            + '<p>风场状态：' + ViewInfo.Project.StatusName + '</p><p class="">风机数量：' + ViewInfo.Project.Fans.length + ' 台<div class="map_popover_xq_btn"></div></p><div class="text-center map_border"><span class="map_popover_xq" onclick="OpenProjectInfo();">进入风场</span>'
+            + '</div></div><div class="closeCont" onclick="CloseProject(this);"><i class="fa fa-close"></i></div></div></div><div class="map_popover_left"><img src="../../Content/Cloud/img/icon_border_lx.gif"></div></div></div> ';
+
+
+
+
+        //var icon = L.icon({
+        //    iconSize: [40, 40],
+        //    iconUrl: IconUrl,
+        //    iconAnchor: [20, 20]
+        //});
+
+        var icon = L.divIcon({
+            //iconSize: [170, 365],//iconSize: [x, y];x越小越往右靠，y越大越往上靠
+            className: "gy_cursor",
+            iconAnchor: [12, 12],//偏移
+            html: introduceHtml,
+        });
+
+        var marker = L.marker([ViewInfo.Project.Lat, ViewInfo.Project.Lon],
+            {
+                icon: icon,
+            }).addTo(_map);
+
+        //marker.bindTooltip(ViewInfo.Project.ProjectName, {
+        //    //className: 'leaflet-labelship',
+        //    //permanent: IsFanZoom,
+        //    offset: [40, -35]
+        //});
+
+        marker.on('click', function (e) {
+
+            //MarkerHelper.clearProject();
+            //MarkerHelper.showProjectFan();
+            //MarkerHelper.showProjectArea();
+            //MapHelper.mapZoomToPosition(13, ViewInfo.Project.Lat, ViewInfo.Project.Lon);
+
+            //GetProjectWeathers();
+            //$('.qt_qxxq').stop(true, true).fadeIn();
+            //$('.fhsyy_box').show();
+
+        });
+        ViewInfo.Project.Marker = marker;
+
+    }
+
+    //添加风机标记点
+    var AddProjectFanMarker = function () {
+
+        if (ViewInfo == null || ViewInfo.Project == null || ViewInfo.Project.Fans == null || ViewInfo.Project.Fans.length == 0)
+            return;
+
+        $(ViewInfo.Project.Fans).each(function (index, dom) {
+
+            if (dom.Lat == null || dom.Lon == null || dom.Lat == '' || dom.Lon == '') {
+                return true;
+            }
+
+            var IconUrl = "../../Content/Cloud/img/icon_fcwj.gif";
+            if (dom.Status == 2) {
+                IconUrl = "../../Content/Cloud/img/icon_fczj.gif";
+            }
+            else if (dom.Status == 1) {
+                IconUrl = "../../Content/Cloud/img/icon_fcyj.gif";
+            }
+            var introduceHtml = '<div class="fj_lable_box"><div class="fj_lable">' + dom.FanName + '</div><div class="text_center"><img src="' + IconUrl + '"></div></div>';
+
+            var icon = L.divIcon({
+                //iconSize: [170, 365],//iconSize: [x, y];x越小越往右靠，y越大越往上靠
+                className: "",
+                iconAnchor: [26, 32],//偏移
+                html: introduceHtml,
+            });
+
+            var marker = L.marker([dom.Lat, dom.Lon],
+                {
+                    icon: icon,
+                });//.addTo(_map);
+
+            //marker.bindTooltip(dom.FanName, {
+            //    //className: 'leaflet-labelship',
+            //    //permanent: IsFanZoom,
+            //    offset: [20, -5]
+            //});
+
+            //marker.data = dom;
+            marker.on('click', function (e) {
+
+                //ShowFanInfo(dom.ID);
+
+            });
+            dom.Marker = marker;
+
+        })
+
+    }
+
+    //添加风场区域
+    var AddProjectAreaMarker = function () {
+
+        if (ViewInfo == null || ViewInfo.Project == null || ViewInfo.Project.Areas == null || ViewInfo.Project.Areas.length == 0)
+            return;
+
+        var Positions = [];
+        $(ViewInfo.Project.Areas).each(function (index, dom) {
+
+            var position = {};
+            position.lat = dom.Lat;
+            position.lon = dom.Lon;
+            Positions.push(position);
+
+        })
+
+        var Polyline = new L.Polyline(Positions, {
+            weight: 2,
+            opacity: 0.8,
+            color: "#3ce139"
+        });//.addTo(_map);
+
+        Polyline.bindTooltip('风场区域', {
+
+        });
+
+        ViewInfo.Project.AreaMarker = Polyline;
+
+
+    }
+
+    var AddShipMarker = function () {
+
+        if (ViewInfo == null || ViewInfo.Ship == null || ViewInfo.Ship.length == 0)
+            return;
+
+        $(ViewInfo.Ship).each(function (index, dom) {
+
+            var IconUrl = "../../Content/Cloud/img/cb_green.png";
+
+            var introduceHtml = '<div class="map_box"><div class="map_cbicon" onclick="QueryShipInfo(' + dom.ID + ', false);"><a><img src="' + IconUrl + '"></a></div>'
+                + '<div class="map_popover_cb" id="Ship' + dom.ID + '"><div class="popover_img"><img src="../../Content/Cloud/img/icon_border.gif"></div></div></div>';
+
+
+            var icon = L.divIcon({
+                //iconSize: [170, 365],//iconSize: [x, y];x越小越往右靠，y越大越往上靠
+                className: "",
+                iconAnchor: [12, 12],//偏移
+                html: introduceHtml,
+            });
+
+            var marker = L.marker([dom.Lat, dom.Lon],
+                {
+                    icon: icon,
+                });//.addTo(_map);
+
+            marker.bindTooltip(dom.ShipName, {
+                //className: 'leaflet-labelship',
+                //permanent: IsFanZoom,
+                offset: [25, -25]
+            });
+
+            marker.on('click', function (e) {
+
+                //ShipHelper.DisplayShipInfo(dom.ID);
+
+            });
+
+            dom.Marker = marker;
+        })
+
+    }
+
+    var AddPointMarker = function () {
+
+        if (ViewInfo == null || ViewInfo.Point == null || ViewInfo.Point.length == 0)
+            return;
+
+        $(ViewInfo.Point).each(function (index, dom) {
+
+            var IconUrl = "../../Content/Cloud/img/cb_green.png";
+
+            var introduceHtml = '<div class="map_box"><div class="map_cbicon" onclick="ShowShipInfo(' + dom.ID + ');"><a><img src="' + IconUrl + '"></a></div>'
+                + '<div class="map_popover_cb" id="Ship' + dom.ID + '"><div class="popover_img"><img src="../../Content/Cloud/img/icon_border.gif"></div></div></div>';
+
+
+            var icon = L.divIcon({
+                //iconSize: [170, 365],//iconSize: [x, y];x越小越往右靠，y越大越往上靠
+                className: "",
+                iconAnchor: [12, 12],//偏移
+                html: introduceHtml,
+            });
+
+            var marker = L.marker([dom.Lat, dom.Lon],
+                {
+                    icon: icon,
+                }).addTo(_map);
+
+            marker.bindTooltip(dom.ShipName + '(' + dom.LonStr + ',' + dom.LatStr + ')', {
+                className: 'leaflet-labelship',
+                //permanent: IsFanZoom,
+                //offset: [-25, -25]
+            });
+
+            marker.on('click', function (e) {
+
+                //ShipHelper.DisplayShipInfo(dom.ID);
+
+            });
+
+            dom.Marker = marker;
+        })
+
+    }
+
+    var MarkerHelper = {
+
+        showProject: function () {
+
+            ViewInfo.Project.Marker.addTo(_map);
+
+        },
+        clearProject: function () {
+
+            ViewInfo.Project.Marker.remove();
+        },
+        //showAllFan: function () {
+
+        //    $(ViewInfo.Projects).each(function (index, dom) {
+
+        //        $(dom.Fans).each(function (index2, dom2) {
+        //            if (dom2.Marker != null) {
+        //                dom2.Marker.addTo(_map);
+        //            }
+        //        })
+        //    })
+
+        //},
+        //clearAllFan: function () {
+
+        //    $(ViewInfo.Projects).each(function (index, dom) {
+
+        //        $(dom.Fans).each(function (index2, dom2) {
+        //            if (dom2.Marker != null) {
+        //                dom2.Marker.remove();
+        //            }
+        //        })
+        //    })
+
+        //},
+
+        showProjectFan: function () {
+
+            if (ViewInfo.Project.Fans == null || ViewInfo.Project.Fans.length == 0) {
+                return;
+            }
+            $(ViewInfo.Project.Fans).each(function (index, dom) {
+
+                if (dom.Marker != null) {
+                    dom.Marker.addTo(_map);
+                }
+
+            })
+
+        },
+        clearProjectFan: function () {
+
+            if (ViewInfo.Project.Fans == null || ViewInfo.Project.Fans.length == 0) {
+                return;
+            }
+            $(ViewInfo.Project.Fans).each(function (index, dom) {
+
+                if (dom.Marker != null) {
+                    dom.Marker.remove();
+                }
+            })
+
+        },
+
+        showProjectArea: function () {
+
+            if (ViewInfo.Project.Areas == null || ViewInfo.Project.Areas.length == 0) {
+                return;
+            }
+
+            ViewInfo.Project.AreaMarker.addTo(_map);
+
+
+        },
+        clearProjectArea: function (ProjectID) {
+
+            if (ViewInfo.Project.Areas == null || ViewInfo.Project.Areas.length == 0) {
+                return;
+            }
+
+            ViewInfo.Project.AreaMarker.remove();
+
+        },
+
+        showShip: function (ShipID) {
+
+            if (ShipID == null || ShipID == '' || ShipID == 0)
+                return;
+
+            $(ViewInfo.Ship).each(function (index, dom) {
+
+                if (dom.ID == ShipID) {
+                    if (dom.Marker != null) {
+                        dom.Marker.addTo(_map);
+                        return false;
+                    }
+                }
+            });
+
+        },
+        showAllShips: function () {
+
+            $(ViewInfo.Ship).each(function (index, dom) {
+
+                if (dom.Marker != null) {
+                    dom.Marker.addTo(_map);
+                }
+
+            });
+
+        },
+        clearShip: function (ShipID) {
+
+            if (ShipID == null || ShipID == '' || ShipID == 0)
+                return;
+            $(ViewInfo.Ships).each(function (index, dom) {
+
+                if (dom.ID == ShipID) {
+                    if (dom.Marker != null) {
+                        dom.Marker.remove();
+                        return false;
+                    }
+
+                }
+
+            })
+        },
+        clearAllShips: function () {
+
+            $(ViewInfo.Ship).each(function (index, dom) {
+
+                if (dom.Marker != null) {
+                    dom.Marker.remove();
+                }
+
+            });
+
+        },
+
+        showAllAnchors: function () {
+
+            $(ViewInfo.Anchor).each(function (index, dom) {
+
+                if (dom != null) {
+                    dom.addTo(_map);
+                }
+
+            });
+
+        },
+
+        clearAllAnchors: function () {
+
+            $(ViewInfo.Anchor).each(function (index, dom) {
+
+                if (dom != null) {
+                    dom.remove();
+                }
+
+            });
+
+        }
+
+    }
+
+    var MapHelper = {
+
+        mapZoomToPosition: function (number, Lat, Lon) {
+            if (Lat == null || Lon == null)
+                return;
+
+            if (number == null || number == '') {
+                number = 10;
+            }
+            _map.setView([Lat, Lon], number);
+
+        },
+        mapZoomIn: function (number) {
+            if (number == null || number == '') {
+                number = 10;
+            }
+            _map.setZoom(number);
+
+        },
+
+    };
+
+    var ShowFanInfo = function (FanID) {
+
+        //alert(FanID);
+        if (FanID == null || FanID == '' || FanID == 0)
+            return;
+        Param.FanID = FanID;
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('GetFanInfo', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+                    if (data.Success) {
+
+                        $('#hid_FanID').val(data.Data.FanID);
+                        $('#popup_span_FanName').html(data.Data.FanName);
+
+                        var DKHtml = '';
+
+                        DKHtml += '<div class="tab-vertical"><ul id="myTab01" class="nav nav-tabs dkzl_tab_header clearfix" >';
+
+                        var LiHtml = '';
+                        var TableHtml = '';
+                        var LiCount = 0;
+                        $(data.Data.DKs).each(function (index, dom) {
+
+                            var NameHtml = '';
+                            for (var i = 0; i < dom.DKName.length; i++) {
+                                NameHtml += '<span>' + dom.DKName[i] + '</span>';
+                            }
+
+                            LiHtml += '<li class="tab-item zm ' + (LiCount == 0 ? 'active' : '') + '"><a href="#dk' + LiCount + '" data-toggle="tab">' + NameHtml + '</a></li>';
+
+                            TableHtml += '<div class="tab-pane fade ' + (LiCount == 0 ? 'active in' : '') + ' row" id="dk' + LiCount + '"><div class="dk_infor_box">';
+                            TableHtml += '<table class="table"><thead><tr><th>序号</th><th>地层编号</th><th>土层编号</th><th>层底标高(m)</th><th>土层类型</th><th>不排水抗剪强度cu(kPa)</th><th>砂土摩擦角°</th><th>有效重度</th><th>标贯击数</th></tr></thead><tbody>';
+                            $(dom.Data).each(function (index2, dom2) {
+                                TableHtml += '<tr><td>' + dom2.序号 + '</td><td>' + dom2.地层编号 + '</td><td>' + dom2.土层名称 + '</td><td>' + dom2.层底标高_m + '</td><td>' + dom2.土层类型 + '</td><td>' + dom2.不排水抗剪强度_cu_kPa + '</td><td>' + dom2.砂土摩擦角_度 + '</td><td>' + dom2.有效重度 + '</td><td>' + dom2.标贯击数 + '</td></tr>';
+                            })
+                            TableHtml += '</tbody></table></div></div>';
+
+                            LiCount++;
+
+                        })
+
+                        DKHtml += LiHtml;
+                        DKHtml += '</ul><div class="tab-content dkzl_tab-body">';
+                        DKHtml += TableHtml;
+                        DKHtml += '</div></div>';
+
+                        $('#li_dkzl').html(DKHtml);
+
+                        $('.fjxx_map_tk01').removeClass('hide');
+                    }
+                    else {
+                        ModalPopup('error', data.Message);
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+            });
+        
+
+    }
+
+    var CloseDKPopup = function () {
+
+        $('.fjxx_map_tk01').addClass('hide');
+
+    }
+
+    var OpenDKPopup = function () {
+
+        $('.fjxx_map_tk01').removeClass('hide');
+
+    }
+
+    var CloseReportPopup = function () {
+
+        $('.fjxx_map_tk02').addClass('hide');
+
+    }
+
+    var OpenReportPopup = function () {
+
+        $('.fjxx_map_tk02').removeClass('hide');
+
+    }
+
+    var CloseProject = function (dom) {
+
+        if (dom == null) {
+            return;
+        }
+
+        $(dom).parent().parent().parent().stop(true, true).fadeOut();
+
+    }
+
+    var OpenProjectInfo = function () {
+
+        MarkerHelper.clearProject();
+        MarkerHelper.showProjectFan();
+        MarkerHelper.showProjectArea();
+        MapHelper.mapZoomToPosition(13, ViewInfo.Project.Lat, ViewInfo.Project.Lon);
+
+        //GetProjectWeathers();
+        //$('.qt_qxxq').stop(true, true).fadeIn();
+        //$('#cb_weather').prop('checked', true);
+
+        $('.fhsyy_box').show();
+
+    }
+
+    var DisplayProject = function (dom) {
+
+        $(dom).next().stop(true, true).fadeIn();
+
+    }
+
+    var DoProjectFanBack = function () {
+
+        MarkerHelper.clearProjectFan();
+        MarkerHelper.clearProjectArea();
+        $('.fjxx_map_tk01').addClass('hide');
+        MarkerHelper.showProject();
+        MapHelper.mapZoomToPosition(7, ViewInfo.Project.Lat, ViewInfo.Project.Lon);
+
+        $('.qt_qxxq').stop(true, true).fadeOut();
+        $('.fhsyy_box').hide();
+
+    }
+
+    var GetProjectWeathers = function () {
+
+        if (ViewInfo == null || ViewInfo.Project == '' || ViewInfo.Project.ID == 0) {
+            return;
+        }
+        var Param = {};
+        Param.ProjectID = ViewInfo.Project.ID;
+        $.post('GetPreWeatherInfo', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+                    if (data.Success) {
+
+                        var html_WeatherDate = '';
+                        var html_WeatherDateInfo = '';
+                        $(data.Data).each(function (index, dom) {
+
+                            html_WeatherDate += '<li class="' + (index == 0 ? "active" : "") + '"><a data-toggle="tab" href="#dt' + index + '">' + dom.DateStr + '</a></li>';
+
+                            var TimePeriodHtml = '';
+                            var TimeWeatherInfo = '';
+                            $(dom.Periods).each(function (index2, dom2) {
+
+                                var WindSpeedWarningLevel = "zc";
+                                if (dom2.WindSpeedWarningLevel == 2) {
+                                    WindSpeedWarningLevel = "yj";
+                                }
+                                else if (dom2.WindSpeedWarningLevel == 3) {
+                                    WindSpeedWarningLevel = "bj";
+                                }
+
+                                var SwellWarningLevel = "zc";
+                                if (dom2.SwellWarningLevel == 2) {
+                                    SwellWarningLevel = "yj";
+                                }
+                                else if (dom2.SwellWarningLevel == 3) {
+                                    SwellWarningLevel = "bj";
+                                }
+
+
+                                TimePeriodHtml += '<li onclick="ChangeWeatherDate(this);" class="' + (index2 == 0 ? "active" : "") + '">' + dom2.Time + '</li>';
+
+                                TimeWeatherInfo += '<ul class="qxxq_zhu_ul ' + (index2 == 0 ? "active" : "") + ' clearfix">'
+                                    + '<li class="' + (index2 == 0 ? "active" : "") + '" ><img src="../../Content/Cloud/img/icon_qxxx_fs.png">风速<span class="' + WindSpeedWarningLevel + '">' + ConvertValue(dom2.WindSpeed) + '</span><i>米/秒</i></li>'
+                                    + '<li><img src="../../Content/Cloud/img/icon_qxxx_tf.png">等级<span class="' + WindSpeedWarningLevel + '">' + ConvertValue(dom2.WindSpeedLevel) + '</span><i>级</i></li>'
+                                    + '<li><img src="../../Content/Cloud/img/icon_qxxx_fx.png">风向<span class="zc">' + ConvertValue(dom2.WindDirStr) + '</span><i>风</i></li>'
+
+                                    + '<li><img src="../../Content/Cloud/img/icon_qxxx_yg.png">涌高<span class="' + SwellWarningLevel + '">' + ConvertValue(dom2.SwellHeight) + '</span><i>米</i></li>'
+                                    + '<li><img src="../../Content/Cloud/img/icon_qxxx_yzq.png">涌周期<span>' + ConvertValue(dom2.SwellPeriod) + '</span><i>秒</i></li>'
+                                    + '<li><img src="../../Content/Cloud/img/icon_qxxx_yx.png">涌向<span class="zc">' + ConvertValue(dom2.SwellDir) + '</span><i>度</i></li>'
+
+                                    + '<li><img src="../../Content/Cloud/img/icon_qxxx_lg.png">浪高<span>' + ConvertValue(dom2.WaveHeight) + '</span><i>米</i></li>'
+                                    + '<li><img src="../../Content/Cloud/img/icon_qxxx_wd.png">温度<span>' + ConvertValue(dom2.Temperature) + '</span><i>℃</i></li>'
+                                    + '<li><img src="../../Content/Cloud/img/icon_qxxx_njd.png">能见度<span>' + ConvertValue(dom2.Visibility) + '</span><i>千米</i></li></ul>';
+
+                            });
+                            html_WeatherDateInfo += '<div id="dt' + index + '" class="tab-pane fade in ' + (index == 0 ? "active" : "") + '"><div class="qt_qxxq_con clearfix"><div class="qx_zhu_box clearfix"><div class="sjz_box"><ul class="sjz_box_ul">';
+                            html_WeatherDateInfo += TimePeriodHtml;
+                            html_WeatherDateInfo += '</ul></div><div class="qxxq_zhu">';
+                            html_WeatherDateInfo += TimeWeatherInfo;
+                            html_WeatherDateInfo += '</div></div><ul class="qxxq_con_ul clearfix">'
+                                + '<li><span>压强</span><span></span><span>' + ConvertValue(dom.Periods[0].Pressure) + ' 百帕</span></li>'
+                                + '<li><span>高程气压</span><span></span><span>' + ConvertValue(dom.Periods[0].Bm500) + ' gpm</span></li>'
+                                + '<li><span>湿度</span><span></span><span>' + ConvertValue(dom.Periods[0].Humidity) + ' %</span></li>'
+                                + '<li><span>流向</span><span></span><span>' + ConvertValue(dom.Periods[0].OceanDirStr) + '</span></li>'
+                                + '<li><span>流速</span><span></span><span>' + ConvertValue(dom.Periods[0].OceanSpeed) + ' m/s</span></li></ul><div class="qxxq_tb_box"></div></div></div >';
+                        })
+
+                        $('#ul_WeatherDate').html(html_WeatherDate);
+                        $('#div_WeatherDateInfo').html(html_WeatherDateInfo);
+
+
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+            });
+    }
+
+    var ChangeWeatherDate = function (dom) {
+
+        $(dom).parent().children().removeClass("active");
+        $(dom).addClass("active");
+        //$('.qxxq_zhu').children('.qxxq_zhu_ul').removeClass("active");
+        $(dom).parent().parent().next('.qxxq_zhu').children().removeClass('active');
+        $(dom).parent().parent().next('.qxxq_zhu').children().eq($(dom).index()).addClass("active");
+
+    }
+
+    //锚地
+    var GetShipAnchor = function () {
+
+        var Param = {};
+        $.post('GetShipAnchor', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+                    if (data.Success) {
+                        DrawShipAnchor(data.Data);
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+
+            });
+
+    }
+
+    var DrawShipAnchor = function (data) {
+        if (data == null || data.length == 0)
+            return;
+
+        MarkerHelper.clearAllAnchors();
+
+        $(data).each(function (index, dom) {
+
+            var latlngs = [];
+            //var latlngs = [
+            //    [45.51, 122.68],
+            //    [37.77, 122.43],
+            //    [34.04, 118.2]
+            //];
+            if (dom == null || dom.Positions.length < 3) {
+                return true;
+            }
+
+            $(dom.Positions).each(function (index2, dom2) {
+                var position = [];
+                position.push(dom2.LatValue);
+                position.push(dom2.LonValue);
+                latlngs.push(position);
+            })
+
+            var polyline = ShipxyAPI.polygon(latlngs,
+                {
+                    color: 'orange',
+                    fillColor: 'orange',
+                    weight: 1,
+                    fillOpacity: 0.5
+                }).bindTooltip(dom.AnchorName);//.addTo(_map).bindTooltip(dom.AnchorName);//.openTooltip();
+
+
+
+            ViewInfo.Anchor.push(polyline);
+        })
+
+    }
+
+    var DisplayAnchor = function () {
+
+        var IsChecked = $('#maodi').prop('checked');
+        //alert(IsChecked);
+
+        if (IsChecked) {
+            MarkerHelper.showAllAnchors();
+
+        }
+        else {
+            MarkerHelper.clearAllAnchors();
+        }
+
+    }
+
+    var DisplayDataResource = function () {
+
+        var IsChecked = $('#cb_shujuziliao').prop('checked');
+        //alert(IsChecked);
+
+        if (IsChecked) {
+            $('.fjxx_map_tk01').removeClass('hide');
+
+        }
+        else {
+            $('.fjxx_map_tk01').addClass('hide');
+        }
+
+    }
+
+    var QueryDaraResource = function () {
+
+        Param.ProjectID = $('#hid_ProjectID').val();;
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('GetDataResource', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+                    if (data.Success) {
+
+                        //$('#hid_FanID').val(data.Data.FanID);
+                        //$('#popup_span_FanName').html(data.Data.FanName);
+
+                        var DKHtml = '';
+
+                        DKHtml += '<div class="tab-vertical"><ul id="myTab01" class="nav nav-tabs dkzl_tab_header dkzl_tab_header_y clearfix" >';
+
+                        var LiHtml = '';
+                        var TableHtml = '';
+                        var LiCount = 0;
+                        $(data.Data.DKList).each(function (index, dom) {
+
+                            var NameHtml = '';
+                            for (var i = 0; i < dom.DKName.length; i++) {
+                                NameHtml += '<span>' + dom.DKName[i] + '</span>';
+                            }
+
+                            LiHtml += '<li class="tab-item zm ' + (LiCount == 0 ? 'active' : '') + '"><a href="#dk' + LiCount + '" data-toggle="tab">' + NameHtml + '</a></li>';
+
+                            TableHtml += '<div class="tab-pane fade ' + (LiCount == 0 ? 'active in' : '') + ' row" id="dk' + LiCount + '"><div class="dk_infor_box">';
+                            TableHtml += '<table class="table"><thead><tr><th>序号</th><th>地层编号</th><th>土层编号</th><th>层底标高(m)</th><th>土层类型</th><th>不排水抗剪强度cu(kPa)</th><th>砂土摩擦角°</th><th>有效重度</th><th>标贯击数</th></tr></thead><tbody>';
+                            $(dom.Data).each(function (index2, dom2) {
+                                TableHtml += '<tr><td>' + dom2.序号 + '</td><td>' + dom2.地层编号 + '</td><td>' + dom2.土层名称 + '</td><td>' + dom2.层底标高_m + '</td><td>' + dom2.土层类型 + '</td><td>' + dom2.不排水抗剪强度_cu_kPa + '</td><td>' + dom2.砂土摩擦角_度 + '</td><td>' + dom2.有效重度 + '</td><td>' + dom2.标贯击数 + '</td></tr>';
+                            })
+                            TableHtml += '</tbody></table></div></div>';
+
+                            LiCount++;
+
+                        })
+
+                        DKHtml += LiHtml;
+                        DKHtml += '</ul><div class="tab-content dkzl_tab-body">';
+                        DKHtml += TableHtml;
+                        DKHtml += '</div></div>';
+
+                        $('#li_dkzl').html(DKHtml);
+
+                        //$('.fjxx_map_tk01').removeClass('hide');
+                    }
+                    else {
+                        ModalPopup('error', data.Message);
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+            });
+
+
+    }
+
+
+    //文件报告
+    var DisplayReport = function () {
+
+        var IsChecked = $('#cb_baogao').prop('checked');
+        //alert(IsChecked);
+
+        if (IsChecked) {
+            $('.fjxx_map_tk02').removeClass('hide');
+
+        }
+        else {
+            $('.fjxx_map_tk02').addClass('hide');
+        }
+
+    }
+
+
+    var QueryReport = function () {
+
+        Param.ProjectID = $('#hid_ProjectID').val();;
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('GetReport', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+                    if (data.Success) {
+
+                        //项目文件
+                        //var htmlProjectFile = '<div class="dk_infor_box02 clearfix">';
+                        var htmlProjectFile = '';
+                        $(data.Data.ProjectFile.Files).each(function (index, dom) {
+
+                            //var imgSrc = GetImgType(dom.FileExtension);
+                            //htmlProjectFile += '<div class="wd_box clearfix col-lg-3"><div class="left_wdicon"><img src="' + imgSrc + '"></div><div class="right_edxiangqing"><div><a download="' + dom.FileName + '" href="' + dom.FilePath + '">' + dom.FileName + '</a></div><div>' + dom.FileTime + '</div></div></div>';
+
+                            htmlProjectFile += '<tr><td>' + dom.FileType + '</td ><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a class="btn btn-download" download="' + dom.FileName + '" href="' + dom.FilePath + '">下载</a></td></tr > ';
+
+                        })
+                        $('#report_ProjectFile').html(htmlProjectFile);
+
+                        //地勘文件
+                        var htmlDKExportFile = '<div class="dk_infor_box02 clearfix">';
+                        $(data.Data.CBZExportFile.Files).each(function (index, dom) {
+
+                            var imgSrc = GetImgType(dom.FileExtension);
+                            htmlDKExportFile += '<div class="wd_box clearfix col-lg-3"><div class="left_wdicon"><img src="' + imgSrc + '"></div><div class="right_edxiangqing"><div><a download="' + dom.FileName + '" href="' + dom.FilePath + '">' + dom.FileName + '</a></div><div>' + dom.FileTime + '</div></div></div>';
+
+                        })
+                        htmlDKExportFile += '</div>';
+                        $('#DKFileExport').html(htmlDKExportFile);
+
+                        var htmlDKImportFile = '<div class="dk_infor_box02 clearfix">';
+                        $(data.Data.CBZImportFile.Files).each(function (index, dom) {
+
+                            var imgSrc = GetImgType(dom.FileExtension);
+                            htmlDKImportFile += '<div class="wd_box clearfix col-lg-3"><div class="left_wdicon"><img src="' + imgSrc + '"></div><div class="right_edxiangqing"><div><a download="' + dom.FileName + '" href="' + dom.FilePath + '">' + dom.FileName + '</a></div><div>' + dom.FileTime + '</div></div></div>';
+
+                        })
+                        htmlDKImportFile += '</div>';
+                        $('#DKFileImport').html(htmlDKImportFile);
+
+
+                        //可作业预报
+                        var htmlKZYExportFile = '<div class="dk_infor_box02 clearfix">';
+                        $(data.Data.KZYExportFile.Files).each(function (index, dom) {
+
+                            var imgSrc = GetImgType(dom.FileExtension);
+                            htmlKZYExportFile += '<div class="wd_box clearfix col-lg-3"><div class="left_wdicon"><img src="' + imgSrc + '"></div><div class="right_edxiangqing"><div><a download="' + dom.FileName + '" href="' + dom.FilePath + '">' + dom.FileName + '</a></div><div>' + dom.FileTime + '</div></div></div>';
+
+                        })
+                        htmlKZYExportFile += '</div>';
+                        $('#KZYFileExport').html(htmlKZYExportFile);
+
+                        var htmlKZYImportFile = '<div class="dk_infor_box02 clearfix">';
+                        $(data.Data.KZYImportFile.Files).each(function (index, dom) {
+
+                            var imgSrc = GetImgType(dom.FileExtension);
+                            htmlKZYImportFile += '<div class="wd_box clearfix col-lg-3"><div class="left_wdicon"><img src="' + imgSrc + '"></div><div class="right_edxiangqing"><div><a download="' + dom.FileName + '" href="' + dom.FilePath + '">' + dom.FileName + '</a></div><div>' + dom.FileTime + '</div></div></div>';
+
+                        })
+                        htmlKZYImportFile += '</div>';
+                        $('#KZYFileImport').html(htmlKZYImportFile);
+
+                        //桩锤文件
+                        var htmlPileExportFile = '<div class="dk_infor_box02 clearfix">';
+                        $(data.Data.PileExportFile.Files).each(function (index, dom) {
+
+                            var imgSrc = GetImgType(dom.FileExtension);
+                            htmlPileExportFile += '<div class="wd_box clearfix col-lg-3"><div class="left_wdicon"><img src="' + imgSrc + '"></div><div class="right_edxiangqing"><div><a download="' + dom.FileName + '" href="' + dom.FilePath + '">' + dom.FileName + '</a></div><div>' + dom.FileTime + '</div></div></div>';
+
+                        })
+                        htmlPileExportFile += '</div>';
+                        $('#PileFileExport').html(htmlPileExportFile);
+
+                        var htmlPileImportFile = '<div class="dk_infor_box02 clearfix">';
+                        $(data.Data.PileImportFile.Files).each(function (index, dom) {
+
+                            var imgSrc = GetImgType(dom.FileExtension);
+                            htmlPileImportFile += '<div class="wd_box clearfix col-lg-3"><div class="left_wdicon"><img src="' + imgSrc + '"></div><div class="right_edxiangqing"><div><a download="' + dom.FileName + '" href="' + dom.FilePath + '">' + dom.FileName + '</a></div><div>' + dom.FileTime + '</div></div></div>';
+
+                        })
+                        htmlPileImportFile += '</div>';
+                        $('#PileFileImport').html(htmlPileImportFile);
+
+                    }
+                    else {
+                        ModalPopup('error', data.Message);
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+            });
+
+
+    }
+
+
+    var GetImgType = function (img) {
+
+        var imgSrc = '/Content/Cloud/img/icon_qtwd.png';
+        if (img == null || img == '')
+        {
+            return imgSrc;
+        }
+
+        if (img == 'word') {
+            imgSrc = '/Content/Cloud/img/icon_word.png';
+        }
+        else if (img == 'excel') {
+            imgSrc = '/Content/Cloud/img/icon_excel.png';
+        }
+        else if (img == 'pdf') {
+            imgSrc = '/Content/Cloud/img/icon_pdf.png';
+        }
+        else
+        {
+            imgSrc = '/Content/Cloud/img/icon_qtwd.png';
+        }
+        return imgSrc;
+
+    }
+
+</script>
+//--------------------船舶------------------------
+@*船舶*@
+<script>
+    $(document).ready(function () {
+
+        GetShips();
+
+        ShipHelper.ShipTrackDateInit();
+
+    })
+
+    var GetShips = function () {
+
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('GetShips', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+                    if (data.Success) {
+
+                        var ShipTypeHtml = '<option value="0">所有</option>';
+                        $(data.Data.ShipTypes).each(function (index, dom) {
+
+                            ShipTypeHtml += '<option value="' + dom.ShipType + '">' + dom.ShipType + '</option>';
+
+                        });
+                        $('#popup_html_ShipType').html(ShipTypeHtml);
+
+                        var ShipListHtml = '';
+                        $(data.Data.Ships).each(function (index, dom) {
+
+                            //船顺网
+                            var Ship = {};
+                            Ship.ID = dom.ID;
+                            Ship.Lon = Number(dom.LonValue);
+                            Ship.Lat = Number(dom.LatValue);
+                            Ship.LonStr = dom.Lon;
+                            Ship.LatStr = dom.Lat;
+                            Ship.ShipName = dom.ShipName;
+                            Ship.MMSI = dom.MMSI;
+                            Ship.UpdateTime = dom.Time;
+                            ViewInfo.Ship.push(Ship);
+
+                            ShipListHtml += '<tr><td>' + dom.ShipName + '</td><td>' + dom.ShipType + '</td><td><button type="button" class="table_btn_ljcl" onclick="QueryShipInfo(' + dom.ID + ', true)">查看详情</button></td></tr>';
+
+                        });
+
+                        $('#table_html_ShipList').html(ShipListHtml);
+
+                        AddShipMarker();
+
+                        DisplayShip();
+
+                        //MarkerHelper.showAllShips();
+                    }
+                    else {
+
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+            });
+
+    }
+
+    var ShipHelper = {
+
+        ShipTrackDateInit: function () {
+
+            $('#ShipTrackStartTime').val(formatDateTimeByMinute(new Date(new Date().setMonth(new Date().getMonth() - 1))));//.datetimepicker("setDate", new Date(new Date().setMonth(new Date().getMonth() - 1)));
+            $('#ShipTrackEndTime').val(formatDateTimeByMinute(new Date()));
+
+        },
+
+        DisplayResourceShip: function (CompanyID, dom) {
+
+            var Text = $(dom).html();
+
+            if (Text == '显示') {
+
+                if (CompanyID == 0) {
+
+                    MarkerHelper.ShowMarker.showAllShips();
+                }
+                else {
+                    MarkerHelper.ClearMarker.clearAllShips();
+                    MarkerHelper.ShowMarker.showShipsByCompanyID(CompanyID);
+                }
+
+                $(dom).html('隐藏');
+                //$('div.zxyj_tk').css('display', 'none');
+                //$('div.cbxq_tk').css('display', 'none');
+                CloseAllPopup();
+                $('.cblb_tk').stop(true, true).fadeIn();
+
+            }
+            else {
+                if (CompanyID == 0) {
+                    MarkerHelper.ClearMarker.clearAllShips();
+                }
+                else {
+                    MarkerHelper.ClearMarker.clearShipsByCompanyID(CompanyID);
+                }
+                $(dom).html('显示');
+            }
+        },
+
+        OpenShipInfo: function (dom) {
+
+            if (dom == null) {
+                return;
+            }
+
+            //CloseAllPopup();
+            $('div.zxyj_tk').css('display', 'none');
+
+            $('div.map_popover_cb').css('display', 'none');
+            $(dom).next().stop(true, true).fadeIn();
+            $('.cbxq_tk').stop(true, true).fadeIn();
+
+        },
+
+        CloseShipInfo: function (dom) {
+
+            if (dom == null) {
+                return;
+            }
+
+            $(dom).parent().parent().stop(true, true).fadeOut();
+
+        },
+
+        OpenShipInfoByShipID: function (ShipID) {
+
+            if (ShipID == '' || ShipID == 0) {
+                return;
+            }
+
+            CloseAllPopup();
+
+            MarkerHelper.ShowMarker.showProject(ProjectID);
+
+            $("#Project" + ProjectID).stop(true, true).fadeIn();
+
+        },
+
+        DisplayShipInfo: function (ShipID, IsFocused) {
+
+            if (ShipID == null || ShipID == '' || ShipID == 0)
+                return;
+
+            $('div.map_popover_cb').css('display', 'none');
+            $('.cbxq_tk').stop(true, true).fadeIn();
+
+            $("#Ship" + ShipID).stop(true, true).fadeIn();
+
+            //ShipHelper.ShipTrackDateInit();
+
+            //var Param = {};
+            //Param.ShipID = ShipID;
+            //$.post('GetShip', Param)
+            //    .success(function (data, statusText, jqXRH) {
+            //        if (data) {
+            //            if (data.Success) {
+            //                var Ship = data.Data;
+            //                if (Ship.Lon != null && Ship.Lat != null) {
+            //                    MarkerHelper.ShowMarker.showShip(Ship.ID);
+            //                    if (IsFocused) {
+            //                        MapHelper.mapZoomToPosition(9, Ship.Lat, Ship.Lon);
+            //                    }
+
+            //                    $("#Ship" + ShipID).stop(true, true).fadeIn();
+            //                    $('#hid_ShipID').val(Ship.ID);
+
+            //                    //填充数据
+            //                    $('#ShipInfo_ShipName').html(Ship.ShipName);
+            //                    $('#ShipInfo_ShipType').html(Ship.ShipTypeName);
+            //                    $('#ShipInfo_UseType').html(Ship.UseTypeStr);
+            //                    $('#ShipInfo_Status').html(Ship.StatusStr);
+            //                    $('#ShipInfo_Weight').html(Ship.Weight + "<span>吨</span>");
+            //                    $('#ShipInfo_Length').html(Ship.Length + "<span>米</span>");
+            //                    $('#ShipInfo_Width').html(Ship.Width + "<span>米</span>");
+            //                    $('#ShipInfo_Draught').html(Ship.Draught + "<span>米</span>");
+            //                    $('#ShipInfo_LiftWeight').html(Ship.LiftWeight + "<span>吨</span>");
+            //                    $('#ShipInfo_LiftHeight').html(Ship.LiftHeight + "<span>米</span>");
+            //                    //AIS
+            //                    $('#span_MMSI').html(Ship.MMSI);
+            //                    $('#span_CallSign').html(Ship.CallSign);
+            //                    $('#span_IMO').html(Ship.IMO);
+            //                    $('#span_Speed').html(Ship.Speed + '<i>节</i>');
+            //                    $('#span_Lon').html(Ship.LonStr);
+            //                    $('#span_Lat').html(Ship.LatStr);
+            //                    $('#span_Dest').html(Ship.Dest);
+            //                    $('#span_ArriveTime').html(Ship.YDSJ);
+            //                    $('#span_NaviStat').html(Ship.Navistat);
+            //                    $('#span_Degree').html(Ship.Heading + '<i>度</i>');
+            //                    $('#span_Left').html(Ship.Left + '<i>米</i>');
+            //                    $('#span_Trail').html(Ship.Trail + '<i>米</i>');
+            //                    $('#span_ShipCode').html(Ship.ShipCode);
+            //                    $('#span_UpdateTime').html(formatDateStamp(Ship.UpdateTime));
+            //                    //联系方式
+            //                    $('#span_Captain').html(Ship.Captain);
+            //                    $('#span_CaptainPhone').html(Ship.CaptainPhone);
+            //                    $('#span_Name1').html(Ship.Name1);
+            //                    $('#span_Phone1').html(Ship.Phone1);
+            //                    $('#span_Name2').html(Ship.Name2);
+            //                    $('#span_Phone2').html(Ship.Phone2);
+            //                }
+
+            //            }
+            //        }
+            //    })
+            //    .fail(function (jqXHR, statusText, errorMessage) {
+            //        //console.error(arguments);
+            //    })
+            //    .always(function (data) {
+            //    });
+        },
+        //查看轨迹信息
+        ShowShipTrack: function () {
+            var ShipID = $('#hid_ShipID').val();
+            if (ShipID == "" || ShipID == 0)
+                return;
+            var PickerStartTime = $('#ShipTrackStartTime').val();
+            var PickerEndTime = $('#ShipTrackEndTime').val();
+
+            if (PickerStartTime == '' || PickerEndTime == '')
+                return;
+            var Param = {};
+            Param.ShipID = ShipID;
+            Param.StartTime = (new Date(PickerStartTime)).getTime().toString().substring(0, 10);
+            Param.EndTime = (new Date(PickerEndTime)).getTime().toString().substring(0, 10);
+
+            $.post('GetShipTrack', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+                            ShipHelper.DrawShipTrack(data.Data);
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+
+                });
+        },
+
+        DrawShipTrack: function (data) {
+            if (data == null || data.length == 0)
+                return;
+            var ShipID = $('#hid_ShipID').val();
+            if (ShipID == "" || ShipID == 0)
+                return;
+            var tracks = [];
+            $(data).each(function (index, dom) {
+                var track = new Track();
+                track.hdg = dom.Cog;
+                track.utc = dom.Time;
+                track.sog = dom.Speed;
+                track.lng = dom.LonValue;
+                track.lat = dom.LatValue
+                tracks.push(track);
+            })
+
+            var TrackOptions = {
+                lineColor: 'tomato',// 线，颜色
+                lineWeight: 2, // 线，粗细
+                dash: true, // 是否为虚线
+                dashArray: [5, 5],// 虚线间隔
+                circleOverColor: 'yellow',// 轨迹点,鼠标划过时颜色
+                isDilute: true, // 是否抽稀模式显示
+                startShow: true,// 是否显示“起点”图标，默认值：true
+                endShow: true,// 是否显示“终点”图标，默认值：true
+                directionShow: true,// 轨迹方向三角是否展示，默认值：false
+                //lableFields: ["name", "mmsi", "sog", "cog", "utc", "kn", "md"],// lable显示的字段
+            };
+
+            // 添加并显示轨迹
+            _map.trackService.addAndShow("truck_id_001", tracks, TrackOptions, { "mmsi": ShipID });
+
+            //if (_map.getZoom() > 14) {
+            //    _map.setZoom(14);
+            //}
+        },
+        //取消轨迹
+        ClearShipTrack: function () {
+            _map.trackService.removeAll();
+        },
+
+    }
+
+    var CloseShipList = function () {
+
+        $('.cblb_tk').hide();
+
+    }
+
+    var CloseShipInfo = function () {
+
+        $('.cbxq_tk').hide();
+    }
+
+    var DisplayShip = function () {
+
+        var IsChecked = $('#cb_chuanbo').prop('checked');
+        //alert(IsChecked);
+
+        if (IsChecked) {
+            MarkerHelper.showAllShips();
+            $('.cblb_tk').show();
+        }
+        else {
+            MarkerHelper.clearAllShips();
+            $('.cblb_tk').hide();
+        }
+
+    }
+
+    var DisplayWeather = function () {
+
+        var IsChecked = $('#cb_weather').prop('checked');
+
+        if (IsChecked) {
+            $('.qt_qxxq').show();
+        }
+        else {
+            $('.qt_qxxq').hide();
+        }
+
+    }
+
+    var QueryShipKeyWord = function () {
+
+        var ShipType = $('#popup_html_ShipType').val();
+        var ShipKeyWord = $('#popup_txt_ShipName').val();
+
+        $('#table_html_ShipList tr').each(function (index, dom) {
+            $(dom).css('display', '');
+        })
+
+        if (ShipType != 0) {
+            $('#table_html_ShipList tr').each(function (index, dom) {
+                var ThisShipType = $(dom).find('td').eq(1).html();
+                if (ThisShipType != ShipType) {
+                    $(dom).css('display', 'none');
+                }
+            })
+        }
+
+        if (ShipKeyWord != '') {
+            $('#table_html_ShipList tr').each(function (index, dom) {
+                var ThisShipName = $(dom).find('td').eq(0).html();
+                if (ThisShipName.indexOf(ShipKeyWord) == -1) {
+                    $(dom).css('display', 'none');
+                }
+            })
+        }
+
+    }
+
+
+    var QueryShipInfo = function (ShipID, IsFocused) {
+
+        if (ShipID == null || ShipID == '' || ShipID == 0)
+            return;
+
+        $('div.map_popover_cb').css('display', 'none');
+        $('.cbxq_tk').stop(true, true).fadeIn();
+        ShipHelper.ShipTrackDateInit();
+
+        var Param = {};
+        Param.ShipID = ShipID;
+        $.post('GetShip', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+                    if (data.Success) {
+                        var Ship = data.Data;
+                        if (Ship.Lon != null && Ship.Lat != null) {
+                            MarkerHelper.showShip(Ship.ID);
+                            if (IsFocused) {
+                                MapHelper.mapZoomToPosition(9, Ship.Lat, Ship.Lon);
+                            }
+
+                            $("#Ship" + ShipID).stop(true, true).fadeIn();
+                            $('#hid_ShipID').val(Ship.ID);
+
+                            //填充数据
+                            $('#ShipInfo_ShipName').html(Ship.ShipName);
+                            $('#ShipInfo_ShipType').html(Ship.ShipTypeName);
+                            $('#ShipInfo_Dest').html(Ship.Dest);
+                            $('#ShipInfo_Status').html(Ship.StatusStr);
+                            //$('#ShipInfo_Weight').html("-<span>吨</span>");
+                            $('#ShipInfo_Length').html(Ship.Length + "<span>米</span>");
+                            $('#ShipInfo_Width').html(Ship.Width + "<span>米</span>");
+                            $('#ShipInfo_Draught').html(Ship.Draught + "<span>米</span>");
+                            //$('#ShipInfo_LiftWeight').html(Ship.LiftWeight + "<span>吨</span>");
+                            //$('#ShipInfo_LiftHeight').html(Ship.LiftHeight + "<span>米</span>");
+                            //AIS
+                            $('#span_MMSI').html(Ship.MMSI);
+                            $('#span_CallSign').html(Ship.CallSign);
+                            $('#span_IMO').html(Ship.IMO);
+                            $('#span_Speed').html(Ship.Speed + '<i>节</i>');
+                            $('#span_Lon').html(Ship.LonStr);
+                            $('#span_Lat').html(Ship.LatStr);
+                            $('#span_Dest').html(Ship.Dest);
+                            $('#span_ArriveTime').html(Ship.YDSJ);
+                            $('#span_NaviStat').html(Ship.Navistat);
+                            $('#span_Degree').html(Ship.Heading + '<i>度</i>');
+                            $('#span_Left').html(Ship.Left + '<i>米</i>');
+                            $('#span_Trail').html(Ship.Trail + '<i>米</i>');
+                            $('#span_ShipCode').html(Ship.ShipCode);
+                            $('#span_UpdateTime').html(formatDateStamp(Ship.UpdateTime));
+                            //联系方式
+                            //$('#span_Captain').html(Ship.Captain);
+                            //$('#span_CaptainPhone').html(Ship.CaptainPhone);
+                            //$('#span_Name1').html(Ship.Name1);
+                            //$('#span_Phone1').html(Ship.Phone1);
+                            //$('#span_Name2').html(Ship.Name2);
+                            //$('#span_Phone2').html(Ship.Phone2);
+                        }
+
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+            });
+
+    }
+
+
+
+</script>

@@ -67,6 +67,12 @@ namespace DataFactory.KingBase.CloudWind
 
         public DbSet<Wind_TaskInfo_KZY> Wind_TaskInfo_KZY { set; get; }
         public DbSet<View_Wind_ProjectTask> View_Wind_ProjectTask { set; get; }
+        public DbSet<View_Library_FanDK> View_Library_FanDK { set; get; }
+        public DbSet<View_ProjectTaskReport> View_ProjectTaskReport { set; get; }
+
+        public DbSet<WebGIS_Ship> WebGIS_Ship { set; get; }
+        public DbSet<WebGIS_ShipAnchor> WebGIS_ShipAnchor { set; get; }
+
     }
 
     public class WindDbUsers
@@ -441,6 +447,70 @@ namespace DataFactory.KingBase.CloudWind
         public string? bgjs { set; get; }
         public DateTime? CreateTime { set; get; }
         public bool IsDelete { set; get; }
+    }
+
+    /// <summary>
+    /// 地勘数据视图（Library_Geology_DK JOIN Library_Geology_Data）
+    /// </summary>
+    public class View_Library_FanDK
+    {
+        public int id { set; get; }
+        public int? ProjectID { set; get; }
+        public string? DKName { set; get; }
+        public int? dataid { set; get; }
+        public int? dkid { set; get; }
+        /// <summary>
+        /// 序号
+        /// </summary>
+        public string? xh { set; get; }
+        /// <summary>
+        /// 地层编号
+        /// </summary>
+        public string? dcbh { set; get; }
+        /// <summary>
+        /// 土层名称
+        /// </summary>
+        public string? tcbh { set; get; }
+        /// <summary>
+        /// [层底标高(m)]
+        /// </summary>
+        public string? cdbg { set; get; }
+        /// <summary>
+        /// 土层类型
+        /// </summary>
+        public string? tclx { set; get; }
+        /// <summary>
+        /// [不排水抗剪强度cu(kPa)]
+        /// </summary>
+        public string? bpskjqd { set; get; }
+        /// <summary>
+        /// [砂土摩擦角°]
+        /// </summary>
+        public string? stmcj { set; get; }
+        /// <summary>
+        /// 有效重度
+        /// </summary>
+        public string? yxzd { set; get; }
+        /// <summary>
+        /// 标贯击数
+        /// </summary>
+        public string? bgjs { set; get; }
+        public int? FanID { set; get; }
+    }
+
+    /// <summary>
+    /// 任务报告视图（Wind_Task JOIN Wind_TaskReport）
+    /// </summary>
+    public class View_ProjectTaskReport
+    {
+        public int id { set; get; }
+        public int? ProjectID { set; get; }
+        public string? TaskCode { set; get; }
+        public int? TaskID { set; get; }
+        public int? Type { set; get; }
+        public string? ReportName { set; get; }
+        public string? ReportPath { set; get; }
+        public DateTime? CreateTime { set; get; }
     }
 
     public class Wind_Task
@@ -820,6 +890,27 @@ namespace DataFactory.KingBase.CloudWind
         public DateTime? ForecastEndTime { set; get; }
         public string? YFYNo { set; get; }
         public string? Balance { set; get; }
+        public string? Lon { set; get; }
+        public string? Lat { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool? IsDelete { set; get; }
+    }
+
+    public class WebGIS_Ship
+    {
+        public int id { set; get; }
+        public string? ShipName { set; get; }
+        public string? mmsi { set; get; }
+        public string? ShipType { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool? IsDelete { set; get; }
+    }
+
+    public class WebGIS_ShipAnchor
+    {
+        public int id { set; get; }
+        public string? AnchorName { set; get; }
+        public string? AnchorGroup { set; get; }
         public string? Lon { set; get; }
         public string? Lat { set; get; }
         public DateTime? CreateTime { set; get; }

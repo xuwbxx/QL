@@ -309,27 +309,27 @@ namespace DataFactory.KingBase.Towing
         /// <summary>
         /// 剩余电量1
         /// </summary>
-        public double? RemainEle { set; get; }
+        public decimal? RemainEle { set; get; }
 
         /// <summary>
         /// 剩余电量2
         /// </summary>
-        public double? RemainEle2 { set; get; }
+        public decimal? RemainEle2 { set; get; }
 
         /// <summary>
         /// 发动机1状态
         /// </summary>
-        public double? Engine1 { set; get; }
+        public decimal? Engine1 { set; get; }
 
         /// <summary>
         /// 发动机2状态
         /// </summary>
-        public double? Engine2 { set; get; }
+        public decimal? Engine2 { set; get; }
 
         /// <summary>
         /// 电压
         /// </summary>
-        public double? Voltage { set; get; }
+        public decimal? Voltage { set; get; }
 
         /// <summary>
         /// 创建时间
@@ -408,17 +408,17 @@ namespace DataFactory.KingBase.Towing
         /// <summary>
         /// X轴角度
         /// </summary>
-        public double? AngleX { set; get; }
+        public decimal? AngleX { set; get; }
 
         /// <summary>
         /// Y轴角度
         /// </summary>
-        public double? AngleY { set; get; }
+        public decimal? AngleY { set; get; }
 
         /// <summary>
         /// 艏向角
         /// </summary>
-        public double? AzAngle { set; get; }
+        public decimal? AzAngle { set; get; }
 
         /// <summary>
         /// 创建时间
@@ -497,27 +497,27 @@ namespace DataFactory.KingBase.Towing
         /// <summary>
         /// 纬度
         /// </summary>
-        public double? Lat { set; get; }
+        public decimal? Lat { set; get; }
 
         /// <summary>
         /// 经度
         /// </summary>
-        public double? Lon { set; get; }
+        public decimal? Lon { set; get; }
 
         /// <summary>
         /// 最大摇X
         /// </summary>
-        public double? MaxYaoX { set; get; }
+        public decimal? MaxYaoX { set; get; }
 
         /// <summary>
         /// 最大摇Y
         /// </summary>
-        public double? MaxYaoY { set; get; }
+        public decimal? MaxYaoY { set; get; }
 
         /// <summary>
         /// 最大荡Z
         /// </summary>
-        public double? MaxDangZ { set; get; }
+        public decimal? MaxDangZ { set; get; }
 
         /// <summary>
         /// 总报警数
@@ -606,32 +606,32 @@ namespace DataFactory.KingBase.Towing
         /// <summary>
         /// 荡X
         /// </summary>
-        public double? DangX { set; get; }
+        public decimal? DangX { set; get; }
 
         /// <summary>
         /// 荡Y
         /// </summary>
-        public double? DangY { set; get; }
+        public decimal? DangY { set; get; }
 
         /// <summary>
         /// 荡Z
         /// </summary>
-        public double? DangZ { set; get; }
+        public decimal? DangZ { set; get; }
 
         /// <summary>
         /// 摇X
         /// </summary>
-        public double? YaoX { set; get; }
+        public decimal? YaoX { set; get; }
 
         /// <summary>
         /// 摇Y
         /// </summary>
-        public double? YaoY { set; get; }
+        public decimal? YaoY { set; get; }
 
         /// <summary>
         /// 摇Z
         /// </summary>
-        public double? YaoZ { set; get; }
+        public decimal? YaoZ { set; get; }
 
         /// <summary>
         /// 创建时间
@@ -695,7 +695,7 @@ namespace DataFactory.KingBase.Towing
         /// <summary>
         /// 经度
         /// </summary>
-        public double? Lon { set; get; }
+        public decimal? Lon { set; get; }
 
         /// <summary>
         /// 经度方向（E/W）
@@ -705,7 +705,7 @@ namespace DataFactory.KingBase.Towing
         /// <summary>
         /// 纬度
         /// </summary>
-        public double? Lat { set; get; }
+        public decimal? Lat { set; get; }
 
         /// <summary>
         /// 纬度方向（N/S）
@@ -715,12 +715,12 @@ namespace DataFactory.KingBase.Towing
         /// <summary>
         /// 海拔高度
         /// </summary>
-        public double? Altitude { set; get; }
+        public decimal? Altitude { set; get; }
 
         /// <summary>
         /// 艏向
         /// </summary>
-        public double? Heading { set; get; }
+        public decimal? Heading { set; get; }
 
         /// <summary>
         /// 创建时间
@@ -757,7 +757,7 @@ namespace DataFactory.KingBase.Towing
         /// <summary>
         /// 航速
         /// </summary>
-        public double? SailSpeed { set; get; }
+        public decimal? SailSpeed { set; get; }
 
         /// <summary>
         /// 创建时间
@@ -824,37 +824,37 @@ namespace DataFactory.KingBase.Towing
         /// <summary>
         /// 预报时效（小时）
         /// </summary>
-        public double? fhour { set; get; }
+        public decimal? fhour { set; get; }
 
         /// <summary>
         /// 纬度
         /// </summary>
-        public double? lat { set; get; }
+        public decimal? lat { set; get; }
 
         /// <summary>
         /// 经度
         /// </summary>
-        public double? lon { set; get; }
+        public decimal? lon { set; get; }
 
         /// <summary>
         /// 台风等级
         /// </summary>
-        public double? grade { set; get; }
+        public decimal? grade { set; get; }
 
         /// <summary>
         /// 最大风速
         /// </summary>
-        public double? mspeed { set; get; }
+        public decimal? mspeed { set; get; }
 
         /// <summary>
         /// 气压
         /// </summary>
-        public double? pressure { set; get; }
+        public decimal? pressure { set; get; }
 
         /// <summary>
         /// 移动速度
         /// </summary>
-        public double? kspeed { set; get; }
+        public decimal? kspeed { set; get; }
 
         /// <summary>
         /// 移动方向
@@ -864,12 +864,12 @@ namespace DataFactory.KingBase.Towing
         /// <summary>
         /// 7级风圈半径
         /// </summary>
-        public double? radius7 { set; get; }
+        public decimal? radius7 { set; get; }
 
         /// <summary>
         /// 10级风圈半径
         /// </summary>
-        public double? radius10 { set; get; }
+        public decimal? radius10 { set; get; }
 
         /// <summary>
         /// 创建时间
@@ -901,12 +901,12 @@ namespace DataFactory.KingBase.Towing
         /// <summary>
         /// 风速
         /// </summary>
-        public double? WindSpeed { set; get; }
+        public decimal? WindSpeed { set; get; }
 
         /// <summary>
         /// 风向
         /// </summary>
-        public double? WindDirection { set; get; }
+        public decimal? WindDirection { set; get; }
 
         /// <summary>
         /// 创建时间
@@ -943,12 +943,12 @@ namespace DataFactory.KingBase.Towing
         /// <summary>
         /// 报警值1
         /// </summary>
-        public double? AlarmValue1 { set; get; }
+        public decimal? AlarmValue1 { set; get; }
 
         /// <summary>
         /// 报警值2
         /// </summary>
-        public double? AlarmValue2 { set; get; }
+        public decimal? AlarmValue2 { set; get; }
 
         /// <summary>
         /// 创建时间
@@ -980,12 +980,12 @@ namespace DataFactory.KingBase.Towing
         /// <summary>
         /// 经度
         /// </summary>
-        public double? Lon { set; get; }
+        public decimal? Lon { set; get; }
 
         /// <summary>
         /// 纬度
         /// </summary>
-        public double? Lat { set; get; }
+        public decimal? Lat { set; get; }
 
         /// <summary>
         /// 创建时间
@@ -1022,22 +1022,22 @@ namespace DataFactory.KingBase.Towing
         /// <summary>
         /// 起点经度
         /// </summary>
-        public double? StartLon { set; get; }
+        public decimal? StartLon { set; get; }
 
         /// <summary>
         /// 起点纬度
         /// </summary>
-        public double? StartLat { set; get; }
+        public decimal? StartLat { set; get; }
 
         /// <summary>
         /// 终点经度
         /// </summary>
-        public double? EndLon { set; get; }
+        public decimal? EndLon { set; get; }
 
         /// <summary>
         /// 终点纬度
         /// </summary>
-        public double? EndLat { set; get; }
+        public decimal? EndLat { set; get; }
 
         /// <summary>
         /// 创建时间
@@ -1111,12 +1111,12 @@ namespace DataFactory.KingBase.Towing
         /// <summary>
         /// 经度
         /// </summary>
-        public double? Lon { set; get; }
+        public decimal? Lon { set; get; }
 
         /// <summary>
         /// 纬度
         /// </summary>
-        public double? Lat { set; get; }
+        public decimal? Lat { set; get; }
 
         /// <summary>
         /// 航线时间
@@ -1227,17 +1227,17 @@ namespace DataFactory.KingBase.Towing
         /// <summary>
         /// 经度
         /// </summary>
-        public double? Lon { set; get; }
+        public decimal? Lon { set; get; }
 
         /// <summary>
         /// 纬度
         /// </summary>
-        public double? Lat { set; get; }
+        public decimal? Lat { set; get; }
 
         /// <summary>
         /// 半径
         /// </summary>
-        public double? Radius { set; get; }
+        public decimal? Radius { set; get; }
 
         /// <summary>
         /// 创建时间

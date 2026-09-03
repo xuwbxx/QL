@@ -1,4 +1,5 @@
 ﻿using DataFactory.KingBase;
+using DataFactory.KingBase.Towing;
 using DataFactory.MySql;
 using DataFactory.SqlServer;
 using Microsoft.Extensions.Configuration;
@@ -35,10 +36,11 @@ namespace DataFactory.Factory
                 "KingBase_TechCenterDBConnection" => new TechCenterDbContext(connectionString, dbType),
                 "KingBase_SJKJCConnection" => new SJKJCDbContext(connectionString, dbType),
                 "KingBase_QlPreAssembledDBConnection" => new QlPreAssembledDbContext(connectionString, dbType),
+                "KingBase_TowingDbConnection" => new TowingDbContext(connectionString, dbType),
 
                 // SqlServer数据库
-                "SqlServer_CloudWindConnection" => new SqlServer.CloudWindDbContext(connectionString, dbType),
-                "SqlServer_TowingDbConnection" => new TowingDbContext(connectionString, dbType),
+                "SqlServer_CloudWindConnection" => new SqlServer.CloudWind.CloudWindDbContext(connectionString, dbType),
+                "SqlServer_TowingDbConnection" => new DataFactory.SqlServer.Towing.TowingDbContext(connectionString, dbType),
                 "SqlServer_TestCloudWindConnection" => new CloudWindTestDbContext(connectionString, dbType),
                 "SqlServer_TestTowingDbConnection" => new TowingTestDbContext(connectionString, dbType),
 

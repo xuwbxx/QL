@@ -1,0 +1,247 @@
+﻿
+@{
+    ViewBag.Title = "海图";
+    Layout = "~/Views/Shared/WebGISLayout.cshtml";
+}
+
+<script src="https://api.shipxy.com/h5/api/?v=3.0&k=@(ViewData["PXYKey"].ToString())"></script>
+<script src="~/Content/leaflet/dist/leaflet-ant-path.js"></script>
+<input type="hidden" id="PXYKey" value="@ViewData["PXYKey"].ToString()" />
+<input type="hidden" id="hid_ProjectID" value="@ViewData["ProjectID"].ToString()" />
+<input type="hidden" id="hid_ProjectLon" value="@ViewData["ProjectLon"].ToString()" />
+<input type="hidden" id="hid_ProjectLat" value="@ViewData["ProjectLat"].ToString()" />
+
+<style>
+    .map {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        margin: 0 auto;
+        background-color: rgb(126, 206, 244);
+        background-size: cover;
+    }
+
+    .mapmin {
+        width: 100vw;
+        height: 100vh;
+    }
+
+    /*滚动条*/
+    ::-webkit-scrollbar {
+        width: 0.24vw !important;
+        height: 10px;
+        background: rgba(0,0,0,0.8);
+    }
+
+    ::-moz-scrollbar {
+        width: 0.24vw;
+        height: 10px;
+        background: rgba(0,0,0,0.8);
+    }
+
+    ::-ms-scrollbar {
+        width: 0.24vw;
+        height: 10px;
+        background: rgba(0,0,0,0.8);
+    }
+
+    ::-o-scrollbar {
+        width: 0.24vw;
+        height: 10px;
+        background: rgba(0,0,0,0.8);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #2c98ff;
+    }
+
+    ::-moz-scrollbar-thumb {
+        background: #2c98ff;
+    }
+
+    ::-mswebkit-scrollbar-thumb {
+        background: #2c98ff;
+    }
+
+    ::-o-scrollbar-thumb {
+        background: #2c98ff;
+    }
+
+    div {
+        scrollbar-arrow-color: #2c98ff; /**/ /*三角箭头的颜色*/
+        scrollbar-face-color: #2c98ff; /**/ /*立体滚动条的颜色*/
+        scrollbar-3dlight-color: #2c98ff; /**/ /*立体滚动条亮边的颜色*/
+        scrollbar-highlight-color: rgba(255,255,255,1); /**/ /*滚动条空白部分的颜色*/
+        scrollbar-shadow-color: #2c98ff; /**/ /*立体滚动条阴影的颜色*/
+        scrollbar-darkshadow-color: #2c98ff; /**/ /*立体滚动条强阴影的颜色*/
+        scrollbar-track-color: #4e657b; /**/ /*立体滚动条背景颜色*/
+        scrollbar-base-color: #f8f8f8; /**/ /*滚动条的基本颜色*/
+    }
+</style>
+
+<!--背景 start-->
+<div class="bim-content">
+    <div class="map">
+        <div id="map" class="mapmin ma-map">
+        </div>
+    </div>
+</div>
+<!--背景 end-->
+<!--header start-->
+<div class="box-header clearfix">
+    <div class="title_l"><img src="~/Content/Cloud/img/logo.png">海上风电WebGIS平台</div>
+    <div class="title_fc_name">@ViewData["ProjectName"].ToString()</div>
+</div>
+<!--header end-->
+@*地图初始化*@
+<script>
+    $(document).ready(function () {
+        MapInit();
+    })
+    var _map;
+    var Setting = false;
+    var popup_options = {
+        className: "shipxy_popup",
+        closeButton: false,
+    };
+    var options = {
+        ak: $("input#PXYKey").val(),
+        mapTypes: ['MT_SEA', 'MT_GOOGLE', 'MT_SATELLITE'],// 显示地图类型，'MT_SEA'，MT_GOOGLE,MT_SATELLITE,
+        // 默认展示地图类型
+        defaultMapType: 'MT_SATELLITE',
+        //初始中心点坐标
+        centerPoint: [Number($('#hid_ProjectLat').val()), Number($('#hid_ProjectLon').val())],
+        //centerPoint: [19.724857, 109.188154],
+        //初始缩放级别
+        zoom: 6,
+        // 最小缩放级别
+        minZoom: 2,
+        // 最大缩放级别
+        maxZoom: 14,
+        // 公司版权信息( 支持html )，默认Elane Inc.
+        attribution: { isShow: false, emptyString: '&copy;2018 <a class="shipxy_small"></a>&nbsp;<a>Elane Inc.</a>' },
+        // 测距控件
+        measureCtrl: {
+            // 是否开启测距控件，默认：true
+            isShow: true,
+            // 是否显示测距按钮，默认：true
+            showMeasurementsMeasureControl: true,
+            // 是否显示删除按钮，默认：true
+            showMeasurementsClearControl: true,
+            // 是否显示切换单位按钮，默认：true
+            showUnitControl: false,
+            position: 'bottomleft'
+        },
+        //鼠标移动悬浮经纬度控件
+        mousePostionCtrl: { isShow: true, position: 'bottomleft' },
+        //缩放工具控件的显示隐藏
+        zoomControlElane: { isShow: false, position: 'topright' },
+        // 缩放级别显示控件
+        zoomviewControl: { isShow: false, position: 'topleft' },
+        //地图切换控件的位置
+        basemapsControl: { isShow: true, position: 'topleft' },
+        // 比例尺，控件
+        scaleCtrl: { isShow: true, position: "bottomleft" },
+    };
+
+    var MapInit = function () {
+
+        // 创建地图示例
+        _map = new ShipxyAPI.Map("map", options);
+
+        ShipxyAPI.WeatherService(_map);
+
+        // 自定义按钮-测距
+        $("#btn_ceju").on("click", function (e) {
+            e.stopPropagation();
+            _map.PolylineMeasureControl._toggleMeasure();
+        });
+        // 自定义按钮-切换单位
+        $("#btn_ceju_unit").on("click", function (e) {
+            e.stopPropagation();
+            // 是否，开启了测距
+            // var isCeju = elane_map.PolylineMeasureControl._measuring();
+            // 切换单位
+            _map.PolylineMeasureControl._changeUnit();
+        });
+        // 自定义按钮-移除
+        $("#btn_ceju_remove").on("click", function (e) {
+            e.stopPropagation();
+            _map.PolylineMeasureControl._clearAllMeasurements();
+            _map.PolylineMeasureControl._toggleMeasure();// 更新测距控件状态
+        });
+
+        ShipxyAPI.TrackService(_map);
+        //延时加载
+        setTimeout(function () {
+
+
+
+        }, 1000);
+
+        _map.on('click', onMapClick);
+    }
+
+    //监听鼠标点击事件，弹出经纬度
+    function onMapClick(e) {
+        //L.popup().setLatLng(e.latlng)
+        //    .setContent('经纬度' + e.latlng.toString())
+        //    .openOn(_map);
+        //console.log(e.latlng)
+        if (Setting) {
+            //console.log(e.latlng.lat);
+            var Position = {};
+            Position.Lat = e.latlng.lat;
+            Position.Lon = e.latlng.lng;
+
+            SettingWarningPositions.push(Position);
+
+            AddPositionMarker(Position);
+        }
+
+    };
+
+</script>
+
+
+@*风场业务*@
+<script>
+
+    $(document).ready(function () {
+        ShowPosition();
+    })
+
+    var ShowPosition = function () {
+
+        var Lon = $('#hid_ProjectLon').val();
+        var Lat = $('#hid_ProjectLat').val();
+        if (Lon == '' || Lat == '')
+            return;
+
+        var IconUrl = "../../Content/Cloud/img/icon_fczj.gif";
+
+        var icon = L.icon({
+            iconSize: [40, 40],
+            iconUrl: IconUrl,
+            iconAnchor: [20, 20]
+        });
+
+        var marker = L.marker([Lat, Lon],
+            {
+                icon: icon,
+            }).addTo(_map);
+
+        marker.bindTooltip('任务位置', {
+            //className: 'leaflet-labelship',
+            //permanent: IsFanZoom,
+            offset: [40, -35]
+        });
+
+        marker.on('click', function (e) {
+
+        });
+
+    }
+
+
+</script>

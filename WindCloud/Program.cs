@@ -6,6 +6,8 @@ using DataFactory.Factory;
 using Service.Base;
 // 引入技术中心Service
 using Service.TechCenter;
+// 引入拖航Service
+using Service.Towing;
 // 引入Wind主模块Service
 using Service.Wind;
 // 引入Wind后台管理Service
@@ -117,12 +119,24 @@ builder.Services.AddScoped<BackKZYReportService>();
 builder.Services.AddScoped<BackTowingManageService>();
 // 注册后台拖航报告服务
 builder.Services.AddScoped<BackTowingReportService>();
+// 注册拖航主页服务
+builder.Services.AddScoped<MainService>();
+// 注册拖航数据服务
+builder.Services.AddScoped<MRUStatusInfoService>();
+builder.Services.AddScoped<SatellteInfoService>();
+builder.Services.AddScoped<NavigationalStatusService>();
+builder.Services.AddScoped<EGYROInfoService>();
+builder.Services.AddScoped<WeatherInfoService>();
+builder.Services.AddScoped<DeviceStatusInfoService>();
+builder.Services.AddScoped<ProjectPlanRouteInfoService>();
 // 注册登录服务，处理用户登录登出逻辑
 builder.Services.AddScoped<LoginService>();
 // 注册云平台信息服务，处理云平台数据查询
 builder.Services.AddScoped<CloudWindInfoService>();
 // 注册云中心服务
 builder.Services.AddScoped<CloudCenterService>();
+// 注册WebGIS服务，用于船讯网船舶查询和气象数据
+builder.Services.AddScoped<WebGISService>();
 // 注册看板头部服务（接口+实现），用于看板数据展示
 builder.Services.AddScoped<IBoardHeaderService, BoardHeaderService>();
 

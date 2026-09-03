@@ -1,0 +1,79 @@
+﻿
+@{
+    ViewBag.Title = "风电物联网";
+    Layout = "~/Views/Shared/WindDoorLayout.cshtml";
+
+
+}
+
+<div class="content content04 clearfix">
+
+    <div class="col-lg-4 col-sm-4 col-xs-12" style="padding-right: 1.5vh;">
+        <div class="mod01 mod04">
+            <div class="mod_title mod_title04 newline">三峡16MW漂浮式风电项目-远距离拖航监控保障系统</div>
+            <div class="mod_content clearfix">
+                <div class="img_box img_box04"><img src="~/Content/WindRedirect/img/towingPic.png"></div>
+                <div class="jianjie_box_w">
+                    <div class="jianjie_box jianjie_box04">
+                        <p>海上风电施工云服务平台是一种基于网络云技术的大型综合应用平台，它将涵盖许多独立的子系统、软件平台、风电业务系统、数据系统等，通过互联网将各个平台系统和服务全部整合起来，专门用于服务海上风电施工业务，可以为用户提供便捷丰富的海上风电服务资源。</p>
+
+                    </div>
+                    <div class="text-center box_btn_enter"><button class="btn_enter" onclick="OpenWindTowing();">进入</button></div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 col-sm-4 col-xs-12" style="padding-right: 1.5vh;">
+        <div class="mod01 mod04">
+            <div class="mod_title">三航翔安物联监测系统</div>
+            <div class="mod_content clearfix">
+                <div class="img_box img_box04"><img src="~/Content/WindRedirect/img/SHXA_IOT.png"></div>
+                <div class="jianjie_box_w">
+                    <div class="jianjie_box jianjie_box04">
+                        <p>通过主机与船舶数据接口及MRU数据接口连接，可同步收集原船工作数据与布设在船舶上的MRU数据，并将采集的数据定时从船上通过网络同步至指定服务器，并以以文件方式存储，支持断网自动续传，同时支持数据船上本地提取。</p>
+
+                    </div>
+                    <div class="text-center box_btn_enter"><button class="btn_enter" onclick="OpenWindSHXA();">进入</button></div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*<div class="col-lg-4 col-sm-4 col-xs-12" style="padding-right: 1.5vh;">
+            <div class="mod01 mod04">
+                <div class="mod_title">海上风电施工技术服务云平台</div>
+                <div class="mod_content clearfix">
+                    <div class="img_box img_box04"><img src="~/Content/WindRedirect/img/pic1.png"></div>
+                    <div class="jianjie_box_w">
+                        <div class="jianjie_box jianjie_box04">
+                            <p>海上风电施工云服务平台是一种基于网络云技术的大型综合应用平台，它将涵盖许多独立的子系统、软件平台、风电业务系统、数据系统等，通过互联网将各个平台系统和服务全部整合起来，专门用于服务海上风电施工业务，可以为用户提供便捷丰富的海上风电服务资源。</p>
+                            <p>三航局技术中心在海上风电施工辅助方面已经开发了多款风电自研软件，例如用于计算桩腿插拔的分析软件、风机整体安装模拟软件、起重船基础施工可作业性预报分析软件等。</p>
+                        </div>
+                        <div class="text-center box_btn_enter"><button class="btn_enter" onclick="OpenWindCloud();">进入云平台</button></div>
+
+                    </div>
+                </div>
+            </div>
+        </div>*@
+
+</div>
+
+
+<script>
+
+    var OpenWindTowing = function () {
+
+        window.open('/Towing/Main/Index', '_blank');
+
+    }
+
+    var OpenWindSHXA = function () {
+
+        window.open('http://10.6.55.74:8010/#/collect', '_blank');
+
+    }
+
+</script>

@@ -1,0 +1,30 @@
+﻿<!DOCTYPE html>
+
+<html style="height:100vh; overflow:hidden;">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+
+    <link rel="icon" href="@(Url.Content("~/Content/Cloud/img/title-logo.ico"))" type="image/x-icon" />
+    <link rel="stylesheet" type="text/css" href="@(Url.Content("~/Content/Cloud/css/font-awesome.4.6.0.css"))" />
+    <link rel="stylesheet" type="text/css" href="@(Url.Content("~/Content/Cloud/css/bootstrap.css"))" />
+    <link rel="stylesheet" type="text/css" href="@(Url.Content("~/Content/Cloud/css/laydate.css"))" />
+
+    <link rel="stylesheet" type="text/css" href="@(Url.Content("~/Content/Cloud/css/map_g.css"))" />
+    <script type="text/javascript" src="@(Url.Content("~/js/jquery1.12.4.min.js?timestamp=") + DateTime.Now.Ticks)"></script>
+    <script type="text/javascript" src="@(Url.Content("~/Content/Cloud/js/bootstrap.js"))"></script>
+    <script type="text/javascript" src="@(Url.Content("~/Content/Cloud/js/GisScript.js"))"></script>
+    <script type="text/javascript" src="@(Url.Content("~/Content/Cloud/js/laydate.js"))"></script>
+    
+    @*<script type="text/javascript" src="@(Url.Content("~/Content/Cloud/js/checkbox.js"))"></script>*@
+    <script type="text/javascript" src="@(Url.Content("~/js/CommonJS.js"))"></script>
+    
+
+</head>
+<body>
+
+    @RenderBody()
+
+
+</body>
+</html>

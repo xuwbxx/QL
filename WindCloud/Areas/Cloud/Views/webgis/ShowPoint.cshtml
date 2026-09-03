@@ -1,0 +1,249 @@
+﻿
+@{
+    ViewBag.Title = "位置预览";
+    Layout = "~/Views/Shared/WebGISLayout.cshtml";
+}
+
+<script src="https://api.shipxy.com/h5/api/?v=3.0&k=@(ViewData["PXYKey"].ToString())"></script>
+<script src="~/Content/leaflet/dist/leaflet-ant-path.js"></script>
+<input type="hidden" id="hid_PXYKey" value="@ViewData["PXYKey"].ToString()" />
+<input type="hidden" id="hid_Points" value="@ViewData["Points"].ToString()" />
+
+<style>
+    .map {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        margin: 0 auto;
+        background-color: rgb(126, 206, 244);
+        background-size: cover;
+    }
+
+    .mapmin {
+        width: 100vw;
+        height: 100vh;
+    }
+
+    /*滚动条*/
+    ::-webkit-scrollbar {
+        width: 0.24vw !important;
+        height: 10px;
+        background: rgba(0,0,0,0.8);
+    }
+
+    ::-moz-scrollbar {
+        width: 0.24vw;
+        height: 10px;
+        background: rgba(0,0,0,0.8);
+    }
+
+    ::-ms-scrollbar {
+        width: 0.24vw;
+        height: 10px;
+        background: rgba(0,0,0,0.8);
+    }
+
+    ::-o-scrollbar {
+        width: 0.24vw;
+        height: 10px;
+        background: rgba(0,0,0,0.8);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #2c98ff;
+    }
+
+    ::-moz-scrollbar-thumb {
+        background: #2c98ff;
+    }
+
+    ::-mswebkit-scrollbar-thumb {
+        background: #2c98ff;
+    }
+
+    ::-o-scrollbar-thumb {
+        background: #2c98ff;
+    }
+
+    div {
+        scrollbar-arrow-color: #2c98ff; /**/ /*三角箭头的颜色*/
+        scrollbar-face-color: #2c98ff; /**/ /*立体滚动条的颜色*/
+        scrollbar-3dlight-color: #2c98ff; /**/ /*立体滚动条亮边的颜色*/
+        scrollbar-highlight-color: rgba(255,255,255,1); /**/ /*滚动条空白部分的颜色*/
+        scrollbar-shadow-color: #2c98ff; /**/ /*立体滚动条阴影的颜色*/
+        scrollbar-darkshadow-color: #2c98ff; /**/ /*立体滚动条强阴影的颜色*/
+        scrollbar-track-color: #4e657b; /**/ /*立体滚动条背景颜色*/
+        scrollbar-base-color: #f8f8f8; /**/ /*滚动条的基本颜色*/
+    }
+</style>
+
+
+<div class="bim-content">
+    <div class="map">
+        <div id="map" class="mapmin ma-map">
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        PointDataInit();
+        MapInit();
+        AddPointMarker();
+    })
+    var _map;
+    var Setting = false;
+    var popup_options = {
+        className: "shipxy_popup",
+        closeButton: false,
+    };
+    var options = {
+        ak: $("input#hid_PXYKey").val(),
+        mapTypes: ['MT_SEA', 'MT_GOOGLE', 'MT_SATELLITE'],// 显示地图类型，'MT_SEA'，MT_GOOGLE,MT_SATELLITE,
+        // 默认展示地图类型
+        defaultMapType: 'MT_SATELLITE',
+        //初始中心点坐标
+        //centerPoint: [Number($('#hid_ProjectLat').val()), Number($('#hid_ProjectLon').val())],
+        centerPoint: [30.724857, 119.188154],
+        //初始缩放级别
+        zoom: 6,
+        // 最小缩放级别
+        minZoom: 2,
+        // 最大缩放级别
+        maxZoom: 14,
+        // 公司版权信息( 支持html )，默认Elane Inc.
+        attribution: { isShow: false, emptyString: '&copy;2018 <a class="shipxy_small"></a>&nbsp;<a>Elane Inc.</a>' },
+        // 测距控件
+        measureCtrl: {
+            // 是否开启测距控件，默认：true
+            isShow: true,
+            // 是否显示测距按钮，默认：true
+            showMeasurementsMeasureControl: true,
+            // 是否显示删除按钮，默认：true
+            showMeasurementsClearControl: true,
+            // 是否显示切换单位按钮，默认：true
+            showUnitControl: false,
+            position: 'bottomleft'
+        },
+        //鼠标移动悬浮经纬度控件
+        mousePostionCtrl: { isShow: true, position: 'bottomleft' },
+        //缩放工具控件的显示隐藏
+        zoomControlElane: { isShow: false, position: 'topright' },
+        // 缩放级别显示控件
+        zoomviewControl: { isShow: false, position: 'topleft' },
+        //地图切换控件的位置
+        basemapsControl: { isShow: true, position: 'topleft' },
+        // 比例尺，控件
+        scaleCtrl: { isShow: true, position: "bottomleft" },
+    };
+
+    var MapInit = function () {
+
+        // 创建地图示例
+        _map = new ShipxyAPI.Map("map", options);
+
+        ShipxyAPI.WeatherService(_map);
+
+        // 自定义按钮-测距
+        $("#btn_ceju").on("click", function (e) {
+            e.stopPropagation();
+            _map.PolylineMeasureControl._toggleMeasure();
+        });
+        // 自定义按钮-切换单位
+        $("#btn_ceju_unit").on("click", function (e) {
+            e.stopPropagation();
+            // 是否，开启了测距
+            // var isCeju = elane_map.PolylineMeasureControl._measuring();
+            // 切换单位
+            _map.PolylineMeasureControl._changeUnit();
+        });
+        // 自定义按钮-移除
+        $("#btn_ceju_remove").on("click", function (e) {
+            e.stopPropagation();
+            _map.PolylineMeasureControl._clearAllMeasurements();
+            _map.PolylineMeasureControl._toggleMeasure();// 更新测距控件状态
+        });
+
+        ShipxyAPI.TrackService(_map);
+
+        _map.on('click', onMapClick);
+    };
+
+    //监听鼠标点击事件，弹出经纬度
+    function onMapClick(e) {
+        L.popup().setLatLng(e.latlng)
+            .setContent('经纬度：' + e.latlng.toString())
+            .openOn(_map);
+        console.log(e.latlng)
+        if (Setting) {
+            //console.log(e.latlng.lat);
+            //var Position = {};
+            //Position.Lat = e.latlng.lat;
+            //Position.Lon = e.latlng.lng;
+
+            //SettingWarningPositions.push(Position);
+
+            //AddPositionMarker(Position);
+        }
+
+    };
+
+    var PointData = [];
+    var PointDataInit = function () {
+
+        var Points = JSON.parse($('#hid_Points').val());
+
+        if (Points.length == 0)
+        {
+            return;
+        }
+
+        PointData = Points;
+
+        options.centerPoint = [Points[0].PointLat, Points[0].PointLon];
+
+    }
+
+    var AddPointMarker = function () {
+
+        if (PointData == null || PointData.length == 0)
+            return;
+
+        $(PointData).each(function (index, dom) {
+
+            var IconUrl = "../../Content/Cloud/img/cb_green.png";
+
+            var introduceHtml = '<div class="map_box"><div class="map_cbicon" onclick="ShowShipInfo(' + dom.ID + ');"><a><img src="' + IconUrl + '"></a></div>'
+                + '<div class="map_popover_cb" id="Ship' + dom.ID + '"><div class="popover_img"><img src="../../Content/Cloud/img/icon_border.gif"></div></div></div>';
+
+
+            var icon = L.divIcon({
+                //iconSize: [170, 365],//iconSize: [x, y];x越小越往右靠，y越大越往上靠
+                className: "",
+                iconAnchor: [12, 12],//偏移
+                html: introduceHtml,
+            });
+
+            var marker = L.marker([dom.PointLat, dom.PointLon],
+                {
+                    icon: icon,
+                }).addTo(_map);
+
+            marker.bindTooltip(dom.PointName + '(' + dom.PointLon + ',' + dom.PointLat + ')', {
+                className: 'leaflet-labelship',
+                //permanent: IsFanZoom,
+                //offset: [-25, -25]
+            });
+
+            marker.on('click', function (e) {
+
+                //ShipHelper.DisplayShipInfo(dom.ID);
+
+            });
+
+        })
+
+    }
+
+
+</script>

@@ -2,8 +2,16 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Identity.Client;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using static DataFactory.Factory.BaseDbContext;
 
 namespace DataFactory.KingBase
 {
@@ -296,6 +304,12 @@ namespace DataFactory.KingBase
         /// </summary>
         [MaxLength(20)]
         public string? Mobile { set; get; }
+
+        /// <summary>
+        /// 邮箱
+        /// </summary>
+        [MaxLength(100)]
+        public string? Email { set; get; }
 
         /// <summary>
         /// 部门OID（关联sys_dept.OID，用于对接外部系统）

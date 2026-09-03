@@ -1,0 +1,112 @@
+﻿document.addEventListener('DOMContentLoaded', function () {
+    var Vue = window.Vue;
+    var ElementPlus = window.ElementPlus;
+    var ElMessage = ElementPlus.ElMessage;
+
+    var app = Vue.createApp({
+        setup: function () {
+            var loading = Vue.ref(false);
+            var tableData = Vue.ref([]);
+            var total = Vue.ref(0);
+            var pageIndex = Vue.ref(1);
+            var pageSize = Vue.ref(10);
+            var searchProjID = Vue.ref(null);
+            var searchCastingGroupName = Vue.ref('');
+            var projectOptions = Vue.ref([]);
+
+            function indexMethod(index) {
+                return (pageIndex.value - 1) * pageSize.value + index + 1;
+            }
+
+            async function loadProjectOptions() {
+                try {
+                    var res = await HttpUtils.get('/Biz/ConcreteBeam/ProjectOptions');
+                    projectOptions.value = res || [];
+                } catch (e) {
+                    console.error('loadProjectOptions error', e);
+                    projectOptions.value = [];
+                }
+            }
+
+            async function loadData() {
+                loading.value = true;
+                try {
+                    var req = {
+                        projID: searchProjID.value,
+                        castingGroupName: searchCastingGroupName.value,
+                        pageIndex: pageIndex.value,
+                        pageSize: pageSize.value
+                    };
+                    var res = await HttpUtils.post('/Biz/ConcreteBeam/List', req);
+                    tableData.value = (res && res.list) || [];
+                    total.value = (res && res.total) || 0;
+                } catch (e) {
+                    console.error('loadData error', e);
+                } finally {
+                    loading.value = false;
+                }
+            }
+
+            function handleSearch() {
+                pageIndex.value = 1;
+                loadData();
+            }
+
+            function handleReset() {
+                searchProjID.value = null;
+                searchCastingGroupName.value = '';
+                pageIndex.value = 1;
+                loadData();
+            }
+
+            function handlePageChange(val) {
+                pageIndex.value = val;
+                loadData();
+            }
+
+            function handleSizeChange(val) {
+                pageSize.value = val;
+                pageIndex.value = 1;
+                loadData();
+            }
+
+            function handleLinearControl(row) {
+                var id = row.id || row.ID;
+                var name = row.castingGroupName || row.CastingGroupName || '线性管控';
+                var url = '/Biz/ConcreteBeam/LinearControl?id=' + id;
+                if (window.parent && window.parent.openInNewTab) {
+                    window.parent.openInNewTab(name, url);
+                } else {
+                    window.location.href = url;
+                }
+            }
+
+            Vue.onMounted(function () {
+                loadProjectOptions();
+                loadData();
+            });
+
+            return {
+                loading: loading,
+                tableData: tableData,
+                total: total,
+                pageIndex: pageIndex,
+                pageSize: pageSize,
+                searchProjID: searchProjID,
+                searchCastingGroupName: searchCastingGroupName,
+                projectOptions: projectOptions,
+                indexMethod: indexMethod,
+                handleSearch: handleSearch,
+                handleReset: handleReset,
+                handlePageChange: handlePageChange,
+                handleSizeChange: handleSizeChange,
+                handleLinearControl: handleLinearControl
+            };
+        }
+    });
+
+    app.use(ElementPlus, {
+        locale: ElementPlusLocaleZhCn
+    });
+    app.mount('#app');
+});

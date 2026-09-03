@@ -1,4 +1,5 @@
 ﻿using DataFactory.Factory;
+using DataFactory.KingBase.Towing;
 using DataFactory.SqlServer;
 
 namespace Service.Towing

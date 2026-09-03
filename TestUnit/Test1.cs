@@ -271,8 +271,8 @@ namespace TestUnit
                 //ReadME.Test();
                 //SpudcanCaculate sc = new SpudcanCaculate();
 
-                var service = serviceProvider.GetRequiredService<DataCopyService>();
-                service.CopyWind_TaskFileDeliver();
+                var service = serviceProvider.GetRequiredService<KingBase_Towing_DataCopyService>();
+                service.CopyData_Message_Body();
 
 
             }

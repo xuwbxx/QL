@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using System.Data.Common;
 
 namespace DataFactory.Factory
 {
@@ -16,6 +18,10 @@ namespace DataFactory.Factory
         /// <typeparam name="TEntity"></typeparam>
         /// <returns></returns>
         IQueryable<TEntity> Query<TEntity>() where TEntity : class;
+        /// <summary>
+        /// 获取底层数据库连接（用于原生ADO.NET操作）
+        /// </summary>
+        DbConnection GetDbConnection();
     }
 
     public class UnitOfWork : IUnitOfWork
@@ -86,6 +92,11 @@ namespace DataFactory.Factory
         public IQueryable<TEntity> Query<TEntity>() where TEntity : class
         {
             return _dbContext.Set<TEntity>();
+        }
+
+        public DbConnection GetDbConnection()
+        {
+            return _dbContext.Database.GetDbConnection();
         }
 
         public void Dispose()

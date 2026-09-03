@@ -1,8 +1,15 @@
-﻿namespace DataFactory.Factory
+﻿using System.Data.Common;
+
+namespace DataFactory.Factory
 {
     public interface IFixedUnitOfWorkFactory
     {
         IUnitOfWork Create();
+
+        /// <summary>
+        /// 获取底层数据库连接（用于原生ADO.NET操作，调用方负责管理连接生命周期）
+        /// </summary>
+        DbConnection GetConnection();
     }
 
     public class FixedUnitOfWorkFactory : IFixedUnitOfWorkFactory
@@ -19,6 +26,12 @@
         public IUnitOfWork Create()
         {
             return _multiDbFactory.GetUnitOfWork(_connectionName);
+        }
+
+        public DbConnection GetConnection()
+        {
+            var uow = _multiDbFactory.GetUnitOfWork(_connectionName);
+            return uow.GetDbConnection();
         }
     }
 

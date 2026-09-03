@@ -37,13 +37,11 @@ namespace WindCloud.Areas.Cloud.Controllers
         private string EnKey = AppSettingUtils.GetSetting("AppSettings:TripleEncrypt:Key").ToString();
         private string EnIV = AppSettingUtils.GetSetting("AppSettings:TripleEncrypt:IV").ToString();
 
-
         protected string CreateWebToken(string UserCode)
         {
             string token = CryptographyUtils.TripleDESEncrypt(UserCode, EnKey, EnIV);
             return token;
         }
-
         protected bool ValidateWebToken(string token)
         {
             bool Success = false;
@@ -68,8 +66,6 @@ namespace WindCloud.Areas.Cloud.Controllers
             }
             return Success;
         }
-
-
         public async Task<IActionResult> FindShjUser(CloudWindRequest request)
         {
             BaseReturn ret = new BaseReturn();
@@ -108,6 +104,8 @@ namespace WindCloud.Areas.Cloud.Controllers
             }
             return Ok(ret);
         }
+
+
 
     }
 }

@@ -72,6 +72,13 @@ namespace Service.Struct
                     multiDbFactory: sp.GetRequiredService<MultiDbRepositoryFactory>()
                 )
             );
+            //拖航kingbase
+            services.AddScoped<Towing_KingBase_UnitOfWorkFactory>(sp =>
+                new Towing_KingBase_UnitOfWorkFactory(
+                    connectionName: "KingBase_TowingDbConnection",
+                    multiDbFactory: sp.GetRequiredService<MultiDbRepositoryFactory>()
+                )
+            );
 
             //测试库
             //KingBase测试库
@@ -102,7 +109,8 @@ namespace Service.Struct
             services.AddScoped<ProjectAreaService>();
             services.AddScoped<DataLoginService>();
             services.AddScoped<SSOService>();
-            services.AddScoped<DataCopyService>();
+            services.AddScoped<KingBase_WindCloud_DataCopyService>();
+            services.AddScoped<KingBase_Towing_DataCopyService>();
             services.AddScoped<CloudWindInfoService>();
 
 

@@ -109,6 +109,7 @@ builder.Services.AddScoped<BizProjectService>();
 builder.Services.AddScoped<BizProjectBridgeService>();
 builder.Services.AddScoped<BizProjectBridgeCastingGroupService>();
 builder.Services.AddScoped<SteelBeamService>();
+builder.Services.AddScoped<ConcreteBeamService>();
 
 // 3.全局配置 JSON 序列化选项
 builder.Services.AddControllersWithViews()
