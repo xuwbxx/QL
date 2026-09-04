@@ -3,6 +3,7 @@ using DataFactory.Factory;
 using DataFactory.KingBase.CloudWind;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Model.Tech.Cloud;
 using Model.Tech.Cloud.BackManage;
 using Model.Tech.System;
@@ -35,6 +36,19 @@ namespace Service.Wind
                 Wind_Project p = repo.FindByID(ProjectID);
 
                 return p;
+
+            }
+        }
+
+        public Wind_Task getTaskByID(int TaskID)
+        {
+            using (var uow = _techCenterUowFactory.Create())
+            {
+                var repo = uow.GetRepository<Wind_Task>();
+
+                Wind_Task t = repo.FindByID(TaskID);
+
+                return t;
 
             }
         }
@@ -140,7 +154,7 @@ namespace Service.Wind
                 {
                     var Flow_ProjectApply_repo = uow.GetRepository<Flow_ProjectApply>();
                     var View_Wind_ProjectFlow_repo = uow.GetRepository<View_Wind_ProjectFlow>();
-                    var ProjectGroupList = await View_Wind_ProjectFlow_repo.FindAsync(a => (string.IsNullOrEmpty(request.ProjectName) || a.ProjectName.Contains(request.ProjectName)) && (a.ApplyerCode.Equals(UserCode) || a.DirectorCode.Equals(UserCode) || a.NodeUserCode.Equals(UserCode) || (!a.isroleexist.Value && a.roleusercode.Equals(UserCode)) || Admins.Contains(UserCode) || Viewers.Contains(UserCode) || Copyers.Contains(UserCode)));
+                    var ProjectGroupList = await View_Wind_ProjectFlow_repo.FindAsync(a => (string.IsNullOrEmpty(request.ProjectName) || EF.Functions.Like(a.ProjectName, $"%{request.ProjectName}%")) && (a.ApplyerCode.Equals(UserCode) || a.DirectorCode.Equals(UserCode) || a.NodeUserCode.Equals(UserCode) || (!a.isroleexist.Value && a.roleusercode.Equals(UserCode)) || Admins.Contains(UserCode) || Viewers.Contains(UserCode) || Copyers.Contains(UserCode)));
                     ProjectGroupList.ToList().GroupBy(a => a.ProjectID).ToList().ForEach(a =>
                     {
                         int ProjectID = a.FirstOrDefault().ProjectID.Value;
@@ -886,7 +900,7 @@ namespace Service.Wind
                             .ForEach(a =>
                             {
                                 a.IsDelete = true;
-                                a.CreateTime = DateTime.UtcNow;
+                                a.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
                             });
 
                         //更新项目中心
@@ -899,7 +913,7 @@ namespace Service.Wind
                             area.ProjectID = request.ProjectID;
                             area.AreaLon = dr[0].ToString().Trim();
                             area.AreaLat = dr[1].ToString().Trim();
-                            area.CreateTime = DateTime.UtcNow;
+                            area.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
                             area.IsDelete = false;
                             list.Add(area);
 
@@ -960,7 +974,7 @@ namespace Service.Wind
                             .ForEach(a =>
                             {
                                 a.IsDelete = true;
-                                a.CreateTime = DateTime.UtcNow;
+                                a.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
                             });
 
                         foreach (DataRow dr in dt.Tables[0].Rows)
@@ -970,7 +984,7 @@ namespace Service.Wind
                             fan.FanName = dr[0].ToString().Trim();
                             fan.Lon = dr[1].ToString().Trim();
                             fan.Lat = dr[2].ToString().Trim();
-                            fan.CreateTime = DateTime.UtcNow;
+                            fan.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
                             fan.IsDelete = false;
                             fan.Status = (int)CloudWindFanStatus.在安装;
                             list.Add(fan);
@@ -1034,7 +1048,7 @@ namespace Service.Wind
                             model.ProjectID = request.ProjectID;
                             model.FileName = File.FileName;
                             model.FilePath = Path.Combine(FileFolderPath, Guid.NewGuid() + Path.GetExtension(File.FileName));
-                            model.CreateTime = DateTime.UtcNow;
+                            model.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
                             model.IsDelete = false;
                             FileList.Add(model);
 
@@ -1111,14 +1125,14 @@ namespace Service.Wind
                             .ForEach(a =>
                             {
                                 a.IsDelete = true;
-                                a.CreateTime = DateTime.UtcNow;
+                                a.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
                             });
 
                         Library_Geology_DK_repo.Find(a => !a.IsDelete && a.ProjectID == request.ProjectID).ToList()
                             .ForEach(a =>
                             {
                                 a.IsDelete = true;
-                                a.CreateTime = DateTime.UtcNow;
+                                a.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
                             });
                     }
 
@@ -1133,7 +1147,7 @@ namespace Service.Wind
                             model.Type = request.FileType;
                             model.FileName = File.FileName;
                             model.FilePath = Path.Combine(FileFolderPath, Guid.NewGuid() + Path.GetExtension(File.FileName));
-                            model.CreateTime = DateTime.UtcNow;
+                            model.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
                             model.IsDelete = false;
                             GeologyList.Add(model);
 
@@ -1163,7 +1177,7 @@ namespace Service.Wind
                                         dk.DKName = dt.TableName;
                                         dk.FanID = null;
                                         dk.ProjectID = request.ProjectID;
-                                        dk.CreateTime = DateTime.UtcNow;
+                                        dk.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
                                         dk.IsDelete = false;
                                         Library_Geology_DK_repo.Add(dk);
                                         uow.SaveAsync().Wait();
@@ -1185,7 +1199,7 @@ namespace Service.Wind
                                             data.stmcj = dr[6].ToString();
                                             data.yxzd = dr[7].ToString();
                                             data.bgjs = dr[8].ToString();
-                                            data.CreateTime = DateTime.UtcNow;
+                                            data.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
                                             data.IsDelete = false;
                                             DataList.Add(data);
                                         }
@@ -1246,7 +1260,7 @@ namespace Service.Wind
                         return msg;
                     }
 
-                    DateTime now = DateTime.UtcNow;
+                    DateTime now = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
 
                     //1.生成风场项目
                     var NewWindProject = new Wind_Project();
@@ -1398,7 +1412,7 @@ namespace Service.Wind
 
                     //8 交建通发消息通知
                     List<SystemJJTInform> informUsers = new List<SystemJJTInform>();
-                    string CloudPlatUrl = AppSettingUtils.GetSetting("CloudPlatUrl");
+                    string CloudPlatUrl = AppSettingUtils.GetSetting("SoftwareApi:CloudPlatUrl");
 
                     // TODO: CloudCenterService 尚未迁移，需实现 CreateJJTMessageRedirectToken
                     NodeUsers.ForEach(a =>
@@ -1409,7 +1423,7 @@ namespace Service.Wind
                         {
                             UserCode = a.ManageUserCode,
                             Title = NewWindProject.ProjectName + "-立项流程审批",
-                            Content = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm") + "\r\n点击查看详情",
+                            Content = DateTime.Now.ToString("yyyy-MM-dd HH:mm") + "\r\n点击查看详情",
                             Url = RedirectUrl
                         });
                     });
@@ -1437,7 +1451,7 @@ namespace Service.Wind
             string msg = "";
             try
             {
-                DateTime now = DateTime.UtcNow;
+                DateTime now = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
 
                 using (var uow = _techCenterUowFactory.Create())
                 {
@@ -1559,7 +1573,7 @@ namespace Service.Wind
                         }
 
                         //下一节点人员
-                        var NodeManageUsers = Flow_NodeManageUser_repo.Find(a => !a.IsDelete && a.NodeID == NextNode.ID).ToList();
+                        var NodeManageUsers = new List<Flow_NodeManageUser>();
 
                         //同节点其他Flow
                         var ThisFlows = ProjectFlow.Where(a => a.NodeID == Flow.NodeID && a.FlowOrder == Flow.FlowOrder && a.ID != Flow.ID && a.FlowHandle == (int)CloudWindProjectFlowHandleStatus.待审批).ToList();
@@ -1894,7 +1908,7 @@ namespace Service.Wind
                         var OldProjectFolder = Path.Combine(_env.WebRootPath, "File", "Project", "TempProject", "Project" + Project.ID);
                         var NewProjectFolder = Path.Combine(_env.WebRootPath, "File", "Project", Project.ProjectCode);
                         Directory.CreateDirectory(NewProjectFolder);
-                        FileUtils.MoveDirectory(OldProjectFolder, NewProjectFolder);
+                        FileUtils.MoveFolder(OldProjectFolder, NewProjectFolder);
                         Wind_ProjectFile_repo.Find(a => !a.IsDelete && a.ProjectID == Project.ID).ToList()
                             .ForEach(a =>
                             {
@@ -2100,7 +2114,7 @@ namespace Service.Wind
 
                     Dks.ForEach(a =>
                     {
-                        a.CreateTime = DateTime.UtcNow;
+                        a.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
                         a.FanID = null;
                     });
 
@@ -2215,7 +2229,7 @@ namespace Service.Wind
                                 newRole.UserPhone = user.UserPhone;
                                 newRole.UserJobName = user.UserJobName;
                                 newRole.IsDelete = false;
-                                newRole.CreateTime = DateTime.UtcNow;
+                                newRole.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
                                 Wind_ProjectRole_repo.Add(newRole);
                             }
                         }
@@ -2326,6 +2340,96 @@ namespace Service.Wind
                 msg = "发生错误";
             }
             return list;
+        }
+
+        public (byte[] bytes, string fileName, string msg) ProjectPositionDownload(int ProjectID)
+        {
+            byte[] bytes = null;
+            string fileName = "";
+            string msg = "";
+            try
+            {
+                using (var uow = _techCenterUowFactory.Create())
+                {
+                    var projectRepo = uow.GetRepository<Wind_Project>();
+                    var Project = projectRepo.FindByID(ProjectID);
+                    if (Project == null)
+                    {
+                        msg = "项目数据错误";
+                        return (null, null, msg);
+                    }
+
+                    DataTable dt = new DataTable();
+                    dt.Columns.Add("经度", typeof(string));
+                    dt.Columns.Add("纬度", typeof(string));
+
+                    var areaRepo = uow.GetRepository<Wind_ProjectArea>();
+                    var Positions = areaRepo.Find(a => !a.IsDelete && a.ProjectID == ProjectID).ToList();
+
+                    foreach (var item in Positions)
+                    {
+                        DataRow dr = dt.NewRow();
+                        dr[0] = item.AreaLon ?? "";
+                        dr[1] = item.AreaLat ?? "";
+                        dt.Rows.Add(dr);
+                    }
+
+                    bytes = ExcelUtils.TableToBytes(dt, "项目区域坐标");
+                    fileName = Project.ProjectName + "_项目区域坐标_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggerUtils.Error(ex.ToString(), typeof(ProjectService));
+                msg = "发生错误，请检查路径是否存在。";
+            }
+            return (bytes, fileName, msg);
+        }
+
+        public (byte[] bytes, string fileName, string msg) ProjectFanPositionDownload(int ProjectID)
+        {
+            byte[] bytes = null;
+            string fileName = "";
+            string msg = "";
+            try
+            {
+                using (var uow = _techCenterUowFactory.Create())
+                {
+                    var projectRepo = uow.GetRepository<Wind_Project>();
+                    var Project = projectRepo.FindByID(ProjectID);
+                    if (Project == null)
+                    {
+                        msg = "项目数据错误";
+                        return (null, null, msg);
+                    }
+
+                    DataTable dt = new DataTable();
+                    dt.Columns.Add("风机名", typeof(string));
+                    dt.Columns.Add("经度", typeof(string));
+                    dt.Columns.Add("纬度", typeof(string));
+
+                    var fanRepo = uow.GetRepository<Wind_ProjectFan>();
+                    var Fans = fanRepo.Find(a => !a.IsDelete && a.ProjectID == ProjectID).ToList();
+
+                    foreach (var item in Fans)
+                    {
+                        DataRow dr = dt.NewRow();
+                        dr[0] = item.FanName ?? "";
+                        dr[1] = item.Lon ?? "";
+                        dr[2] = item.Lat ?? "";
+                        dt.Rows.Add(dr);
+                    }
+
+                    bytes = ExcelUtils.TableToBytes(dt, "风场机位坐标");
+                    fileName = Project.ProjectName + "_风场机位坐标_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggerUtils.Error(ex.ToString(), typeof(ProjectService));
+                msg = "发生错误，请检查路径是否存在。";
+            }
+            return (bytes, fileName, msg);
         }
 
 

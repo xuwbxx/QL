@@ -11,7 +11,7 @@
             var pageIndex = Vue.ref(1);
             var pageSize = Vue.ref(20);
             var searchProjID = Vue.ref(null);
-            var searchBridgeID = Vue.ref(null);
+            var searchGirderID = Vue.ref(null);
             var projectOptions = Vue.ref([]);
             var bridgeOptions = Vue.ref([]);
 
@@ -30,7 +30,7 @@
             }
 
             async function onProjectChange(val) {
-                searchBridgeID.value = null;
+                searchGirderID.value = null;
                 bridgeOptions.value = [];
                 if (!val) return;
                 try {
@@ -46,7 +46,7 @@
                 try {
                     var req = {
                         projID: searchProjID.value,
-                        bridgeID: searchBridgeID.value,
+                        girderID: searchGirderID.value,
                         pageIndex: pageIndex.value,
                         pageSize: pageSize.value
                     };
@@ -67,7 +67,7 @@
 
             function handleReset() {
                 searchProjID.value = null;
-                searchBridgeID.value = null;
+                searchGirderID.value = null;
                 bridgeOptions.value = [];
                 pageIndex.value = 1;
                 loadData();
@@ -85,8 +85,8 @@
             }
 
             function handleLinearControl(row) {
-                var id = row.id || row.ID;
-                window.location.href = '/Biz/SteelBeam/LinearControl?id=' + id;
+                var girderID = row.id || row.ID;
+                window.location.href = '/Biz/SteelBeam/LinearControl?girderID=' + girderID;
             }
 
             Vue.onMounted(function () {
@@ -101,7 +101,7 @@
                 pageIndex: pageIndex,
                 pageSize: pageSize,
                 searchProjID: searchProjID,
-                searchBridgeID: searchBridgeID,
+                searchGirderID: searchGirderID,
                 projectOptions: projectOptions,
                 bridgeOptions: bridgeOptions,
                 indexMethod: indexMethod,

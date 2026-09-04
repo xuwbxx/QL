@@ -707,7 +707,7 @@
 
             Param.Name = UserName;
             Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
-            $.post('/Cloud/Base/FindShjUser', Param)
+            $.post('/Cloud/ProjectTaskBase/FindShjUser', Param)
                 .success(function (data, statusText, jqXRH) {
                     if (data) {
 

@@ -49,6 +49,13 @@ namespace DataFactory.SqlServer.CloudWind
         public DbSet<Wind_TaskInfoImg_ZJCZ> Wind_TaskInfoImg_ZJCZ { set; get; }
         public DbSet<Wind_TaskReport> Wind_TaskReport { set; get; }
         public DbSet<Wind_TaskInfo_KZY> Wind_TaskInfo_KZY { set; get; }
+        public DbSet<Wind_TaskInfo_QXSJ> Wind_TaskInfo_QXSJ { set; get; }
+        public DbSet<Data_PXYWeather> Data_PXYWeather { set; get; }
+        public DbSet<Data_Typhoon> Data_Typhoon { set; get; }
+        public DbSet<Manage_Admin> Manage_Admin { set; get; }
+        public DbSet<Wind_ProjectContacter> Wind_ProjectContacter { set; get; }
+        public DbSet<Wind_Task_JJTResult> Wind_Task_JJTResult { set; get; }
+        public DbSet<Flow_TaskApply> Flow_TaskApply { set; get; }
 
     }
 
@@ -210,7 +217,7 @@ namespace DataFactory.SqlServer.CloudWind
     public class Wind_Task
     {
         public int ID { set; get; }
-        public int ProjectID { set; get; }
+        public int? ProjectID { set; get; }
         public string? TaskCode { set; get; }
         public string? TaskName { set; get; }
         public int? FlowStatus { set; get; }
@@ -488,6 +495,125 @@ namespace DataFactory.SqlServer.CloudWind
         public string? Balance { set; get; }
         public string? Lon { set; get; }
         public string? Lat { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool? IsDelete { set; get; }
+    }
+
+    public class Wind_TaskInfo_QXSJ
+    {
+        public int ID { set; get; }
+        public int? TaskID { set; get; }
+        public int? FlowStatus { set; get; }
+        public int? SoftwareID { set; get; }
+        public string? Points { set; get; }
+        public DateTime? CollectStartTime { set; get; }
+        public DateTime? CollectEndTime { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool IsDelete { set; get; }
+    }
+
+    public class Data_PXYWeather
+    {
+        public int id { set; get; }
+        public int? TaskID { set; get; }
+        public string? PointName { set; get; }
+        public string? LonLat { set; get; }
+        public string? bm500 { set; get; }
+        public string? humidity { set; get; }
+        public string? pressure { set; get; }
+        public string? swelldir { set; get; }
+        public string? swellheight { set; get; }
+        public string? swellperiod { set; get; }
+        public string? temperature { set; get; }
+        public string? visibility { set; get; }
+        public string? waveheight { set; get; }
+        public string? winddir { set; get; }
+        public string? windspeed { set; get; }
+        public string? windlevel { set; get; }
+        public string? windwarninglevel { set; get; }
+        public bool? windalarm { set; get; }
+        public DateTime? time { set; get; }
+    }
+
+    public class Data_Typhoon
+    {
+        public int id { set; get; }
+        public string? chnCode { set; get; }
+        public string? chnName { set; get; }
+        public int? currentyear { set; get; }
+        public string? xuHao { set; get; }
+        public string? time { set; get; }
+        public DateTime? dateTime { set; get; }
+        public string? forecast { set; get; }
+        public decimal? fhour { set; get; }
+        public decimal? lat { set; get; }
+        public decimal? lon { set; get; }
+        public decimal? grade { set; get; }
+        public decimal? mspeed { set; get; }
+        public decimal? pressure { set; get; }
+        public decimal? kspeed { set; get; }
+        public string? direction { set; get; }
+        public decimal? radius7 { set; get; }
+        public decimal? radius10 { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool IsDelete { set; get; }
+    }
+
+    public class Manage_Admin
+    {
+        public int ID { set; get; }
+        public string? UserName { set; get; }
+        public string? UserCode { set; get; }
+        public string? UserDepartName { set; get; }
+        public string? UserPhone { set; get; }
+        public string? UserJobName { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool IsDelete { set; get; }
+    }
+
+    public class Wind_ProjectContacter
+    {
+        public int ID { set; get; }
+        public int ProjectID { set; get; }
+        public string? Applyer { set; get; }
+        public string? ApplyerCode { set; get; }
+        public string? ApplyerDepart { set; get; }
+        public string? ApplyerPhone { set; get; }
+        public string? ApplyerJobName { set; get; }
+        public string? Director { set; get; }
+        public string? DirectorCode { set; get; }
+        public string? DirectorDepart { set; get; }
+        public string? DirectorPhone { set; get; }
+        public string? DirectorJobName { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool IsDelete { set; get; }
+    }
+
+    public class Wind_Task_JJTResult
+    {
+        public int id { set; get; }
+        public string? Type { set; get; }
+        public string? UserCode { set; get; }
+        public string? DirectUrl { set; get; }
+        public bool? Result { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool? IsDelete { set; get; }
+    }
+
+    public class Flow_TaskApply
+    {
+        public int id { set; get; }
+        public int? TaskID { set; get; }
+        public int? NodeID { set; get; }
+        public int? FlowOrder { set; get; }
+        public string? NodeUserName { set; get; }
+        public string? NodeUserCode { set; get; }
+        public string? NodeUserDepart { set; get; }
+        public string? NodeUserPhone { set; get; }
+        public string? NodeUserJobName { set; get; }
+        public int? FlowHandle { set; get; }
+        public DateTime? ApprovalTime { set; get; }
+        public string? Comment { set; get; }
         public DateTime? CreateTime { set; get; }
         public bool? IsDelete { set; get; }
     }

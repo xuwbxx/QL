@@ -1,0 +1,1332 @@
+﻿<!--拖航可行性分和预报-->
+<div class="modal fade" id="Tk_software_04" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog" style="right: -24vw;width: 48vw;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    拖航可行性分析与预报
+                </h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="sqzl_box">
+                    <div class="form-horizontal form-horizontal_sqrjzl">
+
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">任务名</label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" placeholder="任务名自动生成" id="popup_txtTaskName_THFX" disabled>
+                            </div>
+                        </div>
+
+                        <div class="form-group mod_touying">
+
+                            <div class="cb_check_f clearfix mb1">
+                                <h3 class="title_tx"><i class="fa fa-edit"></i>拖航分析需求描述</h3>
+                                <label class="col-md-2 control-label">拖航路线</label>
+                                <div class="col-md-10 clearfix">
+                                    <div class="mb1 clearfix text-left">
+                                        <input type="file" class="form-control pull-left" style="width:auto;" id="popup_filePlanRouteUpload_THFX" accept=".xlsx">
+                                        <button class="btn mr05 btn-success" id="popup_btnPlanRouteUpload_THFX" onclick="SoftwareTHFXHelper.PlanRouteUpload();">路线上传</button>
+                                        <button class="btn mr05 btn-success" id="popup_btnPlanRouteDownload_THFX" onclick="SoftwareTHFXHelper.PlanRouteDownload();">路线下载</button>
+                                    </div>
+                                    <div class="table_project_box">
+                                        <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                            <thead>
+                                                <tr>
+                                                    <th width="20%">序号</th>
+                                                    <th width="20%">经度</th>
+                                                    <th width="20%">纬度</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="popup_htmlPosition_THFX" data-tag="0">
+                                                <tr>
+                                                    <td>1</td>
+                                                    <td>111</td>
+                                                    <td>222</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>1</td>
+                                                    <td>111</td>
+                                                    <td>222</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>1</td>
+                                                    <td>111</td>
+                                                    <td>222</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+
+                                <label class="col-md-2 control-label" style="padding-top:2vh;">相关文档</label>
+                                <div class="col-md-10 clearfix" style="padding-top:2vh;">
+                                    <div class="mb1 clearfix text-left">
+                                        <input type="file" class="form-control pull-left" style="width:auto;" id="popup_fileTowingFile_THFX" accept=".xlsx" multiple>
+                                        <button class="btn mr05 btn-success" id="popup_btnFileUpload_THFX" onclick="SoftwareTHFXHelper.TowingFileUpload();">上传</button>
+                                    </div>
+                                    <div class="table_project_box">
+                                        <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                            <thead>
+                                                <tr>
+                                                    <th width="60%">文件名</th>
+                                                    <th width="20%">上传时间</th>
+                                                    <th width="20%">下载</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="popup_htmlTowingFile_THFX" data-tag="0">
+                                                <tr>
+                                                    <td>1</td>
+                                                    <td>111</td>
+                                                    <td>222</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>1</td>
+                                                    <td>111</td>
+                                                    <td>222</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>1</td>
+                                                    <td>111</td>
+                                                    <td>222</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+
+
+                                <label class="col-md-2 control-label">拖航方案</label>
+                                <div class="col-md-10 p0 xmjbxx_box">
+
+                                    <div class="col-md-12">
+                                        <textarea class="form-control" id="popup_txtTowingScheme_THFX" style="height:12vh;"></textarea>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                         </div>
+                            
+                        <div class="form-group mod_touying" id="popup_divLastContent_THFX">
+
+                            <label class="col-md-2 control-label">上一节点意见</label>
+                            <div class="col-md-10">
+                                <textarea class="form-control" id="popup_txtLastContent_THFX" disabled></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group mod_touying" id="popup_divContent_THFX">
+
+                            <label class="col-md-2 control-label">审批意见</label>
+                            <div class="col-md-10">
+                                <textarea class="form-control" id="popup_txtContent_THFX"></textarea>
+                            </div>
+                            
+                        </div>
+
+                        <div class="form-group mod_touying" id="popup_divNextNode_THFX">
+
+                            <label class="col-md-2 control-label lcjd_next">流程下一节点</label>
+                            <div class="col-md-4 pr0">
+                                <div class="lcjd_next_sp"><i class="icon iconfont">&#xe63e;</i><span id="popup_spanNextNodeName_THFX">分子公司审批</span></div>
+                                <div class="nice-select">
+                                    <input id="popup_txtNodeUserName_THFX" type="text" class="form-control" placeholder="搜索" autocomplete="off" />
+                                    <div class="search_div" onclick="SoftwareTHFXHelper.ClearShjNodeUserName();" id="popup_divClearNodeName_THFX">
+                                        <i class="fa fa-close"></i>
+                                    </div>
+                                    <ul id="popup_ulNodeUserList_THFX" style="display:none;">
+                                    </ul>
+                                </div>
+
+                            </div>
+                            <div class="col-md-1 text-center mt4">
+                                <button class="btn btn-primary search_btn" style="width: 100%" id="popup_btnFindNodeUserName_THFX" onclick="SoftwareTHFXHelper.FindShjNodeUserByName();">搜索</button>
+                            </div>
+                            <div class="col-md-5 zhuyi_zt mt4">
+                                注意：请按照流程节点审批要求，指定下一节点审批人。如果节点审批人选错，整个流程将不能通过或者退回。
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <div class="text-center sqzl_btn_box" id="popup_divSubmit_THFX">
+                    <button class="btn btn-success" id="popup_btnSubmit_THFX" data-type="1" onclick="SoftwareTHFXHelper.AddTaskSubmit(this);">申请</button>
+                    <button class="btn btn-danger" id="popup_btnBack_THFX" data-type="0" onclick="SoftwareTHFXHelper.AddTaskSubmit(this);">审批退回</button>
+                    <button class="btn btn-warning" id="popup_btnCancel_THFX" data-type="3" onclick="SoftwareTHFXHelper.AddTaskSubmit(this);">作废</button>
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!--	   提前可作业预报文件-->
+<div class="modal fade" id="Tk_THFXReport" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog" style="right: -24vw;width: 30vw; top:10vh;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    可作业预报文件
+                </h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="sqzl_box" style="height:50vh; ">
+
+                    <table class="table table_project table_project02">
+                        <thead>
+                            <tr>
+                                <th width="70%">文件名</th>
+                                <th width="20%">时间</th>
+                                <th width="10%">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="popup_html_THFXFile">
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+        SoftwareTHFXHelper.Init();
+        SoftwareTHFXHelper.LoadPosition();
+    })
+
+    var SoftwareTHFXHelper = {
+        Init: function () {
+            
+        },
+        ForecastTimeInit: function () {
+            $('#popup_ForecastStartTime_THFX').val(formatDateTimeByDay(new Date()));
+            $('#popup_ForecastEndTime_THFX').val(formatDateTimeByDay(new Date(new Date().setDate(new Date().getDate() + 90))));
+        },
+        LoadPosition: function () {
+            Param.ProjectID = $('#hid_ProjectID').val();
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('LoadTowingPosition', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        if (data.Success) {
+
+                            var PositionHtml = '';
+                            var count = 1;
+                            $(data.Data).each(function (index, dom) {
+
+                                PositionHtml += '<tr><td>' + count + '</td ><td>' + dom.Lon + '</td><td>' + dom.Lat + '</td></tr> ';
+                                count++;
+                            })
+                            $('#popup_htmlPosition_THFX').html(PositionHtml);
+
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+        OpenPopup: function () {
+
+            var ChooseProjectID = $('#hid_ProjectID').val();
+            if (ChooseProjectID == null || ChooseProjectID == '' || ChooseProjectID == 0) {
+                ModalPopup('error', '必须先选择所关联的风场');
+                return;
+            }
+            SoftwareTHFXHelper.PopupOpenedHandleType = 'new';
+            SoftwareTHFXHelper.OpenTaskPopup('new', ChooseProjectID);
+
+            Param.SoftwareID = 4;
+            //下一节点人员
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('NextNodeQuery', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+                            $('#popup_spanNextNodeName_THFX').html(data.Data.NodeName);
+
+                            if (data.Data.NodeUsers.length > 0) {
+
+                                $('#popup_txtNodeUserName_THFX').attr('disabled', true);
+                                $('#popup_btnFindNodeUserName_THFX').attr('disabled', true);
+                                $('#popup_divClearNodeName_THFX').hide();
+
+                                var NodeUserHtml = '';
+                                $(data.Data.NodeUsers).each(function (index, dom) {
+
+                                    NodeUserHtml += dom.ManageName + '(' + dom.ManageDepart + ');'
+
+                                });
+                                $('#popup_txtNodeUserName_THFX').val(NodeUserHtml);
+
+                            }
+                            else {
+                                $('#popup_txtNodeUserName_THFX').attr('disabled', false);
+                                $('#popup_btnFindNodeUserName_THFX').attr('disabled', false);
+                                $('#popup_divClearNodeName_THFX').show();
+                            }
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        OpenTaskPopup: function (type, ProjectID, FlowStatus) {
+            $('#popup_divSubmit_THFX').show();
+            if (type == 'new') {
+                //清空弹窗
+                SoftwareTHFXHelper.ClearTaskPopup();
+                //设置可写
+                SoftwareTHFXHelper.SetTaskPopupWrite();
+
+
+
+                /*上一节点审批意见*/
+                $('#popup_divLastContent_THFX').hide();
+                //审批意见
+                $('#popup_divContent_THFX').hide();
+                //下一节点
+                $('#popup_divNextNode_THFX').show();
+
+                //提交按钮
+                $('#popup_btnSubmit_THFX').show().html('申请').attr('data-type', 1);
+                $('#popup_btnBack_THFX').hide();
+                $('#popup_btnCancel_THFX').hide();
+
+                
+
+            }
+            else if (type == 'view') {
+                //清空弹窗
+                SoftwareTHFXHelper.ClearTaskPopup();
+                //设置可写
+                SoftwareTHFXHelper.SetTaskPopupRead();
+
+                
+
+                /*上一节点审批意见*/
+                $('#popup_divLastContent_THFX').show();
+                //审批意见
+                $('#popup_divContent_THFX').hide();
+                //下一节点
+                $('#popup_divNextNode_THFX').hide();
+
+                $('#popup_btnSubmit_THFX').hide();
+                $('#popup_btnBack_THFX').hide();
+                $('#popup_btnCancel_THFX').hide();
+
+                //作废的流程
+                if (FlowStatus == 3) {
+                    $('#popup_divSubmit_THFX').hide();
+                }
+
+            }
+            else if (type == 'approval') {
+                //清空弹窗
+                SoftwareTHFXHelper.ClearTaskPopup();
+                //设置只读
+                SoftwareTHFXHelper.SetTaskPopupRead();
+
+
+                /*上一节点审批意见*/
+                $('#popup_divLastContent_THFX').show();
+                //审批意见
+                $('#popup_divContent_THFX').show();
+                //下一节点
+                $('#popup_divNextNode_THFX').show();
+
+                $('#popup_txtNodeUserName_THFX').attr('disabled', false);
+                $('#popup_btnFindNodeUserName_THFX').attr('disabled', false);
+                $('#popup_divClearNodeName_THFX').show();
+
+                $('#popup_btnBack_THFX').show();
+                $('#popup_btnSubmit_THFX').show().html('审批通过').attr('data-type', 2);
+                $('#popup_btnCancel_THFX').show();
+
+            }
+            else if (type == 'renew') {
+                //清空弹窗
+                SoftwareTHFXHelper.ClearTaskPopup();
+                //设置可写
+                SoftwareTHFXHelper.SetTaskPopupWrite();
+
+
+                /*上一节点审批意见*/
+                $('#popup_divLastContent_THFX').show();
+                //审批意见
+                $('#popup_divContent_THFX').show();
+                //下一节点
+                $('#popup_divNextNode_THFX').show();
+
+                $('#popup_btnBack_THFX').hide();
+                $('#popup_btnSubmit_THFX').show().html('重新提交').attr('data-type', 2);
+                $('#popup_btnCancel_THFX').show();
+
+            }
+
+            $('#Tk_software_04').modal('show');
+
+            SoftwareTHFXHelper.LoadPlanRoute();
+            SoftwareTHFXHelper.LoadTowingFile();
+            
+        },
+
+        SetTaskPopupWrite: function () {
+
+            //$('#popup_txtTaskName_THFX').attr('disabled', false);
+
+            //$('#popup_txtBTW_THFX').attr('disabled', false);
+            //$('#popup_txtTLPZ_THFX').attr('disabled', false);
+            //$('#popup_txtCSXX_THFX').attr('disabled', false);
+
+            $('#popup_btnPlanRouteUpload_THFX').attr('disabled', false);
+            $('#popup_btnFileUpload_THFX').attr('disabled', false);
+            $('#popup_txtTowingScheme_THFX').attr('disabled', false);
+
+
+
+            $('#popup_txtNodeUserName_THFX').attr('disabled', false);
+            $('#popup_btnFindNodeUserName_THFX').attr('disabled', false);
+            $('#popup_divClearNodeName_THFX').show();
+
+        },
+
+        SetTaskPopupRead: function () {
+
+            //$('#popup_txtTaskName_THFX').attr('disabled', true);
+
+            //$('#popup_txtBTW_THFX').attr('disabled', true);
+            //$('#popup_txtTLPZ_THFX').attr('disabled', true);
+            //$('#popup_txtCSXX_THFX').attr('disabled', true);
+
+            $('#popup_btnPlanRouteUpload_THFX').attr('disabled', true);
+            $('#popup_btnFileUpload_THFX').attr('disabled', true);
+            $('#popup_txtTowingScheme_THFX').attr('disabled', true);
+
+
+
+            $('#popup_txtNodeUserName_THFX').attr('disabled', true);
+            $('#popup_btnFindNodeUserName_THFX').attr('disabled', true);
+            $('#popup_divClearNodeName_THFX').hide();
+
+        },
+
+        ClearTaskPopup: function () {
+
+            $('#popup_txtTaskName_THFX').val('');
+
+            //$('#popup_txtBTW_THFX').val('');
+            //$('#popup_txtTLPZ_THFX').val('');
+            //$('#popup_txtCSXX_THFX').val('');
+
+            $('#popup_filePlanRouteUpload_THFX').val('');
+            $('#popup_htmlPosition_THFX').html('');
+            $('#popup_filePlanRouteUpload_THFX').val('');
+            $('#popup_htmlTowingFile_THFX').html('');
+            $('#popup_txtTowingScheme_THFX').val('');
+
+            $('#popup_txtNodeUserName_THFX').val('');
+            $('#popup_txtLastContent_THFX').val('');
+
+            $('#popup_txtContent_THFX').val('');
+
+        },
+
+        ChoosedTaskNodeUser: { Name: '', UserCode: '', Depart: '', Phone: '', JobName: '', NextNodeID: '' },
+
+        FindShjNodeUserByName: function () {
+
+            Param.Name = $("#popup_txtNodeUserName_THFX").val();
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('FindShjUser', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        if (data.Success) {
+
+                            var DataListHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                DataListHtml += '<li onclick="SoftwareTHFXHelper.ChooseNodeUser(this);" data-usercode="' + dom.empcode + '" data-name="' + dom.name + '" data-depart="' + dom.wholeDeptPath + '" data-phone="' + dom.phone + '" data-jobname="' + dom.jobname + '" ><h3>' + dom.name + '(' + dom.jobname + ')</h3><div>' + dom.wholeDeptPath + '</div></li >';
+
+                            });
+                            $('ul#popup_ulNodeUserList_THFX').html(DataListHtml);
+                            $('ul#popup_ulNodeUserList_THFX').show();
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        ChooseNodeUser: function (dom) {
+
+            //SoftwareTHFXHelper.ChoosedTaskNodeUser = {};
+
+            if (dom == null)
+                return;
+
+            var Name = $(dom).attr('data-name');
+            var UserCode = $(dom).attr('data-usercode');
+            var Depart = $(dom).attr('data-depart');
+            var Phone = $(dom).attr('data-phone');
+            var JobName = $(dom).attr('data-jobname');
+
+            SoftwareTHFXHelper.ChoosedTaskNodeUser.Name = Name;
+            SoftwareTHFXHelper.ChoosedTaskNodeUser.UserCode = UserCode;
+            SoftwareTHFXHelper.ChoosedTaskNodeUser.Depart = Depart;
+            SoftwareTHFXHelper.ChoosedTaskNodeUser.Phone = Phone;
+            SoftwareTHFXHelper.ChoosedTaskNodeUser.JobName = JobName;
+
+            if (Name == '' || UserCode == '')
+                return;
+
+            $('#popup_txtNodeUserName_THFX').val(Name + '(' + Depart + ')');
+
+            $('ul#popup_ulNodeUserList_THFX').hide();
+
+        },
+
+        PopupOpenedTaskID: 0,
+        PopupIsBackFlow: false,
+        PopupOpenedHandleType: 'new',
+        OpenTaskInfo: function (TaskID) {
+
+            Param.TaskID = TaskID;
+
+            SoftwareTHFXHelper.PopupOpenedTaskID = 0;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('TaskQuery_THFX', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+                            SoftwareTHFXHelper.PopupOpenedTaskID = TaskID;
+
+                            var Task = data.Data;
+
+                            //如果是已经结束的流程，直接打开文件获取弹窗
+                            if (Task.FlowInfo.FlowStatus == 2) {
+
+                                OpenReportPopup(TaskID);
+                                return;
+                            }
+
+                            SoftwareTHFXHelper.OpenTaskPopup(Task.FlowInfo.FlowHandle, Task.ProjectID, Task.FlowInfo.FlowStatus);
+
+                            SoftwareTHFXHelper.PopupOpenedHandleType = Task.FlowInfo.FlowHandle;
+
+                            SoftwareTHFXHelper.PopupIsBackFlow = Task.FlowInfo.IsBackFlow;
+
+                            //如果是最后的流程
+                            SoftwareTHFXHelper.ChoosedTaskNodeUser.NextNodeID = Task.FlowInfo.NextNodeID;
+                            if (Task.FlowInfo.NextNodeID == 0) {
+                                $('#popup_txtNodeUserName_THFX').attr('disabled', true);
+                                $('#popup_btnFindNodeUserName_THFX').attr('disabled', true);
+                                $('#popup_divClearNodeName_THFX').hide();
+                            }
+
+                            //下一节点如果有默认人物
+                            if (Task.FlowInfo.NextNode != null && Task.FlowInfo.NextNode.length > 0) {
+
+                                $('#popup_txtNodeUserName_THFX').attr('disabled', true);
+                                $('#popup_btnFindNodeUserName_THFX').attr('disabled', true);
+                                $('#popup_divClearNodeName_THFX').hide();
+
+                                var NodeUserHtml = '';
+                                $(Task.FlowInfo.NextNode).each(function (index, dom) {
+
+                                    NodeUserHtml += dom.UserName + '(' + dom.UserDepart + ');'
+
+                                });
+                                $('#popup_txtNodeUserName_THFX').val(NodeUserHtml);
+
+                            }
+
+                            //上一节点意见（可能多人）
+                            var CommentHtml = '';
+                            $(Task.FlowInfo.LastNode).each(function (index, dom) {
+                                CommentHtml += dom.UserName + ':' + dom.Comment + ';\n'
+                            });
+                            $('#popup_txtLastContent_THFX').val(CommentHtml);
+                            //下一节点
+                            $('#popup_spanNextNodeName_THFX').html(Task.FlowInfo.NextNodeName);
+
+                            //填充表单数据
+                            $('#popup_txtTaskName_THFX').val(Task.TaskName);
+
+                            $('#popup_txtTowingScheme_THFX').val(Task.TaskInfo_THFX.Scheme);
+
+                            //$('#popup_txtBTW_THFX').val(Task.TaskInfo_THFX.Scheme);
+                            //文件
+                            //var fileHtml = '';
+                            //var count = 1;
+                            //$(Task.TaskInfo_THFX.Files).each(function (index, dom) {
+
+                            //    fileHtml += '<tr><td>' + count + '</td><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '">' + dom.FileName + '</a></td></tr>';
+                            //    count++;
+                            //})
+
+                            //$('#popup_txtTLPZ_THFX').val(Task.TaskInfo_THFX.TLPZ);
+                            //$('#popup_txtCSXX_THFX').val(Task.TaskInfo_THFX.CSXX);
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        ClearShjNodeUserName: function () {
+            SoftwareTHFXHelper.ChoosedTaskNodeUser = {};
+            $('#popup_txtNodeUserName_THFX').val('');
+        },
+
+        UploadLastCommentFile: function () {
+
+            if (SoftwareTHFXHelper.PopupOpenedTaskID == 0)
+                return;
+
+            var CommentFiles = $('#popup_uploadCommentFile_THFX')[0].files;
+            if (CommentFiles == null || CommentFiles.length == 0)
+                return;
+
+            var formData = new FormData();
+            formData.append("TaskID", SoftwareTHFXHelper.PopupOpenedTaskID);
+
+            var FileCount = CommentFiles.length;
+            formData.append("TaskCommentFileCount", FileCount);
+            var Count = 1;
+            $(CommentFiles).each(function (index, dom) {
+
+                formData.append("TaskCommentFile" + Count, dom);
+
+                Count++;
+            });
+
+
+            $.ajax({
+                url: 'TaskCommentFileUpload',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: formData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+
+                            var CommentFileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                CommentFileHtml += '<li><a href="' + dom.FilePath + '">' + dom.FileName + '</a></li>';
+                            });
+
+                            $('#popup_ulNodeCommentFile_THFX').html(CommentFileHtml);
+
+                            ModalPopup('success', '上传成功');
+
+                        }
+                        else {
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                }
+            });
+
+        },
+
+        AddTaskSubmit: function (dom) {
+
+            var type = $(dom).attr('data-type');
+            if (type == null || type == '')
+                return;
+
+            var InfoText = '';
+            if (type == 0) {
+                InfoText = '是否要流程退回？流程将退回至上一节点人员';
+            }
+            else if (type == 1) {
+
+                var TaskName = SoftwareTHFXHelper.CreateTaskName();
+                if (TaskName == '') {
+                    return;
+                }
+                $('#popup_txtTaskName_THFX').val(TaskName);
+                InfoText = TaskName + '</br>是否要保存任务？';
+            }
+            else if (type == 2) {
+
+                if (SoftwareTHFXHelper.PopupIsBackFlow == true) {
+                    var TaskName = SoftwareTHFXHelper.CreateTaskName();
+                    if (TaskName == '') {
+                        return;
+                    }
+                    $('#popup_txtTaskName_THFX').val(TaskName);
+                    InfoText = TaskName + '</br>是否要保存任务？';
+                }
+                else {
+                    InfoText = '是否要审批通过？';
+                }
+            }
+            else if (type == 3) {
+                InfoText = '是否要作废流程？';
+            }
+
+            ModalPopup('information', InfoText);
+
+            $("#ModalSubmit").unbind('click').bind('click', function () {
+                SoftwareTHFXHelper.DoTaskSubmit(type);
+            });
+
+        },
+
+        DoTaskSubmit: function (type) {
+
+            if (type == 1) {
+                SoftwareTHFXHelper.DoTaskAdd();
+            }
+            else if (type == 0 || type == 2) {
+                SoftwareTHFXHelper.DoTaskApproval(type);
+            }
+            else if (type == 3) {
+                SoftwareTHFXHelper.DoTaskCancel();
+            }
+        },
+
+        CreateTaskName: function () {
+
+            var TaskName = '拖航可行性分析与预报';
+
+            TaskName += '(' + GetFullDateTimeString(new Date()) + ')';
+
+            return TaskName;
+
+        },
+
+        DoTaskAdd: function () {
+
+            var ProjectID = $('#hid_ProjectID').val();
+            if (ProjectID == null || ProjectID == '' || ProjectID == 0) {
+                ModalClose('information');
+                ModalPopup('error', '软件申请页面需要选择关联风电项目');
+                return;
+            }
+
+            var SubmitFormData = new FormData();
+            SubmitFormData.append("ProjectID", ProjectID);
+            SubmitFormData.append("TaskID", SoftwareTHFXHelper.PopupOpenedTaskID);
+            SubmitFormData.append("SoftwareID", 4);
+
+            //节点人员
+            SubmitFormData.append("TaskNodeName", SoftwareTHFXHelper.ChoosedTaskNodeUser.Name);
+            SubmitFormData.append("TaskNodeUserCode", SoftwareTHFXHelper.ChoosedTaskNodeUser.UserCode);
+            SubmitFormData.append("TaskNodeDepart", SoftwareTHFXHelper.ChoosedTaskNodeUser.Depart);
+            SubmitFormData.append("TaskNodePhone", SoftwareTHFXHelper.ChoosedTaskNodeUser.Phone);
+            SubmitFormData.append("TaskNodeJobName", SoftwareTHFXHelper.ChoosedTaskNodeUser.JobName);
+
+            SubmitFormData.append("THFX_Scheme", $('#popup_txtTowingScheme_THFX').val());
+
+            SubmitFormData.append("TaskName", $('#popup_txtTaskName_THFX').val());
+
+            $.ajax({
+                url: 'TaskSubmit_THFX',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: SubmitFormData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+                            ModalPopup('success', '保存成功');
+                            $('#Tk_software_04').modal('hide');
+                            $('#tk_WorkTasks').modal('hide');
+
+                            Param.ProjectID = $('#hid_ProjectID').val();
+                            DoQuery();
+
+
+                        }
+                        else {
+
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                    ModalClose('information');
+                }
+            });
+
+        },
+
+        DoTaskApproval: function (type) {
+
+            if (SoftwareTHFXHelper.PopupOpenedTaskID == 0) {
+                ModalClose('information');
+                ModalPopup('error', '数据出错，重新打开弹窗。');
+                return;
+            }
+
+            var SubmitFormData = new FormData();
+
+            SubmitFormData.append("ApprovalType", type);
+            SubmitFormData.append("IsBackFlow", SoftwareTHFXHelper.PopupIsBackFlow);
+            SubmitFormData.append("NodeID", SoftwareTHFXHelper.ChoosedTaskNodeUser.NextNodeID);
+            SubmitFormData.append("TaskID", SoftwareTHFXHelper.PopupOpenedTaskID);
+            SubmitFormData.append("TaskComment", $('#popup_txtContent_THFX').val());
+
+
+            //正常审批
+            SubmitFormData.append("TaskNodeName", SoftwareTHFXHelper.ChoosedTaskNodeUser.Name);
+            SubmitFormData.append("TaskNodeUserCode", SoftwareTHFXHelper.ChoosedTaskNodeUser.UserCode);
+            SubmitFormData.append("TaskNodeDepart", SoftwareTHFXHelper.ChoosedTaskNodeUser.Depart);
+            SubmitFormData.append("TaskNodePhone", SoftwareTHFXHelper.ChoosedTaskNodeUser.Phone);
+            SubmitFormData.append("TaskNodeJobName", SoftwareTHFXHelper.ChoosedTaskNodeUser.JobName);
+
+            SubmitFormData.append("TaskName", $('#popup_txtTaskName_THFX').val());
+
+            SubmitFormData.append("THFX_Scheme", $('#popup_txtTowingScheme_THFX').val());
+
+            if (SoftwareTHFXHelper.ChoosedTaskNodeUser.NextNodeID == 0) {
+
+                //流程结束
+                //SubmitFormData.append("KZYLon", $('#popup_txtLon_THFX').val());
+                //SubmitFormData.append("KZYLat", $('#popup_txtLat_THFX').val());
+                //SubmitFormData.append("KZYWaterDepth", $('#popup_txtWaterDepth_THFX').val());
+                //SubmitFormData.append("KZYStandard", $('#popup_txtStandard_THFX').val());
+            }
+
+            $.ajax({
+                url: 'TaskApprovalSubmit_THFX',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: SubmitFormData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+                            ModalPopup('success', '保存成功');
+                            $('#Tk_software_04').modal('hide');
+
+                            Param.ProjectID = $('#hid_ProjectID').val();
+                            DoQuery();
+
+                        }
+                        else {
+
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                    ModalClose('information');
+                }
+            });
+
+        },
+
+        DoTaskCancel: function () {
+
+            if (SoftwareTHFXHelper.PopupOpenedTaskID == 0) {
+                ModalClose('information');
+                ModalPopup('error', '数据出错，重新打开弹窗。');
+                return;
+            }
+
+            var SubmitFormData = new FormData();
+            SubmitFormData.append("TaskID", SoftwareTHFXHelper.PopupOpenedTaskID);
+
+            $.ajax({
+                url: 'TaskCancelSubmit_THFX',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: SubmitFormData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+                            ModalPopup('success', '作废成功');
+                            $('#Tk_software_04').modal('hide');
+
+                            Param.ProjectID = $('#hid_ProjectID').val();
+                            DoQuery();
+
+                        }
+                        else {
+
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                    ModalClose('information');
+                }
+            });
+
+        },
+
+        ShowPositionMap: function () {
+
+            var Lon = $('#popup_Lon_THFX').val();
+            var Lat = $('#popup_Lat_THFX').val();
+            var ProjectID = $('#popup_btnShowPosition').attr('data-ProjectID');
+
+            if (Lon == '' || Lat == '' || ProjectID == 0) {
+                return;
+            }
+
+            var Url = '/Cloud/WebGIS/ShowPosition?ProjectID=' + ProjectID + '&TaskLon=' + Lon + '&TaskLat=' + Lat;
+
+            window.open(Url, '_blank');
+
+        },
+
+        QueryFloatShip: function () {
+
+            var ShipNameKeyWord = $('#popup_txtFloatShipName_THFX').val();
+
+            if (ShipNameKeyWord == '') {
+                $('#popup_ulFloatList_THFX a').each(function (index, dom) {
+
+                    $(dom).parent().show();
+
+                })
+            }
+            else {
+                $('#popup_ulFloatList_THFX a').each(function (index, dom) {
+
+                    var ShipName = $(dom).html();
+
+                    if (ShipName.indexOf(ShipNameKeyWord) == -1) {
+
+                        $(dom).parent().hide();
+
+                    }
+                    else {
+                        $(dom).parent().show();
+                    }
+
+                })
+            }
+
+
+
+        },
+
+        OpenReport: function () {
+
+            if (SoftwareTHFXHelper.PopupOpenedTaskID == 0)
+            {
+                return;
+            }
+            Param.TaskID = SoftwareTHFXHelper.PopupOpenedTaskID;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            //alert('123');
+            $('#Tk_THFXReport').modal('show');
+
+
+            $.post('LoadTaskFile', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        if (data.Success) {
+
+                            var FileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                FileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a class="xm_zt_green" href="' + dom.FilePath + '" download="' + dom.FileName + '">下载</a></td></tr>';
+
+                            })
+                            $('#popup_html_THFXFile').html(FileHtml);
+
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+
+
+        },
+
+        PlanRouteDownload: function () {
+
+            var ProjectID = $('#hid_ProjectID').val();
+            if (ProjectID == null || ProjectID == '' || ProjectID == 0)
+                return;
+
+
+            window.location.href = "TowingPlanRouteDownload?" + "ProjectID=" + ProjectID;
+
+        },
+
+        PlanRouteUpload: function () {
+
+            var ProjectID = $('#hid_ProjectID').val();
+
+            var formData = new FormData();
+            formData.append("ProjectID", ProjectID);
+
+            var UploadFiles = $('#popup_filePlanRouteUpload_THFX')[0].files;
+            var Count = 1;
+            $(UploadFiles).each(function (index, dom) {
+
+                formData.append("UploadFile" + Count, dom);
+
+                Count++;
+            });
+
+
+            
+            $.ajax({
+                url: '/Cloud/Task/TowingPlanRouteUpload',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: formData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+
+                            var PlanRouteHtml = '';
+                            var count = 1;
+                            $(data.Data).each(function (index, dom) {
+
+                                PlanRouteHtml += '<tr><td>' + count + '</td><td>' + dom.Lon + '</td><td>' + dom.Lat + '</td></tr> ';
+                                count++;
+                            });
+                            $('#popup_htmlPosition_THFX').html(PlanRouteHtml);
+                            
+
+                            ModalPopup('success', '保存成功');
+
+                        }
+                        else {
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                }
+            });
+
+        },
+
+
+        TowingFileUpload: function () {
+
+
+            var ProjectID = $('#hid_ProjectID').val();
+            if (ProjectID == null || ProjectID == '' || ProjectID == 0)
+                return;
+
+            var formData = new FormData();
+            formData.append("ProjectID", ProjectID);
+            var TowingFiles = $('#popup_fileTowingFile_THFX')[0].files;
+
+            if (TowingFiles == null || TowingFiles.length == 0)
+                return;
+
+            var FileCount = TowingFiles.length;
+            formData.append("TowingFileCount", FileCount);
+            var Count = 1;
+            $(TowingFiles).each(function (index, dom) {
+
+                formData.append("TowingFile" + Count, dom);
+
+                Count++;
+            });
+
+
+            $.ajax({
+                url: '/Cloud/Task/TowingFileUpload',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: formData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+
+                            var TowingFileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                TowingFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a> / <a href="#" class="xm_zt_red" data-ID="' + dom.ID + '" onclick="SoftwareTHFXHelper.TowingFileDelete(this);">删除</a></td></tr>';  //<a href="#" class="xm_zt_red" onclick="SoftwareCBZHelper.DeleteTaskFile(this);">删除</a>
+                            });
+
+                            $('#popup_htmlTowingFile_THFX').html(TowingFileHtml);
+
+
+                            ModalPopup('success', '保存成功');
+
+                        }
+                        else {
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                }
+            });
+
+        },
+
+        TowingFileDelete: function (dom) {
+
+            var ID = $(dom).attr('data-ID');
+            if (ID == null || ID == '' || ID == 0)
+                return;
+
+            Param.ID = ID;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            //下一节点人员
+            $.post('TowingFileDelete', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+                            var TowingFileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                TowingFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a> / <a href="#" class="xm_zt_red" data-ID="' + dom.ID + '" onclick="SoftwareTHFXHelper.TowingFileDelete(this);">删除</a></td></tr>';  //<a href="#" class="xm_zt_red" onclick="SoftwareCBZHelper.DeleteTaskFile(this);">删除</a>
+                            });
+                            $('#popup_htmlTowingFile_THFX').html(TowingFileHtml);
+
+                            ModalPopup('success', '删除成功');
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        LoadPlanRoute: function () {
+
+            var ProjectID = $('#hid_ProjectID').val();
+            if (ProjectID == null || ProjectID == '' || ProjectID == 0)
+                return;
+
+            Param.ProjectID = ProjectID;
+            //Param.TaskID = SoftwareTHFXHelper.PopupOpenedTaskID;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            //下一节点人员
+            $.post('LoadPlanRoute', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+                            var PlanRouteHtml = '';
+                            var count = 1;
+                            $(data.Data).each(function (index, dom) {
+
+                                PlanRouteHtml += '<tr><td>' + count + '</td><td>' + dom.Lon + '</td><td>' + dom.Lat + '</td></tr> ';
+                                count++;
+                            });
+                            $('#popup_htmlPosition_THFX').html(PlanRouteHtml);
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        LoadTowingFile: function () {
+
+            var ProjectID = $('#hid_ProjectID').val();
+            if (ProjectID == null || ProjectID == '' || ProjectID == 0)
+                return;
+
+            Param.ProjectID = ProjectID;
+            //Param.TaskID = SoftwareTHFXHelper.PopupOpenedTaskID;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+
+            $.post('LoadTowingFile', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+                            var TowingFileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                TowingFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a> / <a href="#" class="xm_zt_red" data-ID="' + dom.ID + '" onclick="SoftwareTHFXHelper.TowingFileDelete(this);">删除</a></td></tr>';  //<a href="#" class="xm_zt_red" onclick="SoftwareCBZHelper.DeleteTaskFile(this);">删除</a>
+                            });
+
+                            $('#popup_htmlTowingFile_THFX').html(TowingFileHtml);
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+    }   
+
+
+</script>

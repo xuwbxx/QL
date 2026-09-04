@@ -1,6 +1,7 @@
 using DataFactory.Factory;
 using DataFactory.KingBase;
 using DataFactory.KingBase.CloudWind;
+using Microsoft.EntityFrameworkCore;
 using Model.Tech.Cloud;
 using Model.Tech.Cloud.BackManage;
 using Tool;
@@ -9,14 +10,13 @@ namespace Service.Wind.BackManage
 {
     public class BackPlatformService
     {
-        private readonly TechCenter_KingBase_UnitOfWorkFactory _techCenterUowFactory;
+        //private readonly TechCenter_KingBase_UnitOfWorkFactory _techCenterUowFactory;
         private readonly CloudWind_KingBase_UnitOfWorkFactory _cloudWindUowFactory;
 
         public BackPlatformService(
-            TechCenter_KingBase_UnitOfWorkFactory techCenterUowFactory,
             CloudWind_KingBase_UnitOfWorkFactory cloudWindUowFactory)
         {
-            _techCenterUowFactory = techCenterUowFactory;
+            //_techCenterUowFactory = techCenterUowFactory;
             _cloudWindUowFactory = cloudWindUowFactory;
         }
 
@@ -29,17 +29,17 @@ namespace Service.Wind.BackManage
 
             try
             {
-                using (var uow = _techCenterUowFactory.Create())
+                using (var uow = _cloudWindUowFactory.Create())
                 {
-                    var repo = uow.GetRepository<TechCenter_Manage_Software>();
+                    var repo = uow.GetRepository<Manage_Software>();
 
-                    var predicate = PredicateBuilder.True<TechCenter_Manage_Software>();
+                    var predicate = PredicateBuilder.True<Manage_Software>();
                     predicate = PredicateBuilder.And(predicate, a => !a.IsDelete);
 
                     if (!string.IsNullOrEmpty(request.SoftwareName))
                     {
                         var softwareName = request.SoftwareName;
-                        predicate = PredicateBuilder.And(predicate, a => a.Name != null && a.Name.Contains(softwareName));
+                        predicate = PredicateBuilder.And(predicate, a => a.SoftwareName != null && EF.Functions.Like(a.SoftwareName, $"%{softwareName}%"));
                     }
 
                     var (pageList, count) = repo.FindPage(predicate, a => a.ID, request.PageIndex, request.PageSize);
@@ -57,10 +57,10 @@ namespace Service.Wind.BackManage
                         list.Add(new CloudWindManageSoftware()
                         {
                             ID = a.ID,
-                            SoftwareName = a.Name ?? "",
-                            SoftwareUrl = a.Url ?? "",
-                            FlowType = a.Type,
-                            FlowTypeName = Enum.GetName(typeof(CloudWindFlowType), a.Type) ?? ""
+                            SoftwareName = a.SoftwareName ?? "",
+                            SoftwareUrl = a.SoftwareUrl ?? "",
+                            FlowType = a.FlowType.Value,
+                            FlowTypeName = Enum.GetName(typeof(CloudWindFlowType), a.FlowType) ?? ""
                         });
                     }
                 }
@@ -81,7 +81,7 @@ namespace Service.Wind.BackManage
 
             try
             {
-                using (var uow = _techCenterUowFactory.Create())
+                using (var uow = _cloudWindUowFactory.Create())
                 {
                     var repo = uow.GetRepository<TechCenter_Manage_Software>();
                     var software = repo.FindFirst(a => a.ID == request.ID);
@@ -132,7 +132,7 @@ namespace Service.Wind.BackManage
                     if (!string.IsNullOrEmpty(request.CompanyName))
                     {
                         var companyName = request.CompanyName;
-                        predicate = PredicateBuilder.And(predicate, a => a.Company != null && a.Company.Contains(companyName));
+                        predicate = PredicateBuilder.And(predicate, a => a.Company != null && EF.Functions.Like(a.Company, $"%{companyName}%"));
                     }
 
                     var (pageList, count) = companyRepo.FindPage(predicate, a => a.ID, request.PageIndex, request.PageSize);
@@ -249,7 +249,7 @@ namespace Service.Wind.BackManage
                         {
                             Company = request.CompanyName,
                             IsDelete = false,
-                            CreateTime = DateTime.UtcNow
+                            CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified)
                         };
                         companyRepo.Add(newCompany);
                         uow.Save();
@@ -265,7 +265,7 @@ namespace Service.Wind.BackManage
                             return "账号出错";
                         }
                         company.Company = request.CompanyName;
-                        company.CreateTime = DateTime.UtcNow;
+                        company.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
                         companyID = company.ID;
                     }
 
@@ -291,7 +291,7 @@ namespace Service.Wind.BackManage
                             roleUser.UserDepartName = majorUser.UserDepartName;
                             roleUser.UserPhone = majorUser.UserPhone;
                             roleUser.UserJobName = majorUser.UserJobName;
-                            roleUser.CreateTime = DateTime.UtcNow;
+                            roleUser.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
                         }
                         else
                         {
@@ -304,7 +304,7 @@ namespace Service.Wind.BackManage
                                 UserDepartName = majorUser.UserDepartName,
                                 UserPhone = majorUser.UserPhone,
                                 UserJobName = majorUser.UserJobName,
-                                CreateTime = DateTime.UtcNow,
+                                CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified),
                                 IsDelete = false
                             };
                             roleRepo.Add(newRole);

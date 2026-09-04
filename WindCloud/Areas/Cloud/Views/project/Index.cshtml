@@ -56,10 +56,10 @@
     </div>
 </div>
 
-<div class="zlk_box">
+@* <div class="zlk_box">
     <div><i class="icon iconfont">&#xe651;</i></div>
     <div>资料库</div>
-</div>
+</div> *@
 
 <!--创建弹框-->
 <div class="modal fade" id="tk_Project" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
@@ -1921,7 +1921,11 @@
         if (PopupOpenedProjectID == null || PopupOpenedProjectID == '' || PopupOpenedProjectID == 0)
             return;
 
-        window.location.href = "ProjectPositionDownload?" + "ProjectID=" + PopupOpenedProjectID;
+        var iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = "ProjectPositionDownload?ProjectID=" + PopupOpenedProjectID;
+        document.body.appendChild(iframe);
+        setTimeout(function () { document.body.removeChild(iframe); }, 30000);
 
     }
 
@@ -1974,8 +1978,11 @@
         if (PopupOpenedProjectID == null || PopupOpenedProjectID == '' || PopupOpenedProjectID == 0)
             return;
 
-        window.location.href = "ProjectFanPositionDownload?" + "ProjectID=" + PopupOpenedProjectID;
-
+        var iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = "ProjectFanPositionDownload?ProjectID=" + PopupOpenedProjectID;
+        document.body.appendChild(iframe);
+        setTimeout(function () { document.body.removeChild(iframe); }, 30000);
 
     }
 
@@ -2799,7 +2806,7 @@
 
         Param.Name = UserName;
         Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
-        $.post('/Cloud/Base/FindShjUser', Param)
+        $.post('FindShjUser', Param)
             .success(function (data, statusText, jqXRH) {
                 if (data) {
 

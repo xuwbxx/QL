@@ -104,8 +104,7 @@ namespace Service.Towing
                 {
                     var repo = uow.GetRepository<DataFactory.KingBase.Towing.Data_MRU>();
                     // 取最新的一条记录
-                    var data = repo.FindAll()
-                        .Where(a => a.IsDelete != true)
+                    var data = repo.Find(a => a.IsDelete != true)
                         .OrderByDescending(a => a.CreateTime)
                         .FirstOrDefault();
 
@@ -144,8 +143,7 @@ namespace Service.Towing
                     var repo = uow.GetRepository<DataFactory.KingBase.Towing.Data_MRU>();
                     startTime = startTime ?? DateTime.MinValue;
                     endTime = endTime ?? DateTime.Now;
-                    var list = repo.FindAll()
-                        .Where(a => a.IsDelete != true
+                    var list = repo.Find(a => a.IsDelete != true
                             && a.CreateTime >= startTime
                             && a.CreateTime < endTime)
                         .OrderBy(a => a.CreateTime)
@@ -198,8 +196,7 @@ namespace Service.Towing
                     var repo = uow.GetRepository<DataFactory.KingBase.Towing.Data_MRU>();
                     if (size == 0) size = LimitValues.EChartDataSize;
 
-                    var query = repo.FindAll()
-                        .Where(a => a.IsDelete != true)
+                    var query = repo.Find(a => a.IsDelete != true)
                         .OrderByDescending(a => a.CreateTime);
 
                     List<DataFactory.KingBase.Towing.Data_MRU> list;
@@ -247,7 +244,7 @@ namespace Service.Towing
 
                         // 获取alerm值
                         var alarmRepo = uow.GetRepository<DataFactory.KingBase.Towing.Manage_Alarm>();
-                        var alerm = alarmRepo.FindAll().FirstOrDefault(a => a.IsDelete != true && a.Type == "MRU");
+                        var alerm = alarmRepo.Find(a => a.IsDelete != true && a.Type == "MRU").FirstOrDefault();
                         if (alerm != null)
                         {
                             // 只有度数的需要验证
@@ -302,11 +299,10 @@ namespace Service.Towing
 
                     res.Data.UpdateTime = DateTime.Now;
 
-                    var query = repo.FindAll()
-                        .Where(a => a.IsDelete != true && a.CreateTime > startTime)
+                    var query = repo.Find(a => a.IsDelete != true && a.CreateTime > startTime)
                         .OrderByDescending(a => a.CreateTime)
                         .Take(takeCount);
-                    var list = query.ToList();
+                   var list = query.ToList();
 
                     res.List = new List<MRUStatusInfo>();
                     if (list != null && list.Count > 0)
@@ -348,7 +344,7 @@ namespace Service.Towing
 
                         // 获取alerm值
                         var alarmRepo = uow.GetRepository<DataFactory.KingBase.Towing.Manage_Alarm>();
-                        var alerm = alarmRepo.FindAll().FirstOrDefault(a => a.IsDelete != true && a.Type == "MRU");
+                        var alerm = alarmRepo.Find(a => a.IsDelete != true && a.Type == "MRU").FirstOrDefault();
                         if (alerm != null)
                         {
                             // 只有度数的需要验证
@@ -387,8 +383,7 @@ namespace Service.Towing
                     var repo = uow.GetRepository<DataFactory.KingBase.Towing.Data_MRU>();
                     if (size == 0) size = LimitValues.EChartDataSize;
 
-                    var query = repo.FindAll()
-                        .Where(a => a.IsDelete != true)
+                    var query = repo.Find(a => a.IsDelete != true)
                         .OrderByDescending(a => a.CreateTime);
 
                     List<DataFactory.KingBase.Towing.Data_MRU> list;
@@ -462,8 +457,7 @@ namespace Service.Towing
                     startTime = startTime ?? DateTime.MinValue;
                     endTime = endTime ?? DateTime.Now;
 
-                    var query = repo.FindAll()
-                        .Where(a => a.IsDelete != true
+                    var query = repo.Find(a => a.IsDelete != true
                             && a.CreateTime >= startTime
                             && a.CreateTime < endTime)
                         .OrderByDescending(a => a.CreateTime);

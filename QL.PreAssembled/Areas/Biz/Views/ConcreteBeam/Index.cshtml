@@ -53,6 +53,9 @@
         <el-table-column label="浇筑组名称" min-width="200">
             <template #default="scope">{{ scope.row.castingGroupName || scope.row.CastingGroupName || '-' }}</template>
         </el-table-column>
+        <el-table-column label="项目负责人" min-width="140">
+            <template #default="scope">{{ scope.row.managerName || scope.row.ManagerName || '-' }}</template>
+        </el-table-column>
         <el-table-column label="操作" width="150" align="center">
             <template #default="scope">
                 <el-button type="primary" link @@click="handleLinearControl(scope.row)">线性管控</el-button>

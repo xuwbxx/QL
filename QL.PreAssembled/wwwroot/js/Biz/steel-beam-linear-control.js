@@ -1,9 +1,9 @@
-document.addEventListener('DOMContentLoaded', function () {
+﻿document.addEventListener('DOMContentLoaded', function () {
     var Vue = window.Vue;
     var ElementPlus = window.ElementPlus;
     var ElMessage = ElementPlus.ElMessage;
     var ElMessageBox = ElementPlus.ElMessageBox;
-    var bridgeID = Number(window.__bridgeID || 0);
+    var girderID = Number(window.__girderID || 0);
 
     var app = Vue.createApp({
         setup: function () {
@@ -23,8 +23,8 @@ document.addEventListener('DOMContentLoaded', function () {
             var measureTimeOptions = Vue.ref([]);
             var measureTimeValue = Vue.ref('');
             var state = Vue.reactive({ hasTheoretical: false, hasMeasured: false, maxPushCount: null, importPushCounts: [], queryPushCounts: [] });
-            var theoryQuery = Vue.reactive({ bridgeID: bridgeID, pointCode: null, segmentNo: null, pageIndex: 1, pageSize: 20 });
-            var measuredQuery = Vue.reactive({ bridgeID: bridgeID, pushCount: null, measureTime: null, pageIndex: 1, pageSize: 20 });
+            var theoryQuery = Vue.reactive({ girderID: girderID, pointCode: null, segmentNo: null, pageIndex: 1, pageSize: 20 });
+            var measuredQuery = Vue.reactive({ girderID: girderID, pushCount: null, measureTime: null, pageIndex: 1, pageSize: 20 });
             var editingId = Vue.ref(null);
             var editForm = Vue.reactive({ x: '', y: '', z: '' });
             var importDialogVisible = Vue.ref(false);
@@ -37,15 +37,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
             function goBack() { window.history.back(); }
 
-            async function loadBridgeInfo() {
+            async function loadGirderInfo() {
                 try {
-                    var data = await HttpUtils.get('/Biz/SteelBeam/BridgeInfo?id=' + bridgeID);
+                    var data = await HttpUtils.get('/Biz/SteelBeam/GirderInfo?girderID=' + girderID);
                     pageTitle.value = (data.projectName || '') + ' - ' + (data.bridgeName || '');
                 } catch (e) { pageTitle.value = '线形管控'; }
             }
 
             async function loadState() {
-                var data = await HttpUtils.get('/Biz/SteelBeam/ImportState?bridgeID=' + bridgeID);
+                var data = await HttpUtils.get('/Biz/SteelBeam/ImportState?girderID=' + girderID);
                 state.hasTheoretical = !!data.hasTheoretical;
                 state.hasMeasured = !!data.hasMeasured;
                 state.maxPushCount = data.maxPushCount === undefined ? null : data.maxPushCount;
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             async function loadTheoryOptions() {
-                var data = await HttpUtils.get('/Biz/SteelBeam/TheoreticalOptions?bridgeID=' + bridgeID);
+                var data = await HttpUtils.get('/Biz/SteelBeam/TheoreticalOptions?girderID=' + girderID);
                 pointOptions.value = data.points || [];
                 segmentOptions.value = data.segments || [];
             }
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
             async function loadMeasureTimes(pushCount) {
                 measureTimeOptions.value = [];
                 if (pushCount === null || pushCount === undefined || pushCount === '') return;
-                try { measureTimeOptions.value = await HttpUtils.get('/Biz/SteelBeam/MeasureTimeOptions?bridgeID=' + bridgeID + '&pushCount=' + pushCount) || []; }
+                try { measureTimeOptions.value = await HttpUtils.get('/Biz/SteelBeam/MeasureTimeOptions?girderID=' + girderID + '&pushCount=' + pushCount) || []; }
                 catch (e) { measureTimeOptions.value = []; }
             }
 
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             async function saveEdit(row) {
                 if (![editForm.x, editForm.y, editForm.z].every(validCoordinate)) { ElMessage.warning('坐标必须是有效数字，最多保留6位小数'); return; }
-                var payload = { id: row.id, bridgeID: bridgeID, x: Number(editForm.x), y: Number(editForm.y), z: Number(editForm.z), version: row.version };
+                var payload = { id: row.id, girderID: girderID, x: Number(editForm.x), y: Number(editForm.y), z: Number(editForm.z), version: row.version };
                 var url = activeTab.value === 'theoretical' ? '/Biz/SteelBeam/UpdateTheoretical' : '/Biz/SteelBeam/UpdateMeasured';
                 try {
                     await HttpUtils.post(url, payload); ElMessage.success('保存成功'); cancelEdit();
@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 if (importType.value === 'measured') {
                     if (importPushCount.value === null || !importMeasureTime.value) { ElMessage.warning('请选择顶推次数和测量时间'); return; }
-                    var existingTimes = await HttpUtils.get('/Biz/SteelBeam/MeasureTimeOptions?bridgeID=' + bridgeID + '&pushCount=' + importPushCount.value) || [];
+                    var existingTimes = await HttpUtils.get('/Biz/SteelBeam/MeasureTimeOptions?girderID=' + girderID + '&pushCount=' + importPushCount.value) || [];
                     var selected = formatMeasureTime(importMeasureTime.value);
                     if (existingTimes.some(function (x) { return formatMeasureTime(x) === selected; })) {
                         try { await ElMessageBox.confirm('本次导入将覆盖原数据，是否继续？', '提示', { type: 'warning' }); confirmed = true; }
@@ -169,9 +169,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     var form = new FormData(); form.append('file', importFile.value.raw);
                     var url;
                     if (importType.value === 'theoretical') {
-                        url = '/Biz/SteelBeam/ImportTheoretical?bridgeID=' + bridgeID + '&confirmOverwrite=' + confirmOverwrite;
+                        url = '/Biz/SteelBeam/ImportTheoretical?girderID=' + girderID + '&confirmOverwrite=' + confirmOverwrite;
                     } else {
-                        url = '/Biz/SteelBeam/ImportMeasured?bridgeID=' + bridgeID + '&pushCount=' + importPushCount.value + '&measureTime=' + encodeURIComponent(importMeasureTime.value) + '&confirmOverwrite=' + confirmOverwrite;
+                        url = '/Biz/SteelBeam/ImportMeasured?girderID=' + girderID + '&pushCount=' + importPushCount.value + '&measureTime=' + encodeURIComponent(importMeasureTime.value) + '&confirmOverwrite=' + confirmOverwrite;
                     }
                     var response = await axios.post(url, form, { responseType: 'blob', headers: { 'Content-Type': 'multipart/form-data' } });
                     var contentType = response.headers['content-type'] || '';
@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded', function () {
             function disableFutureDate(date) { var today = new Date(); today.setHours(23, 59, 59, 999); return date.getTime() > today.getTime(); }
 
             Vue.onMounted(async function () {
-                await loadBridgeInfo();
+                await loadGirderInfo();
                 try { await loadState(); await loadTheoryOptions(); await loadTheory(); }
                 catch (e) { console.error(e); }
             });

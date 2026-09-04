@@ -2,6 +2,7 @@
     var Vue = window.Vue;
     var ElementPlus = window.ElementPlus;
     var ElMessage = ElementPlus.ElMessage;
+    var ElMessageBox = ElementPlus.ElMessageBox;
     var groupID = window.__groupID || 0;
 
     var app = Vue.createApp({
@@ -30,6 +31,12 @@
                 createdTime: '',
                 updatedTime: ''
             });
+            var savedConfig = { offsetA: '', offsetB: '', offsetC: '', referenceElevation: '' };
+            var importDialogVisible = Vue.ref(false);
+            var importLoading = Vue.ref(false);
+            var importType = Vue.ref('segments');
+            var importFile = Vue.ref(null);
+            var uploadRef = Vue.ref(null);
 
             // 梁段表格
             var segmentTableData = Vue.ref([]);
@@ -158,37 +165,38 @@
 
             async function loadGroupInfo() {
                 try {
-                    var res = await axios.get('/Biz/ConcreteBeam/CastingGroupInfo?id=' + groupID);
-                    var data = res.data;
-                    if (data && data.code === 200 && data.data) {
-                        var info = data.data;
-                        projectInfo.projectName = info.projectName || '';
-                        projectInfo.castingGroupName = info.castingGroupName || '';
-                        projectInfo.managerName = info.managerName || '';
-                    } else {
-                        console.warn('No group info data');
-                    }
+                    var info = await HttpUtils.get('/Biz/ConcreteBeam/Config', { id: groupID });
+                    projectInfo.projectName = info.projectName || '';
+                    projectInfo.castingGroupName = info.castingGroupName || '';
+                    projectInfo.managerName = info.managerName || '';
+                    projectInfo.offsetA = formatNullableNumber(info.offsetA);
+                    projectInfo.offsetB = formatNullableNumber(info.offsetB);
+                    projectInfo.offsetC = formatNullableNumber(info.offsetC);
+                    projectInfo.referenceElevation = formatNullableNumber(info.referenceElevation);
+                    projectInfo.createdTime = formatDateTime(info.createdTime);
+                    projectInfo.updatedTime = formatDateTime(info.updatedTime);
+                    rememberConfig();
                 } catch (e) {
                     console.error('loadGroupInfo error', e);
                 }
             }
 
-            function loadSegmentData() {
+            async function loadSegmentData() {
                 loading.value = true;
-                var list = [];
-                for (var i = 0; i < 10; i++) {
-                    list.push({
-                        segmentName: 'KF-P2-1U',
-                        downstream: '',
-                        upstream: '',
-                        node1: '1',
-                        node2: '2',
-                        pouringDate: '2019-02-19'
+                try {
+                    var res = await HttpUtils.post('/Biz/ConcreteBeam/SegmentList', {
+                        castingGroupID: groupID, pageIndex: segmentPageIndex.value, pageSize: segmentPageSize.value
                     });
+                    segmentTableData.value = (res.list || []).map(function (row) {
+                        row.pouringDate = row.pouringDate ? row.pouringDate.substring(0, 10) : '';
+                        return row;
+                    });
+                    segmentTotal.value = res.total || 0;
+                } catch (e) {
+                    console.error('loadSegmentData error', e);
+                } finally {
+                    loading.value = false;
                 }
-                segmentTableData.value = list;
-                segmentTotal.value = 50;
-                loading.value = false;
             }
 
             function handleSegmentPageChange(val) {
@@ -202,40 +210,33 @@
                 loadSegmentData();
             }
 
-            function handleImportSegment() {
-                ElMessage.info('导入梁段信息功能待开发');
-            }
+            function handleImportSegment() { openImport('segments'); }
+            function downloadSegmentTemplate() { window.location.href = '/Biz/ConcreteBeam/SegmentTemplate'; }
 
-            function loadDesignData() {
+            async function loadDesignData() {
                 designLoading.value = true;
-                var list = [];
-                for (var i = 0; i < 10; i++) {
-                    list.push({
-                        nodeName: 'KF-P2-1U',
-                        xe: '713038.093088', ye: '666806.315995', ze: '11.290768',
-                        xc: '713038.093088', yc: '666806.315995', zc: '11.290768',
-                        xw: '713038.093088', yw: '666806.315995', zw: '11.290768'
+                try {
+                    var res = await HttpUtils.post('/Biz/ConcreteBeam/DesignCoordinateList', {
+                        castingGroupID: groupID, pageIndex: designPageIndex.value, pageSize: designPageSize.value
                     });
+                    designTableData.value = (res.list || []).map(function (row) {
+                        ['xe','ye','ze','xc','yc','zc','xw','yw','zw'].forEach(function (key) { row[key] = formatNullableNumber(row[key]); });
+                        return row;
+                    });
+                    designTotal.value = res.total || 0;
+                } catch (e) {
+                    console.error('loadDesignData error', e);
+                } finally {
+                    designLoading.value = false;
                 }
-                designTableData.value = list;
-                designTotal.value = 50;
-                designLoading.value = false;
             }
 
             function handleDesignPageChange(val) { designPageIndex.value = val; loadDesignData(); }
             function handleDesignSizeChange(val) { designPageSize.value = val; designPageIndex.value = 1; loadDesignData(); }
             function onDesignNormalizeChange() { loadDesignData(); }
-            function onDesignCamberChange() {
-                var preCamberTab = tabs.find(function (t) { return t.name === 'preCamber'; });
-                if (preCamberTab) {
-                    preCamberTab.disabled = designIncludeCamber.value;
-                    if (preCamberTab.disabled && activeTab.value === 'preCamber') {
-                        activeTab.value = 'designCoord';
-                    }
-                }
-                loadDesignData();
-            }
-            function handleImportDesignCoord() { ElMessage.info('导入设计坐标功能待开发'); }
+            function onDesignCamberChange() { loadDesignData(); }
+            function handleImportDesignCoord() { openImport('design'); }
+            function downloadDesignTemplate() { window.location.href = '/Biz/ConcreteBeam/DesignCoordinateTemplate'; }
             function handleDesignPrint() { ElMessage.info('打印功能待开发'); }
             function handleDesignPreview() { ElMessage.info('预览功能待开发'); }
             function handleDesignConfirm() { ElMessage.info('确定功能待开发'); }
@@ -287,31 +288,111 @@
             function handleReportExport() { ElMessage.info('导出功能待开发'); }
             function handleReportCancel() { ElMessage.info('已取消'); }
 
-            function handleConfirm() {
+            async function handleConfirm() {
                 if (!projectInfo.offsetA) { ElMessage.warning('请输入A值'); return; }
                 if (!projectInfo.offsetB) { ElMessage.warning('请输入B值'); return; }
                 if (!projectInfo.offsetC) { ElMessage.warning('请输入C值'); return; }
                 if (!projectInfo.referenceElevation) { ElMessage.warning('请输入参考高程'); return; }
-                ElMessage.info('确定功能待开发');
+                var fields = [projectInfo.offsetA, projectInfo.offsetB, projectInfo.offsetC, projectInfo.referenceElevation];
+                if (fields.some(function (v) { return !isFourDecimalNumber(v); })) {
+                    ElMessage.warning('A、B、C和参考高程必须是最多四位小数的有效数字'); return;
+                }
+                try {
+                    var info = await HttpUtils.post('/Biz/ConcreteBeam/SaveConfig', {
+                        castingGroupID: groupID,
+                        offsetA: Number(projectInfo.offsetA), offsetB: Number(projectInfo.offsetB),
+                        offsetC: Number(projectInfo.offsetC), referenceElevation: Number(projectInfo.referenceElevation)
+                    });
+                    projectInfo.offsetA = formatNullableNumber(info.offsetA);
+                    projectInfo.offsetB = formatNullableNumber(info.offsetB);
+                    projectInfo.offsetC = formatNullableNumber(info.offsetC);
+                    projectInfo.referenceElevation = formatNullableNumber(info.referenceElevation);
+                    projectInfo.createdTime = formatDateTime(info.createdTime);
+                    projectInfo.updatedTime = formatDateTime(info.updatedTime);
+                    rememberConfig();
+                    ElMessage.success('保存成功');
+                } catch (e) { console.error('save config error', e); }
             }
 
-            function handleCancel() {
-                projectInfo.offsetA = '';
-                projectInfo.offsetB = '';
-                projectInfo.offsetC = '';
-                projectInfo.referenceElevation = '';
+            function handleCancel() { restoreConfig(); }
+
+            function handleReset() { restoreConfig(); }
+
+            function openImport(type) {
+                importType.value = type;
+                importFile.value = null;
+                if (uploadRef.value) uploadRef.value.clearFiles();
+                importDialogVisible.value = true;
+            }
+            function onFileChange(file) { importFile.value = file; }
+            function onFileRemove() { importFile.value = null; }
+            function onFileExceed() { ElMessage.warning('只能上传一个文件，请先移除已选文件'); }
+
+            async function confirmImport() {
+                if (!importFile.value || !importFile.value.raw) { ElMessage.warning('请选择要导入的文件'); return; }
+                var raw = importFile.value.raw;
+                if (!/\.xlsx$/i.test(raw.name)) { ElMessage.warning('仅支持 .xlsx 文件'); return; }
+                if (raw.size > 20 * 1024 * 1024) { ElMessage.warning('文件大小不能超过20 MB'); return; }
+                await importExcel(importType.value, raw, false);
             }
 
-            function handleReset() {
-                projectInfo.offsetA = '';
-                projectInfo.offsetB = '';
-                projectInfo.offsetC = '';
-                projectInfo.referenceElevation = '';
+            async function importExcel(type, file, confirmOverwrite) {
+                var form = new FormData(); form.append('file', file);
+                var url = type === 'segments' ? '/Biz/ConcreteBeam/ImportSegments' : '/Biz/ConcreteBeam/ImportDesignCoordinates';
+                importLoading.value = true;
+                try {
+                    var response = await axios.post(url + '?castingGroupID=' + groupID + '&confirmOverwrite=' + confirmOverwrite,
+                        form, { responseType: 'blob', headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 });
+                    var contentType = response.headers['content-type'] || '';
+                    if (contentType.indexOf('application/json') < 0) {
+                        downloadBlob(response.data, getDownloadName(response.headers) || '混凝土梁_导入错误明细.xlsx');
+                        ElMessage.error('导入失败，请查看错误明细文件');
+                        return;
+                    }
+                    var json = JSON.parse(await response.data.text());
+                    if (json.code !== 200) { ElMessage.error(json.message || '导入失败'); return; }
+                    var result = json.data || {};
+                    if (result.requiresOverwriteConfirmation) {
+                        try {
+                            await ElMessageBox.confirm(result.message, '确认覆盖', { type: 'warning', confirmButtonText: '确认覆盖', cancelButtonText: '取消' });
+                            return await importExcel(type, file, true);
+                        } catch (e) { return; }
+                    }
+                    importDialogVisible.value = false;
+                    ElMessage.success(result.message);
+                    if (type === 'segments') { segmentPageIndex.value = 1; loadSegmentData(); }
+                    else { designPageIndex.value = 1; loadDesignData(); }
+                } catch (e) {
+                    ElMessage.error(e && e.message ? e.message : '导入失败');
+                } finally { importLoading.value = false; }
             }
+
+            function downloadBlob(blob, name) {
+                var url = URL.createObjectURL(blob); var link = document.createElement('a');
+                link.href = url; link.download = name; document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url);
+            }
+            function getDownloadName(headers) {
+                var value = headers['content-disposition'] || '';
+                var utf = value.match(/filename\*=UTF-8''([^;]+)/i); if (utf) return decodeURIComponent(utf[1]);
+                var plain = value.match(/filename="?([^";]+)"?/i); return plain ? plain[1] : '';
+            }
+
+            function rememberConfig() {
+                savedConfig = { offsetA: projectInfo.offsetA, offsetB: projectInfo.offsetB,
+                    offsetC: projectInfo.offsetC, referenceElevation: projectInfo.referenceElevation };
+            }
+            function restoreConfig() {
+                projectInfo.offsetA = savedConfig.offsetA; projectInfo.offsetB = savedConfig.offsetB;
+                projectInfo.offsetC = savedConfig.offsetC; projectInfo.referenceElevation = savedConfig.referenceElevation;
+            }
+            function formatNullableNumber(value) { return value === null || value === undefined || value === '' ? '' : Number(value).toFixed(4); }
+            function formatDateTime(value) { return value ? String(value).replace('T', ' ').substring(0, 19) : ''; }
+            function isFourDecimalNumber(value) { return /^[-+]?\d+(\.\d{1,4})?$/.test(String(value).trim()); }
 
             Vue.onMounted(function () {
                 loadGroupInfo();
                 loadSegmentData();
+                loadDesignData();
                 loadCamberData();
             });
 
@@ -328,6 +409,7 @@
                 handleSegmentPageChange: handleSegmentPageChange,
                 handleSegmentSizeChange: handleSegmentSizeChange,
                 handleImportSegment: handleImportSegment,
+                downloadSegmentTemplate: downloadSegmentTemplate,
                 designLoading: designLoading,
                 designTableData: designTableData,
                 designTotal: designTotal,
@@ -340,6 +422,7 @@
                 onDesignNormalizeChange: onDesignNormalizeChange,
                 onDesignCamberChange: onDesignCamberChange,
                 handleImportDesignCoord: handleImportDesignCoord,
+                downloadDesignTemplate: downloadDesignTemplate,
                 handleDesignPrint: handleDesignPrint,
                 handleDesignPreview: handleDesignPreview,
                 handleDesignConfirm: handleDesignConfirm,
@@ -397,7 +480,15 @@
                 handleReportCancel: handleReportCancel,
                 handleConfirm: handleConfirm,
                 handleCancel: handleCancel,
-                handleReset: handleReset
+                handleReset: handleReset,
+                importDialogVisible: importDialogVisible,
+                importLoading: importLoading,
+                importType: importType,
+                uploadRef: uploadRef,
+                onFileChange: onFileChange,
+                onFileRemove: onFileRemove,
+                onFileExceed: onFileExceed,
+                confirmImport: confirmImport
             };
         }
     });
@@ -405,6 +496,7 @@
     try {
         var locale = typeof ElementPlusLocaleZhCn !== 'undefined' ? ElementPlusLocaleZhCn : undefined;
         app.use(ElementPlus, { locale: locale });
+        if (window.ElementPlusIconsVue && window.ElementPlusIconsVue.UploadFilled) app.component('UploadFilled', window.ElementPlusIconsVue.UploadFilled);
         app.mount('#app');
     } catch (e) {
         console.error('Mount error:', e);

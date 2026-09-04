@@ -1,0 +1,1700 @@
+﻿@*桩基弹窗*@
+<div class="modal fade" id="Tk_software_06" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog" style="right: -24vw;width: 48vw;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    桩基沉桩可打性分析
+                </h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="sqzl_box">
+                    <div class="form-horizontal form-horizontal_sqrjzl">
+
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">任务名</label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" placeholder="请输入任务名" id="popup_txtTaskName_ZJ">
+                            </div>
+                        </div>
+
+                        <div class="form-group mod_touying">
+                            <label class="col-md-2 control-label control-label_position">工程项目基本资料</label>
+                            <div class="col-md-10">
+                                <div class="zdtj_box clearfix">
+                                    <div class="col-md-6 pr0">
+                                        <input type="file" multiple class="form-control pull-left" id="popup_uploadTaskFile_gcxmjbzl_ZJ">
+                                    </div>
+                                    <div class="col-md-1 text-center">
+                                        <button class="btn search_btn btn-success" id="popup_btn_uploadTaskFile_gcxmjbzl_ZJ" onclick="SoftwareZJHelper.UploadTaskFile(1);">上传</button>
+                                    </div>
+                                    <div class="col-md-5 zhuyi_zt pr0">
+
+                                    </div>
+                                </div>
+
+                                <div class="table_project_box">
+                                    <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                        <thead>
+                                            <tr>
+                                                <th width="60%">文件名</th>
+                                                <th width="15%">类型</th>
+                                                <th width="15%">大小</th>
+                                                <th width="10%">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="popup_htmlTaskFile_gcxmjbzl_ZJ" data-tag="0">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group mod_touying">
+                            <label class="col-md-2 control-label control-label_position">机孔位地勘资料</label>
+                            <div class="col-md-10">
+                                <div class="zdtj_box clearfix">
+                                    <div class="col-md-6 pr0">
+                                        <input type="file" multiple class="form-control pull-left" id="popup_uploadTaskFile_jkwdkzl_ZJ">
+                                    </div>
+                                    <div class="col-md-1 text-center">
+                                        <button class="btn search_btn btn-success" id="popup_btn_uploadTaskFile_jkwdkzl_ZJ" onclick="SoftwareZJHelper.UploadTaskFile(2);">上传</button>
+                                    </div>
+                                    <div class="col-md-5 text-right zhuyi_zt pr0">
+
+                                    </div>
+                                </div>
+
+                                <div class="table_project_box">
+                                    <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                        <thead>
+                                            <tr>
+                                                <th width="60%">文件名</th>
+                                                <th width="15%">类型</th>
+                                                <th width="15%">大小</th>
+                                                <th width="10%">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="popup_htmlTaskFile_jkwdkzl_ZJ" data-tag="0">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mod_touying">
+                            <label class="col-md-2 control-label control-label_position">机孔位地勘数据表</label>
+                            <div class="col-md-10">
+                                <div class="zdtj_box clearfix">
+                                    <div class="col-md-6 pr0">
+                                        <input type="file" multiple class="form-control pull-left" id="popup_uploadTaskFile_jkwdksjb_ZJ">
+                                    </div>
+                                    <div class="col-md-1 text-center">
+                                        <button class="btn search_btn btn-success" id="popup_btn_uploadTaskFile_jkwdksjb_ZJ" onclick="SoftwareZJHelper.UploadTaskFile(3);">上传</button>
+                                    </div>
+                                    <div class="col-md-5 zhuyi_zt pr0">
+                                        <a class="btn btn-primary btn-primary-a" href="~/File/Task/地勘数据表.xlsx">模板下载</a>
+                                    </div>
+                                </div>
+
+                                <div class="table_project_box">
+                                    <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                        <thead>
+                                            <tr>
+                                                <th width="60%">文件名</th>
+                                                <th width="15%">类型</th>
+                                                <th width="15%">大小</th>
+                                                <th width="10%">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="popup_htmlTaskFile_jkwdksjb_ZJ" data-tag="0">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group mod_touying">
+                            <label class="col-md-2 control-label control-label_position02">嵌岩装备资料</label>
+                            <div class="col-md-10">
+                                <div class="zdtj_box clearfix">
+                                    <div class="col-md-6 pr0">
+                                        <input type="file" multiple class="form-control pull-left" accept=".xlsx" id="popup_uploadTaskFile_qyzbzl_ZJ">
+                                    </div>
+                                    <div class="col-md-1 text-center">
+                                        <button class="btn search_btn btn-success" id="popup_btn_uploadTaskFile_qyzbzl_ZJ" onclick="SoftwareZJHelper.UploadTaskFile(4);">上传</button>
+                                    </div>
+                                    <div class="col-md-5 text-right zhuyi_zt pr0">
+
+                                    </div>
+                                </div>
+
+                                <div class="table_project_box">
+                                    <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                        <thead>
+                                            <tr>
+                                                <th width="60%">文件名</th>
+                                                <th width="15%">类型</th>
+                                                <th width="15%">大小</th>
+                                                <th width="10%">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="popup_htmlTaskFile_qyzbzl_ZJ" data-tag="0">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group mod_touying">
+                            <label class="col-md-2 control-label control-label_position02">施工工艺</label>
+                            <div class="col-md-10">
+                                <div class="zdtj_box clearfix">
+                                    <div class="col-md-6 pr0">
+                                        <input type="file" multiple class="form-control pull-left" id="popup_uploadTaskFile_sggy_ZJ">
+                                    </div>
+                                    <div class="col-md-1 text-center">
+                                        <button class="btn search_btn btn-success" id="popup_btn_uploadTaskFile_sggy_ZJ" onclick="SoftwareZJHelper.UploadTaskFile(5);">上传</button>
+                                    </div>
+                                    <div class="col-md-5 text-right zhuyi_zt pr0">
+
+                                    </div>
+                                </div>
+
+                                <div class="table_project_box">
+                                    <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                        <thead>
+                                            <tr>
+                                                <th width="60%">文件名</th>
+                                                <th width="15%">类型</th>
+                                                <th width="15%">大小</th>
+                                                <th width="10%">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="popup_htmlTaskFile_sggy_ZJ" data-tag="0">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group mod_touying">
+                            <label class="col-md-2 control-label control-label_position02">作业环境</label>
+                            <div class="col-md-10">
+                                <div class="zdtj_box clearfix">
+                                    <div class="col-md-6 pr0">
+                                        <input type="file" multiple class="form-control pull-left" id="popup_uploadTaskFile_zyhj_ZJ">
+                                    </div>
+                                    <div class="col-md-1 text-center">
+                                        <button class="btn search_btn btn-success" id="popup_btn_uploadTaskFile_zyhj_ZJ" onclick="SoftwareZJHelper.UploadTaskFile(6);">上传</button>
+                                    </div>
+                                    <div class="col-md-5 text-right zhuyi_zt pr0">
+
+                                    </div>
+                                </div>
+
+                                <div class="table_project_box">
+                                    <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                        <thead>
+                                            <tr>
+                                                <th width="60%">文件名</th>
+                                                <th width="15%">类型</th>
+                                                <th width="15%">大小</th>
+                                                <th width="10%">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="popup_htmlTaskFile_zyhj_ZJ" data-tag="0">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group mod_touying">
+                            <label class="col-md-2 control-label control-label_position02">临近项目施工资料</label>
+                            <div class="col-md-10">
+                                <div class="zdtj_box clearfix">
+                                    <div class="col-md-6 pr0">
+                                        <input type="file" multiple class="form-control pull-left" id="popup_uploadTaskFile_ljxmsgzl_ZJ">
+                                    </div>
+                                    <div class="col-md-1 text-center">
+                                        <button class="btn search_btn btn-success" id="popup_btn_uploadTaskFile_ljxmsgzl_ZJ" onclick="SoftwareZJHelper.UploadTaskFile(7);">上传</button>
+                                    </div>
+                                    <div class="col-md-5 text-right zhuyi_zt pr0">
+
+                                    </div>
+                                </div>
+
+                                <div class="table_project_box">
+                                    <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                        <thead>
+                                            <tr>
+                                                <th width="60%">文件名</th>
+                                                <th width="15%">类型</th>
+                                                <th width="15%">大小</th>
+                                                <th width="10%">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="popup_htmlTaskFile_ljxmsgzl_ZJ" data-tag="0">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group mod_touying">
+                            <label class="col-md-2 control-label control-label_position02">实际施工情况</label>
+                            <div class="col-md-10">
+                                <div class="zdtj_box clearfix">
+                                    <div class="col-md-6 pr0">
+                                        <input type="file" multiple class="form-control pull-left" id="popup_uploadTaskFile_sjsgqk_ZJ">
+                                    </div>
+                                    <div class="col-md-1 text-center">
+                                        <button class="btn search_btn btn-success" id="popup_btn_uploadTaskFile_sjsgqk_ZJ" onclick="SoftwareZJHelper.UploadTaskFile(8);">上传</button>
+                                    </div>
+                                    <div class="col-md-5 text-right zhuyi_zt pr0">
+                                        <a class="btn btn-primary btn-primary-a" href="~/File/Task/黄船33.xlsx">模板下载</a>
+                                    </div>
+                                </div>
+
+                                <div class="table_project_box">
+                                    <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                        <thead>
+                                            <tr>
+                                                <th width="60%">文件名</th>
+                                                <th width="15%">类型</th>
+                                                <th width="15%">大小</th>
+                                                <th width="10%">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="popup_htmlTaskFile_sjsgqk_ZJ" data-tag="0">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group mod_touying" id="popup_divReport_ZJ">
+                            <label class="col-md-2 control-label control-label_position02" style="color:red;">报告文件</label>
+                            <div class="col-md-10">
+
+                                <div class="zdtj_box clearfix">
+                                    <div class="col-md-6 pr0">
+                                        <input type="file" multiple class="form-control pull-left" id="popup_uploadReportFile_ZJ">
+                                    </div>
+                                    <div class="col-md-1 text-center">
+                                        <button class="btn search_btn btn-success" id="popup_btn_uploadReportFile_ZJ" onclick="SoftwareZJHelper.UploadReportFile();">上传</button>
+                                    </div>
+                                    <div class="col-md-5 text-right zhuyi_zt pr0">
+                                    </div>
+                                </div>
+
+                                <div class="table_project_box">
+                                    <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                        <thead>
+                                            <tr>
+                                                <th width="60%">文件名</th>
+                                                <th width="15%">类型</th>
+                                                <th width="15%">大小</th>
+                                                <th width="10%">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="popup_htmlReportFile_ZJ" data-tag="0">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">报告接收人</label>
+                            <div class="col-md-4">
+                                <div class="nice-select">
+                                    <input type="text" class="form-control" placeholder="姓名关键字搜索" id="popup_txtDeliverUserName_ZJ" autocomplete="off" />
+                                    <div class="search_div" onclick="SoftwareZJHelper.ClearShjDeliverUserName();" id="popup_divClearDeliverName_ZJ">
+                                        <i class="fa fa-close"></i>
+                                    </div>
+                                    <ul id="popup_ulDeliverUserList_ZJ" style="display:none;">
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-1 text-center">
+                                <button class="btn btn-primary search_btn" style="width: 100%" id="popup_btnDeiverNameQuery_ZJ" onclick="SoftwareZJHelper.FindShjDeliverUser();">搜索</button>
+                            </div>
+                            <div class="col-md-5 zhuyi_zt">
+                                注意：请选择最终报告文件的接收人员。
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">交付时间（之前）</label>
+                            <div class="col-md-10">
+                                <input placeholder="交付时间" class="laydate-icon timeUstyle stateUTime form-control" id="popup_TaskDeliverTime_ZJ" onclick="laydate({istime: true,format:'YYYY-MM-DD'})">
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="popup_divLastContent_ZJ">
+                            <label class="col-md-2 control-label control-label_position02">上一节点意见</label>
+
+                            <div class="col-md-10">
+                                <textarea class="form-control" id="popup_txtLastContent_ZJ" disabled></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="popup_divContent_ZJ">
+                            <label class="col-md-2 control-label control-label_position02">审批意见</label>
+
+                            <div class="col-md-10">
+                                <textarea class="form-control" id="popup_txtContent_ZJ"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group mod_touying" id="popup_divNextNode_ZJ">
+                            <label class="col-md-2 control-label" style="color:red;" id="popup_labNextNode_ZJ">流程下一节点<br /><span id="popup_spanNextNodeName_ZJ">111122222</span></label>
+                            <div class="col-md-4">
+                                <div class="nice-select">
+                                    <input type="text" class="form-control" placeholder="姓名关键字搜索" id="popup_txtNodeUserName_ZJ" autocomplete="off" />
+                                    <div class="search_div" onclick="SoftwareZJHelper.ClearShjNodeUserName();" id="popup_divClearNodeName_ZJ">
+                                        <i class="fa fa-close"></i>
+                                    </div>
+                                    <ul id="popup_ulNodeUserList_ZJ" style="display:none;">
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="col-md-1 pl0 text-center">
+                                <button class="btn btn-primary search_btn" style="width: 100%" id="popup_btnFindNodeUserName_ZJ" onclick="SoftwareZJHelper.FindShjNodeUser();">搜索</button>
+                            </div>
+                            <div class="col-md-5 zhuyi_zt">
+                                注意：请按照流程节点审批要求，指定下一节点审批人。如果节点审批人选错，整个流程将不能通过或者退回。
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="text-center sqzl_btn_box">
+                    <button class="btn btn-success" onclick="SoftwareZJHelper.AddTaskSubmit(this);" data-type="1" id="popup_btnSubmit_ZJ">申请</button>
+                    <button class="btn btn-success" style="color:red;" id="popup_btnBack_ZJ" data-type="0" onclick="SoftwareZJHelper.AddTaskSubmit(this);">审批退回</button>
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+    $(document).ready(function () {
+        SoftwareZJHelper.Init();
+    })
+
+    var SoftwareZJHelper = {
+
+        Init: function () {
+            SoftwareZJHelper.DeliverTimeInit();
+        },
+        DeliverTimeInit: function () {
+            $('#popup_TaskDeliverTime_ZJ').val(formatDateTimeByDay(new Date(new Date().setMonth(new Date().getMonth() + 1))));
+        },
+        OpenPopup: function () {
+
+            var ChooseProjectID = $('#popup_software_ProjectChoose').val();
+            if (ChooseProjectID == null || ChooseProjectID == '' || ChooseProjectID == 0) {
+                ModalPopup('error', '必须先选择所关联的风场');
+                return;
+            }
+
+            SoftwareZJHelper.OpenTaskPopup('new');
+
+        },
+        OpenTaskPopup: function (type) {
+            if (type == 'new') {
+                //清空弹窗
+                SoftwareZJHelper.ClearTaskPopup();
+                //设置可写
+                SoftwareZJHelper.SetTaskPopupWrite();
+
+                //报告文件
+                $('#popup_divReport_ZJ').hide();
+                //上一节点审批意见
+                $('#popup_divLastContent_ZJ').hide();
+                //审批意见
+                $('#popup_divContent_ZJ').hide();
+                //下一节点
+                $('#popup_divNextNode_ZJ').hide();
+
+                $('#popup_btnBack_ZJ').hide();
+                $('#popup_btnSubmit_ZJ').show().html('申请').attr('data-type', 1);
+
+            }
+            else if (type == 'view') {
+                //清空弹窗
+                SoftwareZJHelper.ClearTaskPopup();
+                //设置可写
+                SoftwareZJHelper.SetTaskPopupRead();
+
+
+                //成果报告（需要另外判断）
+                $('#popup_divReport_ZJ').show();
+
+                //上节点审批意见
+                $('#popup_divLastContent_ZJ').show();
+                //审批意见
+                $('#popup_divContent_ZJ').hide();
+                //下节点信息
+                $('#popup_divNextNode_ZJ').hide();
+
+                //申请按钮
+                $('#popup_btnSubmit_ZJ').hide();
+                $('#popup_btnBack_ZJ').hide();
+
+            }
+            else if (type == 'approval') {
+                //清空弹窗
+                SoftwareZJHelper.ClearTaskPopup();
+                //设置只读
+                SoftwareZJHelper.SetTaskPopupRead();
+
+                //成果报告（需要另外判断）
+                $('#popup_divReport_ZJ').show();
+                //上节点审批意见
+                $('#popup_divLastContent_ZJ').show();
+                //审批意见
+                $('#popup_divContent_ZJ').show();
+                $('#popup_txtContent_ZJ').attr('disabled', false);
+                //下节点信息
+                $('#popup_divNextNode_ZJ').show();
+                $('#popup_txtNodeUserName_ZJ').attr('disabled', false);
+                $('#popup_btnFindNodeUserName_ZJ').attr('disabled', false);
+                $('#popup_divClearNodeName_ZJ').show();
+
+                $('#popup_btnBack_ZJ').show();
+                $('#popup_btnSubmit_ZJ').show().html('审批通过').attr('data-type', 2);
+
+
+
+            }
+            else if (type == 'renew') {
+                //清空弹窗
+                SoftwareZJHelper.ClearTaskPopup();
+                //设置可写
+                SoftwareZJHelper.SetTaskPopupWrite();
+
+                //成果报告（需要另外判断）
+                $('#popup_divReport_ZJ').show();
+
+                //上节点审批意见
+                $('#popup_divLastContent_ZJ').show();
+                $('#popup_txtLastContent_ZJ').attr('disabled', true);
+                //审批意见
+                $('#popup_divContent_ZJ').show();
+                $('#popup_txtContent_ZJ').attr('disabled', false);
+                //下节点信息
+                $('#popup_divNextNode_ZJ').hide();
+
+                $('#popup_btnBack_ZJ').hide();
+                $('#popup_btnSubmit_ZJ').show().html('重新提交').attr('data-type', 2);
+            }
+
+            $('#Tk_software_06').modal('show');
+
+            $('#popup_htmlTaskFile_gcxmjbzl_ZJ').attr('data-tag', 0);
+            $('#popup_htmlTaskFile_jkwdkzl_ZJ').attr('data-tag', 0);
+            $('#popup_htmlTaskFile_jkwdksjb_ZJ').attr('data-tag', 0);
+            $('#popup_htmlTaskFile_qyzbzl_ZJ').attr('data-tag', 0);
+            $('#popup_htmlTaskFile_sggy_ZJ').attr('data-tag', 0);
+            $('#popup_htmlTaskFile_zyhj_ZJ').attr('data-tag', 0);
+            $('#popup_htmlTaskFile_ljxmsgzl_ZJ').attr('data-tag', 0);
+            $('#popup_htmlTaskFile_sjsgqk_ZJ').attr('data-tag', 0);
+
+            $('#popup_htmlReportFile_ZJ').attr('data-tag', 0);
+        },
+        ClearTaskPopup: function () {
+
+            $('#popup_txtTaskName_ZJ').val('');
+
+            $('#popup_uploadTaskFile_gcxmjbzl_ZJ').val('');
+            $('#popup_uploadTaskFile_jkwdkzl_ZJ').val('');
+            $('#popup_uploadTaskFile_jkwdksjb_ZJ').val('');
+            $('#popup_uploadTaskFile_qyzbzl_ZJ').val('');
+            $('#popup_uploadTaskFile_sggy_ZJ').val('');
+            $('#popup_uploadTaskFile_zyhj_ZJ').val('');
+            $('#popup_uploadTaskFile_ljxmsgzl_ZJ').val('');
+            $('#popup_uploadTaskFile_sjsgqk_ZJ').val('');
+
+            $('#popup_htmlTaskFile_gcxmjbzl_ZJ').html('');
+            $('#popup_htmlTaskFile_jkwdkzl_ZJ').html('');
+            $('#popup_htmlTaskFile_jkwdksjb_ZJ').html('');
+            $('#popup_htmlTaskFile_qyzbzl_ZJ').html('');
+            $('#popup_htmlTaskFile_sggy_ZJ').html('');
+            $('#popup_htmlTaskFile_zyhj_ZJ').html('');
+            $('#popup_htmlTaskFile_ljxmsgzl_ZJ').html('');
+            $('#popup_htmlTaskFile_sjsgqk_ZJ').html('');
+
+            $('#popup_uploadReportFile_ZJ').val('');
+            $('#popup_htmlReportFile_ZJ').html('');
+
+            $('#popup_txtDeliverUserName_ZJ').val('');
+            $('#popup_TaskDeliverTime_ZJ').val('');
+
+            $('#popup_txtLastContent_ZJ').val('');
+            $('#popup_txtContent_ZJ').val('');
+            $('#popup_txtNodeUserName_ZJ').val('');
+
+            SoftwareZJHelper.DeliverTimeInit();
+        },
+        SetTaskPopupWrite: function () {
+
+            $('#popup_txtTaskName_ZJ').attr('disabled', false);
+
+            $('#popup_uploadTaskFile_gcxmjbzl_ZJ').attr('disabled', false);
+            $('#popup_uploadTaskFile_jkwdkzl_ZJ').attr('disabled', false);
+            $('#popup_uploadTaskFile_jkwdksjb_ZJ').attr('disabled', false);
+            $('#popup_uploadTaskFile_qyzbzl_ZJ').attr('disabled', false);
+            $('#popup_uploadTaskFile_sggy_ZJ').attr('disabled', false);
+            $('#popup_uploadTaskFile_zyhj_ZJ').attr('disabled', false);
+            $('#popup_uploadTaskFile_ljxmsgzl_ZJ').attr('disabled', false);
+            $('#popup_uploadTaskFile_sjsgqk_ZJ').attr('disabled', false);
+
+            $('#popup_btn_uploadTaskFile_gcxmjbzl_ZJ').attr('disabled', false);
+            $('#popup_btn_uploadTaskFile_jkwdkzl_ZJ').attr('disabled', false);
+            $('#popup_btn_uploadTaskFile_jkwdksjb_ZJ').attr('disabled', false);
+            $('#popup_btn_uploadTaskFile_qyzbzl_ZJ').attr('disabled', false);
+            $('#popup_btn_uploadTaskFile_sggy_ZJ').attr('disabled', false);
+            $('#popup_btn_uploadTaskFile_zyhj_ZJ').attr('disabled', false);
+            $('#popup_btn_uploadTaskFile_ljxmsgzl_ZJ').attr('disabled', false);
+            $('#popup_btn_uploadTaskFile_sjsgqk_ZJ').attr('disabled', false);
+
+            $('#popup_uploadReportFile_ZJ').attr('disabled', false);
+            $('#popup_btn_uploadReportFile_ZJ').attr('disabled', false);
+
+            $('#popup_txtDeliverUserName_ZJ').attr('disabled', false);
+            $('#popup_btnDeiverNameQuery_ZJ').attr('disabled', false);
+            $('#popup_divClearDeliverName_ZJ').show();
+
+            $('#popup_TaskDeliverTime_ZJ').attr('disabled', false);
+
+            $('#popup_txtContent_ZJ').attr('disabled', false);
+
+            $('#popup_txtNodeUserName_ZJ').attr('disabled', false);
+            $('#popup_btnFindNodeUserName_ZJ').attr('disabled', false);
+            $('#popup_divClearNodeName_ZJ').show();
+
+        },
+
+        SetTaskPopupRead: function () {
+
+            $('#popup_txtTaskName_ZJ').attr('disabled', true);
+
+            $('#popup_uploadTaskFile_gcxmjbzl_ZJ').attr('disabled', true);
+            $('#popup_uploadTaskFile_jkwdkzl_ZJ').attr('disabled', true);
+            $('#popup_uploadTaskFile_jkwdksjb_ZJ').attr('disabled', true);
+            $('#popup_uploadTaskFile_qyzbzl_ZJ').attr('disabled', true);
+            $('#popup_uploadTaskFile_sggy_ZJ').attr('disabled', true);
+            $('#popup_uploadTaskFile_zyhj_ZJ').attr('disabled', true);
+            $('#popup_uploadTaskFile_ljxmsgzl_ZJ').attr('disabled', true);
+            $('#popup_uploadTaskFile_sjsgqk_ZJ').attr('disabled', true);
+
+            $('#popup_btn_uploadTaskFile_gcxmjbzl_ZJ').attr('disabled', true);
+            $('#popup_btn_uploadTaskFile_jkwdkzl_ZJ').attr('disabled', true);
+            $('#popup_btn_uploadTaskFile_jkwdksjb_ZJ').attr('disabled', true);
+            $('#popup_btn_uploadTaskFile_qyzbzl_ZJ').attr('disabled', true);
+            $('#popup_btn_uploadTaskFile_sggy_ZJ').attr('disabled', true);
+            $('#popup_btn_uploadTaskFile_zyhj_ZJ').attr('disabled', true);
+            $('#popup_btn_uploadTaskFile_ljxmsgzl_ZJ').attr('disabled', true);
+            $('#popup_btn_uploadTaskFile_sjsgqk_ZJ').attr('disabled', true);
+
+            $('#popup_uploadReportFile_ZJ').attr('disabled', true);
+            $('#popup_btn_uploadReportFile_ZJ').attr('disabled', true);
+
+            $('#popup_txtDeliverUserName_ZJ').attr('disabled', true);
+            $('#popup_btnDeiverNameQuery_ZJ').attr('disabled', true);
+            $('#popup_divClearDeliverName_ZJ').hide();
+
+            $('#popup_TaskDeliverTime_ZJ').attr('disabled', true);
+
+            $('#popup_txtContent_ZJ').attr('disabled', true);
+
+            $('#popup_txtNodeUserName_ZJ').attr('disabled', true);
+            $('#popup_btnFindNodeUserName_ZJ').attr('disabled', true);
+            $('#popup_divClearNodeName_ZJ').hide();
+
+        },
+
+        UploadTaskFile: function (FileType) {
+
+            if (FileType == null || FileType == '' || FileType == 0)
+                return;
+
+            var formData = new FormData();
+            formData.append("FileType", FileType);
+            var TaskFiles = null;
+            if (FileType == 1) {
+                TaskFiles = $('#popup_uploadTaskFile_gcxmjbzl_ZJ')[0].files;
+            }
+            else if (FileType == 2) {
+                TaskFiles = $('#popup_uploadTaskFile_jkwdkzl_ZJ')[0].files;
+            }
+            else if (FileType == 3) {
+                TaskFiles = $('#popup_uploadTaskFile_jkwdksjb_ZJ')[0].files;
+            }
+            else if (FileType == 4) {
+                TaskFiles = $('#popup_uploadTaskFile_qyzbzl_ZJ')[0].files;
+            }
+            else if (FileType == 5) {
+                TaskFiles = $('#popup_uploadTaskFile_sggy_ZJ')[0].files;
+            }
+            else if (FileType == 6) {
+                TaskFiles = $('#popup_uploadTaskFile_zyhj_ZJ')[0].files;
+            }
+            else if (FileType == 7) {
+                TaskFiles = $('#popup_uploadTaskFile_ljxmsgzl_ZJ')[0].files;
+            }
+            else if (FileType == 8) {
+                TaskFiles = $('#popup_uploadTaskFile_sjsgqk_ZJ')[0].files;
+            }
+
+            if (TaskFiles == null || TaskFiles.length == 0)
+                return;
+
+            var FileCount = TaskFiles.length;
+            formData.append("TaskFileCount", FileCount);
+            var Count = 1;
+            $(TaskFiles).each(function (index, dom) {
+
+                formData.append("TaskFile" + Count, dom);
+
+                Count++;
+            });
+
+
+            $.ajax({
+                url: 'TaskFileUpload',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: formData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+
+                            var TaskFileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                TaskFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileExtension + '</td><td>' + dom.FileLength + '</td><td><a href="#" class="xm_zt_red" onclick="SoftwareZJHelper.DeleteTaskFile(this);">删除</a></td></tr>';
+                            });
+                            if (FileType == 1) {
+                                $('#popup_htmlTaskFile_gcxmjbzl_ZJ').html(TaskFileHtml);
+                                $('#popup_htmlTaskFile_gcxmjbzl_ZJ').attr('data-tag', 1);
+                            }
+                            else if (FileType == 2) {
+                                $('#popup_htmlTaskFile_jkwdkzl_ZJ').html(TaskFileHtml);
+                                $('#popup_htmlTaskFile_jkwdkzl_ZJ').attr('data-tag', 1);
+                            }
+                            else if (FileType == 3) {
+                                $('#popup_htmlTaskFile_jkwdksjb_ZJ').html(TaskFileHtml);
+                                $('#popup_htmlTaskFile_jkwdksjb_ZJ').attr('data-tag', 1);
+                            }
+                            else if (FileType == 4) {
+                                $('#popup_htmlTaskFile_qyzbzl_ZJ').html(TaskFileHtml);
+                                $('#popup_htmlTaskFile_qyzbzl_ZJ').attr('data-tag', 1);
+                            }
+                            else if (FileType == 5) {
+                                $('#popup_htmlTaskFile_sggy_ZJ').html(TaskFileHtml);
+                                $('#popup_htmlTaskFile_sggy_ZJ').attr('data-tag', 1);
+                            }
+                            else if (FileType == 6) {
+                                $('#popup_htmlTaskFile_zyhj_ZJ').html(TaskFileHtml);
+                                $('#popup_htmlTaskFile_zyhj_ZJ').attr('data-tag', 1);
+                            }
+                            else if (FileType == 7) {
+                                $('#popup_htmlTaskFile_ljxmsgzl_ZJ').html(TaskFileHtml);
+                                $('#popup_htmlTaskFile_ljxmsgzl_ZJ').attr('data-tag', 1);
+                            }
+                            else if (FileType == 8) {
+                                $('#popup_htmlTaskFile_sjsgqk_ZJ').html(TaskFileHtml);
+                                $('#popup_htmlTaskFile_sjsgqk_ZJ').attr('data-tag', 1);
+                            }
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                }
+            });
+
+        },
+
+        UploadReportFile: function () {
+
+            var formData = new FormData();
+
+            var ReportFiles = $('#popup_uploadReportFile_ZJ')[0].files;
+
+            if (ReportFiles == null || ReportFiles.length == 0)
+                return;
+
+            var FileCount = ReportFiles.length;
+            formData.append("TaskFileCount", FileCount);
+            var Count = 1;
+            $(ReportFiles).each(function (index, dom) {
+
+                formData.append("TaskFile" + Count, dom);
+
+                Count++;
+            });
+
+            $.ajax({
+                url: 'TaskFileUpload',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: formData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+
+                            var TaskFileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                TaskFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileExtension + '</td><td>' + dom.FileLength + '</td><td><a href="#" class="xm_zt_red" onclick="SoftwareZJHelper.DeleteTaskFile(this);">删除</a></td></tr>';
+                            });
+                            $('#popup_htmlReportFile_ZJ').html(TaskFileHtml);
+                            $('#popup_htmlReportFile_ZJ').attr('data-tag', 1);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                }
+            });
+
+        },
+
+        DeleteTaskFile: function (dom) {
+
+            if (dom != null) {
+                $(dom).parent().parent().remove();
+            }
+
+        },
+
+        ChoosedDeliverUser: { Name: '', UserCode: '', Depart: '', Phone: '', JobName: '' },
+
+        ChoosedTaskNodeUser: { Name: '', UserCode: '', Depart: '', Phone: '', JobName: '', NextNodeID: '' },
+
+        FindShjDeliverUser: function () {
+
+            Param.Name = $("#popup_txtDeliverUserName_ZJ").val();
+
+            $.post('FindShjUser', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        if (data.Success) {
+
+                            var DataListHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                DataListHtml += '<li onclick="SoftwareZJHelper.ChooseDeliverUser(this);" data-usercode="' + dom.empcode + '" data-name="' + dom.name + '" data-depart="' + dom.wholeDeptPath + '" data-phone="' + dom.phone + '" data-jobname="' + dom.jobname + '" ><h3>' + dom.name + '(' + dom.jobname + ')</h3><div>' + dom.wholeDeptPath + '</div></li >';
+
+                            });
+                            $('ul#popup_ulDeliverUserList_ZJ').html(DataListHtml);
+                            $('ul#popup_ulDeliverUserList_ZJ').show();
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                    Pagination();
+                });
+
+        },
+
+        FindShjNodeUser: function () {
+
+            Param.Name = $("#popup_txtNodeUserName_ZJ").val();
+
+            $.post('FindShjUser', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        if (data.Success) {
+
+                            var DataListHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                DataListHtml += '<li onclick="SoftwareZJHelper.ChooseNodeUser(this);" data-usercode="' + dom.empcode + '" data-name="' + dom.name + '" data-depart="' + dom.wholeDeptPath + '" data-phone="' + dom.phone + '" data-jobname="' + dom.jobname + '" ><h3>' + dom.name + '(' + dom.jobname + ')</h3><div>' + dom.wholeDeptPath + '</div></li >';
+
+                            });
+                            $('ul#popup_ulNodeUserList_ZJ').html(DataListHtml);
+                            $('ul#popup_ulNodeUserList_ZJ').show();
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                    Pagination();
+                });
+
+        },
+
+        ChooseDeliverUser: function (dom) {
+
+            //SoftwareZJHelper.ChoosedDeliverUser = {};
+
+            if (dom == null)
+                return;
+
+            var Name = $(dom).attr('data-name');
+            var UserCode = $(dom).attr('data-usercode');
+            var Depart = $(dom).attr('data-depart');
+            var Phone = $(dom).attr('data-phone');
+            var JobName = $(dom).attr('data-jobname');
+
+            SoftwareZJHelper.ChoosedDeliverUser.Name = Name;
+            SoftwareZJHelper.ChoosedDeliverUser.UserCode = UserCode;
+            SoftwareZJHelper.ChoosedDeliverUser.Depart = Depart;
+            SoftwareZJHelper.ChoosedDeliverUser.Phone = Phone;
+            SoftwareZJHelper.ChoosedDeliverUser.JobName = JobName;
+
+            if (Name == '' || UserCode == '')
+                return;
+
+            $('#popup_txtDeliverUserName_ZJ').val(Name + '(' + Depart + ')');
+
+            $('ul#popup_ulDeliverUserList_ZJ').hide();
+
+        },
+
+        ChooseNodeUser: function (dom) {
+
+            //SoftwareZJHelper.ChoosedTaskNodeUser = {};
+
+            if (dom == null)
+                return;
+
+            var Name = $(dom).attr('data-name');
+            var UserCode = $(dom).attr('data-usercode');
+            var Depart = $(dom).attr('data-depart');
+            var Phone = $(dom).attr('data-phone');
+            var JobName = $(dom).attr('data-jobname');
+
+            SoftwareZJHelper.ChoosedTaskNodeUser.Name = Name;
+            SoftwareZJHelper.ChoosedTaskNodeUser.UserCode = UserCode;
+            SoftwareZJHelper.ChoosedTaskNodeUser.Depart = Depart;
+            SoftwareZJHelper.ChoosedTaskNodeUser.Phone = Phone;
+            SoftwareZJHelper.ChoosedTaskNodeUser.JobName = JobName;
+
+            if (Name == '' || UserCode == '')
+                return;
+
+            $('#popup_txtNodeUserName_ZJ').val(Name + '(' + Depart + ')');
+
+            $('ul#popup_ulNodeUserList_ZJ').hide();
+
+        },
+
+        ClearShjDeliverUserName: function () {
+            SoftwareZJHelper.ChoosedDeliverUser = {};
+            $('#popup_txtDeliverUserName_ZJ').val('');
+        },
+
+        ClearShjNodeUserName: function () {
+            SoftwareZJHelper.ChoosedTaskNodeUser = {};
+            $('#popup_txtNodeUserName_ZJ').val('');
+        },
+
+        PopupOpenedTaskID: 0,
+        PopupIsBackFlow: false,
+
+        OpenTaskInfo: function (TaskID, Type) {
+
+            Param.TaskID = TaskID;
+
+            SoftwareZJHelper.PopupOpenedTaskID = 0;
+
+            $.post('TaskQuery_ZJ', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+                            SoftwareZJHelper.PopupOpenedTaskID = TaskID;
+
+                            var Task = data.Data;
+
+                            SoftwareZJHelper.OpenTaskPopup(Task.FlowInfo.FlowHandle);
+
+                            SoftwareZJHelper.PopupIsBackFlow = Task.FlowInfo.IsBackFlow;
+
+                            //退回重新走流程
+                            if (Task.FlowInfo.FlowHandle == 'renew') {
+                                SoftwareZJHelper.ChoosedDeliverUser.Name = Task.DeliverUser.UserName;
+                                SoftwareZJHelper.ChoosedDeliverUser.UserCode = Task.DeliverUser.UserCode;
+                                SoftwareZJHelper.ChoosedDeliverUser.Depart = Task.DeliverUser.UserDepart;
+                                SoftwareZJHelper.ChoosedDeliverUser.Phone = Task.DeliverUser.UserPhone;
+                                SoftwareZJHelper.ChoosedDeliverUser.JobName = Task.DeliverUser.UserJobName;
+
+
+                                $('#popup_uploadReportFile_ZJ').attr('disabled', true);
+                                $('#popup_btn_uploadReportFile_ZJ').attr('disabled', true);
+
+                            }
+
+                            //使用类软件
+                            //if (Task.FlowInfo.IsUsingFlowNode) {
+                            //    $('#popup_divContent_ZJ').hide();
+                            //    $('#popup_divNextNode_ZJ').hide();
+                            //    $('#popup_btnSubmit_ZJ').hide();
+                            //    $('#popup_btnBack_ZJ').hide();
+                            //}
+
+                            //如果是最后的流程
+                            SoftwareZJHelper.ChoosedTaskNodeUser.NextNodeID = Task.FlowInfo.NextNode.NodeID;
+                            if (Task.FlowInfo.NextNode.NodeID == 0) {
+                                $('#popup_txtNodeUserName').attr('disabled', true);
+                                $('#popup_btnFindNodeUserName').attr('disabled', true);
+                                $('#popup_divClearNodeName').hide();
+                            }
+
+                            //下一节点如果有默认人物
+                            if (Task.FlowInfo.NextNode != null && Task.FlowInfo.NextNode.UserCode != null && Task.FlowInfo.NextNode.UserCode != '') {
+                                SoftwareZJHelper.ChoosedTaskNodeUser.Name = Task.FlowInfo.NextNode.UserName;
+                                SoftwareZJHelper.ChoosedTaskNodeUser.UserCode = Task.FlowInfo.NextNode.UserCode;
+                                SoftwareZJHelper.ChoosedTaskNodeUser.Depart = Task.FlowInfo.NextNode.UserDepart;
+                                SoftwareZJHelper.ChoosedTaskNodeUser.Phone = Task.FlowInfo.NextNode.UserPhone;
+                                SoftwareZJHelper.ChoosedTaskNodeUser.JobName = Task.FlowInfo.NextNode.UserJobName;
+
+
+                                $('#popup_txtNodeUserName_ZJ').val(Task.FlowInfo.NextNode.UserName + '(' + Task.FlowInfo.NextNode.UserDepart + ')');
+
+                            }
+
+
+                            //填充数据
+                            $('#popup_txtTaskName_ZJ').val(Task.TaskName);
+
+                            //上一节点意见
+                            $('#popup_txtLastContent_ZJ').val(Task.FlowInfo.LastNode.Comment);
+
+                            //项目文件接收人
+                            $('#popup_TaskDeliverTime_ZJ').val(Task.DeliverTime)
+                            $('#popup_txtDeliverUserName_ZJ').val(Task.DeliverUser.UserName + '(' + Task.DeliverUser.UserDepart + ')');
+
+                            //下一节点
+                            $('#popup_spanNextNodeName_ZJ').html(Task.FlowInfo.NextNode.NodeName);
+
+                            var File_gcxmjbzl_Html = '';
+                            $(Task.File_gcxmjbzl).each(function (index, dom) {
+                                File_gcxmjbzl_Html += '<tr><td>' + dom.FileName + '</td><td></td><td></td><td><a href="' + dom.FilePath + '" class="xm_zt_green" >下载</a></td></tr>';
+                            });
+                            $('#popup_htmlTaskFile_gcxmjbzl_ZJ').html(File_gcxmjbzl_Html);
+
+                            var File_jkwdkzl_Html = '';
+                            $(Task.File_jkwdkzl).each(function (index, dom) {
+                                File_jkwdkzl_Html += '<tr><td>' + dom.FileName + '</td><td></td><td></td><td><a href="' + dom.FilePath + '" class="xm_zt_green" >下载</a></td></tr>';
+                            });
+                            $('#popup_htmlTaskFile_jkwdkzl_ZJ').html(File_jkwdkzl_Html);
+
+                            var File_jkwdksjb_Html = '';
+                            $(Task.File_jkwdksjb).each(function (index, dom) {
+                                File_jkwdksjb_Html += '<tr><td>' + dom.FileName + '</td><td></td><td></td><td><a href="' + dom.FilePath + '" class="xm_zt_green" >下载</a></td></tr>';
+                            });
+                            $('#popup_htmlTaskFile_jkwdksjb_ZJ').html(File_jkwdksjb_Html);
+
+                            var File_qyzbzl_Html = '';
+                            $(Task.File_qyzbzl).each(function (index, dom) {
+                                File_qyzbzl_Html += '<tr><td>' + dom.FileName + '</td><td></td><td></td><td><a href="' + dom.FilePath + '" class="xm_zt_green" >下载</a></td></tr>';
+                            });
+                            $('#popup_htmlTaskFile_qyzbzl_ZJ').html(File_qyzbzl_Html);
+
+                            var File_sggy_Html = '';
+                            $(Task.File_sggy).each(function (index, dom) {
+                                File_sggy_Html += '<tr><td>' + dom.FileName + '</td><td></td><td></td><td><a href="' + dom.FilePath + '" class="xm_zt_green" >下载</a></td></tr>';
+                            });
+                            $('#popup_htmlTaskFile_sggy_ZJ').html(File_sggy_Html);
+
+                            var File_zyhj_Html = '';
+                            $(Task.File_zyhj).each(function (index, dom) {
+                                File_zyhj_Html += '<tr><td>' + dom.FileName + '</td><td></td><td></td><td><a href="' + dom.FilePath + '" class="xm_zt_green" >下载</a></td></tr>';
+                            });
+                            $('#popup_htmlTaskFile_zyhj_ZJ').html(File_zyhj_Html);
+
+                            var File_ljxmsgzl_Html = '';
+                            $(Task.File_ljxmsgzl).each(function (index, dom) {
+                                File_ljxmsgzl_Html += '<tr><td>' + dom.FileName + '</td><td></td><td></td><td><a href="' + dom.FilePath + '" class="xm_zt_green" >下载</a></td></tr>';
+                            });
+                            $('#popup_htmlTaskFile_ljxmsgzl_ZJ').html(File_ljxmsgzl_Html);
+
+                            var File_sjsgqk_Html = '';
+                            $(Task.File_sjsgqk).each(function (index, dom) {
+                                File_sjsgqk_Html += '<tr><td>' + dom.FileName + '</td><td></td><td></td><td><a href="' + dom.FilePath + '" class="xm_zt_green" >下载</a></td></tr>';
+                            });
+                            $('#popup_htmlTaskFile_sjsgqk_ZJ').html(File_sjsgqk_Html);
+
+                            //成果报告处理
+                            if (Task.Report.IsDisplay)
+                            {
+                                var ReportFileHtml = '';
+                                $(Task.Report.ReportFile).each(function (index, dom) {
+                                    ReportFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileExtension + '</td><td></td><td><a href="' + dom.FilePath + '" class="xm_zt_green" >下载</a></td></tr>';
+                                })
+                                $('#popup_htmlReportFile_ZJ').html(ReportFileHtml);
+
+                                if (Task.Report.IsOperate) {
+                                    $('#popup_uploadReportFile_ZJ').attr('disabled', false);
+                                    $('#popup_btn_uploadReportFile_ZJ').attr('disabled', false);
+                                }
+                                else
+                                {
+                                    $('#popup_uploadReportFile_ZJ').attr('disabled', true);
+                                    $('#popup_btn_uploadReportFile_ZJ').attr('disabled', true);
+                                }
+                            }
+                            
+
+
+
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                    Pagination();
+                });
+
+        },
+
+        AddTaskSubmit: function (dom) {
+
+            var type = $(dom).attr('data-type');
+            if (type == null || type == '')
+                return;
+
+            var InfoText = '';
+            if (type == 0) {
+                InfoText = '是否要流程退回？流程将退回至发起人';
+            }
+            else if (type == 1) {
+                InfoText = '是否要保存任务？';
+            }
+            else if (type == 2) {
+                InfoText = '是否要审批通过？';
+            }
+
+            ModalPopup('information', InfoText);
+
+            $("#ModalSubmit").unbind('click').bind('click', function () {
+                SoftwareZJHelper.DoTaskSubmit(type);
+            });
+
+        },
+
+        DoTaskSubmit: function (type) {
+
+            if (type == 1) {
+                SoftwareZJHelper.DoTaskAdd();
+            }
+            else if (type == 0 || type == 2) {
+                SoftwareZJHelper.DoTaskApproval(type);
+            }
+
+        },
+
+        DoTaskAdd: function () {
+
+            if (SoftwareZJHelper.ChoosedDeliverUser == null || SoftwareZJHelper.ChoosedDeliverUser.UserCode == null || SoftwareZJHelper.ChoosedDeliverUser.UserCode == '') {
+                ModalClose('information');
+                ModalPopup('error', '需要选择报告接收人');
+                return;
+            }
+
+            var ProjectID = $('#popup_software_ProjectChoose').val();
+            if (ProjectID == null || ProjectID == '' || ProjectID == 0) {
+                ModalClose('information');
+                ModalPopup('error', '软件申请页面需要选择关联风电项目');
+                return;
+            }
+
+            var SubmitFormData = new FormData();
+            SubmitFormData.append("ProjectID", ProjectID);
+            SubmitFormData.append("SoftwareID", 6);//桩基软件ID=6
+            SubmitFormData.append("TaskName", $('#popup_txtTaskName_ZJ').val());
+            SubmitFormData.append("TaskDeliverName", SoftwareZJHelper.ChoosedDeliverUser.Name);
+            SubmitFormData.append("TaskDeliverUserCode", SoftwareZJHelper.ChoosedDeliverUser.UserCode);
+            SubmitFormData.append("TaskDeliverDepart", SoftwareZJHelper.ChoosedDeliverUser.Depart);
+            SubmitFormData.append("TaskDeliverPhone", SoftwareZJHelper.ChoosedDeliverUser.Phone);
+            SubmitFormData.append("TaskDeliverJobName", SoftwareZJHelper.ChoosedDeliverUser.JobName);
+            SubmitFormData.append("TaskDeliverTime", $('#popup_TaskDeliverTime_ZJ').val());
+
+            //gcxmjbzl
+            //jkwdkzl
+            //jkwdksjb
+            //qyzbzl
+            //sggy
+            //zyhj
+            //ljxmsgzl
+            //sjsgqk
+            
+            var FileCount_gcxmjbzl = $('#popup_htmlTaskFile_gcxmjbzl_ZJ tr').length;
+            if (FileCount_gcxmjbzl > 0) {
+                SubmitFormData.append("TaskFileCount_gcxmjbzl", FileCount_gcxmjbzl);
+                var Files = $('#popup_uploadTaskFile_gcxmjbzl_ZJ')[0].files;
+                var Count = 1;
+                $('#popup_htmlTaskFile_gcxmjbzl_ZJ tr').each(function (index, dom) {
+
+                    var FileName = $(dom).find('td').first().html();
+                    if (FileName != null && FileName != '') {
+
+                        $(Files).each(function (index2, dom2) {
+
+                            if (dom2.name == FileName) {
+                                SubmitFormData.append("TaskFile_gcxmjbzl" + Count, dom2);
+                                Count++;
+                                return false;
+                            }
+                        });
+                    }
+                })
+            }
+
+            var FileCount_jkwdkzl = $('#popup_htmlTaskFile_jkwdkzl_ZJ tr').length;
+            if (FileCount_jkwdkzl > 0) {
+                SubmitFormData.append("TaskFileCount_jkwdkzl", FileCount_jkwdkzl);
+                var Files = $('#popup_uploadTaskFile_jkwdkzl_ZJ')[0].files;
+                var Count = 1;
+                $('#popup_htmlTaskFile_jkwdkzl_ZJ tr').each(function (index, dom) {
+
+                    var FileName = $(dom).find('td').first().html();
+                    if (FileName != null && FileName != '') {
+
+                        $(Files).each(function (index2, dom2) {
+
+                            if (dom2.name == FileName) {
+                                SubmitFormData.append("TaskFile_jkwdkzl" + Count, dom2);
+                                Count++;
+                                return false;
+                            }
+                        });
+                    }
+                })
+            }
+
+            var FileCount_jkwdksjb = $('#popup_htmlTaskFile_jkwdksjb_ZJ tr').length;
+            if (FileCount_jkwdksjb > 0) {
+                SubmitFormData.append("TaskFileCount_jkwdksjb", FileCount_jkwdksjb);
+                var Files = $('#popup_uploadTaskFile_jkwdksjb_ZJ')[0].files;
+                var Count = 1;
+                $('#popup_htmlTaskFile_jkwdksjb_ZJ tr').each(function (index, dom) {
+
+                    var FileName = $(dom).find('td').first().html();
+                    if (FileName != null && FileName != '') {
+
+                        $(Files).each(function (index2, dom2) {
+
+                            if (dom2.name == FileName) {
+                                SubmitFormData.append("TaskFile_jkwdksjb" + Count, dom2);
+                                Count++;
+                                return false;
+                            }
+                        });
+                    }
+                })
+            }
+
+            var FileCount_qyzbzl = $('#popup_htmlTaskFile_qyzbzl_ZJ tr').length;
+            if (FileCount_qyzbzl > 0) {
+                SubmitFormData.append("TaskFileCount_qyzbzl", FileCount_qyzbzl);
+                var Files = $('#popup_uploadTaskFile_qyzbzl_ZJ')[0].files;
+                var Count = 1;
+                $('#popup_htmlTaskFile_qyzbzl_ZJ tr').each(function (index, dom) {
+
+                    var FileName = $(dom).find('td').first().html();
+                    if (FileName != null && FileName != '') {
+
+                        $(Files).each(function (index2, dom2) {
+
+                            if (dom2.name == FileName) {
+                                SubmitFormData.append("TaskFile_qyzbzl" + Count, dom2);
+                                Count++;
+                                return false;
+                            }
+                        });
+                    }
+                })
+            }
+
+            var FileCount_sggy = $('#popup_htmlTaskFile_sggy_ZJ tr').length;
+            if (FileCount_sggy > 0) {
+                SubmitFormData.append("TaskFileCount_sggy", FileCount_sggy);
+                var Files = $('#popup_uploadTaskFile_sggy_ZJ')[0].files;
+                var Count = 1;
+                $('#popup_htmlTaskFile_sggy_ZJ tr').each(function (index, dom) {
+
+                    var FileName = $(dom).find('td').first().html();
+                    if (FileName != null && FileName != '') {
+
+                        $(Files).each(function (index2, dom2) {
+
+                            if (dom2.name == FileName) {
+                                SubmitFormData.append("TaskFile_sggy" + Count, dom2);
+                                Count++;
+                                return false;
+                            }
+                        });
+                    }
+                })
+            }
+
+            var FileCount_zyhj = $('#popup_htmlTaskFile_zyhj_ZJ tr').length;
+            if (FileCount_zyhj > 0) {
+                SubmitFormData.append("TaskFileCount_zyhj", FileCount_zyhj);
+                var Files = $('#popup_uploadTaskFile_zyhj_ZJ')[0].files;
+                var Count = 1;
+                $('#popup_htmlTaskFile_zyhj_ZJ tr').each(function (index, dom) {
+
+                    var FileName = $(dom).find('td').first().html();
+                    if (FileName != null && FileName != '') {
+
+                        $(Files).each(function (index2, dom2) {
+
+                            if (dom2.name == FileName) {
+                                SubmitFormData.append("TaskFile_zyhj" + Count, dom2);
+                                Count++;
+                                return false;
+                            }
+                        });
+                    }
+                })
+            }
+
+            var FileCount_ljxmsgzl = $('#popup_htmlTaskFile_ljxmsgzl_ZJ tr').length;
+            if (FileCount_ljxmsgzl > 0) {
+                SubmitFormData.append("TaskFileCount_ljxmsgzl", FileCount_ljxmsgzl);
+                var Files = $('#popup_uploadTaskFile_ljxmsgzl_ZJ')[0].files;
+                var Count = 1;
+                $('#popup_htmlTaskFile_ljxmsgzl_ZJ tr').each(function (index, dom) {
+
+                    var FileName = $(dom).find('td').first().html();
+                    if (FileName != null && FileName != '') {
+
+                        $(Files).each(function (index2, dom2) {
+
+                            if (dom2.name == FileName) {
+                                SubmitFormData.append("TaskFile_ljxmsgzl" + Count, dom2);
+                                Count++;
+                                return false;
+                            }
+                        });
+                    }
+                })
+            }
+
+            var FileCount_sjsgqk = $('#popup_htmlTaskFile_sjsgqk_ZJ tr').length;
+            if (FileCount_sjsgqk > 0) {
+                SubmitFormData.append("TaskFileCount_sjsgqk", FileCount_sjsgqk);
+                var Files = $('#popup_uploadTaskFile_sjsgqk_ZJ')[0].files;
+                var Count = 1;
+                $('#popup_htmlTaskFile_sjsgqk_ZJ tr').each(function (index, dom) {
+
+                    var FileName = $(dom).find('td').first().html();
+                    if (FileName != null && FileName != '') {
+
+                        $(Files).each(function (index2, dom2) {
+
+                            if (dom2.name == FileName) {
+                                SubmitFormData.append("TaskFile_sjsgqk" + Count, dom2);
+                                Count++;
+                                return false;
+                            }
+                        });
+                    }
+                })
+            }
+
+            $.ajax({
+                url: 'TaskSubmit_ZJ',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: SubmitFormData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+                            ModalPopup('success', '保存成功');
+                            $('.tk_sqzl_tx06').stop(true, true).fadeOut()
+                            DoQuery();
+                        }
+                        else {
+
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                    ModalClose('information');
+                }
+            });
+
+        },
+
+
+        DoTaskApproval: function (type) {
+
+            if (SoftwareZJHelper.PopupOpenedTaskID == 0) {
+                ModalClose('information');
+                ModalPopup('error', '数据出错，重新打开弹窗。');
+                return;
+            }
+
+            var SubmitFormData = new FormData();
+
+            SubmitFormData.append("ApprovalType", type);
+            SubmitFormData.append("IsBackFlow", SoftwareZJHelper.PopupIsBackFlow);
+            SubmitFormData.append("NodeID", SoftwareZJHelper.ChoosedTaskNodeUser.NextNodeID);
+            SubmitFormData.append("TaskID", SoftwareZJHelper.PopupOpenedTaskID);
+            SubmitFormData.append("TaskComment", $('#popup_txtContent_ZJ').val());
+            if (SoftwareZJHelper.ChoosedTaskNodeUser.NextNodeID == 0) {
+                //流程结束
+
+            }
+            else {
+                //正常审批
+                SubmitFormData.append("TaskNodeName", SoftwareZJHelper.ChoosedTaskNodeUser.Name);
+                SubmitFormData.append("TaskNodeUserCode", SoftwareZJHelper.ChoosedTaskNodeUser.UserCode);
+                SubmitFormData.append("TaskNodeDepart", SoftwareZJHelper.ChoosedTaskNodeUser.Depart);
+                SubmitFormData.append("TaskNodePhone", SoftwareZJHelper.ChoosedTaskNodeUser.Phone);
+                SubmitFormData.append("TaskNodeJobName", SoftwareZJHelper.ChoosedTaskNodeUser.JobName);
+
+                if (SoftwareZJHelper.PopupIsBackFlow) {
+
+                    SubmitFormData.append("TaskName", $('#popup_txtTaskName_ZJ').val());
+                    SubmitFormData.append("TaskDeliverName", SoftwareZJHelper.ChoosedDeliverUser.Name);
+                    SubmitFormData.append("TaskDeliverUserCode", SoftwareZJHelper.ChoosedDeliverUser.UserCode);
+                    SubmitFormData.append("TaskDeliverDepart", SoftwareZJHelper.ChoosedDeliverUser.Depart);
+                    SubmitFormData.append("TaskDeliverPhone", SoftwareZJHelper.ChoosedDeliverUser.Phone);
+                    SubmitFormData.append("TaskDeliverJobName", SoftwareZJHelper.ChoosedDeliverUser.JobName);
+
+                    SubmitFormData.append("TaskDeliverTime", $('#popup_TaskDeliverTime_ZJ').val());
+
+                    var TaskFile_gcxmjbzl_tag = $('#popup_htmlTaskFile_gcxmjbzl_ZJ').attr('data-tag');
+                    SubmitFormData.append("TaskFile_gcxmjbzl_tag", TaskFile_gcxmjbzl_tag);
+                    if (TaskFile_gcxmjbzl_tag == '1') {
+                        var FileCount_gcxmjbzl = $('#popup_htmlTaskFile_gcxmjbzl_ZJ tr').length;
+                        if (FileCount_gcxmjbzl > 0) {
+                            SubmitFormData.append("TaskFileCount_gcxmjbzl", FileCount_gcxmjbzl);
+                            var Files = $('#popup_uploadTaskFile_gcxmjbzl_ZJ')[0].files;
+                            var Count = 1;
+                            $('#popup_htmlTaskFile_gcxmjbzl_ZJ tr').each(function (index, dom) {
+
+                                var FileName = $(dom).find('td').first().html();
+                                if (FileName != null && FileName != '') {
+
+                                    $(Files).each(function (index2, dom2) {
+
+                                        if (dom2.name == FileName) {
+                                            SubmitFormData.append("TaskFile_gcxmjbzl" + Count, dom2);
+                                            Count++;
+                                            return false;
+                                        }
+                                    });
+                                }
+                            })
+                        }
+                    }
+
+                    var TaskFile_jkwdkzl_tag = $('#popup_htmlTaskFile_jkwdkzl_ZJ').attr('data-tag');
+                    SubmitFormData.append("TaskFile_jkwdkzl_tag", TaskFile_jkwdkzl_tag);
+                    if (TaskFile_jkwdkzl_tag == '1') {
+                        var FileCount_jkwdkzl = $('#popup_htmlTaskFile_jkwdkzl_ZJ tr').length;
+                        if (FileCount_jkwdkzl > 0) {
+                            SubmitFormData.append("TaskFileCount_jkwdkzl", FileCount_jkwdkzl);
+                            var Files = $('#popup_uploadTaskFile_jkwdkzl_ZJ')[0].files;
+                            var Count = 1;
+                            $('#popup_htmlTaskFile_jkwdkzl_ZJ tr').each(function (index, dom) {
+
+                                var FileName = $(dom).find('td').first().html();
+                                if (FileName != null && FileName != '') {
+
+                                    $(Files).each(function (index2, dom2) {
+
+                                        if (dom2.name == FileName) {
+                                            SubmitFormData.append("TaskFile_jkwdkzl" + Count, dom2);
+                                            Count++;
+                                            return false;
+                                        }
+                                    });
+                                }
+                            })
+                        }
+                    }
+
+                    var TaskFile_jkwdksjb_tag = $('#popup_htmlTaskFile_jkwdksjb_ZJ').attr('data-tag');
+                    SubmitFormData.append("TaskFile_jkwdksjb_tag", TaskFile_jkwdksjb_tag);
+                    if (TaskFile_jkwdksjb_tag == '1') {
+                        var FileCount_jkwdksjb = $('#popup_htmlTaskFile_jkwdksjb_ZJ tr').length;
+                        if (FileCount_jkwdksjb > 0) {
+                            SubmitFormData.append("TaskFileCount_jkwdksjb", FileCount_jkwdksjb);
+                            var Files = $('#popup_uploadTaskFile_jkwdksjb_ZJ')[0].files;
+                            var Count = 1;
+                            $('#popup_htmlTaskFile_jkwdksjb_ZJ tr').each(function (index, dom) {
+
+                                var FileName = $(dom).find('td').first().html();
+                                if (FileName != null && FileName != '') {
+
+                                    $(Files).each(function (index2, dom2) {
+
+                                        if (dom2.name == FileName) {
+                                            SubmitFormData.append("TaskFile_jkwdksjb" + Count, dom2);
+                                            Count++;
+                                            return false;
+                                        }
+                                    });
+                                }
+                            })
+                        }
+                    }
+
+                    var TaskFile_qyzbzl_tag = $('#popup_htmlTaskFile_qyzbzl_ZJ').attr('data-tag');
+                    SubmitFormData.append("TaskFile_qyzbzl_tag", TaskFile_qyzbzl_tag);
+                    if (TaskFile_qyzbzl_tag == '1') {
+                        var FileCount_qyzbzl = $('#popup_htmlTaskFile_qyzbzl_ZJ tr').length;
+                        if (FileCount_qyzbzl > 0) {
+                            SubmitFormData.append("TaskFileCount_qyzbzl", FileCount_qyzbzl);
+                            var Files = $('#popup_uploadTaskFile_qyzbzl_ZJ')[0].files;
+                            var Count = 1;
+                            $('#popup_htmlTaskFile_qyzbzl_ZJ tr').each(function (index, dom) {
+
+                                var FileName = $(dom).find('td').first().html();
+                                if (FileName != null && FileName != '') {
+
+                                    $(Files).each(function (index2, dom2) {
+
+                                        if (dom2.name == FileName) {
+                                            SubmitFormData.append("TaskFile_qyzbzl" + Count, dom2);
+                                            Count++;
+                                            return false;
+                                        }
+                                    });
+                                }
+                            })
+                        }
+                    }
+
+                    var TaskFile_sggy_tag = $('#popup_htmlTaskFile_sggy_ZJ').attr('data-tag');
+                    SubmitFormData.append("TaskFile_sggy_tag", TaskFile_sggy_tag);
+                    if (TaskFile_sggy_tag == '1') {
+                        var FileCount_sggy = $('#popup_htmlTaskFile_sggy_ZJ tr').length;
+                        if (FileCount_sggy > 0) {
+                            SubmitFormData.append("TaskFileCount_sggy", FileCount_sggy);
+                            var Files = $('#popup_uploadTaskFile_sggy_ZJ')[0].files;
+                            var Count = 1;
+                            $('#popup_htmlTaskFile_sggy_ZJ tr').each(function (index, dom) {
+
+                                var FileName = $(dom).find('td').first().html();
+                                if (FileName != null && FileName != '') {
+
+                                    $(Files).each(function (index2, dom2) {
+
+                                        if (dom2.name == FileName) {
+                                            SubmitFormData.append("TaskFile_sggy" + Count, dom2);
+                                            Count++;
+                                            return false;
+                                        }
+                                    });
+                                }
+                            })
+                        }
+                    }
+
+                    var TaskFile_zyhj_tag = $('#popup_htmlTaskFile_zyhj_ZJ').attr('data-tag');
+                    SubmitFormData.append("TaskFile_zyhj_tag", TaskFile_zyhj_tag);
+                    if (TaskFile_zyhj_tag == '1') {
+                        var FileCount_zyhj = $('#popup_htmlTaskFile_zyhj_ZJ tr').length;
+                        if (FileCount_zyhj > 0) {
+                            SubmitFormData.append("TaskFileCount_zyhj", FileCount_zyhj);
+                            var Files = $('#popup_uploadTaskFile_zyhj_ZJ')[0].files;
+                            var Count = 1;
+                            $('#popup_htmlTaskFile_zyhj_ZJ tr').each(function (index, dom) {
+
+                                var FileName = $(dom).find('td').first().html();
+                                if (FileName != null && FileName != '') {
+
+                                    $(Files).each(function (index2, dom2) {
+
+                                        if (dom2.name == FileName) {
+                                            SubmitFormData.append("TaskFile_zyhj" + Count, dom2);
+                                            Count++;
+                                            return false;
+                                        }
+                                    });
+                                }
+                            })
+                        }
+                    }
+
+                    var TaskFile_ljxmsgzl_tag = $('#popup_htmlTaskFile_ljxmsgzl_ZJ').attr('data-tag');
+                    SubmitFormData.append("TaskFile_ljxmsgzl_tag", TaskFile_ljxmsgzl_tag);
+                    if (TaskFile_ljxmsgzl_tag == '1') {
+                        var FileCount_ljxmsgzl = $('#popup_htmlTaskFile_ljxmsgzl_ZJ tr').length;
+                        if (FileCount_ljxmsgzl > 0) {
+                            SubmitFormData.append("TaskFileCount_ljxmsgzl", FileCount_ljxmsgzl);
+                            var Files = $('#popup_uploadTaskFile_ljxmsgzl_ZJ')[0].files;
+                            var Count = 1;
+                            $('#popup_htmlTaskFile_ljxmsgzl_ZJ tr').each(function (index, dom) {
+
+                                var FileName = $(dom).find('td').first().html();
+                                if (FileName != null && FileName != '') {
+
+                                    $(Files).each(function (index2, dom2) {
+
+                                        if (dom2.name == FileName) {
+                                            SubmitFormData.append("TaskFile_ljxmsgzl" + Count, dom2);
+                                            Count++;
+                                            return false;
+                                        }
+                                    });
+                                }
+                            })
+                        }
+                    }
+
+                    var TaskFile_sjsgqk_tag = $('#popup_htmlTaskFile_sjsgqk_ZJ').attr('data-tag');
+                    SubmitFormData.append("TaskFile_sjsgqk_tag", TaskFile_sjsgqk_tag);
+                    if (TaskFile_sjsgqk_tag == '1') {
+                        var FileCount_sjsgqk = $('#popup_htmlTaskFile_sjsgqk_ZJ tr').length;
+                        if (FileCount_sjsgqk > 0) {
+                            SubmitFormData.append("TaskFileCount_sjsgqk", FileCount_sjsgqk);
+                            var Files = $('#popup_uploadTaskFile_sjsgqk_ZJ')[0].files;
+                            var Count = 1;
+                            $('#popup_htmlTaskFile_sjsgqk_ZJ tr').each(function (index, dom) {
+
+                                var FileName = $(dom).find('td').first().html();
+                                if (FileName != null && FileName != '') {
+
+                                    $(Files).each(function (index2, dom2) {
+
+                                        if (dom2.name == FileName) {
+                                            SubmitFormData.append("TaskFile_sjsgqk" + Count, dom2);
+                                            Count++;
+                                            return false;
+                                        }
+                                    });
+                                }
+                            })
+                        }
+                    }
+                }
+                else
+                {
+                    var TaskFile_Report_tag = $('#popup_htmlReportFile_ZJ').attr('data-tag');
+                    SubmitFormData.append("TaskFile_Report_tag", TaskFile_Report_tag);
+                    if (TaskFile_Report_tag == '1') {
+                        var FileCount_Report = $('#popup_htmlReportFile_ZJ tr').length;
+                        if (FileCount_Report > 0) {
+                            SubmitFormData.append("TaskFileCount_Report", FileCount_Report);
+                            var Files = $('#popup_uploadReportFile_ZJ')[0].files;
+                            var Count = 1;
+                            $('#popup_htmlReportFile_ZJ tr').each(function (index, dom) {
+
+                                var FileName = $(dom).find('td').first().html();
+                                if (FileName != null && FileName != '') {
+
+                                    $(Files).each(function (index2, dom2) {
+
+                                        if (dom2.name == FileName) {
+                                            SubmitFormData.append("TaskFile_Report" + Count, dom2);
+                                            Count++;
+                                            return false;
+                                        }
+                                    });
+                                }
+                            })
+                        }
+                    }
+                }
+
+            }
+
+            $.ajax({
+                url: 'TaskApprovalSubmit_ZJ',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: SubmitFormData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+                            ModalPopup('success', '保存成功');
+                            $('.tk_sqzl_tx06').stop(true, true).fadeOut();
+                            DoQuery();
+                        }
+                        else {
+
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                    ModalClose('information');
+                }
+            });
+
+        }
+    }
+
+</script>

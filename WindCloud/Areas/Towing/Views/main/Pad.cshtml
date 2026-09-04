@@ -1,0 +1,421 @@
+﻿@{
+    Layout = "~/Views/Shared/TowingPadLayout.cshtml";
+    ViewData["Title"] = "深远海风机安装拖航系统";
+    var loginInfoStr = ViewData["LoginInfo"];
+    var flashTimeStr = ViewData["FlashTime"];
+
+    var pxyKey = ViewData["PXYKey"].ToString();
+}
+@section Styles {
+    <link rel="stylesheet" type="text/css" href="~/Content/PadTowing/css/ipad-style.css" />
+    <link rel="stylesheet" type="text/css" href="~/Content/PadTowing/css/checkbox_radio.css" />
+    <script>
+        var loginUser = @Html.Raw(loginInfoStr);
+        var flashTime = @Html.Raw(flashTimeStr);
+    </script>
+}
+@section Scripts {
+    <script type="text/javascript" src="https://api.shipxy.com/h5/api/?v=3.0&k=@(pxyKey)"></script>
+    <script type="text/javascript" src="~/Content/PadTowing/lib/leaflet/dist/leaflet-ant-path.js"></script>
+    <script type="text/javascript" src="~/Content/PadTowing/js/checkbox.js"></script>
+    <script type="text/javascript" src="~/Content/PadTowing/js/imgenlarge.js"></script>
+    <script type="text/javascript" src="~/Content/PadTowing/js/JSfontsize.js"></script>
+    <script type="text/javascript" src="~/Content/PadTowing/Scripts/towing/towingPad_script.js?t=@DateTime.Now.ToString("yyyyMMddHHmmss")"></script>
+
+}
+
+<style>
+    .leaflet-bottom {
+        display: none;
+    }
+</style>
+
+<input type="hidden" id="PXYKey" value="@pxyKey" />
+
+<!--背景 start-->
+<!--    <div class="bim-content"></div>-->
+<!--背景 end-->
+<!--	地图控件-->
+<div id="map" class="my-map"></div>
+<!--header start-->
+
+<div class="box-header">
+    <div class="login_user"><img src="~/Content/PadTowing/img/icon_user.png"><a>陆上人员</a></div>
+</div>
+
+<!--header end-->
+<!--left content-->
+<div><a href="javascript:" class="left_bar"></a></div>
+
+<div class="left_main">
+
+    <div class="jiance_box clearfix">
+        <div class=" title"><img src="~/Content/PadTowing/img/title_icon.png"><span>卫星数据</span></div>
+
+        <div class="btn_hxgj clearfix">
+            <div class="pull-left"><img src="~/Content/PadTowing/img/icon_yuan.png"><span>航行轨迹</span><input type="checkbox" id="chkHangxing" name="chk"></div>
+            <div class="pull-left"><img src="~/Content/PadTowing/img/icon_yuan.png"><span>计划路径</span><input type="checkbox" id="chkJihua" name="chk"></div>
+            <div class="pull-left"><img src="~/Content/PadTowing/img/icon_yuan.png"><span>台风预警</span><input type="checkbox" id="chkTaifeng" name="chk"></div>
+            <div class="pull-left"><img src="~/Content/PadTowing/img/icon_yuan.png"><span>周边船舶</span><input type="checkbox" id="chkZhoubian" name="chk"></div>
+        </div>
+
+        <div class="btn_jczy clearfix">
+            <div>
+                @*<div>电池1&nbsp;<img id="remainingEPowerICON" src="~/Content/PadTowing/img/icon_SYdl02.png">剩余电量：<span id="remainingEPower">25.66</span>%</div>
+                <div>电池2&nbsp;<img id="remainingEPowerICON2" src="~/Content/PadTowing/img/icon_SYdl02.png">剩余电量：<span id="remainingEPower2">25.66</span>%</div>*@
+
+                <div><span style="color:white;">电池状态</span><i></i><span class="xcd" id="EleStatus">需充电</span></div>
+                <div><span style="color:white;">发电机1状态</span><i></i><span class="zc" id="EngineStatus1">正常</span></div>
+                <div><span style="color:white;">发电机2状态</span><i></i><span class="tzgz" id="EngineStatus2">停止工作</span></div>
+
+            </div>
+            <div><img src="~/Content/PadTowing/img/icon_yuan.png"><span>锚地资源</span><input type="checkbox" id="chkMaodi" name="chk"></div>
+        </div>
+    </div>
+
+    <div class="sssj_box clearfix">
+        <div class=" title"><img src="~/Content/PadTowing/img/title_icon.png"><span>实时监测数据</span></div>
+        <div class="sssj_box_son clearfix">
+            <div class="jiance_list clearfix" style="float: none;width: 100%">
+                <div class="pull-left"><img src="~/Content/PadTowing/img/icon_jwd.png"></div>
+                <div class="pull-left">
+                    <div><span id="shipLon">116°.24323</span>E&nbsp;&nbsp;<span id="shipLat">39°.324355</span>N</div>
+                    <div>经纬度</div>
+                </div>
+            </div>
+            <div class="jiance_list clearfix">
+                <div class="pull-left"><img src="~/Content/PadTowing/img/icon_chuansu.png"></div>
+                <div class="pull-left">
+                    <div><span id="speedNum">12.1</span>节</div>
+                    <div>船速</div>
+                </div>
+            </div>
+            <div class="jiance_list jiance_list02 clearfix">
+                <div class="pull-left"><img id="imgHeadingDegree" src="~/Content/PadTowing/img/icon_hangxiang.png"></div>
+                <div class="pull-left">
+                    <div><span id="headingDegree">55.1</span>°</div>
+                    <div>浮体方向</div>
+                </div>
+            </div>
+            <div class="jiance_list jiance_list02 clearfix">
+                <div class="pull-left"><img id="imgWindDirection" src="~/Content/PadTowing/img/icon_fx.png"></div>
+                <div class="pull-left">
+                    <div><span id="weatherInfo_direction">45</span>°</div>
+                    <div id="weatherInfo_directionName">风向</div>
+                </div>
+            </div>
+            <div class="jiance_list clearfix">
+                <div class="pull-left"><img src="~/Content/PadTowing/img/icon_fs.png"></div>
+                <div class="pull-left">
+                    <div><span id="weatherInfo_speed">45</span>m/s</div>
+                    <div>风速</div>
+                </div>
+            </div>
+
+            <div class="jiance_list clearfix">
+                <div class="pull-left"><img src="~/Content/PadTowing/img/icon_time_yhx.png"></div>
+                <div class="pull-left">
+                    <div><span id="spentTime">45</span>h</div>
+                    <div><span id="spentDistance">45</span>海里</div>
+                    <div>已航行</div>
+                </div>
+            </div>
+            <div class="jiance_list clearfix">
+                <div class="pull-left"><img src="~/Content/PadTowing/img/icon_time_sy.png"></div>
+                <div class="pull-left">
+                    <div><span id="remainingTime">45</span>h</div>
+                    <div>剩余航行估算</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ziyoudu_box">
+        <div class=" title"><img src="~/Content/PadTowing/img/title_icon.png"><span>六自由度运动</span></div>
+
+        <ul class="ziyoudu_ul clearfix">
+            <li class="clearfix">
+                <div class="pull-left ziyoudu_div_one"><img src="~/Content/PadTowing/img/icon_cd.png"><span>垂荡</span></div>
+                <div class="pull-left ziyoudu_div_two">
+                    <div><span class="red">-4.413</span><span>m</span></div>
+                    <div><span>-4.415</span><span>m</span></div>
+                </div>
+            </li>
+            <li class="clearfix">
+                <div class="pull-left ziyoudu_div_one"><img src="~/Content/PadTowing/img/icon_hd.png"><span>横荡</span></div>
+                <div class="pull-left ziyoudu_div_two">
+                    <div><span>-4.413</span><span>m</span></div>
+                    <div><span>-4.415</span><span>m</span></div>
+                </div>
+            </li>
+            <li class="clearfix">
+                <div class="pull-left ziyoudu_div_one"><img src="~/Content/PadTowing/img/icon_hy.png"><span>横摇</span></div>
+                <div class="pull-left ziyoudu_div_two">
+                    <div><span>-4.4135</span><span>°</span></div>
+                    <div><span>-4.4135</span><span>°</span></div>
+                </div>
+            </li>
+            <li class="clearfix">
+                <div class="pull-left ziyoudu_div_one"><img src="~/Content/PadTowing/img/icon_zd.png"><span>纵荡</span></div>
+                <div class="pull-left ziyoudu_div_two">
+                    <div><span>-4.415</span><span>m</span></div>
+                    <div><span>-4.415</span><span>m</span></div>
+                </div>
+            </li>
+            <li class="clearfix">
+                <div class="pull-left ziyoudu_div_one"><img src="~/Content/PadTowing/img/icon_zy.png"><span>纵摇</span></div>
+                <div class="pull-left ziyoudu_div_two">
+                    <div><span>-4.413</span><span>°</span></div>
+                    <div><span>-4.415</span><span>°</span></div>
+                </div>
+            </li>
+            <li class="clearfix">
+                <div class="pull-left ziyoudu_div_one"><img src="~/Content/PadTowing/img/icon_sy.png"><span>艏摇</span></div>
+                <div class="pull-left ziyoudu_div_two">
+                    <div><span>-4.413</span><span>°</span></div>
+                    <div><span>-4.415</span><span>°</span></div>
+                </div>
+            </li>
+
+        </ul>
+
+    </div>
+
+
+</div>
+
+
+<!-- 指挥通讯 -->
+<div class="center_content clearfix">
+    <div class="bg_zhtx"><span>指挥通讯</span><img src="~/Content/PadTowing/img/icon_jiantou.png"></div>
+</div>
+
+<!--现场照片弹框-->
+<div class="xinxi_content">
+    <div class="TK_title">
+        <span>信息详情</span>
+        <div class="time_box">
+            <span>
+                <input placeholder="开始时间" class="form-control" id="queryStartTime">
+            </span>
+            <span class="zj_span"> - </span>
+            <span>
+                <input placeholder="截止时间" class="form-control" id="queryEndTime">
+            </span>
+            <span>
+                <button class="btn_search" id="btnQuery">查询</button>
+            </span>
+        </div>
+        <img src="~/Content/PadTowing/img/icon_close.png" id="qxxq_close">
+    </div>
+
+    @*<div class="xczp_box">
+            <ul class="clearfix" id="ul_photos">
+                <li>
+                    <img src="~/Content/PadTowing/img/img01.jpg" class="zoomable-img">
+                </li>
+                <li>
+                    <img src="~/Content/PadTowing/img/img02.jpg" class="zoomable-img">
+                </li>
+                <li>
+                    <img src="~/Content/PadTowing/img/img03.jpg" class="zoomable-img">
+                </li>
+
+            </ul>
+        </div>*@
+
+    <section class="tab qxxq_tab">
+
+        <div class="panel-body">
+            <div class="tab-content tasi-tab">
+                <div id="one" class="tab-pane fade in active">
+                    <div class="bottom_chart" id="chartZMotion">
+                        图表
+                    </div>
+                </div>
+                <div id="two" class="tab-pane fade">
+                    <div class="bottom_chart" id="chartXMotion">
+                        图表
+                    </div>
+                </div>
+                <div id="three" class="tab-pane fade">
+                    <div class="bottom_chart" id="chartWindSpeed">
+                        图表
+                    </div>
+                </div>
+                <div id="four" class="tab-pane fade">
+                    <div class="bottom_chart" id="chartWindDir">
+                        图表
+                    </div>
+                </div>
+                <div id="five" class="tab-pane fade">
+                    <div class="bottom_chart" id="chartShipSpeed">
+                        图表
+                    </div>
+                </div>
+
+                <div id="six" class="tab-pane fade">
+                    <div class="bottom_chart" id="chartShipDir">
+                        图表
+                    </div>
+                </div>
+
+                <div id="seven" class="tab-pane fade">
+
+                    <div class="xczp_box">
+
+                        <ul class="clearfix" id="ul_photos">
+                            <li>
+                                <img src="~/Content/PadTowing/img/img01.jpg" class="zoomable-img">
+                                <span>2025年7月18日&nbsp;&nbsp;14点</span>
+                            </li>
+                            <li>
+                                <img src="~/Content/PadTowing/img/img02.jpg" class="zoomable-img">
+                                <span>2025年7月18日&nbsp;&nbsp;14点</span>
+                            </li>
+                            <li>
+                                <img src="~/Content/PadTowing/img/img03.jpg" class="zoomable-img">
+                                <span>2025年7月18日&nbsp;&nbsp;14点</span>
+                            </li>
+                            <li>
+                                <img src="~/Content/PadTowing/img/img04.jpg" class="zoomable-img">
+                                <span>2025年7月18日&nbsp;&nbsp;14点</span>
+                            </li>
+                            <li>
+                                <img src="~/Content/PadTowing/img/img05.jpg" class="zoomable-img">
+                                <span>2025年7月18日&nbsp;&nbsp;14点</span>
+                            </li>
+                            <li>
+                                <img src="~/Content/PadTowing/img/img06.jpg" class="zoomable-img">
+                                <span>2025年7月18日&nbsp;&nbsp;14点</span>
+                            </li>
+                            <li>
+                                <img src="~/Content/PadTowing/img/img01.jpg" class="zoomable-img">
+                                <span>2025年7月18日&nbsp;&nbsp;14点</span>
+                            </li>
+                            <li>
+                                <img src="~/Content/PadTowing/img/img02.jpg" class="zoomable-img">
+                                <span>2025年7月18日&nbsp;&nbsp;14点</span>
+                            </li>
+                            <li>
+                                <img src="~/Content/PadTowing/img/img03.jpg" class="zoomable-img">
+                                <span>2025年7月18日&nbsp;&nbsp;14点</span>
+                            </li>
+                            <li>
+                                <img src="~/Content/PadTowing/img/img04.jpg" class="zoomable-img">
+                                <span>2025年7月18日&nbsp;&nbsp;14点</span>
+                            </li>
+                            <li>
+                                <img src="~/Content/PadTowing/img/img05.jpg" class="zoomable-img">
+                                <span>2025年7月18日&nbsp;&nbsp;14点</span>
+                            </li>
+                            <li>
+                                <img src="~/Content/PadTowing/img/img06.jpg" class="zoomable-img">
+                                <span>2025年7月18日&nbsp;&nbsp;14点</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>    
+        
+        <header class="panel-heading tab_header_bottom">
+            <ul class="nav nav-tabs nav-justified qxxq_ul">
+
+                <li class="active">
+                    <a data-toggle="tab" href="#one">垂向运动</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#two">横向运动</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#three">风速</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#four">风向</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#five">航速</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#six">浮体方向</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#seven">现场照片</a>
+                </li>
+
+            </ul>
+        </header>
+    </section>
+
+
+</div>
+
+
+<!--指挥通讯-->
+<div class="chatroom_content">
+    <div class="TK_title"><span>指挥通讯</span><img src="~/Content/PadTowing/img/icon_close.png" id="chatroom_close"></div>
+    <div class="chat_box">
+        <div class="chat_content">
+            <ul id="chatMsgList">
+                <li>
+                    张三(2024-03-02 12:12:12)：<span>在吗？</span>
+                </li>
+                <li>
+                    李四(2024-03-02 12:13:12)：<span>在的！</span>
+                </li>
+                <li>
+                    张三(2024-03-02 12:12:12)：<span class="text_jinji">重要事情宣布，今天台风！</span>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+    <div>
+        <div class="chat_gongneng">
+            <ul class="clearfix">
+                @*<li id="open_picture"><img src="~/Content/Towing/img/icon_zhaopian.png" alt="上传图片"></li>
+                    <li id="open_history"><img src="~/Content/Towing/img/icon_lsjl.png"></li>*@
+                <li><button class="btn_jj">紧急</button></li>
+                <li><button class="btn_pt">普通</button></li>
+            </ul>
+        </div>
+        <div class="chat_textarea">
+            <textarea id="chatMsgContent" class="input_textarea" rows="3"></textarea>
+            <button id="btnChatSend" class="btn_send">发送</button>
+        </div>
+    </div>
+</div>
+
+
+
+<!--	地图上content-->
+@*<div class="btw_box">
+        <img src="~/Content/PadTowing/img/icon_border.gif">
+    </div>*@
+
+<!-- bottom 内容  -->
+<div class="bottom_content">
+    <ul class="clearfix">
+
+        <li id="qxxq_kg"><a>信息详情</a></li>
+    </ul>
+</div>
+
+<div id="showMsgImg">
+    <div class="TK_title"><span>图片</span><img src="~/Content/PadTowing/img/icon_close.png" id="showMsgImg_close"></div>
+    <div class="showMsgBody" style="cursor: pointer">
+        <img id="msgImgLarge" />
+    </div>
+</div>
+
+<!--	地图模式-->
+<div class="map_box">
+    <div class="bottom_bar">海图</div>
+    <div class="bottom_menu">
+        <div class="bottom_menu_son">卫星图</div>
+        <div class="bottom_menu_son">路线图</div>
+    </div>
+</div>

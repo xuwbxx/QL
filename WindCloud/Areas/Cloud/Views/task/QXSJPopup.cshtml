@@ -1,0 +1,1064 @@
+﻿<!--	    气象数据收集-->
+<div class="modal fade" id="Tk_software_08" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog" style="right: -24vw;width: 48vw;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    海况与气象数据收集
+                </h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="sqzl_box">
+                    <div class="form-horizontal form-horizontal_sqrjzl">
+
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">任务名</label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" placeholder="任务名自动生成" id="popup_txtTaskName_QXSJ" disabled>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="mb1 clearfix">
+                                <label class="col-md-2 control-label" style="padding-right:0;">气象数据收集点</label>
+                                <div class="col-md-4">
+                                    <button class="btn btn-primary" id="popup_btnAddPoint" onclick="SoftwareQXSJHelper.AddQXSJPoint();">新增收集点</button>
+                                    <button class="btn btn-primary" id="popup_btnShowPoint" onclick="SoftwareQXSJHelper.ShowPointMap();">地图浏览</button>
+                                </div>
+                                
+                            </div>
+                            <div class="clearfix">
+                                <div class="col-md-2"></div>
+                                <div class="col-md-10">
+                                    <ul class="pejd_user" id="popup_htmlQXSJPoint">
+                                        @*<li class="clearfix">
+                                            <span style="width:80%;">
+                                                <div class="nice-select">
+                                                    <input type="text" class="form-control" style="width:30%;" placeholder="输入名称：气象收集点1#">
+                                                    <input type="number" class="form-control" style="width:30%;" placeholder="输入经度：120.123456">
+                                                    <input type="number" class="form-control" style="width:30%;" placeholder="输入纬度：30.123456">
+                                                </div>
+                                            </span>
+                                            <span>
+                                                <button type="button" onclick="SoftwareQXSJHelper.DeleteQXSJPoint(this);" class="btn btn-danger">删除</button>
+                                            </span>
+                                        </li>*@
+                                        
+                                    </ul>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">采集时间</label>
+                            <div class="col-md-5">
+                                <input placeholder="开始时间" class="laydate-icon timeUstyle stateUTime form-control" id="popup_StartTime_QXSJ" onclick="laydate({istime: true,format:'YYYY-MM-DD'})">
+
+                            </div>
+                            <div class="col-md-5">
+                                <input placeholder="结束时间" class="laydate-icon timeUstyle stateUTime form-control" id="popup_EndTime_QXSJ" onclick="laydate({istime: true,format:'YYYY-MM-DD'})">
+
+                            </div>
+
+                        </div>
+
+
+
+
+                        <div class="form-group mod_touying" id="popup_divLastContent_QXSJ">
+
+                            <label class="col-md-2 control-label">上一节点意见</label>
+                            <div class="col-md-10">
+                                <textarea class="form-control" id="popup_txtLastContent_QXSJ" disabled></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group mod_touying" id="popup_divContent_QXSJ">
+
+                            <label class="col-md-2 control-label">审批意见</label>
+                            <div class="col-md-10">
+                                <textarea class="form-control" id="popup_txtContent_QXSJ"></textarea>
+                            </div>
+                            
+                        </div>
+
+                        <div class="form-group mod_touying" id="popup_divNextNode_QXSJ">
+
+                            <label class="col-md-2 control-label lcjd_next">流程下一节点</label>
+                            <div class="col-md-4 pr0">
+                                <div class="lcjd_next_sp"><i class="icon iconfont">&#xe63e;</i><span id="popup_spanNextNodeName_QXSJ">分子公司审批</span></div>
+                                <div class="nice-select">
+                                    <input id="popup_txtNodeUserName_QXSJ" type="text" class="form-control" placeholder="搜索" autocomplete="off" />
+                                    <div class="search_div" onclick="SoftwareQXSJHelper.ClearShjNodeUserName();" id="popup_divClearNodeName_QXSJ">
+                                        <i class="fa fa-close"></i>
+                                    </div>
+                                    <ul id="popup_ulNodeUserList_QXSJ" style="display:none;">
+                                    </ul>
+                                </div>
+
+                            </div>
+                            <div class="col-md-1 text-center mt4">
+                                <button class="btn btn-primary search_btn" style="width: 100%" id="popup_btnFindNodeUserName_QXSJ" onclick="SoftwareQXSJHelper.FindShjNodeUserByName();">搜索</button>
+                            </div>
+                            <div class="col-md-5 zhuyi_zt mt4">
+                                注意：请按照流程节点审批要求，指定下一节点审批人。如果节点审批人选错，整个流程将不能通过或者退回。
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <div class="text-center sqzl_btn_box" id="popup_divSubmit_QXSJ">
+                    <button class="btn btn-success" id="popup_btnSubmit_QXSJ" data-type="1" onclick="SoftwareQXSJHelper.AddTaskSubmit(this);">申请</button>
+                    <button class="btn btn-danger" id="popup_btnBack_QXSJ" data-type="0" onclick="SoftwareQXSJHelper.AddTaskSubmit(this);">审批退回</button>
+                    <button class="btn btn-warning" id="popup_btnCancel_QXSJ" data-type="3" onclick="SoftwareQXSJHelper.AddTaskSubmit(this);">作废</button>
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!--	   提前可作业预报文件-->
+<div class="modal fade" id="Tk_QXSJReport" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog" style="right: -24vw;width: 30vw; top:10vh;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    可作业预报文件
+                </h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="sqzl_box" style="height:50vh; ">
+
+                    <table class="table table_project table_project02">
+                        <thead>
+                            <tr>
+                                <th width="70%">文件名</th>
+                                <th width="20%">时间</th>
+                                <th width="10%">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="popup_html_QXSJFile">
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="Tk_QXSJ_Map" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog" style="width: 50vw; top:10vh;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    经纬度预览
+                </h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="sqzl_box" style="height:50vh; " id="PointMap">
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    $(document).ready(function () {
+        SoftwareQXSJHelper.Init();
+    })
+
+    var SoftwareQXSJHelper = {
+        Init: function () {
+            SoftwareQXSJHelper.ForecastTimeInit();
+        },
+        ForecastTimeInit: function () {
+            $('#popup_StartTime_QXSJ').val(formatDateTimeByDay(new Date()));
+            $('#popup_EndTime_QXSJ').val(formatDateTimeByDay(new Date(new Date().setDate(new Date().getDate() + 90))));
+        },
+        OpenPopup: function () {
+
+            var ChooseProjectID = $('#hid_ProjectID').val();
+            if (ChooseProjectID == null || ChooseProjectID == '' || ChooseProjectID == 0) {
+                ModalPopup('error', '必须先选择所关联的风场');
+                return;
+            }
+            SoftwareQXSJHelper.PopupOpenedHandleType = 'new';
+            SoftwareQXSJHelper.OpenTaskPopup('new', ChooseProjectID);
+
+            Param.SoftwareID = 8;
+            //下一节点人员
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('NextNodeQuery', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+                            $('#popup_spanNextNodeName_QXSJ').html(data.Data.NodeName);
+
+                            if (data.Data.NodeUsers.length > 0) {
+
+                                $('#popup_txtNodeUserName_QXSJ').attr('disabled', true);
+                                $('#popup_btnFindNodeUserName_QXSJ').attr('disabled', true);
+                                $('#popup_divClearNodeName_QXSJ').hide();
+
+                                var NodeUserHtml = '';
+                                $(data.Data.NodeUsers).each(function (index, dom) {
+
+                                    NodeUserHtml += dom.ManageName + '(' + dom.ManageDepart + ');'
+
+                                });
+                                $('#popup_txtNodeUserName_QXSJ').val(NodeUserHtml);
+
+                            }
+                            else {
+                                $('#popup_txtNodeUserName_QXSJ').attr('disabled', false);
+                                $('#popup_btnFindNodeUserName_QXSJ').attr('disabled', false);
+                                $('#popup_divClearNodeName_QXSJ').show();
+                            }
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        OpenTaskPopup: function (type, ProjectID, FlowStatus) {
+            $('#popup_divSubmit_QXSJ').show();
+            if (type == 'new') {
+                //清空弹窗
+                SoftwareQXSJHelper.ClearTaskPopup();
+                //设置可写
+                SoftwareQXSJHelper.SetTaskPopupWrite();
+
+                
+
+                /*上一节点审批意见*/
+                $('#popup_divLastContent_QXSJ').hide();
+                //审批意见
+                $('#popup_divContent_QXSJ').hide();
+                //下一节点
+                $('#popup_divNextNode_QXSJ').show();
+
+                //提交按钮
+                $('#popup_btnSubmit_QXSJ').show().html('申请').attr('data-type', 1);
+                $('#popup_btnBack_QXSJ').hide();
+                $('#popup_btnCancel_QXSJ').hide();
+
+                
+
+            }
+            else if (type == 'view') {
+                //清空弹窗
+                SoftwareQXSJHelper.ClearTaskPopup();
+                //设置可写
+                SoftwareQXSJHelper.SetTaskPopupRead();
+
+                $('#popup_btnShowPoint').attr('disabled', false);
+
+                /*上一节点审批意见*/
+                $('#popup_divLastContent_QXSJ').show();
+                //审批意见
+                $('#popup_divContent_QXSJ').hide();
+                //下一节点
+                $('#popup_divNextNode_QXSJ').hide();
+
+                $('#popup_btnSubmit_QXSJ').hide();
+                $('#popup_btnBack_QXSJ').hide();
+                $('#popup_btnCancel_QXSJ').hide();
+
+                //作废的流程
+                if (FlowStatus == 3) {
+                    $('#popup_divSubmit_QXSJ').hide();
+                }
+
+            }
+            else if (type == 'approval') {
+                //清空弹窗
+                SoftwareQXSJHelper.ClearTaskPopup();
+                //设置只读
+                SoftwareQXSJHelper.SetTaskPopupRead();
+
+                $('#popup_btnShowPoint').attr('disabled', false);
+
+                /*上一节点审批意见*/
+                $('#popup_divLastContent_QXSJ').show();
+                //审批意见
+                $('#popup_divContent_QXSJ').show();
+                //下一节点
+                $('#popup_divNextNode_QXSJ').show();
+
+                $('#popup_txtNodeUserName_QXSJ').attr('disabled', false);
+                $('#popup_btnFindNodeUserName_QXSJ').attr('disabled', false);
+                $('#popup_divClearNodeName_QXSJ').show();
+
+                $('#popup_btnBack_QXSJ').show();
+                $('#popup_btnSubmit_QXSJ').show().html('审批通过').attr('data-type', 2);
+                $('#popup_btnCancel_QXSJ').show();
+
+                //个性化要求
+                //$('#popup_txtLon_QXSJ').attr('disabled', false);
+                //$('#popup_txtLat_QXSJ').attr('disabled', false);
+                //$('#popup_txtWaterDepth_QXSJ').attr('disabled', false);
+                //$('#popup_txtStandard_QXSJ').attr('disabled', false);
+
+
+            }
+            else if (type == 'renew') {
+                //清空弹窗
+                SoftwareQXSJHelper.ClearTaskPopup();
+                //设置可写
+                SoftwareQXSJHelper.SetTaskPopupWrite();
+
+
+
+                /*上一节点审批意见*/
+                $('#popup_divLastContent_QXSJ').show();
+                //审批意见
+                $('#popup_divContent_QXSJ').show();
+                //下一节点
+                $('#popup_divNextNode_QXSJ').show();
+
+                $('#popup_btnBack_QXSJ').hide();
+                $('#popup_btnSubmit_QXSJ').show().html('重新提交').attr('data-type', 2);
+                $('#popup_btnCancel_QXSJ').show();
+
+            }
+
+            $('#Tk_software_08').modal('show');
+            
+        },
+
+        SetTaskPopupWrite: function () {
+
+            //$('#popup_txtTaskName_QXSJ').attr('disabled', false);
+
+            $('#popup_btnAddPoint').attr('disabled', false);
+            $('#popup_btnShowPoint').attr('disabled', false);
+
+            $('#popup_StartTime_QXSJ').attr('disabled', false);
+            $('#popup_EndTime_QXSJ').attr('disabled', false);
+
+            $('#popup_txtNodeUserName_QXSJ').attr('disabled', false);
+            $('#popup_btnFindNodeUserName_QXSJ').attr('disabled', false);
+            $('#popup_divClearNodeName_QXSJ').show();
+
+        },
+
+        SetTaskPopupRead: function () {
+
+            //$('#popup_txtTaskName_QXSJ').attr('disabled', true);
+
+            $('#popup_btnAddPoint').attr('disabled', true);
+            $('#popup_btnShowPoint').attr('disabled', true);
+
+            $('#popup_StartTime_QXSJ').attr('disabled', true);
+            $('#popup_EndTime_QXSJ').attr('disabled', true);
+
+
+            $('#popup_txtNodeUserName_QXSJ').attr('disabled', true);
+            $('#popup_btnFindNodeUserName_QXSJ').attr('disabled', true);
+            $('#popup_divClearNodeName_QXSJ').hide();
+
+        },
+
+        ClearTaskPopup: function () {
+
+            $('#popup_txtTaskName_QXSJ').val('');
+
+            $('#popup_ulFloatList_QXSJ input:checkbox').prop('checked', false);
+
+
+            $('#popup_ForecastStartTime_QXSJ').val('');
+            $('#popup_ForecastEndTime_QXSJ').val('');
+
+            //$('#popup_txtLon_QXSJ').val('');
+            //$('#popup_txtLat_QXSJ').val('');
+
+            //$('#popup_txtWaterDepth_QXSJ').val('');
+            //$('#popup_txtStandard_QXSJ').val('');
+
+            $('#popup_htmlTaskReportFile_QXSJ').html('');
+
+            $('#popup_txtNodeUserName_QXSJ').val('');
+
+            $('#popup_txtLastContent_QXSJ').val('');
+            //$('#popup_ulLastNodeCommentFile_QXSJ').html('');
+
+            $('#popup_txtContent_QXSJ').val('');
+            $('#popup_ulNodeCommentFile_QXSJ').html('');
+
+
+            SoftwareQXSJHelper.ForecastTimeInit();
+        },
+
+        ChoosedTaskNodeUser: { Name: '', UserCode: '', Depart: '', Phone: '', JobName: '', NextNodeID: '' },
+
+        FindShjNodeUserByName: function () {
+
+            Param.Name = $("#popup_txtNodeUserName_QXSJ").val();
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('FindShjUser', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        if (data.Success) {
+
+                            var DataListHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                DataListHtml += '<li onclick="SoftwareQXSJHelper.ChooseNodeUser(this);" data-usercode="' + dom.empcode + '" data-name="' + dom.name + '" data-depart="' + dom.wholeDeptPath + '" data-phone="' + dom.phone + '" data-jobname="' + dom.jobname + '" ><h3>' + dom.name + '(' + dom.jobname + ')</h3><div>' + dom.wholeDeptPath + '</div></li >';
+
+                            });
+                            $('ul#popup_ulNodeUserList_QXSJ').html(DataListHtml);
+                            $('ul#popup_ulNodeUserList_QXSJ').show();
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        ChooseNodeUser: function (dom) {
+
+            //SoftwareQXSJHelper.ChoosedTaskNodeUser = {};
+
+            if (dom == null)
+                return;
+
+            var Name = $(dom).attr('data-name');
+            var UserCode = $(dom).attr('data-usercode');
+            var Depart = $(dom).attr('data-depart');
+            var Phone = $(dom).attr('data-phone');
+            var JobName = $(dom).attr('data-jobname');
+
+            SoftwareQXSJHelper.ChoosedTaskNodeUser.Name = Name;
+            SoftwareQXSJHelper.ChoosedTaskNodeUser.UserCode = UserCode;
+            SoftwareQXSJHelper.ChoosedTaskNodeUser.Depart = Depart;
+            SoftwareQXSJHelper.ChoosedTaskNodeUser.Phone = Phone;
+            SoftwareQXSJHelper.ChoosedTaskNodeUser.JobName = JobName;
+
+            if (Name == '' || UserCode == '')
+                return;
+
+            $('#popup_txtNodeUserName_QXSJ').val(Name + '(' + Depart + ')');
+
+            $('ul#popup_ulNodeUserList_QXSJ').hide();
+
+        },
+
+        PopupOpenedTaskID: 0,
+        PopupIsBackFlow: false,
+        PopupOpenedHandleType: 'new',
+        OpenTaskInfo: function (TaskID) {
+
+            Param.TaskID = TaskID;
+
+            SoftwareQXSJHelper.PopupOpenedTaskID = 0;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('TaskQuery_QXSJ', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+                            SoftwareQXSJHelper.PopupOpenedTaskID = TaskID;
+
+                            var Task = data.Data;
+
+                            //如果是已经结束的流程，直接打开文件获取弹窗
+                            if (Task.FlowInfo.FlowStatus == 2) {
+
+                                OpenReportPopup(TaskID);
+                                return;
+                            }
+
+                            SoftwareQXSJHelper.OpenTaskPopup(Task.FlowInfo.FlowHandle, Task.ProjectID, Task.FlowInfo.FlowStatus);
+
+                            SoftwareQXSJHelper.PopupOpenedHandleType = Task.FlowInfo.FlowHandle;
+
+                            SoftwareQXSJHelper.PopupIsBackFlow = Task.FlowInfo.IsBackFlow;
+
+                            var PointsHtml = '';
+                            if (!SoftwareQXSJHelper.PopupIsBackFlow) {
+                                
+                                $(Task.TaskInfo_QXSJ.Points).each(function (index, dom) {
+
+                                    PointsHtml += '<li class="clearfix"><span style = "width:80%;" ><div class="nice-select"><input type="text" class="form-control" style="width:30%;" placeholder="输入名称：气象收集点1号" value="' + dom.PointName + '"><input type="number" class="form-control" style="width:30%;" placeholder="输入经度：120.123456" value="' + dom.PointLon + '"><input type="number" class="form-control" style="width:30%;" placeholder="输入纬度：30.123456" value="' + dom.PointLat + '"></div></span><span></span></li>'
+
+                                });
+                                
+                            }
+                            else
+                            {
+                                $(Task.TaskInfo_QXSJ.Points).each(function (index, dom) {
+
+                                    PointsHtml += '<li class="clearfix"><span style = "width:80%;" ><div class="nice-select"><input type="text" class="form-control" style="width:30%;" placeholder="输入名称：气象收集点1号" value="' + dom.PointName + '"><input type="number" class="form-control" style="width:30%;" placeholder="输入经度：120.123456" value="' + dom.PointLon + '"><input type="number" class="form-control" style="width:30%;" placeholder="输入纬度：30.123456" value="' + dom.PointLat + '"></div></span><span><button type="button" onclick="SoftwareQXSJHelper.DeleteQXSJPoint(this);" class="btn btn-danger">删除</button></span></li>';
+
+                                });
+                            }
+                            $('#popup_htmlQXSJPoint').html(PointsHtml);
+
+                            if (Task.FlowInfo.DoEditConfirm == true) {
+                                
+                            }
+
+                            if (Task.FlowInfo.IsUsingFlowNode) {
+                                $('#popup_divContent_QXSJ').hide();
+                                $('#popup_divNextNode_QXSJ').hide();
+                                $('#popup_btnSubmit_QXSJ').hide();
+                                $('#popup_btnBack_QXSJ').hide();
+                            }
+
+                            //如果是最后的流程
+                            SoftwareQXSJHelper.ChoosedTaskNodeUser.NextNodeID = Task.FlowInfo.NextNodeID;
+                            if (Task.FlowInfo.NextNodeID == 0) {
+                                $('#popup_txtNodeUserName_QXSJ').attr('disabled', true);
+                                $('#popup_btnFindNodeUserName_QXSJ').attr('disabled', true);
+                                $('#popup_divClearNodeName_QXSJ').hide();
+                            }
+
+                            //下一节点如果有默认人物
+                            if (Task.FlowInfo.NextNode != null && Task.FlowInfo.NextNode.length > 0) {
+
+                                $('#popup_txtNodeUserName_QXSJ').attr('disabled', true);
+                                $('#popup_btnFindNodeUserName_QXSJ').attr('disabled', true);
+                                $('#popup_divClearNodeName_QXSJ').hide();
+
+                                var NodeUserHtml = '';
+                                $(Task.FlowInfo.NextNode).each(function (index, dom) {
+
+                                    NodeUserHtml += dom.UserName + '(' + dom.UserDepart + ');'
+
+                                });
+                                $('#popup_txtNodeUserName_QXSJ').val(NodeUserHtml);
+
+                            }
+
+                            //上一节点意见（可能多人）
+                            var CommentHtml = '';
+                            $(Task.FlowInfo.LastNode).each(function (index, dom) {
+                                CommentHtml += dom.UserName + ':' + dom.Comment + ';\n'
+                            });
+                            $('#popup_txtLastContent_QXSJ').val(CommentHtml);
+                            //下一节点
+                            $('#popup_spanNextNodeName_QXSJ').html(Task.FlowInfo.NextNodeName);
+
+                            //填充表单数据
+                            $('#popup_txtTaskName_QXSJ').val(Task.TaskName);
+
+                            $('#popup_StartTime_QXSJ').val(Task.TaskInfo_QXSJ.CollectStartTime);
+                            $('#popup_EndTime_QXSJ').val(Task.TaskInfo_QXSJ.CollectEndTime);
+
+                            
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        ClearShjNodeUserName: function () {
+            SoftwareQXSJHelper.ChoosedTaskNodeUser = {};
+            $('#popup_txtNodeUserName_QXSJ').val('');
+        },
+
+
+        AddTaskSubmit: function (dom) {
+
+            var type = $(dom).attr('data-type');
+            if (type == null || type == '')
+                return;
+
+            var InfoText = '';
+            if (type == 0) {
+                InfoText = '是否要流程退回？流程将退回至上一节点人员';
+            }
+            else if (type == 1) {
+
+                var TaskName = SoftwareQXSJHelper.CreateTaskName();
+                if (TaskName == '') {
+                    return;
+                }
+                $('#popup_txtTaskName_QXSJ').val(TaskName);
+                InfoText = TaskName + '</br>是否要保存任务？';
+            }
+            else if (type == 2) {
+
+                if (SoftwareQXSJHelper.PopupIsBackFlow == true) {
+                    var TaskName = SoftwareQXSJHelper.CreateTaskName();
+                    if (TaskName == '') {
+                        return;
+                    }
+                    $('#popup_txtTaskName_QXSJ').val(TaskName);
+                    InfoText = TaskName + '</br>是否要保存任务？';
+                }
+                else {
+                    InfoText = '是否要审批通过？';
+                }
+            }
+            else if (type == 3) {
+                InfoText = '是否要作废流程？';
+            }
+
+            ModalPopup('information', InfoText);
+
+            $("#ModalSubmit").unbind('click').bind('click', function () {
+                SoftwareQXSJHelper.DoTaskSubmit(type);
+            });
+
+        },
+
+        DoTaskSubmit: function (type) {
+
+            if (type == 1) {
+                SoftwareQXSJHelper.DoTaskAdd();
+            }
+            else if (type == 0 || type == 2) {
+                SoftwareQXSJHelper.DoTaskApproval(type);
+            }
+            else if (type == 3) {
+                SoftwareQXSJHelper.DoTaskCancel();
+            }
+        },
+
+        CreateTaskName: function () {
+
+            var TaskName = '';
+
+
+            TaskName += '海况与气象数据收集(' + GetFullDateTimeString(new Date()) + ')';
+
+            return TaskName;
+
+        },
+
+        DoTaskAdd: function () {
+
+            var ProjectID = $('#hid_ProjectID').val();
+            if (ProjectID == null || ProjectID == '' || ProjectID == 0) {
+                ModalClose('information');
+                ModalPopup('error', '软件申请页面需要选择关联风电项目');
+                return;
+            }
+
+            var SubmitFormData = new FormData();
+            SubmitFormData.append("ProjectID", ProjectID);
+            SubmitFormData.append("TaskID", SoftwareQXSJHelper.PopupOpenedTaskID);
+            SubmitFormData.append("SoftwareID", 8);
+
+            //节点人员
+            SubmitFormData.append("TaskNodeName", SoftwareQXSJHelper.ChoosedTaskNodeUser.Name);
+            SubmitFormData.append("TaskNodeUserCode", SoftwareQXSJHelper.ChoosedTaskNodeUser.UserCode);
+            SubmitFormData.append("TaskNodeDepart", SoftwareQXSJHelper.ChoosedTaskNodeUser.Depart);
+            SubmitFormData.append("TaskNodePhone", SoftwareQXSJHelper.ChoosedTaskNodeUser.Phone);
+            SubmitFormData.append("TaskNodeJobName", SoftwareQXSJHelper.ChoosedTaskNodeUser.JobName);
+
+
+            SubmitFormData.append("QXSJ_StartTime", $('#popup_StartTime_QXSJ').val());
+            SubmitFormData.append("QXSJ_EndTime", $('#popup_EndTime_QXSJ').val());
+
+            var Points = [];
+            $('ul#popup_htmlQXSJPoint li').each(function (index, dom) {
+
+                var Inputs = $(dom).find('div.nice-select input');
+
+                var PointName = $(Inputs).eq(0).val();
+                var PointLon = $(Inputs).eq(1).val();
+                var PointLat = $(Inputs).eq(2).val();
+
+                if (PointName != '' && PointLon != '' && PointLat != '') {
+                    var point = {};
+                    point.PointName = PointName;
+                    point.PointLon = PointLon;
+                    point.PointLat = PointLat;
+                    Points.push(point);
+                }
+
+            });
+            if (Points.length == 0)
+            {
+                ModalPopup('error', '没有添加任何数据收集点');
+                return;
+            }
+            SubmitFormData.append("QXSJ_Points", JSON.stringify(Points));
+
+            SubmitFormData.append("TaskName", $('#popup_txtTaskName_QXSJ').val());
+
+            $.ajax({
+                url: 'TaskSubmit_QXSJ',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: SubmitFormData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+                            ModalPopup('success', '保存成功');
+                            $('#Tk_software_08').modal('hide');
+                            $('#tk_WorkTasks').modal('hide');
+
+                            Param.ProjectID = $('#hid_ProjectID').val();
+                            DoQuery();
+
+
+                        }
+                        else {
+
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                    ModalClose('information');
+                }
+            });
+
+        },
+
+        DoTaskApproval: function (type) {
+
+            if (SoftwareQXSJHelper.PopupOpenedTaskID == 0) {
+                ModalClose('information');
+                ModalPopup('error', '数据出错，重新打开弹窗。');
+                return;
+            }
+
+            var SubmitFormData = new FormData();
+
+            SubmitFormData.append("ApprovalType", type);
+            SubmitFormData.append("IsBackFlow", SoftwareQXSJHelper.PopupIsBackFlow);
+            SubmitFormData.append("NodeID", SoftwareQXSJHelper.ChoosedTaskNodeUser.NextNodeID);
+            SubmitFormData.append("TaskID", SoftwareQXSJHelper.PopupOpenedTaskID);
+            SubmitFormData.append("TaskComment", $('#popup_txtContent_QXSJ').val());
+
+
+            //正常审批
+            SubmitFormData.append("TaskNodeName", SoftwareQXSJHelper.ChoosedTaskNodeUser.Name);
+            SubmitFormData.append("TaskNodeUserCode", SoftwareQXSJHelper.ChoosedTaskNodeUser.UserCode);
+            SubmitFormData.append("TaskNodeDepart", SoftwareQXSJHelper.ChoosedTaskNodeUser.Depart);
+            SubmitFormData.append("TaskNodePhone", SoftwareQXSJHelper.ChoosedTaskNodeUser.Phone);
+            SubmitFormData.append("TaskNodeJobName", SoftwareQXSJHelper.ChoosedTaskNodeUser.JobName);
+
+
+            SubmitFormData.append("QXSJ_StartTime", $('#popup_StartTime_QXSJ').val());
+            SubmitFormData.append("QXSJ_EndTime", $('#popup_EndTime_QXSJ').val());
+
+            var Points = [];
+            $('ul#popup_htmlQXSJPoint li').each(function (index, dom) {
+
+                var Inputs = $(dom).find('div.nice-select input');
+
+                var PointName = $(Inputs).eq(0).val();
+                var PointLon = $(Inputs).eq(1).val();
+                var PointLat = $(Inputs).eq(2).val();
+
+                if (PointName != '' && PointLon != '' && PointLat != '') {
+                    var point = {};
+                    point.PointName = PointName;
+                    point.PointLon = PointLon;
+                    point.PointLat = PointLat;
+                    Points.push(point);
+                }
+
+            });
+            if (Points.length == 0) {
+                ModalPopup('error', '没有添加任何数据收集点');
+                return;
+            }
+            SubmitFormData.append("QXSJ_Points", JSON.stringify(Points));
+
+
+           
+
+            if (SoftwareQXSJHelper.ChoosedTaskNodeUser.NextNodeID == 0) {
+
+                //流程结束
+                //SubmitFormData.append("KZYLon", $('#popup_txtLon_QXSJ').val());
+                //SubmitFormData.append("KZYLat", $('#popup_txtLat_QXSJ').val());
+                //SubmitFormData.append("KZYWaterDepth", $('#popup_txtWaterDepth_QXSJ').val());
+                //SubmitFormData.append("KZYStandard", $('#popup_txtStandard_QXSJ').val());
+            }
+
+            $.ajax({
+                url: 'TaskApprovalSubmit_QXSJ',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: SubmitFormData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+                            ModalPopup('success', '保存成功');
+                            $('#Tk_software_08').modal('hide');
+
+                            Param.ProjectID = $('#hid_ProjectID').val();
+                            DoQuery();
+
+                        }
+                        else {
+
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                    ModalClose('information');
+                }
+            });
+
+        },
+
+        DoTaskCancel: function () {
+
+            if (SoftwareQXSJHelper.PopupOpenedTaskID == 0) {
+                ModalClose('information');
+                ModalPopup('error', '数据出错，重新打开弹窗。');
+                return;
+            }
+
+            var SubmitFormData = new FormData();
+            SubmitFormData.append("TaskID", SoftwareQXSJHelper.PopupOpenedTaskID);
+
+            $.ajax({
+                url: 'TaskCancelSubmit_QXSJ',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: SubmitFormData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+                            ModalPopup('success', '作废成功');
+                            $('#Tk_software_08').modal('hide');
+
+                            Param.ProjectID = $('#hid_ProjectID').val();
+                            DoQuery();
+
+                        }
+                        else {
+
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                    ModalClose('information');
+                }
+            });
+
+        },
+
+        ShowPointMap: function () {
+
+            var Points = [];
+            $('ul#popup_htmlQXSJPoint li').each(function (index, dom) {
+
+                var Inputs = $(dom).find('div.nice-select input');
+
+                var PointName = $(Inputs).eq(0).val();
+                var PointLon = $(Inputs).eq(1).val();
+                var PointLat = $(Inputs).eq(2).val();
+
+                if (PointName != '' && PointLon != '' && PointLat != '')
+                {
+                    var point = {};
+                    point.PointName = PointName;
+                    point.PointLon = PointLon;
+                    point.PointLat = PointLat;
+                    Points.push(point);
+                }
+
+            });
+
+            if (Points.length == 0)
+            {
+                alert('请先输入收集点');
+                return;
+            }
+
+            var Url = '/Cloud/WebGIS/ShowPoint?Points=' + JSON.stringify(Points);
+
+            window.open(Url, '_blank');
+
+        },
+
+        OpenReport: function () {
+
+            if (SoftwareQXSJHelper.PopupOpenedTaskID == 0)
+            {
+                return;
+            }
+            Param.TaskID = SoftwareQXSJHelper.PopupOpenedTaskID;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            //alert('123');
+            $('#Tk_QXSJReport').modal('show');
+
+
+            $.post('LoadTaskFile', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        if (data.Success) {
+
+                            var FileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                FileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a class="xm_zt_green" href="' + dom.FilePath + '">下载</a></td></tr>';
+
+                            })
+                            $('#popup_html_QXSJFile').html(FileHtml);
+
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+
+
+        },
+
+        AddQXSJPoint: function () {
+
+            var NewHtml = '<li class="clearfix"><span style = "width:80%;" ><div class="nice-select"><input type="text" class="form-control" style="width:30%;" placeholder="输入名称：气象收集点1号"><input type="number" class="form-control" style="width:30%;" placeholder="输入经度：120.123456"><input type="number" class="form-control" style="width:30%;" placeholder="输入纬度：30.123456"></div></span><span><button type="button" onclick="SoftwareQXSJHelper.DeleteQXSJPoint(this);" class="btn btn-danger">删除</button></span></li>';
+
+            $('#popup_htmlQXSJPoint').append(NewHtml);
+
+        },
+
+        DeleteQXSJPoint: function(dom) {
+
+            $(dom).parent().parent().remove();
+
+        }
+
+    }
+
+
+</script>

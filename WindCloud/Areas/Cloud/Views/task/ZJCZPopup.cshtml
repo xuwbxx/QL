@@ -1,0 +1,1833 @@
+﻿@*插拔桩弹窗*@
+<div class="modal fade" id="Tk_software_06" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog" style="right: -24vw;width: 48vw;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    桩基沉桩可打性分析
+                </h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="sqzl_box">
+                    <div class="form-horizontal form-horizontal_sqrjzl">
+
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">任务名</label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" placeholder="任务名自动生成" id="popup_txtTaskName_ZJCZ" disabled>
+                            </div>
+                        </div>
+
+                        <div class="form-group mod_touying">
+                            <label class="col-md-2 control-label">项目介绍@*<span class="BT_span">*</span>*@</label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" placeholder="少于100字" id="popup_txtProjectIntroduce_ZJCZ">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">项目位置</label>
+                            <div class="col-md-10 clearfix">
+                                <div class="table_project_box clearfix">
+                                    <div class="col-md-6 pl0">
+                                        <input type="text" class="form-control" placeholder="例如 N:28.53 E:122.87" id="popup_txtProjectPosition_ZJCZ" readonly>
+                                        
+                                    </div>
+                                    <div class="col-md-6 text-center zhuyi_zt">
+                                        注意：项目位置数据是“项目立项”过程中输入，当前可以上传项目位置图片（下栏）。
+                                    </div>
+                                </div>
+
+                                <div class="table_project_box clearfix">
+                                    <div class="col-md-6 pl0">
+                                        <input type="file" multiple class="form-control pull-left" id="popup_fileProjectPosition_ZJCZ">
+                                    </div>
+                                    <div class="col-md-1 text-center">
+                                        <button class="btn search_btn btn-success" id="popup_btn_uploadProjectPosition_ZJCZ" onclick="SoftwareZJCZHelper.UploadProjectPosition();">上传</button>
+                                    </div>
+                                </div>
+
+                                <div class="table_project_box">
+                                    <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                        <thead>
+                                            <tr>
+                                                <th width="60%">文件名</th>
+                                                <th width="20%">上传时间</th>
+                                                <th width="20%">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="popup_htmlProjectPosition_ZJCZ" data-tag="0">
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="form-group mod_touying">
+                            <label class="col-md-2 control-label">桩帽替打</label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" placeholder="少于100字" id="popup_txtPileReplace_ZJCZ">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="mb1 clearfix">
+                                <label class="col-md-2 control-label" style="padding-right:0;">锤型号</label>
+                                <div class="col-md-2"><button class="btn btn-primary width100" id="popup_btnAddHammerModel_ZJCZ" onclick="SoftwareZJCZHelper.AddHammerModel();">新增锤型号</button></div>
+                                <div class="col-md-8 mt1">
+                                    <span class="zhuyi_zt">
+                                        @*可以添加项目组成员，成员可以发起“风电施工辅助软件”的使用申请。*@
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="clearfix">
+                                <div class="col-md-2"></div>
+                                <div class="col-md-10">
+                                    <ul class="pejd_user" id="popup_htmlHammerModel_ZJCZ">
+                                        <li class="clearfix">
+                                            <span>
+                                                <div class="nice-select">
+                                                    <input type="text" class="form-control" />
+                                                </div>
+                                            </span>
+                                            <span>
+                                                <button class="btn btn-danger">删除</button>
+                                            </span>
+                                        </li>
+                                        <li class="clearfix">
+                                            <span>
+                                                <div class="nice-select">
+                                                    <input type="text" class="form-control" />
+                                                </div>
+                                            </span>
+                                            <span>
+                                                <button class="btn btn-danger">删除</button>
+                                            </span>
+                                        </li>
+                                        <li class="clearfix">
+                                            <span>
+                                                <div class="nice-select">
+                                                    <input type="text" class="form-control" />
+                                                </div>
+                                            </span>
+                                            <span>
+                                                <button class="btn btn-danger">删除</button>
+                                            </span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                        @*桩数据*@
+                        <div class="form-group mod_touying">
+                            <div class="text-left cb_check_f_title">桩配置</div>
+                            <div class="cb_check_f clearfix mb1">
+                                <label class="col-md-2 control-label">桩原始资料</label>
+                                <div class="col-md-10 clearfix">
+                                    <div class="zdtj_box clearfix">
+                                        <div class="col-md-6 pr0">
+                                            <input type="file" multiple class="form-control pull-left" id="popup_filePileSource_ZJCZ">
+                                        </div>
+                                        <div class="col-md-1 text-center">
+                                            <button class="btn search_btn btn-success" id="popup_btn_uploadPileSource_ZJCZ" onclick="SoftwareZJCZHelper.UploadPileFile(5);">上传</button>
+                                        </div>
+                                        <div class="col-md-5 text-right zhuyi_zt pr0">
+                                            <a class="btn btn-primary btn-primary-a" download="桩原始数据-模板文件.pdf" href="~/File/Task/桩原始数据-模板文件.pdf">模板下载</a>
+                                        </div>
+                                    </div>
+
+                                    <div class="table_project_box">
+                                        <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                            <thead>
+                                                <tr>
+                                                    <th width="60%">文件名</th>
+                                                    <th width="20%">上传时间</th>
+                                                    <th width="20%">操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="popup_htmlPileSource_ZJCZ" data-tag="0">
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="cb_check_f clearfix mb1">
+                                <label class="col-md-2 control-label">桩数据表</label>
+                                <div class="col-md-10 clearfix">
+                                    <div class="zdtj_box clearfix">
+                                        <div class="col-md-6 pr0">
+                                            <input type="file" class="form-control pull-left" accept=".xlsx" id="popup_filePileData_ZJCZ">
+                                        </div>
+                                        <div class="col-md-1 text-center">
+                                            <button class="btn search_btn btn-success" id="popup_btn_uploadPileData_ZJCZ" onclick="SoftwareZJCZHelper.UploadPileFile(6);">上传</button>
+                                        </div>
+                                        <div class="col-md-5 text-right zhuyi_zt pr0">
+                                            <a class="btn btn-primary btn-primary-a" download="桩基参数表.xlsx" href="~/File/Task/桩基参数表.xlsx">模板下载</a>
+                                        </div>
+                                    </div>
+
+                                    <div class="table_project_box">
+                                        <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                            <thead>
+                                                <tr>
+                                                    <th width="60%">文件名</th>
+                                                    <th width="20%">上传时间</th>
+                                                    <th width="20%">操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="popup_htmlPileData_ZJCZ" data-tag="0">
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                        @*地勘数据*@
+                        <div class="form-group">
+                            <div class="text-left cb_check_f_title">地勘数据配置</div>
+                            <div class="cb_check_f clearfix mb1">
+                                <label class="col-md-2 control-label">地勘原始资料</label>
+                                <div class="col-md-10 clearfix">
+                                    <div class="zdtj_box clearfix">
+                                        <div class="col-md-6 pr0">
+                                            <input type="file" multiple class="form-control pull-left" id="popup_file_DKYSZL_ZJCZ">
+                                        </div>
+                                        <div class="col-md-1 text-center">
+                                            <button class="btn search_btn btn-success" id="popup_btn_upload_DKYSZL_ZJCZ" onclick="SoftwareZJCZHelper.UploadProjectDKFile(1);">上传</button>
+                                        </div>
+                                        <div class="col-md-5 zhuyi_zt pr0">
+
+                                        </div>
+                                    </div>
+
+                                    <div class="table_project_box">
+                                        <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                            <thead>
+                                                <tr>
+                                                    <th width="60%">文件名</th>
+                                                    <th width="20%">上传时间</th>
+                                                    <th width="20%">操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="popup_htmlProjectFile_DKYSZL_ZJCZ" data-tag="0">
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="cb_check_f clearfix mb1">
+                                <label class="col-md-2 control-label">地勘数据表</label>
+                                <div class="col-md-10 clearfix">
+                                    <div class="zdtj_box clearfix">
+                                        <div class="col-md-6 pr0">
+                                            <input type="file" class="form-control pull-left" accept=".xlsx" id="popup_file_DKSJB_ZJCZ">
+                                        </div>
+                                        <div class="col-md-1 text-center">
+                                            <button class="btn search_btn btn-success" id="popup_btn_upload_DKSJB_ZJCZ" onclick="SoftwareZJCZHelper.UploadProjectDKFile(2);">上传</button>
+                                        </div>
+                                        <div class="col-md-5 text-right zhuyi_zt pr0">
+                                            <a class="btn btn-primary btn-primary-a" href="~/File/Task/地勘数据表(汇总表).xlsx">模板下载</a>
+                                        </div>
+                                    </div>
+
+                                    <div class="table_project_box">
+                                        <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                            <thead>
+                                                <tr>
+                                                    <th width="60%">文件名</th>
+                                                    <th width="20%">上传时间</th>
+                                                    <th width="20%">操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="popup_htmlProjectFile_DKSJB_ZJCZ" data-tag="0">
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group" id="popup_divFileReport_ZJCZ">
+                            <label class="col-md-2 control-label control-label_position02" style="color:red;">文件报告</label>
+
+                            <div class="col-md-10">
+
+                                <div class="table_project_box clearfix">
+
+                                    <div class="col-md-4 pl0 mb1">
+                                        <input type="file" multiple class="form-control" id="popup_uploadFileReport_ZJCZ">
+                                    </div>
+                                    <div class="col-md-2 pl0 mb1">
+                                        <button class="btn search_btn btn-success" id="popup_btn_uploadFileReport_ZJCZ" onclick="SoftwareZJCZHelper.UploadReportFile();">上传</button>
+                                    </div>
+
+                                    <div class="col-md-6 pl0 mb1">
+
+                                    </div>
+
+                                    <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                        <thead>
+                                            <tr>
+                                                <th width="60%">文件名</th>
+                                                <th width="20%">上传时间</th>
+                                                <th width="20%">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="popup_htmlFileReport_ZJCZ" data-tag="0">
+                                            
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group mod_touying" id="popup_divLastContent_ZJCZ">
+
+                            <label class="col-md-2 control-label">上一节点意见</label>
+                            <div class="col-md-10">
+                                <textarea class="form-control" id="popup_txtLastContent_ZJCZ" disabled style="height:12vh;"></textarea>
+                            </div>
+                            <label class="col-md-2 control-label"></label>
+
+                        </div>
+
+                        <div class="form-group" id="popup_divContent_ZJCZ">
+
+                            <label class="col-md-2 control-label">审批意见</label>
+                            <div class="col-md-10">
+                                <textarea class="form-control" id="popup_txtContent_ZJCZ" style="height:12vh;"></textarea>
+                            </div>
+                            <label class="col-md-2 control-label"></label>
+
+                        </div>
+
+                        <div class="form-group mod_touying" id="popup_divNextNode_ZJCZ">
+
+                            <label class="col-md-2 control-label lcjd_next">流程下一节点</label>
+                            <div class="col-md-4 pr0">
+                                <div class="lcjd_next_sp"><i class="icon iconfont">&#xe63e;</i><span id="popup_spanNextNodeName_ZJCZ">分子公司审批</span></div>
+                                <div class="nice-select">
+                                    <input id="popup_txtNodeUserName_ZJCZ" type="text" class="form-control" placeholder="搜索" autocomplete="off" />
+                                    <div class="search_div" onclick="SoftwareZJCZHelper.ClearShjNodeUserName();" id="popup_divClearNodeName_ZJCZ">
+                                        <i class="fa fa-close"></i>
+                                    </div>
+                                    <ul id="popup_ulNodeUserList_ZJCZ" style="display:none;">
+                                    </ul>
+                                </div>
+
+                            </div>
+                            <div class="col-md-1 text-center mt4">
+                                <button class="btn btn-primary search_btn" style="width: 100%" id="popup_btnFindNodeUserName_ZJCZ" onclick="SoftwareZJCZHelper.FindShjNodeUserByName();">搜索</button>
+                            </div>
+                            <div class="col-md-5 zhuyi_zt mt4">
+                                注意：请按照流程节点审批要求，指定下一节点审批人。如果节点审批人选错，整个流程将不能通过或者退回。
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="text-center sqzl_btn_box" id="popup_divSubmit_ZJCZ">
+                    <button class="btn btn-success" id="popup_btnSubmit_ZJCZ" data-type="1" onclick="SoftwareZJCZHelper.AddTaskSubmit(this);">申请</button>
+                    <button class="btn btn-danger" id="popup_btnBack_ZJCZ" data-type="0" onclick="SoftwareZJCZHelper.AddTaskSubmit(this);">审批退回</button>
+                    <button class="btn btn-warning" id="popup_btnCancel_ZJCZ" data-type="3" onclick="SoftwareZJCZHelper.AddTaskSubmit(this);">作废</button>
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    $(document).ready(function () {
+        //SoftwareZJCZHelper.Init();
+        //SoftwareZJCZHelper.LoadZJCZShip();
+    })
+
+    var SoftwareZJCZHelper = {
+        Init: function () {
+            //SoftwareZJCZHelper.ForecastTimeInit();
+        },
+        ForecastTimeInit: function () {
+            $('#popup_ForecastStartTime_ZJCZ').val(formatDateTimeByDay(new Date()));
+            $('#popup_ForecastEndTime_ZJCZ').val(formatDateTimeByDay(new Date(new Date().setDate(new Date().getDate() + 90))));
+        },
+        OpenPopup: function () {
+
+            var ChooseProjectID = $('#hid_ProjectID').val();
+            if (ChooseProjectID == null || ChooseProjectID == '' || ChooseProjectID == 0) {
+                ModalPopup('error', '必须先选择所关联的风场');
+                return;
+            }
+            SoftwareZJCZHelper.PopupOpenedHandleType = 'new';
+            SoftwareZJCZHelper.OpenTaskPopup('new', ChooseProjectID);
+
+            Param.SoftwareID = 6;
+            //下一节点人员
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('NextNodeQuery', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+                            $('#popup_spanNextNodeName_ZJCZ').html(data.Data.NodeName);
+
+                            if (data.Data.NodeUsers.length > 0) {
+
+                                $('#popup_txtNodeUserName_ZJCZ').attr('disabled', true);
+                                $('#popup_btnFindNodeUserName_ZJCZ').attr('disabled', true);
+                                $('#popup_divClearNodeName_ZJCZ').hide();
+
+                                var NodeUserHtml = '';
+                                $(data.Data.NodeUsers).each(function (index, dom) {
+
+                                    NodeUserHtml += dom.ManageName + '(' + dom.ManageDepart + ');'
+
+                                });
+                                $('#popup_txtNodeUserName_ZJCZ').val(NodeUserHtml);
+
+                            }
+                            else {
+                                $('#popup_txtNodeUserName_ZJCZ').attr('disabled', false);
+                                $('#popup_btnFindNodeUserName_ZJCZ').attr('disabled', false);
+                                $('#popup_divClearNodeName_ZJCZ').show();
+                            }
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+
+
+        },
+
+        OpenTaskPopup: function (type, FlowStatus) {
+            $('#popup_divSubmit_ZJCZ').show();
+            if (type == 'new') {
+                //清空弹窗
+                SoftwareZJCZHelper.ClearTaskPopup();
+                //设置可写
+                SoftwareZJCZHelper.SetTaskPopupWrite();
+
+                //报告文件
+                $('#popup_divFileReport_ZJCZ').hide();
+                /*上一节点审批意见*/
+                $('#popup_divLastContent_ZJCZ').hide();
+                //审批意见
+                $('#popup_divContent_ZJCZ').hide();
+                //下一节点
+                $('#popup_divNextNode_ZJCZ').show();
+
+                //提交按钮
+                $('#popup_btnSubmit_ZJCZ').show().html('申请').attr('data-type', 1);
+                $('#popup_btnBack_ZJCZ').hide();
+                $('#popup_btnCancel_ZJCZ').hide();
+
+                SoftwareZJCZHelper.PopupOpenedTaskID = parseInt(Math.random() * 10000000);
+
+            }
+            else if (type == 'view') {
+                //清空弹窗
+                SoftwareZJCZHelper.ClearTaskPopup();
+                //设置可写
+                SoftwareZJCZHelper.SetTaskPopupRead();
+
+                //文件报告（需要另外判断）
+                $('#popup_divFileReport_ZJCZ').show();
+
+                /*上一节点审批意见*/
+                $('#popup_divLastContent_ZJCZ').show();
+                //审批意见
+                $('#popup_divContent_ZJCZ').hide();
+                //下一节点
+                $('#popup_divNextNode_ZJCZ').hide();
+
+                //提交按钮
+                $('#popup_btnSubmit_ZJCZ').hide();
+                $('#popup_btnBack_ZJCZ').hide();
+                $('#popup_btnCancel_ZJCZ').hide();
+
+                //作废的流程
+                if (FlowStatus == 3) {
+                    $('#popup_divSubmit_ZJCZ').hide();
+                }
+
+            }
+            else if (type == 'approval') {
+                //清空弹窗
+                SoftwareZJCZHelper.ClearTaskPopup();
+                //设置只读
+                SoftwareZJCZHelper.SetTaskPopupRead();
+
+                //成果报告（需要另外判断）
+                $('#popup_divFileReport_ZJCZ').show();
+                $('#popup_uploadFileReport_ZJCZ').attr('disabled', false);
+                $('#popup_btn_uploadFileReport_ZJCZ').attr('disabled', false);
+
+                /*上一节点审批意见*/
+                $('#popup_divLastContent_ZJCZ').show();
+                //审批意见
+                $('#popup_divContent_ZJCZ').show();
+                $('#popup_txtContent_ZJCZ').attr('disabled', false);
+                //下一节点
+                $('#popup_divNextNode_ZJCZ').show();
+                $('#popup_txtNodeUserName_ZJCZ').attr('disabled', false);
+                $('#popup_btnFindNodeUserName_ZJCZ').attr('disabled', false);
+                $('#popup_divClearNodeName_ZJCZ').show();
+
+                $('#popup_btnBack_ZJCZ').show();
+                $('#popup_btnSubmit_ZJCZ').show().html('审批通过').attr('data-type', 2);
+                $('#popup_btnCancel_ZJCZ').show();
+
+            }
+            else if (type == 'renew') {
+                //清空弹窗
+                SoftwareZJCZHelper.ClearTaskPopup();
+                //设置可写
+                SoftwareZJCZHelper.SetTaskPopupWrite();
+
+                //成果报告（需要另外判断）
+                $('#popup_divFileReport_ZJCZ').hide();
+
+                /*上一节点审批意见*/
+                $('#popup_divLastContent_ZJCZ').show();
+                $('#popup_txtLastContent_ZJCZ').attr('disabled', true);
+                //审批意见
+                $('#popup_divContent_ZJCZ').show();
+                $('#popup_txtContent_ZJCZ').attr('disabled', false);
+                
+                //下一节点
+                $('#popup_divNextNode_ZJCZ').show();
+
+                $('#popup_btnBack_ZJCZ').hide();
+                $('#popup_btnSubmit_ZJCZ').show().html('重新提交').attr('data-type', 2);
+                $('#popup_btnCancel_ZJCZ').show();
+
+            }
+
+            $('#Tk_software_06').modal('show');
+
+            //SoftwareZJCZHelper.LoadDKFile(type);
+
+            SoftwareZJCZHelper.LoadDKFile(type);
+
+            //SoftwareZJCZHelper.LoadDKData(ProjectID);
+
+            SoftwareZJCZHelper.LoadProjectPosition();
+
+        },
+
+        SetTaskPopupWrite: function () {
+
+            //任务名
+            //$('#popup_txtTaskName_ZJCZ').attr('disabled', false);
+            //项目介绍
+            $('#popup_txtProjectIntroduce_ZJCZ').attr('disabled', false);
+            //项目位置
+            $('#popup_txtProjectPosition_ZJCZ').attr('disabled', false);
+            $('#popup_fileProjectPosition_ZJCZ').attr('disabled', false);
+            $('#popup_btn_uploadProjectPosition_ZJCZ').attr('disabled', false);
+            
+            //桩帽替打
+            $('#popup_txtPileReplace_ZJCZ').attr('disabled', false);
+            //锤型号
+            $('#popup_btnAddHammerModel_ZJCZ').attr('disabled', false);
+            //桩配置
+            $('#popup_filePileSource_ZJCZ').attr('disabled', false);
+            $('#popup_btn_uploadPileSource_ZJCZ').attr('disabled', false);
+            $('#popup_filePileData_ZJCZ').attr('disabled', false);
+            $('#popup_btn_uploadPileData_ZJCZ').attr('disabled', false);
+            //地勘数据
+            $('#popup_file_DKYSZL_ZJCZ').attr('disabled', false);
+            $('#popup_btn_upload_DKYSZL_ZJCZ').attr('disabled', false);
+            $('#popup_file_DKSJB_ZJCZ').attr('disabled', false);
+            $('#popup_btn_upload_DKSJB_ZJCZ').attr('disabled', false);
+            //文件报告
+            $('#popup_uploadFileReport_ZJCZ').attr('disabled', false);
+            $('#popup_btn_uploadFileReport_ZJCZ').attr('disabled', false);
+            //意见
+            $('#popup_txtLastContent_ZJCZ').attr('disabled', false);
+            $('#popup_txtContent_ZJCZ').attr('disabled', false);
+            //节点
+            $('#popup_btnFindNodeUserName_ZJCZ').attr('disabled', false);
+            $('#popup_txtNodeUserName_ZJCZ').attr('disabled', false);
+            $('#popup_divClearNodeName_ZJCZ').show();
+        },
+
+        SetTaskPopupRead: function () {
+
+            //任务名
+            //$('#popup_txtTaskName_ZJCZ').attr('disabled', true);
+            //项目介绍
+            $('#popup_txtProjectIntroduce_ZJCZ').attr('disabled', true);
+            //项目位置
+            $('#popup_txtProjectPosition_ZJCZ').attr('disabled', true);
+            $('#popup_fileProjectPosition_ZJCZ').attr('disabled', true);
+            $('#popup_btn_uploadProjectPosition_ZJCZ').attr('disabled', true);
+            //桩帽替打
+            $('#popup_txtPileReplace_ZJCZ').attr('disabled', true);
+            //锤型号
+            $('#popup_btnAddHammerModel_ZJCZ').attr('disabled', true);
+            //桩配置
+            $('#popup_filePileSource_ZJCZ').attr('disabled', true);
+            $('#popup_btn_uploadPileSource_ZJCZ').attr('disabled', true);
+            $('#popup_filePileData_ZJCZ').attr('disabled', true);
+            $('#popup_btn_uploadPileData_ZJCZ').attr('disabled', true);
+            //地勘数据
+            $('#popup_file_DKYSZL_ZJCZ').attr('disabled', true);
+            $('#popup_btn_upload_DKYSZL_ZJCZ').attr('disabled', true);
+            $('#popup_file_DKSJB_ZJCZ').attr('disabled', true);
+            $('#popup_btn_upload_DKSJB_ZJCZ').attr('disabled', true);
+            //文件报告
+            $('#popup_uploadFileReport_ZJCZ').attr('disabled', true);
+            $('#popup_btn_uploadFileReport_ZJCZ').attr('disabled', true);
+            //意见
+            $('#popup_txtLastContent_ZJCZ').attr('disabled', true);
+            $('#popup_txtContent_ZJCZ').attr('disabled', true);
+            //节点
+            $('#popup_btnFindNodeUserName_ZJCZ').attr('disabled', true);
+            $('#popup_txtNodeUserName_ZJCZ').attr('disabled', true);
+            $('#popup_divClearNodeName_ZJCZ').hide();
+
+        },
+
+        ClearTaskPopup: function () {
+
+            //任务名
+            $('#popup_txtTaskName_ZJCZ').val('');
+            //项目介绍
+            $('#popup_txtProjectIntroduce_ZJCZ').val('');
+            //项目位置
+            $('#popup_txtProjectPosition_ZJCZ').val('');
+            $('#popup_fileProjectPosition_ZJCZ').val('');
+            $('#popup_htmlProjectPosition_ZJCZ').html('');
+            //桩帽替打
+            $('#popup_txtPileReplace_ZJCZ').val('');
+            //锤型号
+            $('#popup_htmlHammerModel_ZJCZ').html('');
+            //桩配置
+            $('#popup_filePileSource_ZJCZ').val('');
+            $('#popup_htmlPileSource_ZJCZ').html('');
+            $('#popup_filePileData_ZJCZ').val('');
+            $('#popup_htmlPileData_ZJCZ').html('');
+            //地勘数据
+            $('#popup_file_DKYSZL_ZJCZ').val('');
+            $('#popup_htmlProjectFile_DKYSZL_ZJCZ').html('');
+            $('#popup_file_DKSJB_ZJCZ').val('');
+            $('#popup_htmlProjectFile_DKSJB_ZJCZ').html('');
+            //文件报告
+            $('#popup_uploadFileReport_ZJCZ').val('');
+            $('#popup_htmlFileReport_ZJCZ').html('');
+            //意见
+            $('#popup_txtLastContent_ZJCZ').val('');
+            $('#popup_txtContent_ZJCZ').val('');
+
+        },
+
+        ChoosedTaskNodeUser: { Name: '', UserCode: '', Depart: '', Phone: '', JobName: '', NextNodeID: '' },
+
+        FindShjNodeUserByName: function () {
+
+            Param.Name = $("#popup_txtNodeUserName_ZJCZ").val();
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('FindShjUser', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        if (data.Success) {
+
+                            var DataListHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                DataListHtml += '<li onclick="SoftwareZJCZHelper.ChooseNodeUser(this);" data-usercode="' + dom.empcode + '" data-name="' + dom.name + '" data-depart="' + dom.wholeDeptPath + '" data-phone="' + dom.phone + '" data-jobname="' + dom.jobname + '" ><h3>' + dom.name + '(' + dom.jobname + ')</h3><div>' + dom.wholeDeptPath + '</div></li >';
+
+                            });
+                            $('ul#popup_ulNodeUserList_ZJCZ').html(DataListHtml);
+                            $('ul#popup_ulNodeUserList_ZJCZ').show();
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        ChooseNodeUser: function (dom) {
+
+            if (dom == null)
+                return;
+
+            var Name = $(dom).attr('data-name');
+            var UserCode = $(dom).attr('data-usercode');
+            var Depart = $(dom).attr('data-depart');
+            var Phone = $(dom).attr('data-phone');
+            var JobName = $(dom).attr('data-jobname');
+
+            SoftwareZJCZHelper.ChoosedTaskNodeUser.Name = Name;
+            SoftwareZJCZHelper.ChoosedTaskNodeUser.UserCode = UserCode;
+            SoftwareZJCZHelper.ChoosedTaskNodeUser.Depart = Depart;
+            SoftwareZJCZHelper.ChoosedTaskNodeUser.Phone = Phone;
+            SoftwareZJCZHelper.ChoosedTaskNodeUser.JobName = JobName;
+
+            if (Name == '' || UserCode == '')
+                return;
+
+            $('#popup_txtNodeUserName_ZJCZ').val(Name + '(' + Depart + ')');
+
+            $('ul#popup_ulNodeUserList_ZJCZ').hide();
+
+        },
+
+        PopupOpenedTaskID: 0,
+        PopupIsBackFlow: false,
+        PopupOpenedHandleType: 'new',
+
+        OpenTaskInfo: function (TaskID) {
+
+            Param.TaskID = TaskID;
+
+            SoftwareZJCZHelper.PopupOpenedTaskID = 0;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('TaskQuery_ZJCZ', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+                            SoftwareZJCZHelper.PopupOpenedTaskID = TaskID;
+
+                            var Task = data.Data;
+
+                            //如果是已经结束的流程，直接打开文件获取弹窗
+                            if (Task.FlowInfo.FlowStatus == 2) {
+
+                                OpenReportPopup(TaskID);
+                                return;
+                            }
+
+                            SoftwareZJCZHelper.OpenTaskPopup(Task.FlowInfo.FlowHandle, Task.FlowInfo.FlowStatus);
+
+                            SoftwareZJCZHelper.PopupOpenedHandleType = Task.FlowInfo.FlowHandle;
+
+                            SoftwareZJCZHelper.PopupIsBackFlow = Task.FlowInfo.IsBackFlow;
+
+                            if (Task.FlowInfo.FlowHandle == 'renew' && Task.FlowInfo.NodeID == 9) {
+                                $('#popup_divTechEdit_ZJCZ').show();
+                            }
+
+
+                            if (Task.FlowInfo.DoEditConfirm == true) {
+
+                            }
+
+                            if (Task.FlowInfo.IsUsingFlowNode) {
+                                $('#popup_divContent_ZJCZ').hide();
+                                $('#popup_divNextNode_ZJCZ').hide();
+                                $('#popup_btnSubmit_ZJCZ').hide();
+                                $('#popup_btnBack_ZJCZ').hide();
+                            }
+
+                            //如果是最后的流程
+                            SoftwareZJCZHelper.ChoosedTaskNodeUser.NextNodeID = Task.FlowInfo.NextNodeID;
+                            if (Task.FlowInfo.NextNodeID == 0) {
+                                $('#popup_txtNodeUserName_ZJCZ').attr('disabled', true);
+                                $('#popup_btnFindNodeUserName_ZJCZ').attr('disabled', true);
+                                $('#popup_divClearNodeName_ZJCZ').hide();
+                            }
+
+                            //下一节点如果有默认人物
+                            if (Task.FlowInfo.NextNode != null && Task.FlowInfo.NextNode.length > 0) {
+
+                                $('#popup_txtNodeUserName_ZJCZ').attr('disabled', true);
+                                $('#popup_btnFindNodeUserName_ZJCZ').attr('disabled', true);
+                                $('#popup_divClearNodeName_ZJCZ').hide();
+
+                                var NodeUserHtml = '';
+                                $(Task.FlowInfo.NextNode).each(function (index, dom) {
+
+                                    NodeUserHtml += dom.UserName + '(' + dom.UserDepart + ');'
+
+                                });
+                                $('#popup_txtNodeUserName_ZJCZ').val(NodeUserHtml);
+
+                            }
+
+                            //上一节点意见（可能多人）
+                            var CommentHtml = '';
+                            $(Task.FlowInfo.LastNode).each(function (index, dom) {
+                                CommentHtml += dom.UserName + ':' + dom.Comment + ';\n'
+                            });
+                            $('#popup_txtLastContent_ZJCZ').val(CommentHtml);
+                            //下一节点
+                            $('#popup_spanNextNodeName_ZJCZ').html(Task.FlowInfo.NextNodeName);
+
+                            //填充表单数据
+                            $('#popup_txtTaskName_ZJCZ').val(Task.TaskName);
+
+                            $('#popup_txtProjectIntroduce_ZJCZ').val(Task.TaskInfo_ZJCZ.ProjectIntroduce);
+                            $('#popup_txtProjectPosition_ZJCZ').val(Task.TaskInfo_ZJCZ.ProjectPosition);
+                            $('#popup_txtPileReplace_ZJCZ').val(Task.TaskInfo_ZJCZ.PileReplace);
+
+                            //项目位置图片
+                            var ProjectPositionImgHtml = '';
+                            $(Task.TaskInfo_ZJCZ.ProjectPositionImgs).each(function (index, dom) {
+
+                                if (Task.FlowInfo.FlowHandle == 'approval' || Task.FlowInfo.FlowHandle == 'renew') {
+                                    ProjectPositionImgHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a> / <a href="#" class="xm_zt_red" data-ID="' + dom.ID + '" onclick="SoftwareZJCZHelper.DeleteProjectPositionFile(this);">删除</a></td></tr>';
+                                }
+                                else {
+                                    ProjectPositionImgHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a></td></tr>';
+                                }
+                            })
+                            $('#popup_htmlProjectPosition_ZJCZ').html(ProjectPositionImgHtml);
+
+                            //锤型号
+                            var HammerModelHtml = '';
+                            $(Task.TaskInfo_ZJCZ.HammerModels).each(function (index, dom) {
+                                HammerModelHtml += '<li class="clearfix"><span><div class="nice-select"><input type="text" value=' + dom + ' class="form-control"/></div></span><span><button class="btn btn-danger">删除</button></span></li>';
+                            })
+                            $('#popup_htmlHammerModel_ZJCZ').html(HammerModelHtml);
+                            if (Task.FlowInfo.FlowHandle == 'renew') {
+                                SoftwareZJCZHelper.SetHammerModelWrite();
+                            }
+                            else {
+                                SoftwareZJCZHelper.SetHammerModelRead();
+                            }
+
+                            //桩
+                            var Pile_YSZL_html = '';
+                            $(Task.TaskInfo_ZJCZ.File_Pile_YSZL).each(function (index, dom) {
+                                if (Task.FlowInfo.FlowHandle != 'view') {
+                                    Pile_YSZL_html += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a> / <a href="#" class="xm_zt_red" data-ID="' + dom.ID + '" onclick="SoftwareZJCZHelper.DeletePileFile(this);">删除</a></td></tr>';
+                                }
+                                else {
+                                    Pile_YSZL_html += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a></td></tr>';
+                                }
+                            })
+                            var Pile_SJB_html = '';
+                            $(Task.TaskInfo_ZJCZ.File_Pile_SJB).each(function (index, dom) {
+                                Pile_SJB_html += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a></td></tr>';
+                            })
+                            $('#popup_htmlPileSource_ZJCZ').html(Pile_YSZL_html);
+                            $('#popup_htmlPileData_ZJCZ').html(Pile_SJB_html);
+
+                            var ReportFileHtml = '';
+                            $(Task.Report.ReportFile).each(function (index, dom) {
+
+                                if (Task.FlowInfo.FlowHandle != 'view') {
+                                    ReportFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '" >下载</a> / <a class="xm_zt_red" data-id="' + dom.ID + '" onclick="SoftwareZJCZHelper.DeleteReportFile(this)">删除</a></td></tr>';
+                                }
+                                else {
+                                    ReportFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '" >下载</a></td></tr>';
+                                }
+
+                            })
+                            $('#popup_htmlFileReport_ZJCZ').html(ReportFileHtml);
+
+                            //$('#popup_ForecastStartTime_ZJCZ').val(Task.TaskInfo_ZJCZ.ForecastStartTime);
+                            //$('#popup_ForecastEndTime_ZJCZ').val(Task.TaskInfo_ZJCZ.ForecastEndTime);
+                            //$('#popup_txtLon_ZJCZ').val(Task.TaskInfo_ZJCZ.Lon);
+                            //$('#popup_txtLat_ZJCZ').val(Task.TaskInfo_ZJCZ.Lat);
+                            //$('#popup_txtHZ_ZJCZ').val(Task.TaskInfo_ZJCZ.Balance);
+                            //$('#popup_txtYFYTask_ZJCZ').val(Task.TaskInfo_ZJCZ.YFYNo);
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        ClearShjNodeUserName: function () {
+            SoftwareZJCZHelper.ChoosedTaskNodeUser = {};
+            $('#popup_txtNodeUserName_ZJCZ').val('');
+        },
+
+        AddTaskSubmit: function (dom) {
+
+            var type = $(dom).attr('data-type');
+            if (type == null || type == '')
+                return;
+
+            var InfoText = '';
+            if (type == 0) {
+                InfoText = '是否要流程退回？流程将退回至上一节点人员';
+            }
+            else if (type == 1) {
+
+                var TaskName = SoftwareZJCZHelper.CreateTaskName();
+                if (TaskName == '') {
+                    return;
+                }
+                $('#popup_txtTaskName_ZJCZ').val(TaskName);
+                InfoText = TaskName + '</br>是否要保存任务？';
+            }
+            else if (type == 2) {
+
+                if (SoftwareZJCZHelper.PopupIsBackFlow == true) {
+                    var TaskName = SoftwareZJCZHelper.CreateTaskName();
+                    if (TaskName == '') {
+                        return;
+                    }
+                    $('#popup_txtTaskName_ZJCZ').val(TaskName);
+                    InfoText = TaskName + '</br>是否要保存任务？';
+                }
+                else {
+                    InfoText = '是否要审批通过？';
+                }
+            }
+            else if (type == 3) {
+                InfoText = '是否要作废流程？';
+            }
+
+            ModalPopup('information', InfoText);
+
+            $("#ModalSubmit").unbind('click').bind('click', function () {
+                SoftwareZJCZHelper.DoTaskSubmit(type);
+            });
+
+        },
+
+        DoTaskSubmit: function (type) {
+
+            if (type == 1) {
+                SoftwareZJCZHelper.DoTaskAdd();
+            }
+            else if (type == 0 || type == 2) {
+                SoftwareZJCZHelper.DoTaskApproval(type);
+            }
+            else if (type == 3) {
+                SoftwareZJCZHelper.DoTaskCancel();
+            }
+        },
+
+        CreateTaskName: function () {
+
+            var TaskName = '';
+
+            //$('#popup_htmlHammerModel_ZJCZ li input').each(function (index, dom) {
+
+            //    var HammerName = $(dom).val().trim();
+            //    if (HammerName == '')
+            //    {
+            //        ModalClose('information');
+            //        ModalPopup('error', '锤型号 不能为空');
+            //        return '';
+            //    }
+            //})
+
+            var HammerCount = $('#popup_htmlHammerModel_ZJCZ li input').length;
+            if (HammerCount == 0) {
+                ModalClose('information');
+                ModalPopup('error', '没有输入 锤型号');
+                return '';
+            }
+            else
+            {
+                if (HammerCount == 1) {
+                    TaskName = '(' + $('#popup_htmlHammerModel_ZJCZ li input').first().val().trim() + ')桩基沉桩可打性分析';
+                }
+                else
+                {
+                    TaskName = '(' + $('#popup_htmlHammerModel_ZJCZ li input').first().val().trim() + ')等' + HammerCount + '个锤型号的桩基沉桩可打性分析';
+                }
+            }
+
+
+            TaskName += '(' + GetFullDateTimeString(new Date()) + ')';
+
+            return TaskName;
+
+        },
+
+        DoTaskAdd: function () {
+
+            var ProjectID = $('#hid_ProjectID').val();
+            if (ProjectID == null || ProjectID == '' || ProjectID == 0) {
+                ModalClose('information');
+                ModalPopup('error', '软件申请页面需要选择关联风电项目');
+                return;
+            }
+
+            var SubmitFormData = new FormData();
+            SubmitFormData.append("ProjectID", ProjectID);
+            SubmitFormData.append("TaskID", SoftwareZJCZHelper.PopupOpenedTaskID);
+            SubmitFormData.append("SoftwareID", 6);
+
+            SubmitFormData.append("TaskName", $('#popup_txtTaskName_ZJCZ').val());
+            SubmitFormData.append("ZJCZProjectIntroduce", $('#popup_txtProjectIntroduce_ZJCZ').val());
+            SubmitFormData.append("ZJCZProjectPosition", $('#popup_txtProjectPosition_ZJCZ').val());
+            SubmitFormData.append("PileReplace", $('#popup_txtPileReplace_ZJCZ').val());
+
+            //桩锤号
+            var HammerNames = '';
+            var HammerErrorText = '';
+            $('#popup_htmlHammerModel_ZJCZ li input').each(function (index, dom) {
+                var HammerName = $(dom).val().trim();
+                if (HammerName == '')
+                {
+                    HammerErrorText = '锤型号 内容不能为空';
+                    return false;
+                }
+                HammerNames += HammerName + ','
+            })
+            if (HammerErrorText != '')
+            {
+                ModalClose('information');
+                ModalPopup('error', '锤型号 内容不能为空');
+                return;
+            }
+            HammerNames = HammerNames.substring(0, HammerNames.length - 1);
+            SubmitFormData.append("HammerModel", HammerNames);
+
+            //节点人员
+            SubmitFormData.append("TaskNodeName", SoftwareZJCZHelper.ChoosedTaskNodeUser.Name);
+            SubmitFormData.append("TaskNodeUserCode", SoftwareZJCZHelper.ChoosedTaskNodeUser.UserCode);
+            SubmitFormData.append("TaskNodeDepart", SoftwareZJCZHelper.ChoosedTaskNodeUser.Depart);
+            SubmitFormData.append("TaskNodePhone", SoftwareZJCZHelper.ChoosedTaskNodeUser.Phone);
+            SubmitFormData.append("TaskNodeJobName", SoftwareZJCZHelper.ChoosedTaskNodeUser.JobName);
+
+            $('#ModalSubmit').attr('disabled', true);
+            OpenMaskPopUp();
+
+            $.ajax({
+                url: 'TaskSubmit_ZJCZ',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: SubmitFormData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+                            ModalPopup('success', '保存成功');
+                            $('#Tk_software_06').modal('hide');
+                            $('#tk_WorkTasks').modal('hide');
+
+                            Param.ProjectID = $('#hid_ProjectID').val();
+                            DoQuery();
+
+
+                        }
+                        else {
+
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                    $('#ModalSubmit').attr('disabled', false);
+                    CloseMaskPopUp();
+                    ModalClose('information');
+                }
+            });
+
+        },
+
+        DoTaskApproval: function (type) {
+
+            if (SoftwareZJCZHelper.PopupOpenedTaskID == 0) {
+                ModalClose('information');
+                ModalPopup('error', '数据出错，重新打开弹窗。');
+                return;
+            }
+
+            var SubmitFormData = new FormData();
+
+            SubmitFormData.append("ApprovalType", type);
+            SubmitFormData.append("IsBackFlow", SoftwareZJCZHelper.PopupIsBackFlow);
+            SubmitFormData.append("NodeID", SoftwareZJCZHelper.ChoosedTaskNodeUser.NextNodeID);
+            SubmitFormData.append("TaskID", SoftwareZJCZHelper.PopupOpenedTaskID);
+            SubmitFormData.append("TaskComment", $('#popup_txtContent_ZJCZ').val());
+            if (SoftwareZJCZHelper.ChoosedTaskNodeUser.NextNodeID == 0) {
+                //流程结束
+
+            }
+            else {
+                //正常审批
+                SubmitFormData.append("TaskNodeName", SoftwareZJCZHelper.ChoosedTaskNodeUser.Name);
+                SubmitFormData.append("TaskNodeUserCode", SoftwareZJCZHelper.ChoosedTaskNodeUser.UserCode);
+                SubmitFormData.append("TaskNodeDepart", SoftwareZJCZHelper.ChoosedTaskNodeUser.Depart);
+                SubmitFormData.append("TaskNodePhone", SoftwareZJCZHelper.ChoosedTaskNodeUser.Phone);
+                SubmitFormData.append("TaskNodeJobName", SoftwareZJCZHelper.ChoosedTaskNodeUser.JobName);
+
+                //重新填写的表单
+                if (SoftwareZJCZHelper.PopupIsBackFlow) {
+
+                    SubmitFormData.append("TaskName", $('#popup_txtTaskName_ZJCZ').val());
+                    SubmitFormData.append("ZJCZProjectIntroduce", $('#popup_txtProjectIntroduce_ZJCZ').val());
+                    SubmitFormData.append("ZJCZProjectPosition", $('#popup_txtProjectPosition_ZJCZ').val());
+                    SubmitFormData.append("PileReplace", $('#popup_txtPileReplace_ZJCZ').val());
+
+                    //桩锤号
+                    var HammerNames = '';
+                    var HammerErrorText = '';
+                    $('#popup_htmlHammerModel_ZJCZ li input').each(function (index, dom) {
+                        var HammerName = $(dom).val().trim();
+                        if (HammerName == '') {
+                            HammerErrorText = '锤型号 内容不能为空';
+                            return false;
+                        }
+                        HammerNames += HammerName + ','
+                    })
+                    if (HammerErrorText != '') {
+                        ModalClose('information');
+                        ModalPopup('error', '锤型号 内容不能为空');
+                        return;
+                    }
+                    HammerNames = HammerNames.substring(0, HammerNames.length - 1);
+                    SubmitFormData.append("HammerModel", HammerNames);
+
+
+                    
+                }
+
+            }
+
+            OpenMaskPopUp();
+            $('#ModalSubmit').attr('disabled', true);
+
+            $.ajax({
+                url: 'TaskApprovalSubmit_ZJCZ',
+                dataType: 'json',
+                type: 'POST',
+                async: true,
+                data: SubmitFormData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+                            ModalPopup('success', '操作成功');
+                            $('#Tk_software_06').modal('hide');
+
+                            Param.ProjectID = $('#hid_ProjectID').val();
+                            DoQuery();
+
+                            var CBZUrl = data.Data;
+                            if (CBZUrl != null && CBZUrl != '') {
+                                //window.open(CBZUrl, '_blank');
+                            }
+
+                        }
+                        else {
+
+                            ModalOpenCBZ(data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                    $('#ModalSubmit').attr('disabled', false);
+                    CloseMaskPopUp();
+                    ModalClose('information');
+                }
+            });
+
+        },
+
+        DoTaskCancel: function () {
+
+            if (SoftwareZJCZHelper.PopupOpenedTaskID == 0) {
+                ModalClose('information');
+                ModalPopup('error', '数据出错，重新打开弹窗。');
+                return;
+            }
+
+            var SubmitFormData = new FormData();
+            SubmitFormData.append("TaskID", SoftwareZJCZHelper.PopupOpenedTaskID);
+
+            OpenMaskPopUp();
+            $('#ModalSubmit').attr('disabled', true);
+
+            $.ajax({
+                url: 'TaskCancelSubmit_ZJCZ',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: SubmitFormData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+                            ModalPopup('success', '作废成功');
+                            $('#Tk_software_06').modal('hide');
+
+                            Param.ProjectID = $('#hid_ProjectID').val();
+                            DoQuery();
+
+                        }
+                        else {
+
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                    $('#ModalSubmit').attr('disabled', false);
+                    CloseMaskPopUp();
+                    ModalClose('information');
+                }
+            });
+
+        },
+
+        ShowPositionMap: function () {
+
+            var Lon = $('#popup_Lon_ZJCZ').val();
+            var Lat = $('#popup_Lat_ZJCZ').val();
+            var ProjectID = $('#popup_btnShowPosition').attr('data-ProjectID');
+
+            if (Lon == '' || Lat == '' || ProjectID == 0) {
+                return;
+            }
+
+            var Url = '/Cloud/WebGIS/ShowPosition?ProjectID=' + ProjectID + '&TaskLon=' + Lon + '&TaskLat=' + Lat;
+
+            window.open(Url, '_blank');
+
+        },
+
+        QueryFloatShip: function () {
+
+            var ShipNameKeyWord = $('#popup_txtFloatShipName_ZJCZ').val();
+
+            if (ShipNameKeyWord == '') {
+                $('#popup_ulFloatList_ZJCZ a').each(function (index, dom) {
+
+                    $(dom).parent().show();
+
+                })
+            }
+            else {
+                $('#popup_ulFloatList_ZJCZ a').each(function (index, dom) {
+
+                    var ShipName = $(dom).html();
+
+                    if (ShipName.indexOf(ShipNameKeyWord) == -1) {
+
+                        $(dom).parent().hide();
+
+                    }
+                    else {
+                        $(dom).parent().show();
+                    }
+
+                })
+            }
+
+
+
+        },
+
+        OpenReport: function () {
+
+            if (SoftwareZJCZHelper.PopupOpenedTaskID == 0) {
+                return;
+            }
+            Param.TaskID = SoftwareZJCZHelper.PopupOpenedTaskID;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            //alert('123');
+            $('#Tk_ZJCZReport').modal('show');
+
+
+            $.post('LoadTaskFile', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        if (data.Success) {
+
+                            var FileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                FileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a class="xm_zt_green" href="' + dom.FilePath + '">下载</a></td></tr>';
+
+                            })
+                            $('#popup_html_ZJCZFile').html(FileHtml);
+
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+
+
+        },
+
+        AddHammerModel: function () {
+
+            var NewHtml = '<li class="clearfix"><span><div class="nice-select"><input type="text" placeholder="例如：IHC S-3000、Menck MHU 3500S" class="form-control"/></div></span><span><button class="btn btn-danger" onclick="SoftwareZJCZHelper.DeleteHammerModel(this);">删除</button></span></li>';
+
+            $('#popup_htmlHammerModel_ZJCZ').append(NewHtml);
+
+        },
+
+        DeleteHammerModel: function (dom) {
+
+            $(dom).parent().parent().remove();
+
+        },
+
+        UploadPileFile: function (FileType) {
+
+            if (FileType == null || FileType == '' || FileType == 0)
+                return;
+
+            var formData = new FormData();
+            formData.append("TaskID", SoftwareZJCZHelper.PopupOpenedTaskID);
+            formData.append("FlowHandle", SoftwareZJCZHelper.PopupOpenedHandleType);
+            formData.append("FileType", FileType);
+            var TaskFiles = null;
+            if (FileType == 5) {
+                TaskFiles = $('#popup_filePileSource_ZJCZ')[0].files;
+            }
+            else if (FileType == 6) {
+                TaskFiles = $('#popup_filePileData_ZJCZ')[0].files;
+            }
+
+            if (TaskFiles == null || TaskFiles.length == 0)
+                return;
+
+            var FileCount = TaskFiles.length;
+            formData.append("PileFileCount", FileCount);
+            var Count = 1;
+            $(TaskFiles).each(function (index, dom) {
+
+                formData.append("PileFile" + Count, dom);
+
+                Count++;
+            });
+
+
+            $.ajax({
+                url: 'TaskPileFileUpload',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: formData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+
+                            var ProjectFileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                ProjectFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" download="' + dom.FileName + '" class="xm_zt_green" >下载</a> / <a href="#" class="xm_zt_red" data-ID="' + dom.ID + '" onclick="SoftwareZJCZHelper.DeletePileFile(this);">删除</a></td></tr>';
+                            });
+
+                            if (data.Data.length > 0) {
+                                if (FileType == 5) {
+                                    //桩原始资料
+                                    $('#popup_htmlPileSource_ZJCZ').html(ProjectFileHtml);
+                                }
+                                else if (FileType == 6) {
+                                    //桩数据表
+                                    $('#popup_htmlPileData_ZJCZ').html(ProjectFileHtml);
+                                }
+                            }
+
+                            ModalPopup('success', '保存成功');
+
+                        }
+                        else {
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                }
+            });
+
+        },
+
+        DeleteProjectPositionFile: function (dom) {
+
+            var ID = $(dom).attr('data-ID');
+            if (ID == null || ID == '' || ID == 0)
+                return;
+
+            Param.ID = ID;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            //下一节点人员
+            $.post('DeleteProjectPositionFile', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+                            var FileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                FileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" download="' + dom.FileName + '" class="xm_zt_green" >下载</a> / <a href="#" class="xm_zt_red" data-ID="' + dom.ID + '" onclick="SoftwareZJCZHelper.DeleteProjectPositionFile(this);">删除</a></td></tr>';
+                            })
+
+                            $('#popup_htmlProjectPosition_ZJCZ').html(FileHtml);
+
+                            $(dom).parent().parent().parent().html(PileFileHtml);
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        UploadProjectPosition: function () {
+
+            var formData = new FormData();
+            formData.append("TaskID", SoftwareZJCZHelper.PopupOpenedTaskID);
+            formData.append("FlowHandle", SoftwareZJCZHelper.PopupOpenedHandleType);
+
+            var TaskFiles = $('#popup_fileProjectPosition_ZJCZ')[0].files;
+            var FileCount = TaskFiles.length;
+            formData.append("ProjectPositionFileCount", FileCount);
+            var Count = 1;
+            $(TaskFiles).each(function (index, dom) {
+
+                formData.append("ProjectPositionFile" + Count, dom);
+
+                Count++;
+            });
+
+            $.ajax({
+                url: 'ProjectPositionFileUpload',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: formData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+
+                            var ProjectFileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                ProjectFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" download="' + dom.FileName + '" class="xm_zt_green" >下载</a> / <a href="#" class="xm_zt_red" data-ID="' + dom.ID + '" onclick="SoftwareZJCZHelper.DeleteProjectPositionFile(this);">删除</a></td></tr>';
+                            });
+
+                            $('#popup_htmlProjectPosition_ZJCZ').html(ProjectFileHtml);
+
+                            ModalPopup('success', '保存成功');
+
+                        }
+                        else {
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                }
+            });
+
+        },
+
+        DeletePileFile: function (dom) {
+
+            var ID = $(dom).attr('data-ID');
+            if (ID == null || ID == '' || ID == 0)
+                return;
+
+            Param.ID = ID;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            //下一节点人员
+            $.post('DeletePileFile', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+                            var FileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                FileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" download="' + dom.FileName + '" class="xm_zt_green" >下载</a> / <a href="#" class="xm_zt_red" data-ID="' + dom.ID + '" onclick="SoftwareZJCZHelper.DeletePileFile(this);">删除</a></td></tr>';
+                            })
+
+                            $('#popup_htmlPileSource_ZJCZ').html(FileHtml);
+
+                            $(dom).parent().parent().parent().html(FileHtml);
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        //地勘资料
+        UploadProjectDKFile: function (FileType) {
+
+            if (FileType == null || FileType == '' || FileType == 0)
+                return;
+
+            var ProjectID = $('#hid_ProjectID').val();
+            if (ProjectID == null || ProjectID == '' || ProjectID == 0)
+                return;
+
+            var formData = new FormData();
+            formData.append("ProjectID", ProjectID);
+            formData.append("FlowHandle", 'approval');
+            formData.append("FileType", FileType);
+            var TaskFiles = null;
+            if (FileType == 1) {
+                TaskFiles = $('#popup_file_DKYSZL_ZJCZ')[0].files;
+            }
+            else if (FileType == 2) {
+                TaskFiles = $('#popup_file_DKSJB_ZJCZ')[0].files;
+            }
+
+            if (TaskFiles == null || TaskFiles.length == 0)
+                return;
+
+            var FileCount = TaskFiles.length;
+            formData.append("ProjectFileCount", FileCount);
+            var Count = 1;
+            $(TaskFiles).each(function (index, dom) {
+
+                formData.append("ProjectFile" + Count, dom);
+
+                Count++;
+            });
+
+
+            $.ajax({
+                url: '/Cloud/Project/ProjectDKFileInfoUpload',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: formData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+
+                            var ProjectFileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                ProjectFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a> / <a href="#" class="xm_zt_red" data-ID="' + dom.ID + '" onclick="SoftwareZJCZHelper.DeleteDKFile(this);">删除</a></td></tr>';  //<a href="#" class="xm_zt_red" onclick="SoftwareZJCZHelper.DeleteTaskFile(this);">删除</a>
+                            });
+
+                            if (data.Data.length > 0) {
+                                if (FileType == 1) {
+                                    $('#popup_htmlProjectFile_DKYSZL_ZJCZ').html(ProjectFileHtml);
+                                    //$('#popup_htmlProjectFile_dkyszl').attr('data-tag', 1);
+                                }
+                                else if (FileType == 2) {
+                                    $('#popup_htmlProjectFile_DKSJB_ZJCZ').html(ProjectFileHtml);
+                                    //$('#popup_htmlProjectFile_dksjb').attr('data-tag', 1);
+
+                                }
+                            }
+
+                            ModalPopup('success', '保存成功');
+
+                        }
+                        else {
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                }
+            });
+
+        },
+
+        LoadDKFile: function (type) {
+
+            var ProjectID = $('#hid_ProjectID').val();
+            //if (ProjectID == null || ProjectID == '' || ProjectID == 0)
+            //    return;
+
+            Param.ProjectID = ProjectID;
+            Param.TaskID = SoftwareZJCZHelper.PopupOpenedTaskID;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            
+            $.post('LoadDKFile', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+                            var GeologyFile_dkyszl_Html = '';
+                            $(data.Data.File_dkyszl).each(function (index, dom) {
+
+                                if (type != 'view') {
+                                    GeologyFile_dkyszl_Html += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a> / <a href="#" class="xm_zt_red" data-ID="' + dom.ID + '" onclick="SoftwareZJCZHelper.DeleteDKFile(this);">删除</a></td></tr>';
+                                }
+                                else {
+                                    GeologyFile_dkyszl_Html += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a></td></tr>';
+                                }
+
+                            })
+                            $('#popup_htmlProjectFile_DKYSZL_ZJCZ').html(GeologyFile_dkyszl_Html);
+
+                            var GeologyFile_dksjb_Html = '';
+                            $(data.Data.File_dksjb).each(function (index, dom) {
+                                GeologyFile_dksjb_Html += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a></td></tr>';
+                            })
+                            $('#popup_htmlProjectFile_DKSJB_ZJCZ').html(GeologyFile_dksjb_Html);
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        DeleteDKFile: function (dom) {
+
+            var ID = $(dom).attr('data-ID');
+            if (ID == null || ID == '' || ID == 0)
+                return;
+
+            Param.ID = ID;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            //下一节点人员
+            $.post('DeleteDKFile', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+                            var GeologyFileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+                                GeologyFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" >下载</a> / <a href="#" class="xm_zt_red" data-ID="' + dom.ID + '" onclick="SoftwareZJCZHelper.DeleteDKFile(this);">删除</a></td></tr>';
+                            })
+                            //$('#popup_htmlProjectFile_dkyszl').html(GeologyFile_dkyszl_Html);
+                            $(dom).parent().parent().parent().html(GeologyFileHtml);
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        SetHammerModelRead: function () {
+
+            $('#popup_htmlHammerModel_ZJCZ input').attr('disabled', true);
+            $('#popup_htmlHammerModel_ZJCZ button').attr('disabled', true);
+
+        },
+
+        SetHammerModelWrite: function () {
+
+            $('#popup_htmlHammerModel_ZJCZ input').attr('disabled', false);
+            $('#popup_htmlHammerModel_ZJCZ button').attr('disabled', false);
+
+        },
+
+        UploadReportFile: function () {
+
+            if (SoftwareZJCZHelper.PopupOpenedTaskID == 0)
+                return;
+
+            var FileReports = $('#popup_uploadFileReport_ZJCZ')[0].files;
+            if (FileReports == null || FileReports.length == 0)
+                return;
+
+            var formData = new FormData();
+            formData.append("TaskID", SoftwareZJCZHelper.PopupOpenedTaskID);
+            formData.append("FileType", 3);
+            var FileCount = FileReports.length;
+            formData.append("TaskFileReportCount", FileCount);
+            var Count = 1;
+            $(FileReports).each(function (index, dom) {
+
+                formData.append("TaskFileReportFile" + Count, dom);
+
+                Count++;
+            });
+
+            $.ajax({
+                url: 'UploadReportFile',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: formData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+
+                            var ReportFileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+                                ReportFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a class="xm_zt_green" download="' + dom.FileName + '" href="' + dom.FilePath + '">下载</a> / <a class="xm_zt_red" data-id="' + dom.ID + '" onclick="SoftwareZJCZHelper.DeleteReportFile(this)">删除</a></td></tr>';
+                            });
+
+                            $('#popup_htmlFileReport_ZJCZ').html(ReportFileHtml);
+
+                            ModalPopup('success', '上传成功');
+
+                        }
+                        else {
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                }
+            });
+
+        },
+
+        DeleteReportFile: function (dom) {
+
+            var ID = $(dom).attr('data-ID');
+            if (ID == null || ID == '' || ID == 0)
+                return;
+
+            Param.ID = ID;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            //下一节点人员
+            $.post('DeleteReportFile', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+                            var FileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                FileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" download="' + dom.FileName + '" class="xm_zt_green" >下载</a> / <a href="#" class="xm_zt_red" data-ID="' + dom.ID + '" onclick="SoftwareZJCZHelper.DeleteReportFile(this);">删除</a></td></tr>';
+                            })
+
+                            $('#popup_htmlFileReport_ZJCZ').html(FileHtml);
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+
+        LoadProjectPosition: function () {
+
+            var ProjectID = $('#hid_ProjectID').val();
+            if (ProjectID == null || ProjectID == '' || ProjectID == 0)
+                return;
+
+            Param.ProjectID = ProjectID;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('LoadProjectPosition', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+                            $('#popup_txtProjectPosition_ZJCZ').val(data.Data);
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+    }
+
+
+</script>

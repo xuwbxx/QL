@@ -1,5 +1,6 @@
 using DataFactory.Factory;
 using DataFactory.KingBase.Towing;
+using Microsoft.EntityFrameworkCore;
 using Model.Tech.Cloud.BackManage;
 using Tool;
 
@@ -36,7 +37,7 @@ namespace Service.Wind.BackManage
                     if (!string.IsNullOrEmpty(request.RealName))
                     {
                         var realName = request.RealName;
-                        predicate = PredicateBuilder.And(predicate, a => a.RealName != null && a.RealName.Contains(realName));
+                        predicate = PredicateBuilder.And(predicate, a => a.RealName != null && EF.Functions.Like(a.RealName, $"%{realName}%"));
                     }
 
                     totalCount = repo.FindCount(predicate);
@@ -123,7 +124,7 @@ namespace Service.Wind.BackManage
                         user.Depart = request.Depart;
                         user.IsConfirm = request.IsConfirm;
                         user.Role = request.Role;
-                        user.CreateTime = DateTime.Now;
+                        user.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
                         user.IsDelete = false;
 
                         repo.Add(user);
@@ -146,7 +147,7 @@ namespace Service.Wind.BackManage
 
                         user.IsConfirm = request.IsConfirm;
                         user.Role = request.Role;
-                        user.CreateTime = DateTime.Now;
+                        user.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
 
                         userCode = user.UserName ?? "";
                         uow.Save();

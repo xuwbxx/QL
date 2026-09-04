@@ -1,4 +1,4 @@
-using ClosedXML.Excel;
+﻿using ClosedXML.Excel;
 using DataFactory.Factory;
 using DataFactory.KingBase;
 using Microsoft.AspNetCore.Http;
@@ -18,7 +18,7 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
     public SteelBeamService(
         QlPreAssembled_KingBase_UnitOfWorkFactory qlUowFactory,
         IHttpContextAccessor httpContextAccessor,
-        IConfiguration configuration) : base(qlUowFactory)
+        IConfiguration configuration) : base(qlUowFactory, httpContextAccessor)
     {
         _httpContextAccessor = httpContextAccessor;
         _configuration = configuration;
@@ -36,7 +36,7 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
                     };
         if (allowed != null) query = query.Where(a => allowed.Contains(a.ProjID));
         if (req.ProjID is > 0) query = query.Where(a => a.ProjID == req.ProjID);
-        if (req.BridgeID is > 0) query = query.Where(a => a.ID == req.BridgeID);
+        if (req.GirderID is > 0) query = query.Where(a => a.ID == req.GirderID);
         var total = await query.CountAsync();
         var page = Math.Max(req.PageIndex, 1);
         var size = NormalizePageSize(req.PageSize);
@@ -65,17 +65,17 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         return rows.Select(a => (object)a).ToList();
     }
 
-    public async Task<object> GetBridgeInfo(int bridgeID)
+    public async Task<object> GetGirderInfo(int girderID)
     {
-        var context = await EnsureBridgeAccess(bridgeID);
+        var context = await EnsureGirderAccess(girderID);
         return new { projectName = context.ProjectName, bridgeName = context.BridgeName, projID = context.ProjID, beamType = 0 };
     }
 
-    public async Task<SteelBeamImportStateDTO> GetImportState(int bridgeID)
+    public async Task<SteelBeamImportStateDTO> GetImportState(int girderID)
     {
-        await EnsureBridgeAccess(bridgeID);
-        var hasTheory = await Db.Query<biz_steel_beam_theoretical>().AnyAsync(a => a.BridgeID == bridgeID && a.Status != -1);
-        var activeBatches = Db.Query<biz_steel_beam_measure_batch>().Where(a => a.BridgeID == bridgeID && a.Status != -1);
+        await EnsureGirderAccess(girderID);
+        var hasTheory = await Db.Query<biz_steel_beam_theoretical>().AnyAsync(a => a.GirderID == girderID && a.Status != -1);
+        var activeBatches = Db.Query<biz_steel_beam_measure_batch>().Where(a => a.GirderID == girderID && a.Status != -1);
         var hasMeasured = await activeBatches.AnyAsync();
         var max = hasMeasured ? await activeBatches.MaxAsync(a => a.PushCount) : (int?)null;
         return new()
@@ -90,9 +90,9 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
 
     public async Task<SteelBeamPagedResultDTO<SteelBeamTheoreticalItemDTO>> TheoreticalList(SteelBeamTheoreticalQueryDTO req)
     {
-        await EnsureBridgeAccess(req.BridgeID);
-        var locked = await Db.Query<biz_steel_beam_measure_batch>().AnyAsync(a => a.BridgeID == req.BridgeID && a.Status != -1);
-        var query = Db.Query<biz_steel_beam_theoretical>().Where(a => a.BridgeID == req.BridgeID && a.Status != -1);
+        await EnsureGirderAccess(req.GirderID);
+        var locked = await Db.Query<biz_steel_beam_measure_batch>().AnyAsync(a => a.GirderID == req.GirderID && a.Status != -1);
+        var query = Db.Query<biz_steel_beam_theoretical>().Where(a => a.GirderID == req.GirderID && a.Status != -1);
         if (!string.IsNullOrWhiteSpace(req.PointCode)) query = query.Where(a => a.PointCode == req.PointCode);
         if (!string.IsNullOrWhiteSpace(req.SegmentNo)) query = query.Where(a => a.SegmentNo == req.SegmentNo);
         var total = await query.CountAsync();
@@ -108,10 +108,10 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         return new() { List = rows, Total = total };
     }
 
-    public async Task<object> TheoreticalOptions(int bridgeID)
+    public async Task<object> TheoreticalOptions(int girderID)
     {
-        await EnsureBridgeAccess(bridgeID);
-        var query = Db.Query<biz_steel_beam_theoretical>().Where(a => a.BridgeID == bridgeID && a.Status != -1);
+        await EnsureGirderAccess(girderID);
+        var query = Db.Query<biz_steel_beam_theoretical>().Where(a => a.GirderID == girderID && a.Status != -1);
         var points = await query.Select(a => a.PointCode).Distinct().OrderBy(a => a.ToLower()).ToListAsync();
         var segments = await query.Select(a => a.SegmentNo).Distinct().OrderBy(a => a).ToListAsync();
         return new { points, segments };
@@ -119,10 +119,10 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
 
     public async Task<SteelBeamPagedResultDTO<SteelBeamMeasuredItemDTO>> MeasuredList(SteelBeamMeasuredQueryDTO req)
     {
-        await EnsureBridgeAccess(req.BridgeID);
-        var batches = Db.Query<biz_steel_beam_measure_batch>().Where(a => a.BridgeID == req.BridgeID && a.Status != -1);
+        await EnsureGirderAccess(req.GirderID);
+        var batches = Db.Query<biz_steel_beam_measure_batch>().Where(a => a.GirderID == req.GirderID && a.Status != -1);
         var maxPush = await batches.AnyAsync() ? await batches.MaxAsync(a => a.PushCount) : -1;
-        var query = from measured in Db.Query<biz_steel_beam_measured>().Where(a => a.BridgeID == req.BridgeID && a.Status != -1)
+        var query = from measured in Db.Query<biz_steel_beam_measured>().Where(a => a.GirderID == req.GirderID && a.Status != -1)
                     join batch in batches on measured.BatchID equals batch.ID
                     select new { measured, batch };
         if (req.PushCount.HasValue) query = query.Where(a => a.batch.PushCount == req.PushCount.Value);
@@ -150,22 +150,22 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         return new() { List = ordered, Total = total };
     }
 
-    public async Task<List<DateTime>> MeasureTimeOptions(int bridgeID, int pushCount)
+    public async Task<List<DateTime>> MeasureTimeOptions(int girderID, int pushCount)
     {
-        await EnsureBridgeAccess(bridgeID);
+        await EnsureGirderAccess(girderID);
         return await Db.Query<biz_steel_beam_measure_batch>()
-            .Where(a => a.BridgeID == bridgeID && a.Status != -1 && a.PushCount == pushCount)
+            .Where(a => a.GirderID == girderID && a.Status != -1 && a.PushCount == pushCount)
             .Select(a => a.MeasureTime).Distinct().OrderByDescending(a => a).ToListAsync();
     }
 
     public async Task<SteelBeamTheoreticalItemDTO> UpdateTheoretical(SteelBeamCoordinateUpdateDTO req)
     {
-        await EnsureBridgeAccess(req.BridgeID);
+        await EnsureGirderAccess(req.GirderID);
         ValidateCoordinate(req.X, req.Y, req.Z);
-        if (await Db.Query<biz_steel_beam_measure_batch>().AnyAsync(a => a.BridgeID == req.BridgeID && a.Status != -1))
+        if (await Db.Query<biz_steel_beam_measure_batch>().AnyAsync(a => a.GirderID == req.GirderID && a.Status != -1))
             throw new InvalidOperationException("已存在实测数据，理论数据不可修改");
         var row = await Db.Query<biz_steel_beam_theoretical>()
-            .FirstOrDefaultAsync(a => a.ID == req.ID && a.BridgeID == req.BridgeID && a.Status != -1 && a.Version == req.Version)
+            .FirstOrDefaultAsync(a => a.ID == req.ID && a.GirderID == req.GirderID && a.Status != -1 && a.Version == req.Version)
             ?? throw new InvalidOperationException("数据已更新，请刷新后重试");
         row.DesignX = req.X; row.DesignY = req.Y; row.DesignZ = req.Z;
         row.Version++; row.UpdatedBy = GetCurrentAccount(); row.UpdatedTime = DateTime.Now;
@@ -180,13 +180,13 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
 
     public async Task<SteelBeamMeasuredItemDTO> UpdateMeasured(SteelBeamCoordinateUpdateDTO req)
     {
-        await EnsureBridgeAccess(req.BridgeID);
+        await EnsureGirderAccess(req.GirderID);
         ValidateCoordinate(req.X, req.Y, req.Z);
         var maxPush = await Db.Query<biz_steel_beam_measure_batch>()
-            .Where(a => a.BridgeID == req.BridgeID && a.Status != -1).MaxAsync(a => a.PushCount);
+            .Where(a => a.GirderID == req.GirderID && a.Status != -1).MaxAsync(a => a.PushCount);
         var row = await (from measured in Db.Query<biz_steel_beam_measured>()
                          join batch in Db.Query<biz_steel_beam_measure_batch>().Where(a => a.Status != -1) on measured.BatchID equals batch.ID
-                         where measured.ID == req.ID && measured.BridgeID == req.BridgeID && measured.Status != -1 && measured.Version == req.Version
+                         where measured.ID == req.ID && measured.GirderID == req.GirderID && measured.Status != -1 && measured.Version == req.Version
                          select new { measured, batch }).FirstOrDefaultAsync()
                   ?? throw new InvalidOperationException("数据已更新，请刷新后重试");
         if (row.batch.PushCount != maxPush) throw new InvalidOperationException("非最大顶推次数的数据不可编辑");
@@ -202,22 +202,22 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         };
     }
 
-    public async Task<SteelBeamImportOutcome> ImportTheoretical(int bridgeID, byte[] bytes, bool confirmOverwrite)
+    public async Task<SteelBeamImportOutcome> ImportTheoretical(int girderID, byte[] bytes, bool confirmOverwrite)
     {
-        var context = await EnsureBridgeAccess(bridgeID);
+        var context = await EnsureGirderAccess(girderID);
         var timestamp = DateTime.Now;
         SteelBeamParseResult<SteelBeamTheoreticalImportRow> parsed;
         try { using var input = new MemoryStream(bytes); parsed = SteelBeamExcelHelper.ParseTheoretical(input); }
         catch (Exception ex) { return SaveFailure(context, "理论数据", null, null, timestamp, bytes, [new(0, "", "文件", "", $"Excel解析失败：{ex.Message}")]); }
 
-        if (await Db.Query<biz_steel_beam_measure_batch>().AnyAsync(a => a.BridgeID == bridgeID && a.Status != -1))
+        if (await Db.Query<biz_steel_beam_measure_batch>().AnyAsync(a => a.GirderID == girderID && a.Status != -1))
             parsed.Errors.Add(new(0, "", "业务规则", "", "已存在实测数据，理论数据不可导入"));
-        var hasExisting = await Db.Query<biz_steel_beam_theoretical>().AnyAsync(a => a.BridgeID == bridgeID && a.Status != -1);
+        var hasExisting = await Db.Query<biz_steel_beam_theoretical>().AnyAsync(a => a.GirderID == girderID && a.Status != -1);
         if (hasExisting && !confirmOverwrite) parsed.Errors.Add(new(0, "", "业务规则", "", "本次导入将覆盖当前全部理论数据，请确认后继续"));
         if (parsed.Errors.Count == 0)
         {
             var duplicateSet = (await Db.Query<biz_steel_beam_theoretical>()
-                .Where(a => a.ProjID == context.ProjID && a.BridgeID != bridgeID && a.Status != -1)
+                .Where(a => a.ProjID == context.ProjID && a.GirderID != girderID && a.Status != -1)
                 .Select(a => a.PointCode).ToListAsync()).ToHashSet(StringComparer.OrdinalIgnoreCase);
             foreach (var row in parsed.SourcePoints.Where(a => duplicateSet.Contains(a.PointCode)))
                 parsed.Errors.Add(new(row.ExcelRow, row.PointCode, "测点编号", row.PointCode, "测点编号已在同一项目的其他桥梁中使用"));
@@ -228,16 +228,16 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         try
         {
             Db.BeginTransaction();
-            if (await Db.Query<biz_steel_beam_measure_batch>().AnyAsync(a => a.BridgeID == bridgeID && a.Status != -1))
+            if (await Db.Query<biz_steel_beam_measure_batch>().AnyAsync(a => a.GirderID == girderID && a.Status != -1))
                 throw new InvalidOperationException("已存在实测数据，理论数据不可导入");
-            var oldRows = await Db.Query<biz_steel_beam_theoretical>().Where(a => a.BridgeID == bridgeID && a.Status != -1).ToListAsync();
+            var oldRows = await Db.Query<biz_steel_beam_theoretical>().Where(a => a.GirderID == girderID && a.Status != -1).ToListAsync();
             if (oldRows.Count > 0 && !confirmOverwrite) throw new InvalidOperationException("理论数据已变化，请确认覆盖后重试");
             foreach (var old in oldRows) { old.Status = -1; old.UpdatedBy = GetCurrentAccount(); old.UpdatedTime = timestamp; }
             await Db.SaveAsync();
             var account = GetCurrentAccount();
             var entities = parsed.Rows.Select(a => new biz_steel_beam_theoretical
             {
-                ProjID = context.ProjID, BridgeID = bridgeID, PointCode = a.PointCode,
+                ProjID = context.ProjID, GirderID = girderID, PointCode = a.PointCode,
                 DesignX = a.DesignX, DesignY = a.DesignY, DesignZ = a.DesignZ, PreCamber = a.PreCamber,
                 Weight = a.Weight, SegmentNo = a.SegmentNo, PositionName = a.PositionName,
                 IsFirstCoordinate = null, PositionOrder = null, DistanceFromStart = null,
@@ -256,9 +256,9 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         }
     }
 
-    public async Task<SteelBeamImportOutcome> ImportMeasured(int bridgeID, int pushCount, DateTime measureTime, byte[] bytes, bool confirmOverwrite)
+    public async Task<SteelBeamImportOutcome> ImportMeasured(int girderID, int pushCount, DateTime measureTime, byte[] bytes, bool confirmOverwrite)
     {
-        var context = await EnsureBridgeAccess(bridgeID);
+        var context = await EnsureGirderAccess(girderID);
         var timestamp = DateTime.Now;
         measureTime = new DateTime(measureTime.Year, measureTime.Month, measureTime.Day, measureTime.Hour, 0, 0, DateTimeKind.Unspecified);
         SteelBeamParseResult<SteelBeamMeasuredImportRow> parsed;
@@ -266,12 +266,15 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         catch (Exception ex) { return SaveFailure(context, "实测数据", pushCount, measureTime, timestamp, bytes, [new(0, "", "文件", "", $"Excel解析失败：{ex.Message}")]); }
 
         var theory = await Db.Query<biz_steel_beam_theoretical>()
-            .Where(a => a.BridgeID == bridgeID && a.Status != -1).ToListAsync();
+            .Where(a => a.GirderID == girderID && a.Status != -1).ToListAsync();
         var theoryMap = theory.ToDictionary(a => a.PointCode, StringComparer.OrdinalIgnoreCase);
         if (theory.Count == 0) parsed.Errors.Add(new(0, "", "业务规则", "", "请先导入理论数据"));
         foreach (var row in parsed.SourcePoints.Where(a => !string.IsNullOrEmpty(a.PointCode) && !theoryMap.ContainsKey(a.PointCode)))
             parsed.Errors.Add(new(row.ExcelRow, row.PointCode, "测点编号", row.PointCode, "测点编号不存在于当前桥梁理论数据"));
-        var activeBatches = Db.Query<biz_steel_beam_measure_batch>().Where(a => a.BridgeID == bridgeID && a.Status != -1);
+        parsed.Errors.AddRange(SteelBeamExcelHelper.ValidateMeasuredSegmentCompleteness(
+            theory.Select(a => new SteelBeamTheoreticalPoint(a.PointCode, a.SegmentNo)),
+            parsed.SourcePoints.Select(a => a.PointCode)));
+        var activeBatches = Db.Query<biz_steel_beam_measure_batch>().Where(a => a.GirderID == girderID && a.Status != -1);
         var hasBatch = await activeBatches.AnyAsync();
         var maxPush = hasBatch ? await activeBatches.MaxAsync(a => a.PushCount) : (int?)null;
         var allowedPushes = maxPush.HasValue ? new[] { maxPush.Value, maxPush.Value + 1 } : new[] { 0 };
@@ -287,7 +290,7 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         {
             Db.BeginTransaction();
             var account = GetCurrentAccount();
-            var currentBatches = Db.Query<biz_steel_beam_measure_batch>().Where(a => a.BridgeID == bridgeID && a.Status != -1);
+            var currentBatches = Db.Query<biz_steel_beam_measure_batch>().Where(a => a.GirderID == girderID && a.Status != -1);
             var currentHasBatch = await currentBatches.AnyAsync();
             var currentMaxPush = currentHasBatch ? await currentBatches.MaxAsync(a => a.PushCount) : (int?)null;
             var currentAllowed = currentMaxPush.HasValue ? new[] { currentMaxPush.Value, currentMaxPush.Value + 1 } : new[] { 0 };
@@ -304,7 +307,7 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
             }
             var batch = new biz_steel_beam_measure_batch
             {
-                ProjID = context.ProjID, BridgeID = bridgeID, PushCount = pushCount, MeasureTime = measureTime,
+                ProjID = context.ProjID, GirderID = girderID, PushCount = pushCount, MeasureTime = measureTime,
                 ImportCount = parsed.Rows.Count, Status = 0, CreatedBy = account, CreatedTime = timestamp
             };
             Db.GetRepository<biz_steel_beam_measure_batch>().Add(batch);
@@ -315,7 +318,7 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
                 var point = theoryMap[a.PointCode];
                 return new biz_steel_beam_measured
                 {
-                    ProjID = context.ProjID, BridgeID = bridgeID, BatchID = batch.ID, TheoreticalID = point.ID,
+                    ProjID = context.ProjID, GirderID = girderID, BatchID = batch.ID, TheoreticalID = point.ID,
                     PointCode = point.PointCode, MeasuredX = a.MeasuredX, MeasuredY = a.MeasuredY, MeasuredZ = a.MeasuredZ,
                     ImportTime = timestamp, Version = 1, Status = 0, CreatedBy = account, CreatedTime = timestamp
                 };
@@ -339,8 +342,8 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
 
     public async Task<(byte[] Bytes, string FileName)> ExportMeasured(SteelBeamMeasuredQueryDTO req)
     {
-        var context = await EnsureBridgeAccess(req.BridgeID);
-        var query = from measured in Db.Query<biz_steel_beam_measured>().Where(a => a.BridgeID == req.BridgeID && a.Status != -1)
+        var context = await EnsureGirderAccess(req.GirderID);
+        var query = from measured in Db.Query<biz_steel_beam_measured>().Where(a => a.GirderID == req.GirderID && a.Status != -1)
                     join batch in Db.Query<biz_steel_beam_measure_batch>().Where(a => a.Status != -1) on measured.BatchID equals batch.ID
                     select new { measured, batch };
         if (req.PushCount.HasValue) query = query.Where(a => a.batch.PushCount == req.PushCount.Value);
@@ -386,7 +389,7 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         return (output.ToArray(), name);
     }
 
-    private SteelBeamImportOutcome SaveFailure(BridgeContext context, string type, int? pushCount, DateTime? measureTime,
+    private SteelBeamImportOutcome SaveFailure(GirderContext context, string type, int? pushCount, DateTime? measureTime,
         DateTime timestamp, byte[] original, IEnumerable<SteelBeamImportError> errors)
     {
         var errorList = errors.ToList();
@@ -398,7 +401,7 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         return new() { Success = false, Message = "导入失败，请查看错误明细文件", ErrorFile = errorBytes, ErrorFileName = errorName };
     }
 
-    private string SaveOriginal(BridgeContext context, string type, int? pushCount, DateTime? measureTime, DateTime timestamp, byte[] bytes, bool failed)
+    private string SaveOriginal(GirderContext context, string type, int? pushCount, DateTime? measureTime, DateTime timestamp, byte[] bytes, bool failed)
     {
         var root = _configuration["SteelBeam:FileRoot"];
         if (string.IsNullOrWhiteSpace(root)) root = Path.Combine(AppContext.BaseDirectory, "App_Data");
@@ -420,12 +423,25 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         try { if (File.Exists(path)) File.Delete(path); } catch { }
     }
 
-    private Task<HashSet<int>?> GetAllowedProjectIds()
+    private async Task<HashSet<int>?> GetAllowedProjectIds()
     {
-        // 当前系统通过菜单权限控制钢梁管理入口，数据库中没有项目与用户关联表。
-        // 返回 null 表示已登录用户可访问全部项目，保持与现有项目管理模块一致。
-        GetCurrentAccount();
-        return Task.FromResult<HashSet<int>?>(null);
+        var account = GetCurrentAccount().Trim().ToLower();
+        var users = Db.Query<sys_userinfo>()
+            .Where(a => a.Status == 1 && a.Account.ToLower() == account);
+        var isAdmin = await (from user in users
+                             join userRole in Db.Query<sys_user_role>().Where(a => a.Status == 1)
+                                 on user.ID equals userRole.UserID
+                             join role in Db.Query<sys_role>().Where(a => a.Status == 1 && !a.IsDeleted)
+                                 on userRole.RoleID equals role.ID
+                             where role.Code != null &&
+                                   (role.Code.ToLower() == "role_admin" || role.Code.ToLower() == "role_biz_admin")
+                             select role.ID).AnyAsync();
+        if (isAdmin) return null;
+
+        return await (from user in users
+                      join projectUser in Db.Query<biz_project_user>().Where(a => a.Status == 1)
+                          on user.ID equals projectUser.UserID
+                      select projectUser.ProjID).Distinct().ToHashSetAsync();
     }
 
     private async Task EnsureProjectAccess(int projID)
@@ -434,11 +450,11 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         if (allowed != null && !allowed.Contains(projID)) throw new UnauthorizedAccessException("无该项目的数据权限");
     }
 
-    private async Task<BridgeContext> EnsureBridgeAccess(int bridgeID)
+    private async Task<GirderContext> EnsureGirderAccess(int girderID)
     {
-        var bridge = await (from b in Db.Query<biz_project_bridge>().Where(a => a.Status != -1 && a.BeamType == 0 && a.ID == bridgeID)
+        var bridge = await (from b in Db.Query<biz_project_bridge>().Where(a => a.Status != -1 && a.BeamType == 0 && a.ID == girderID)
                             join p in Db.Query<biz_project>().Where(a => a.Status != -1) on b.ProjID equals p.ID
-                            select new BridgeContext(b.ProjID, p.Name, b.Name)).FirstOrDefaultAsync()
+                            select new GirderContext(b.ProjID, p.Name, b.Name)).FirstOrDefaultAsync()
                      ?? throw new InvalidOperationException("钢梁不存在或已失效");
         await EnsureProjectAccess(bridge.ProjID);
         return bridge;
@@ -453,10 +469,10 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
 
     private static void ValidateCoordinate(decimal x, decimal y, decimal z)
     {
-        if (!SteelBeamExcelHelper.HasScale(x, 6) || !SteelBeamExcelHelper.HasScale(y, 6) || !SteelBeamExcelHelper.HasScale(z, 6))
-            throw new InvalidOperationException("坐标最多保留6位小数");
+        if (!SteelBeamExcelHelper.HasScale(x, 4) || !SteelBeamExcelHelper.HasScale(y, 4) || !SteelBeamExcelHelper.HasScale(z, 4))
+            throw new InvalidOperationException("坐标最多保留4位小数");
     }
 
     private static int NormalizePageSize(int size) => size is 20 or 50 or 100 ? size : 20;
-    private sealed record BridgeContext(int ProjID, string ProjectName, string BridgeName);
+    private sealed record GirderContext(int ProjID, string ProjectName, string BridgeName);
 }

@@ -47,6 +47,9 @@ namespace TestUnit
         {
             try
             {
+                var t1 = DateTime.Now;
+                var t2 = DateTime.UtcNow;
+
                 //金震天 330382199103267313
                 //姚人臣 310103198609224092
                 //时蓓玲 310110196911073226
@@ -271,8 +274,8 @@ namespace TestUnit
                 //ReadME.Test();
                 //SpudcanCaculate sc = new SpudcanCaculate();
 
-                var service = serviceProvider.GetRequiredService<KingBase_Towing_DataCopyService>();
-                service.CopyData_Message_Body();
+                var service = serviceProvider.GetRequiredService<KingBase_WindCloud_DataCopyService>();
+                service.CopyWind_TaskReport();
 
 
             }

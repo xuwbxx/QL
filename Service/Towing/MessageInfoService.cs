@@ -1,5 +1,6 @@
 ﻿using Business.Towing;
 using DataFactory.Factory;
+using Microsoft.EntityFrameworkCore;
 using Tool;
 
 namespace Service.Towing
@@ -55,14 +56,13 @@ namespace Service.Towing
                     data.MsgLevel = msg.MsgLevel;
                     data.MsgContent = msg.MsgContent;
                     data.Sender = msg.Sender;
-                    data.CreateTime = DateTime.UtcNow;
+                    data.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
                     data.IsDelete = false;
 
                     repo.Add(data);
                     uow.Save();
 
-                    var msgList = repo.FindAll()
-                        .Where(a => !a.IsDelete && a.CreateTime > msg.LastTime)
+                    var msgList = repo.Find(a => !a.IsDelete && a.CreateTime > msg.LastTime)
                         .OrderBy(a => a.CreateTime)
                         .ToList();
 
@@ -108,14 +108,14 @@ namespace Service.Towing
                     var repo = uow.GetRepository<DataFactory.KingBase.Towing.Message_Body>();
                     if (size == 0) size = LimitValues.MsgSize;
 
-                    var q = repo.FindAll().Where(a => !a.IsDelete);
+                    var q = repo.Find(a => !a.IsDelete).AsEnumerable();
                     if (!string.IsNullOrEmpty(query))
                     {
                         foreach (var str in query.Split(' '))
                         {
                             if (!string.IsNullOrEmpty(str))
                             {
-                                q = q.Where(a => a.MsgContent.Contains(str));
+                                q = q.Where(a => EF.Functions.Like(a.MsgContent, $"%{str}%"));
                             }
                         }
                     }
@@ -176,14 +176,14 @@ namespace Service.Towing
                     if (size == 0) size = LimitValues.MsgSize;
 
                     lastTime = lastTime ?? DateTime.UtcNow.AddDays(-1);
-                    var q = repo.FindAll().Where(a => !a.IsDelete);
+                    var q = repo.Find(a => !a.IsDelete).AsEnumerable();
                     if (!string.IsNullOrEmpty(query))
                     {
                         foreach (var str in query.Split(' '))
                         {
                             if (!string.IsNullOrEmpty(str))
                             {
-                                q = q.Where(a => a.MsgContent.Contains(str));
+                                q = q.Where(a => EF.Functions.Like(a.MsgContent, $"%{str}%"));
                             }
                         }
                     }

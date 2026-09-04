@@ -1,0 +1,39 @@
+﻿@{
+    var title = ViewData["Title"] == null ? "深远海风机安装拖航系统" : ViewData["Title"].ToString();
+}
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@title</title>
+    <link rel="icon" href="~/Content/WindRedirect/img/title-logo.ico" type="image/x-icon" />
+    <link href="~/Content/Towing/Content/Site.css" rel="stylesheet" />
+    @RenderSection("Styles", required: false)
+</head>
+<body class="laydate_body">
+    @RenderBody()
+    <!-- 自定义加载遮罩 -->
+    <div id="custom-loading-overlay" class="overlay modal fade" tabindex="-1" role="dialog" aria-labelledby="loadingLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="spinner-border text-primary" role="status">
+                        <span id="maskMsg" class="">请稍后...</span>
+                    </div>
+                </div>
+                <div class="modal-footer hide">
+                    <button type="button" class="btn btn-success" onclick="hideLoading()">完成</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="~/Content/Towing/js/jquery1.12.4.min.js"></script>
+    <script src="~/Content/Towing/js/bootstrap.js"></script>
+    <script src="~/Content/Towing/Scripts/micro-jstemplate.js"></script>
+    <script src="~/Content/Towing/Scripts/site.js"></script>
+    <script src="~/js/CommonJS.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

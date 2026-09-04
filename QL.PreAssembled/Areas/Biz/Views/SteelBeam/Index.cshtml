@@ -35,7 +35,7 @@
             <el-select v-model="searchProjID" placeholder="请选择所属项目" clearable style="width: 220px;" @@change="onProjectChange">
                 <el-option v-for="item in projectOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
             </el-select>
-            <el-select v-model="searchBridgeID" placeholder="请选择所属桥梁" clearable style="width: 220px;" :disabled="!searchProjID">
+            <el-select v-model="searchGirderID" placeholder="请选择所属桥梁" clearable style="width: 220px;" :disabled="!searchProjID">
                 <el-option v-for="item in bridgeOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
             </el-select>
             <el-button type="primary" @@click="handleSearch">搜索</el-button>

@@ -1,0 +1,29 @@
+﻿
+@{
+    ViewBag.Title = "DataTest";
+    Layout = "~/Views/Shared/BlankLayout.cshtml";
+}
+
+<h2>正在自动生成数据......</h2>
+
+<script>
+
+    $(document).ready(function () {
+
+        setInterval(DataGenerare, 1 * 60 * 1000);
+        //
+    })
+
+    var DataGenerare = function () {
+
+
+        $.post('DataGenerate', function () {
+            // console.log('leftPanel:', r);
+
+
+
+        });
+
+    }
+
+</script>

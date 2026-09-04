@@ -18,6 +18,8 @@
             overflow: hidden;
         }
 
+        .lc-upload .el-upload, .lc-upload .el-upload-dragger { width: 100%; }
+
         .lc-container {
             background: #f0f2f5;
             height: 100%;
@@ -336,7 +338,10 @@
             <!-- 右侧表格 -->
             <div class="pi-main">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                    <el-button type="primary" @@click="handleImportSegment">导入梁段信息</el-button>
+                    <div>
+                        <el-button @@click="downloadSegmentTemplate">下载模板</el-button>
+                        <el-button type="primary" @@click="handleImportSegment">导入梁段信息</el-button>
+                    </div>
                     <div class="pi-meta">
                         创建时间：{{ projectInfo.createdTime || '-' }}<br />
                         更新时间：{{ projectInfo.updatedTime || '-' }}
@@ -382,6 +387,7 @@
     <!-- 2. 设计坐标 -->
     <div class="lc-tab-panel" v-show="activeTab === 'designCoord'">
         <div style="margin-bottom: 12px;">
+            <el-button @@click="downloadDesignTemplate">下载模板</el-button>
             <el-button type="primary" @@click="handleImportDesignCoord">导入设计坐标</el-button>
         </div>
         <el-table v-loading="designLoading" :data="designTableData" border stripe style="width: 100%;">
@@ -815,6 +821,21 @@
             <el-button @@click="handleReportCancel">取消</el-button>
         </div>
     </div>
+
+    <el-dialog v-model="importDialogVisible" :title="importType === 'segments' ? '导入梁段信息' : '导入设计坐标'" width="560px"
+               :close-on-click-modal="false" :close-on-press-escape="!importLoading" :show-close="!importLoading">
+        <el-upload ref="uploadRef" class="lc-upload" drag :auto-upload="false" :limit="1"
+                   :on-change="onFileChange" :on-remove="onFileRemove" :on-exceed="onFileExceed"
+                   accept=".xlsx" :disabled="importLoading">
+            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+            <div class="el-upload__text">将文件拖曳到此区域，或<em>点击添加</em></div>
+            <template #tip><div class="el-upload__tip">仅支持 .xlsx，最大 20 MB，第一个工作表最多 50,000 条数据。</div></template>
+        </el-upload>
+        <template #footer>
+            <el-button :disabled="importLoading" @@click="importDialogVisible=false">取消</el-button>
+            <el-button type="primary" :loading="importLoading" @@click="confirmImport">确定</el-button>
+        </template>
+    </el-dialog>
 </div>
 
 @section Scripts {

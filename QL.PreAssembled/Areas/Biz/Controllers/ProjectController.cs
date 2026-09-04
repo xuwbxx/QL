@@ -130,5 +130,28 @@ namespace QL.PreAssembled.Areas.Biz.Controllers
                 return Json(EPApiResult.Fail(ex.Message));
             }
         }
+
+        // ==================== 项目授权 ====================
+
+        [HttpPost]
+        public JsonResult GetAuthorizedUsers([FromBody] GetAuthorizedUsersReq req)
+        {
+            var userIds = _projectService.GetAuthorizedUserIds(req.ProjId);
+            return Json(EPApiResult.Success(userIds));
+        }
+
+        [HttpPost]
+        public JsonResult SaveAuthorize([FromBody] SaveAuthorizeDTO dto)
+        {
+            try
+            {
+                _projectService.SaveAuthorization(dto.ProjId, dto.UserIds);
+                return Json(EPApiResult.Success(true));
+            }
+            catch (Exception ex)
+            {
+                return Json(EPApiResult.Fail(ex.Message));
+            }
+        }
     }
 }

@@ -1,7 +1,7 @@
-@{
+﻿@{
     Layout = "_LayoutModelEP";
     ViewData["Title"] = "线形管控";
-    var bridgeID = ViewBag.BridgeID ?? 0;
+    var girderID = ViewBag.GirderID ?? 0;
 }
 
 @section Styles {
@@ -140,6 +140,6 @@
 </div>
 
 @section Scripts {
-    <script>window.__bridgeID = @bridgeID;</script>
+    <script>window.__girderID = @girderID;</script>
     <script src="~/js/Biz/steel-beam-linear-control.js" asp-append-version="true"></script>
 }

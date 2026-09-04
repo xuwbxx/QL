@@ -4,77 +4,10 @@
 }
 
 @section Styles {
-    <style>
-        .menu-container {
-            padding: 20px;
-            background: #fff;
-        }
-
-        .menu-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            align-items: center;
-        }
-
-        .search-area {
-            display: flex;
-            gap: 10px;
-        }
-
-        .action-btn {
-            margin-right: 8px;
-        }
-        /* 树形表格缩进样式 */
-        .el-table__row .cell {
-            display: flex;
-            align-items: center;
-        }
-
-        .tree-icon {
-            margin-right: 5px;
-            color: #909399;
-            cursor: pointer;
-        }
-
-            .tree-icon.is-expanded {
-                transform: rotate(90deg);
-            }
-
-        .icon-grid {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 10px;
-            max-height: 420px;
-            overflow-y: auto;
-        }
-
-        .icon-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 10px 4px;
-            border: 1px solid #e4e7ed;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-            .icon-item:hover {
-                background: #f5f7fa;
-                border-color: #409eff;
-            }
-
-        .icon-name {
-            font-size: 11px;
-            color: #606266;
-            margin-top: 4px;
-            word-break: break-all;
-            text-align: center;
-        }
-    </style>
+    <link href="~/css/Sys/menu-index.css" rel="stylesheet" />
 }
 
-<div id="app" class="menu-container" v-cloak>
+<div v-cloak id="app" class="menu-container" v-cloak>
     <!-- 顶部操作栏 -->
     <div class="menu-header">
         <div class="search-area">
@@ -82,9 +15,10 @@
                       :placeholder="$t('sys.menu.searchKeywordPlaceholder')"
                       clearable
                       style="width: 200px;"></el-input>
-            <el-button type="primary" v-on:click="handleSearch">{{$t('common.search')}}</el-button>
+            <el-button type="primary" v-on:click="handleSearch"><el-icon><Search /></el-icon> {{ $t('common.search') }}</el-button>
+            <el-button type="default" v-on:click="handleSearchReset"><el-icon><Refresh-Left /></el-icon> {{ $t('common.reset') }}</el-button>
         </div>
-        <el-button type="success" v-on:click="openAddDialog">{{$t('sys.menu.newMenu')}}</el-button>
+        <el-button type="primary" v-on:click="openAddDialog"><el-icon><Plus /></el-icon>{{$t('sys.menu.newMenu')}}</el-button>
     </div>
 
     <!-- 树形数据表格 -->
@@ -112,7 +46,7 @@
         <el-table-column prop="icon" :label="$t('sys.menu.tableIcon')" width="100">
             <template #default="scope">
                 <el-icon v-if="scope.row.icon">
-                    <component :is="$formatIconName(scope.row.icon)" />
+                    <component :is="scope.row.icon" />
                 </el-icon>
             </template>
         </el-table-column>
@@ -199,7 +133,7 @@
                               style="flex:1">
                         <template #prefix>
                             <el-icon v-if="formData.icon">
-                                <component :is="$formatIconName(formData.icon)" />
+                                <component :is="formData.icon" />
                             </el-icon>
                         </template>
                     </el-input>

@@ -18,7 +18,7 @@
     public class SteelBeamQueryDTO
     {
         public int? ProjID { set; get; }
-        public int? BridgeID { set; get; }
+        public int? GirderID { set; get; }
         public int PageIndex { set; get; } = 1;
         public int PageSize { set; get; } = 20;
     }
@@ -34,7 +34,7 @@
 
     public class SteelBeamTheoreticalQueryDTO
     {
-        public int BridgeID { get; set; }
+        public int GirderID { get; set; }
         public string? PointCode { get; set; }
         public string? SegmentNo { get; set; }
         public int PageIndex { get; set; } = 1;
@@ -58,7 +58,7 @@
 
     public class SteelBeamMeasuredQueryDTO
     {
-        public int BridgeID { get; set; }
+        public int GirderID { get; set; }
         public int? PushCount { get; set; }
         public DateTime? MeasureTime { get; set; }
         public int PageIndex { get; set; } = 1;
@@ -83,7 +83,7 @@
     public class SteelBeamCoordinateUpdateDTO
     {
         public int ID { get; set; }
-        public int BridgeID { get; set; }
+        public int GirderID { get; set; }
         public decimal X { get; set; }
         public decimal Y { get; set; }
         public decimal Z { get; set; }

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Model.tech.QL;
 using Model.tech.QL.DTO.BizProject;
 using Service.PreAssembled;
@@ -16,9 +16,9 @@ public class SteelBeamController : Controller
     public IActionResult Index() => View();
 
     [HttpGet]
-    public IActionResult LinearControl(int id)
+    public IActionResult LinearControl(int girderID)
     {
-        ViewBag.BridgeID = id;
+        ViewBag.GirderID = girderID;
         return View();
     }
 
@@ -32,22 +32,22 @@ public class SteelBeamController : Controller
     public Task<JsonResult> BridgeOptions(int projID) => JsonCall(() => _service.BridgeOptions(projID));
 
     [HttpGet]
-    public Task<JsonResult> BridgeInfo(int id) => JsonCall(() => _service.GetBridgeInfo(id));
+    public Task<JsonResult> GirderInfo(int girderID) => JsonCall(() => _service.GetGirderInfo(girderID));
 
     [HttpGet]
-    public Task<JsonResult> ImportState(int bridgeID) => JsonCall(() => _service.GetImportState(bridgeID));
+    public Task<JsonResult> ImportState(int girderID) => JsonCall(() => _service.GetImportState(girderID));
 
     [HttpPost]
     public Task<JsonResult> TheoreticalList([FromBody] SteelBeamTheoreticalQueryDTO req) => JsonCall(() => _service.TheoreticalList(req));
 
     [HttpGet]
-    public Task<JsonResult> TheoreticalOptions(int bridgeID) => JsonCall(() => _service.TheoreticalOptions(bridgeID));
+    public Task<JsonResult> TheoreticalOptions(int girderID) => JsonCall(() => _service.TheoreticalOptions(girderID));
 
     [HttpPost]
     public Task<JsonResult> MeasuredList([FromBody] SteelBeamMeasuredQueryDTO req) => JsonCall(() => _service.MeasuredList(req));
 
     [HttpGet]
-    public Task<JsonResult> MeasureTimeOptions(int bridgeID, int pushCount) => JsonCall(() => _service.MeasureTimeOptions(bridgeID, pushCount));
+    public Task<JsonResult> MeasureTimeOptions(int girderID, int pushCount) => JsonCall(() => _service.MeasureTimeOptions(girderID, pushCount));
 
     [HttpPost]
     public Task<JsonResult> UpdateTheoretical([FromBody] SteelBeamCoordinateUpdateDTO req) => JsonCall(() => _service.UpdateTheoretical(req));
@@ -57,14 +57,14 @@ public class SteelBeamController : Controller
 
     [HttpPost]
     [RequestSizeLimit(SteelBeamExcelHelper.MaxFileBytes + 1024 * 1024)]
-    public async Task<IActionResult> ImportTheoretical(int bridgeID, bool confirmOverwrite, IFormFile file)
+    public async Task<IActionResult> ImportTheoretical(int girderID, bool confirmOverwrite, IFormFile file)
     {
         var invalid = ValidateUpload(file);
         if (invalid != null) return Json(EPApiResult.Fail(invalid));
         try
         {
             var bytes = await ReadFile(file);
-            var outcome = await _service.ImportTheoretical(bridgeID, bytes, confirmOverwrite);
+            var outcome = await _service.ImportTheoretical(girderID, bytes, confirmOverwrite);
             return ImportResponse(outcome);
         }
         catch (Exception ex) { return Json(EPApiResult.Fail(ex.Message)); }
@@ -72,14 +72,14 @@ public class SteelBeamController : Controller
 
     [HttpPost]
     [RequestSizeLimit(SteelBeamExcelHelper.MaxFileBytes + 1024 * 1024)]
-    public async Task<IActionResult> ImportMeasured(int bridgeID, int pushCount, DateTime measureTime, bool confirmOverwrite, IFormFile file)
+    public async Task<IActionResult> ImportMeasured(int girderID, int pushCount, DateTime measureTime, bool confirmOverwrite, IFormFile file)
     {
         var invalid = ValidateUpload(file);
         if (invalid != null) return Json(EPApiResult.Fail(invalid));
         try
         {
             var bytes = await ReadFile(file);
-            var outcome = await _service.ImportMeasured(bridgeID, pushCount, measureTime, bytes, confirmOverwrite);
+            var outcome = await _service.ImportMeasured(girderID, pushCount, measureTime, bytes, confirmOverwrite);
             return ImportResponse(outcome);
         }
         catch (Exception ex) { return Json(EPApiResult.Fail(ex.Message)); }

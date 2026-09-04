@@ -41,7 +41,7 @@ namespace Business.Towing
             {
                 //double offlineSeconds = (double)(0 - LimitValues.DeviceOfflineSeconds);
                 //return DateTime.Now.AddSeconds(offlineSeconds);
-                return DateTime.Now.AddDays(-99);
+                return DateTime.Now.AddDays(-129);
             }
         }
 

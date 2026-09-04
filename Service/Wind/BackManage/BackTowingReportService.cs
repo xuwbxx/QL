@@ -1,5 +1,6 @@
 using DataFactory.Factory;
 using DataFactory.KingBase.CloudWind;
+using Microsoft.EntityFrameworkCore;
 using Model.Tech.Cloud;
 using Model.Tech.Cloud.BackManage;
 using System;
@@ -38,13 +39,13 @@ namespace Service.Wind.BackManage
                     if (!string.IsNullOrEmpty(request.ProjectName))
                     {
                         var projectName = request.ProjectName;
-                        predicate = PredicateBuilder.And(predicate, a => a.ProjectName != null && a.ProjectName.Contains(projectName));
+                        predicate = PredicateBuilder.And(predicate, a => a.ProjectName != null && EF.Functions.Like(a.ProjectName, $"%{projectName}%"));
                     }
 
                     if (!string.IsNullOrEmpty(request.TaskName))
                     {
                         var taskName = request.TaskName;
-                        predicate = PredicateBuilder.And(predicate, a => a.TaskName != null && a.TaskName.Contains(taskName));
+                        predicate = PredicateBuilder.And(predicate, a => a.TaskName != null && EF.Functions.Like(a.TaskName, $"%{taskName}%"));
                     }
 
                     var (pageList, count) = taskRepo.FindPage(predicate, a => a.id, request.PageIndex, request.PageSize);

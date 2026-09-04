@@ -1,5 +1,6 @@
 ﻿using DataFactory.Factory;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.Options;
 using QL.PreAssembled.Middleware;
 using Service.Base;
 using Service.PreAssembled;
@@ -25,7 +26,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/Home/AccessDenied";
 
         options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
         options.Cookie.SameSite = SameSiteMode.Lax;
         options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
         options.SlidingExpiration = true;
@@ -140,6 +141,19 @@ builder.Services.AddControllers(options =>
 
 var app = builder.Build();
 
+// ========== 必须放在所有中间件最前面！ ==========
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor
+                       | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
+});
+
+// 允许Jexus代理的本机IP，127.0.0.1信任
+app.UseForwardedHeaders();
+// 清除默认限制，本机回环代理信任
+app.Services.GetRequiredService<IOptions<ForwardedHeadersOptions>>().Value.KnownProxies.Clear();
+app.Services.GetRequiredService<IOptions<ForwardedHeadersOptions>>().Value.KnownNetworks.Clear();
+
 // 初始化 CookieUtils（注册静态类，因为里面有需要注册的空间）
 CookieUtils.Initialize(app.Services);
 
@@ -177,18 +191,13 @@ app.UseAuthorization();
 
 
 // 9. 合并所有端点配置到 UseEndpoints 中
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllerRoute(
-        name: "areas",
-        pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
-    );
-
-    endpoints.MapControllerRoute(
-        name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}"
-    );
-});
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}"
+);
 
 //app.MapControllers();
 

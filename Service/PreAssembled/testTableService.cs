@@ -28,7 +28,7 @@ namespace Service.PreAssembled
 
                     var query = from usr in uow.Query<sys_userinfo>().Where(a => a.Status != -1)
                                 from dep in uow.Query<sys_dept>().Where(a => a.Status != -1)
-                                   .Where(a => usr.DeptOID == a.OID)
+                                   .Where(a => usr.DeptOID == a.OID.ToString())
                                 select new
                                 {
                                     usr,

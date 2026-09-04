@@ -6,6 +6,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     var Vue = window.Vue;
     var ElementPlus = window.ElementPlus;
+    var ElementPlusIconsVue = window.ElementPlusIconsVue;
 
     var app = Vue.createApp({
         data() {
@@ -82,8 +83,46 @@ document.addEventListener('DOMContentLoaded', function () {
                     { label: '混凝土梁', value: 1 }
                 ],
 
-                managerOptions: []
+                managerOptions: [],
+
+                // 授权弹窗
+                authDialogVisible: false,
+                authProjectId: 0,
+                authProjectName: '',
+                authSubmitting: false,
+                authAllUsers: [],
+                authSelected: [],
+                authSearchKey: '',
+                authLeftCurrentPage: 1,
+                authLeftPageSize: 10,
+                authRightCurrentPage: 1,
+                authRightPageSize: 10
             };
+        },
+
+        computed: {
+            authFilteredLeft() {
+                var self = this;
+                var key = (this.authSearchKey || '').trim().toLowerCase();
+                var selectedIds = {};
+                this.authSelected.forEach(function (u) { selectedIds[u.id] = true; });
+                return this.authAllUsers.filter(function (u) {
+                    if (selectedIds[u.id]) return false;
+                    if (!key) return true;
+                    return (u.name || '').toLowerCase().indexOf(key) >= 0 ||
+                        (u.account || '').toLowerCase().indexOf(key) >= 0;
+                });
+            },
+
+            authLeftPaged() {
+                var start = (this.authLeftCurrentPage - 1) * this.authLeftPageSize;
+                return this.authFilteredLeft.slice(start, start + this.authLeftPageSize);
+            },
+
+            authRightPaged() {
+                var start = (this.authRightCurrentPage - 1) * this.authRightPageSize;
+                return this.authSelected.slice(start, start + this.authRightPageSize);
+            }
         },
 
         mounted() {
@@ -441,7 +480,89 @@ document.addEventListener('DOMContentLoaded', function () {
             // ==================== 其他 ====================
 
             handleAuthorize(row) {
-                ElementPlus.ElMessage.info('授权：' + row.name + '（功能待开发）');
+                this.authProjectId = row.id;
+                this.authProjectName = row.name;
+                this.authDialogVisible = true;
+            },
+
+            async onAuthDialogOpened() {
+                this.authAllUsers = [];
+                this.authSelected = [];
+                this.authSearchKey = '';
+                this.authLeftCurrentPage = 1;
+                this.authRightCurrentPage = 1;
+
+                try {
+                    var users = await HttpUtils.post('/Sys/User/List', {});
+                    this.authAllUsers = (users || []).map(function (u) {
+                        return {
+                            id: u.id || u.ID,
+                            name: u.name || u.Name || '',
+                            account: u.account || u.Account || '',
+                            deptName: u.deptName || u.DeptName || ''
+                        };
+                    });
+
+                    var authorizedIds = await HttpUtils.post('/Biz/Project/GetAuthorizedUsers', { projId: this.authProjectId });
+                    var idSet = {};
+                    (authorizedIds || []).forEach(function (id) { idSet[id] = true; });
+                    this.authSelected = this.authAllUsers.filter(function (u) { return idSet[u.id]; });
+                } catch (error) {
+                    console.error('load auth data error:', error);
+                    ElementPlus.ElMessage.error('加载授权数据失败');
+                }
+            },
+
+            isAuthSelected(id) {
+                return this.authSelected.some(function (u) { return u.id === id; });
+            },
+
+            addAuthUser(user) {
+                if (this.isAuthSelected(user.id)) return;
+                this.authSelected.push(user);
+                this.authRightCurrentPage = 1;
+            },
+
+            removeAuthUser(user) {
+                var idx = this.authSelected.findIndex(function (u) { return u.id === user.id; });
+                if (idx >= 0) this.authSelected.splice(idx, 1);
+                var maxPage = Math.ceil(this.authSelected.length / this.authRightPageSize) || 1;
+                if (this.authRightCurrentPage > maxPage) this.authRightCurrentPage = maxPage;
+            },
+
+            clearAuthSelected() {
+                this.authSelected = [];
+                this.authRightCurrentPage = 1;
+            },
+
+            onAuthSearchInput() {
+                this.authLeftCurrentPage = 1;
+            },
+
+            onAuthLeftPageChange(val) {
+                this.authLeftCurrentPage = val;
+            },
+
+            onAuthRightPageChange(val) {
+                this.authRightCurrentPage = val;
+            },
+
+            async saveAuthorization() {
+                this.authSubmitting = true;
+                try {
+                    var userIds = this.authSelected.map(function (u) { return u.id; });
+                    await HttpUtils.post('/Biz/Project/SaveAuthorize', {
+                        projId: this.authProjectId,
+                        userIds: userIds
+                    });
+                    ElementPlus.ElMessage.success('授权成功');
+                    this.authDialogVisible = false;
+                } catch (error) {
+                    console.error('save authorization error:', error);
+                    ElementPlus.ElMessage.error('授权保存失败');
+                } finally {
+                    this.authSubmitting = false;
+                }
             },
 
             getStatusLabel(val) {
@@ -473,5 +594,11 @@ document.addEventListener('DOMContentLoaded', function () {
     app.use(ElementPlus, {
         locale: ElementPlusLocaleZhCn
     });
+
+    if (ElementPlusIconsVue) {
+        app.component('Check', ElementPlusIconsVue.Check);
+        app.component('Delete', ElementPlusIconsVue.Delete);
+    }
+
     app.mount('#app');
 });

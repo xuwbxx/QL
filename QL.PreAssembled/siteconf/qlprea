@@ -13,9 +13,21 @@ hosts=*
 # AspNet.MaxMemory=256   # Memory used by each working process
 
 addr=0.0.0.0
-reproxy=/ http://127.0.0.1:5001/
+# reproxy=/ http://127.0.0.1:5001/
+# 关键：开启转发头，把真实访问的协议、主机、端口传给后端
+# proxy_set_header X-Forwarded-For $remote_addr;
+# proxy_set_header X-Forwarded-Proto $scheme;
+# proxy_set_header X-Forwarded-Host $host:$port;
 # CheckQuery=false
 NoLog=false
+
+AppHost={
+ Cmd=/root/.dotnet/dotnet /var/www/qlprea/QL.PreAssembled.dll;
+ AppRoot=/var/www/qlprea;
+ AppPort=5000;
+ OutLog=/tmp/qlprea.out.log;
+ ErrLog=/tmp/qlprea.err.log;
+}
 
 # NoFile=/index.aspx
 # Keep_Alive=false

@@ -7,7 +7,13 @@ const siteUtils = (function () {
   function append(_app) {
     _app.config.globalProperties.$formatIconName = function (icon) {
       if (!icon) return '';
-      return icon.replace('el-icon-', '');
+      let name = icon.replace('el-icon-', '');
+      // kebab‑case 转 PascalCase大驼峰
+      name = name.split('-')
+        .map(seg => seg.charAt(0).toUpperCase() + seg.slice(1))
+        .join('');
+      console.log('$formatIconName:', icon, name);
+      return name;
     };
 
     _app.config.globalProperties.$formatDate = function (val) {
@@ -20,7 +26,19 @@ const siteUtils = (function () {
     };
   }
 
+  async function getUserInfoAsync() {
+    var userInfo = await HttpUtils.post('/api/sys/Auth/GetUserInfo');
+    return userInfo;
+  }
+  function defError(error) {
+    console.error(error);
+  }
+  function getUserInfo() {
+    return HttpUtils.post('/api/sys/Auth/GetUserInfo');
+  }
   return {
-    append: append
+    append: append,
+    getUserInfoAsync: getUserInfoAsync,
+    getUserInfo: getUserInfo
   };
 })();

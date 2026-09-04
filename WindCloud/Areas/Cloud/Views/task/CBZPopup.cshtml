@@ -1,0 +1,2148 @@
+﻿@*插拔桩弹窗*@
+<div class="modal fade" id="Tk_software_02" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog" style="right: -24vw;width: 48vw;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    自升式平台桩腿插拔计算
+                </h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="sqzl_box">
+                    <div class="form-horizontal form-horizontal_sqrjzl">
+
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">任务名</label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" placeholder="任务名自动生成" id="popup_txtTaskName_CBZ" disabled>
+                            </div>
+                        </div>
+
+                        
+
+                        @*地勘数据*@
+                    <div class="form-group mod_touying">
+                        <div class="text-left cb_check_f_title">地勘数据配置</div>
+                        <div class="cb_check_f clearfix mb1">
+                            <label class="col-md-2 control-label">地勘原始资料</label>
+                            <div class="col-md-10 clearfix">
+                                <div class="zdtj_box clearfix">
+                                    <div class="col-md-6 pr0">
+                                        <input type="file" multiple class="form-control pull-left" id="popup_uploadProjectFile_dkyszl">
+                                    </div>
+                                    <div class="col-md-1 text-center">
+                                        <button class="btn search_btn btn-success" id="popup_btn_uploadProjectFile_dkyszl" onclick="SoftwareCBZHelper.UploadProjectDKFile(1);">上传</button>
+                                    </div>
+                                    <div class="col-md-5 zhuyi_zt pr0">
+
+                                    </div>
+                                </div>
+
+                                <div class="table_project_box">
+                                    <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                        <thead>
+                                            <tr>
+                                                <th width="60%">文件名</th>
+                                                <th width="20%">上传时间</th>
+                                                <th width="20%">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="popup_htmlProjectFile_dkyszl" data-tag="0">
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="cb_check_f clearfix mb1">
+                            <label class="col-md-2 control-label">地勘数据表</label>
+                            <div class="col-md-10 clearfix">
+                                <div class="zdtj_box clearfix">
+                                    <div class="col-md-6 pr0">
+                                        <input type="file" class="form-control pull-left" accept=".xlsx" id="popup_uploadProjectFile_dksjb">
+                                    </div>
+                                    <div class="col-md-1 text-center">
+                                        <button class="btn search_btn btn-success" id="popup_btn_uploadProjectFile_dksjb" onclick="SoftwareCBZHelper.UploadProjectDKFile(2);">上传</button>
+                                    </div>
+                                    <div class="col-md-5 text-right zhuyi_zt pr0">
+                                        <a class="btn btn-primary btn-primary-a" href="~/File/Task/地勘数据表(汇总表).xlsx">模板下载</a>
+                                    </div>
+                                </div>
+
+                                <div class="table_project_box">
+                                    <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                        <thead>
+                                            <tr>
+                                                <th width="60%">文件名</th>
+                                                <th width="20%">上传时间</th>
+                                                <th width="20%">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="popup_htmlProjectFile_dksjb" data-tag="0">
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="cb_check_f clearfix mb1">
+                            <label class="col-md-2 control-label">选择计算机位</label>
+                            <div class="col-md-10 clearfix">
+                                <span style="color:red;">(一次性不要勾选太多，容易导致内存溢出。)</span>
+                                <div class="cb_checkbox">
+                                    <ul class="clearfix" id="popup_DKZL_CBZ">
+                                        <li><input type="checkbox">机孔位1</li>
+                                        <li><input type="checkbox">机孔位1</li>
+                                        <li><input type="checkbox">机孔位1</li>
+                                        <li><input type="checkbox">机孔位1</li>
+                                        <li><input type="checkbox">机孔位1</li>
+                                        <li><input type="checkbox">机孔位1</li>
+                                        <li><input type="checkbox">机孔位1</li>
+                                        <li><input type="checkbox">机孔位1</li>
+                                        <li><input type="checkbox">机孔位1</li>
+                                        <li><input type="checkbox">机孔位1</li>
+                                        <li><input type="checkbox">机孔位1</li>
+                                        <li><input type="checkbox">机孔位1</li>
+                                        <li><input type="checkbox">机孔位1</li>
+                                        <li><input type="checkbox">机孔位1</li>
+                                    </ul>
+                                    <div class="text-center zhuyi_zt"></div>
+                                </div>
+                                <div class="text-center relative_position">
+                                    <ul class="xwj_box_ul clearfix">
+                                        <li><a href="#" id="popup_DKFile_CBZ"></a></li>
+                                        <li><a href="#" id="popup_DKFile_CBZ_JSCS"></a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+
+                        @*船舶选择7-12*@
+                        <div class="form-group mod_touying">
+                            <div class="text-left cb_check_f_title">平台船选择</div>
+                            <div class="cb_check_f clearfix mb1">
+                                <label class="col-md-2 control-label">现有船舶选择</label>
+                                <div class="col-md-10 clearfix">
+                                    <div class="cb_checkbox">
+                                        <div class="clearfix mb1 mt1">
+                                            <div class="col-md-6">
+                                                <input type="text" class="form-control" placeholder="请输入船名" id="popup_LibraryShipNameKeyWord_CBZ" />
+                                            </div>
+                                            <div class="col-md-1 pl0">
+                                                <button class="btn btn-primary search_btn" style="width: 100%" id="popup_btnQueryLibraryShip_CBZ" onclick="SoftwareCBZHelper.QueryLibraryShip();">搜索</button>
+                                            </div>
+                                        </div>
+
+                                        <ul class="clearfix" id="popup_ulShipList_CBZ">
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="cb_check_f clearfix mb1">
+                                <label class="col-md-2 control-label">新增船舶</label>
+                                <div class="col-md-10 clearfix">
+
+                                    <div class="mb1 clearfix text-left">
+                                        <button class="btn mr05 btn-success" id="popup_btnOpenCreateLibraryShip_CBZ" onclick="SoftwareCBZHelper.OpenCreateLibraryShip();">新增</button>
+                                        @*<button class="btn btn-primary">模板下载</button>*@
+                                        <a class="btn btn-primary btn-primary-a" href="~/File/Task/平台船数据模板new.xlsx">模板下载</a>
+                                    </div>
+                                    <div class="table_project_box" id="popup_divLibraryShip_CBZ" style="display:none;">
+                                        <table class="table table_project table_fcjzb m0">
+                                            <thead>
+                                                <tr>
+                                                    <th width="25%">船名</th>
+                                                    <th width="35%">上传文件</th>
+                                                    <th width="10%">操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="vertical">
+                                                        <input type="text" placeholder="请输入船名" id="popup_LibraryShipName_CBZ" class="form-control">
+                                                    </td>
+                                                    <td class="vertical">
+
+                                                        <div class="col-md-9 pl0">
+                                                            <input type="file" class="form-control" id="popup_LibraryShipFile_CBZ">
+                                                        </div>
+                                                    </td>
+                                                    <td class="vertical">
+                                                        <button class="btn search_btn btn-success" id="popup_btnCreateNewLibraryShip" onclick="SoftwareCBZHelper.CreateNewLibraryShip();">上传</button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <span class="xm_zt_red">船舶新增后请联系：技术中心</span>
+                                        
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <div class="cb_check_f clearfix">
+                                <label class="col-md-2 control-label" style="margin-top: 1.5vh;">所选平台船文件</label>
+                                <div class="col-md-10 clearfix">
+
+                                    <ul class="xwj_box_ul02 clearfix" id="popup_ShipFile_CBZ">
+                                        @*<li><a href="#">0c4cb568-766696a16b2c.doc</a></li>
+                        <li><a href="#">0c4cb568-766696a16b2c.doc</a></li>
+                        <li><a href="#">0c4cb568-766696a16b2c.doc</a></li>
+                        <li><a href="#">0c4cb568-766696a16b2c.doc</a></li>
+                        <li><a href="#">0c4cb568-766696a16b2c.doc</a></li>
+                        <li><a href="#">0c4cb568-766696a16b2c.doc</a></li>
+                        <li><a href="#">0c4cb568-766696a16b2c.doc</a></li>
+                        <li><a href="#">0c4cb568-766696a16b2c.doc</a></li>
+                        <li><a href="#">0c4cb568-766696a16b2c.doc</a></li>*@
+
+
+                                    </ul>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group mod_touying" id="popup_divReport_CBZ">
+                            <label class="col-md-2 control-label control-label_position02" style="color:red;">报告文件</label>
+                            <div class="col-md-10">
+
+                                <div class="table_project_box">
+                                    <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                        <thead>
+                                            <tr>
+                                                <th width="60%">文件名</th>
+                                                <th width="20%">上传日期</th>
+                                                <th width="20%">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="popup_htmlTaskReportFile_CBZ" data-tag="0">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group mod_touying" id="popup_divModifyReport_CBZ">
+                            <label class="col-md-2 control-label control-label_position02" style="color:red;">修改报告</label>
+                            
+
+                            
+                            <div class="col-md-10">
+                                
+                                <div class="table_project_box clearfix">
+
+                                    <div class="col-md-4 pl0 mb1">
+                                        <input type="file" multiple class="form-control" id="popup_uploadModifyReport_CBZ">
+                                    </div>
+                                    <div class="col-md-2 pl0 mb1">
+                                        <button class="btn search_btn btn-success" id="popup_btn_uploadModifyReport_CBZ" onclick="SoftwareCBZHelper.UploadModifyReportFile();">上传</button>
+                                    </div>
+
+                                    <div class="col-md-6 pl0 mb1">
+                                        
+                                    </div>
+
+                                    <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                                        <thead>
+                                            <tr>
+                                                <th width="60%">文件名</th>
+                                                <th width="20%">上传时间</th>
+                                                <th width="20%">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="popup_htmlTaskModifyReport_CBZ" data-tag="0">
+                                            <tr>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-group mod_touying" id="popup_divLastContent_CBZ">
+
+                            <label class="col-md-2 control-label">上一节点意见</label>
+                            <div class="col-md-10">
+                                <textarea class="form-control" id="popup_txtLastContent_CBZ" disabled style="height:12vh;"></textarea>
+                            </div>
+                            <label class="col-md-2 control-label"></label>
+                            @*<div class="col-md-10">
+                                <div class="spyj_wj">
+                                    <ul id="popup_ulLastNodeCommentFile_CBZ">
+                                        <li><a href="">0c4cb568-766a16b2c.jpg</a></li>
+                                        <li><a href="">0c4cb568-766a16b2c.jpg</a></li>
+                                        <li><a href="">0c4cb568-766a16b2c.jpg</a></li>
+                                        <li><a href="">0c4cb568-766a16b2c.jpg</a></li>
+                                        <li><a href="">0c4cb568-766a16b2c.jpg</a></li>
+                                    </ul>
+                                </div>
+
+
+                            </div>*@
+                        </div>
+
+                        <div class="form-group mod_touying" id="popup_divContent_CBZ">
+
+                            <label class="col-md-2 control-label">审批意见</label>
+                            <div class="col-md-10">
+                                <textarea class="form-control" id="popup_txtContent_CBZ" style="height:12vh;"></textarea>
+                            </div>
+                            <label class="col-md-2 control-label"></label>
+                            @*<div class="col-md-10">
+                                <div class="col-md-3 pl0 mt1">
+                                    <input type="file" multiple class="form-control" id="popup_uploadCommentFile_CBZ">
+                                </div>
+                                <div class="col-md-1 pl0 mt1">
+                                    <button class="btn search_btn btn-success" id="popup_btn_uploadCommentFile_CBZ" onclick="SoftwareCBZHelper.UploadLastCommentFile();">上传</button>
+                                </div>
+
+                                <div class="col-md-8 pl0 spyj_wj">
+                                    <ul id="popup_ulNodeCommentFile_CBZ">
+                                    </ul>
+
+                                </div>
+
+                            </div>*@
+                        </div>
+
+                        <div class="form-group mod_touying" id="popup_divNextNode_CBZ">
+
+                            <label class="col-md-2 control-label lcjd_next">流程下一节点</label>
+                            <div class="col-md-4 pr0">
+                                <div class="lcjd_next_sp"><i class="icon iconfont">&#xe63e;</i><span id="popup_spanNextNodeName_CBZ">分子公司审批</span></div>
+                                <div class="nice-select">
+                                    <input id="popup_txtNodeUserName_CBZ" type="text" class="form-control" placeholder="搜索" autocomplete="off" />
+                                    <div class="search_div" onclick="SoftwareCBZHelper.ClearShjNodeUserName();" id="popup_divClearNodeName_CBZ">
+                                        <i class="fa fa-close"></i>
+                                    </div>
+                                    <ul id="popup_ulNodeUserList_CBZ" style="display:none;">
+                                    </ul>
+                                </div>
+
+                            </div>
+                            <div class="col-md-1 text-center mt4">
+                                <button class="btn btn-primary search_btn" style="width: 100%" id="popup_btnFindNodeUserName_CBZ" onclick="SoftwareCBZHelper.FindShjNodeUserByName();">搜索</button>
+                            </div>
+                            <div class="col-md-5 zhuyi_zt mt4">
+                                注意：请按照流程节点审批要求，指定下一节点审批人。如果节点审批人选错，整个流程将不能通过或者退回。
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="text-center sqzl_btn_box" id="popup_divSubmit_CBZ">
+                    <button class="btn btn-success" id="popup_btnSubmit_CBZ" data-type="1" onclick="SoftwareCBZHelper.AddTaskSubmit(this);">申请</button>
+
+                    <button class="btn btn-danger" id="popup_btnBackLast_CBZ" data-type="4" onclick="SoftwareCBZHelper.AddTaskSubmit(this);">退回上节点</button>
+
+                    <button class="btn btn-danger" id="popup_btnBack_CBZ" data-type="0" onclick="SoftwareCBZHelper.AddTaskSubmit(this);">退回发起人</button>
+
+                    <button class="btn btn-warning" id="popup_btnCancel_CBZ" data-type="3" onclick="SoftwareCBZHelper.AddTaskSubmit(this);">作废</button>
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!--船舶详情弹框-->
+<div class="modal fade" id="Tk_ShipDetail" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-m mt12">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="popup_LibraryShipInfoName_CBZ">
+                    港航平9
+                </h4>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="popup_LibraryShipID" />
+                <ul class="cbxq_ul clearfix">
+                    <li><span>桩腿直径（m）</span> <span></span> <span><input id="popup_Ship_ZTZJ" type="number" class="form-control" disabled></span></li>
+                    <li><span>桩腿周长（m）</span> <span></span> <span><input id="popup_Ship_ZTZC" type="number" class="form-control" disabled></span></li>
+                    <li><span>桩靴长度 L（m）</span> <span></span> <span><input id="popup_Ship_ZXCD" type="number" class="form-control" disabled></span></li>
+                    <li><span>桩靴宽度 B（m）</span> <span></span> <span><input id="popup_Ship_ZXKD" type="number" class="form-control" disabled></span></li>
+                    <li><span>桩靴高度 H（m）</span> <span></span> <span><input id="popup_Ship_ZXGD" type="number" class="form-control" disabled></span></li>
+                    <li><span>桩靴面积 A（m2）</span> <span></span> <span><input id="popup_Ship_ZXMJ" type="number" class="form-control" disabled></span></li>
+                    <li><span>桩靴最大截面周长（m）</span> <span></span> <span><input id="popup_Ship_ZXZDJMZC" type="number" class="form-control" disabled></span></li>
+                    <li><span>桩靴体积 V（m3）</span> <span></span> <span><input id="popup_Ship_ZXTJ" type="number" class="form-control" disabled></span></li>
+
+                    <li><span>桩腿、桩靴自重 W（t）</span> <span></span> <span><input id="popup_Ship_ZTZXZZ" type="number" class="form-control" disabled></span></li>
+                    <li><span style="color:red;">桩腿预压力（t）</span> <span></span> <span><input id="popup_Ship_ZTYYL" style="color:red;" type="number" class="form-control"></span></li>
+                    <li><span style="color:red;">计算预压荷载（t）</span> <span></span> <span><input id="popup_Ship_JSYYHZ" style="color:red;" type="number" class="form-control" disabled></span></li>
+                    <li><span>拔桩力（t）</span> <span></span> <span><input id="popup_Ship_BZL" type="number" class="form-control" disabled></span></li>
+
+                    <li><span style="color:red;">对地比压（kpa）</span> <span></span> <span><input id="popup_Ship_DDBY" style="color:red;" type="number" class="form-control" disabled></span></li>
+                    <li><span>有效桩腿长度（船底到靴底）（m）</span> <span></span> <span><input id="popup_Ship_YXZTCD" type="number" class="form-control" disabled></span></li>
+                    <li><span>气隙（船底到水面）（m）</span> <span></span> <span><input id="popup_Ship_QX" type="number" class="form-control" disabled></span></li>
+                    <li><span>桩腿有效长度（m）</span> <span></span> <span><input id="popup_Ship_ZTYXCD" type="number" class="form-control" disabled></span></li>
+                    <li><span>桩腿截面积（m2）</span> <span></span> <span><input id="popup_Ship_ZTJMJ" style="color:red;" type="number" class="form-control"></span></li>
+
+                </ul>
+            </div>
+            <div class="modal-footer tishi_footer_tk">
+
+                <button type="button" class="btn btn-primary" onclick="SoftwareCBZHelper.GetShipPreloading();">重新计算</button>
+                <button type="button" class="btn btn-success" onclick="SoftwareCBZHelper.SaveLibraryShip();">保存船库</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*插拔桩弹窗*@
+<script>
+
+    $(document).ready(function () {
+        SoftwareCBZHelper.Init();
+    })
+
+    var SoftwareCBZHelper = {
+        Init: function () {
+            SoftwareCBZHelper.DeliverTimeInit();
+        },
+        DeliverTimeInit: function () {
+            //$('#popup_TaskDeliverTime_CBZ').val(formatDateTimeByDay(new Date(new Date().setMonth(new Date().getMonth() + 1))));
+        },
+        OpenPopup: function () {
+
+            var ChooseProjectID = $('#hid_ProjectID').val();
+            if (ChooseProjectID == null || ChooseProjectID == '' || ChooseProjectID == 0) {
+                ModalPopup('error', '必须先选择所关联的风场');
+                return;
+            }
+            SoftwareCBZHelper.PopupOpenedHandleType = 'new';
+            SoftwareCBZHelper.OpenTaskPopup('new', ChooseProjectID);
+
+            Param.SoftwareID = 2;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            //下一节点人员
+            $.post('NextNodeQuery', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+                            $('#popup_spanNextNodeName_CBZ').html(data.Data.NodeName);
+
+                            if (data.Data.NodeUsers.length > 0) {
+
+                                $('#popup_txtNodeUserName_CBZ').attr('disabled', true);
+                                $('#popup_btnFindNodeUserName_CBZ').attr('disabled', true);
+                                $('#popup_divClearNodeName_CBZ').hide();
+
+                                var NodeUserHtml = '';
+                                $(data.Data.NodeUsers).each(function (index, dom) {
+
+                                    NodeUserHtml += dom.ManageName + '(' + dom.ManageDepart + ');'
+
+                                });
+                                $('#popup_txtNodeUserName_CBZ').val(NodeUserHtml);
+
+                            }
+                            else
+                            {
+                                $('#popup_txtNodeUserName_CBZ').attr('disabled', false);
+                                $('#popup_btnFindNodeUserName_CBZ').attr('disabled', false);
+                                $('#popup_divClearNodeName_CBZ').show();
+                            }
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+            
+            
+
+        },
+
+        OpenTaskPopup: function (type, ProjectID, FlowStatus) {
+
+            $('#popup_divSubmit_CBZ').show();
+            if (type == 'new') {
+                //清空弹窗
+                SoftwareCBZHelper.ClearTaskPopup();
+                //设置可写
+                SoftwareCBZHelper.SetTaskPopupWrite();
+
+                //地勘数据
+
+
+                //报告文件
+                $('#popup_divReport_CBZ').hide();
+                $('#popup_divModifyReport_CBZ').hide();
+                //上一节点审批意见
+                $('#popup_divLastContent_CBZ').hide();
+                //审批意见
+                $('#popup_divContent_CBZ').hide();
+                //下一节点
+                $('#popup_divNextNode_CBZ').show();
+
+                $('#popup_btnBack_CBZ').hide();
+                $('#popup_btnSubmit_CBZ').show().html('申请').attr('data-type', 1);
+                $('#popup_btnCancel_CBZ').hide();
+
+                $('#popup_btnBackLast_CBZ').hide();
+
+                SoftwareCBZHelper.PopupOpenedTaskID = parseInt(Math.random() * 10000000);
+
+                
+            }
+            else if (type == 'view') {
+                //清空弹窗
+                SoftwareCBZHelper.ClearTaskPopup();
+                //设置可写
+                SoftwareCBZHelper.SetTaskPopupRead();
+
+
+                //成果报告（需要另外判断）
+                $('#popup_divReport_CBZ').show();
+                $('#popup_divModifyReport_CBZ').show();
+                //上节点审批意见
+                $('#popup_divLastContent_CBZ').show();
+                //审批意见
+                $('#popup_divContent_CBZ').hide();
+                //下节点信息
+                $('#popup_divNextNode_CBZ').hide();
+
+                //申请按钮
+                $('#popup_btnSubmit_CBZ').hide();
+                $('#popup_btnBack_CBZ').hide();
+                $('#popup_btnCancel_CBZ').hide();
+
+                $('#popup_btnBackLast_CBZ').hide();
+
+                //作废的流程
+                if (FlowStatus == 3)
+                {
+                    $('#popup_divSubmit_CBZ').hide();
+                }
+
+            }
+            else if (type == 'approval') {
+                //清空弹窗
+                SoftwareCBZHelper.ClearTaskPopup();
+                //设置只读
+                SoftwareCBZHelper.SetTaskPopupRead();
+
+                //成果报告（需要另外判断）
+                $('#popup_divReport_CBZ').show();
+                $('#popup_divModifyReport_CBZ').show();
+                $('#popup_uploadModifyReport_CBZ').attr('disabled', false);
+                $('#popup_btn_uploadModifyReport_CBZ').attr('disabled', false);
+
+                //上节点审批意见
+                $('#popup_divLastContent_CBZ').show();
+                //审批意见
+                $('#popup_divContent_CBZ').show();
+                $('#popup_txtContent_CBZ').attr('disabled', false);
+                /*$('#popup_uploadCommentFile_CBZ').attr('disabled', false);*/
+
+                //下节点信息
+                $('#popup_divNextNode_CBZ').show();
+                $('#popup_txtNodeUserName_CBZ').attr('disabled', false);
+                $('#popup_btnFindNodeUserName_CBZ').attr('disabled', false);
+                $('#popup_divClearNodeName_CBZ').show();
+
+                $('#popup_btnBack_CBZ').show();
+                $('#popup_btnSubmit_CBZ').show().html('审批通过').attr('data-type', 2);
+                $('#popup_btnCancel_CBZ').show();
+
+                $('#popup_btnBackLast_CBZ').show();
+
+
+            }
+            else if (type == 'renew') {
+                //清空弹窗
+                SoftwareCBZHelper.ClearTaskPopup();
+                //设置可写
+                SoftwareCBZHelper.SetTaskPopupWrite();
+
+                //成果报告（需要另外判断）
+                $('#popup_divReport_CBZ').hide();
+                $('#popup_divModifyReport_CBZ').hide();
+                //上节点审批意见
+                $('#popup_divLastContent_CBZ').show();
+                $('#popup_txtLastContent_CBZ').attr('disabled', true);
+                //审批意见
+                $('#popup_divContent_CBZ').show();
+                $('#popup_txtContent_CBZ').attr('disabled', false);
+                //下节点信息
+                $('#popup_divNextNode_CBZ').show();
+
+
+                $('#popup_btnBack_CBZ').hide();
+                $('#popup_btnSubmit_CBZ').show().html('重新提交').attr('data-type', 2);
+                $('#popup_btnCancel_CBZ').show();
+
+                $('#popup_btnBackLast_CBZ').hide();
+            }
+
+            $('#Tk_software_02').modal('show');
+
+            //$('#popup_htmlTaskFile_ptcyszl_CBZ').attr('data-tag', 0);
+            //$('#popup_htmlTaskFile_ptcsjb_CBZ').attr('data-tag', 0);
+
+            SoftwareCBZHelper.LoadDKFile(type);
+
+            SoftwareCBZHelper.LoadDKData(ProjectID);
+
+            SoftwareCBZHelper.LoadShip(type);
+
+            
+        },
+
+
+        LoadDKData: function (ProjectID) {
+
+            if (ProjectID == null || ProjectID == '' || ProjectID == 0)
+            {
+                ModalPopup('error', '必须先选择所关联的风场');
+                return;
+            }
+
+            Param.ProjectID = ProjectID;
+            //Param.FlowHandle = FlowHandle;
+            Param.TaskID = SoftwareCBZHelper.PopupOpenedTaskID;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('LoadDKZL', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        if (data.Success) {
+
+                            var DKDataHtml = '<li><input type="checkbox" data-id="0" onclick="SoftwareCBZHelper.ChooseAllDKs(this);">选择所有</li>';
+                            $(data.Data.DKs).each(function (index, dom) {
+
+                                DKDataHtml += '<li><input type="checkbox" data-id="' + dom.ID + '" data-name="' + dom.DKName + '">' + dom.DKName + '</li>';
+
+                            })
+                            
+                            $('#popup_DKZL_CBZ').html(DKDataHtml);
+
+                            if (data.Data.File.FileName != null && data.Data.File.FilePath != null && data.Data.File.FileName != '' && data.Data.File.FilePath != '')
+                            {
+                                $('#popup_DKFile_CBZ').html(data.Data.File.FileName).attr('href', data.Data.File.FilePath);
+
+                                $('#popup_DKFile_CBZ_JSCS').html('计算参数.xlsx').attr('href', '\\File\\Task\\计算参数.xlsx');
+
+                            }
+
+                            //$('#popup_DKFile_CBZ_JSCS').html('计算参数.xlsx').attr('href', '\\File\\Task\\计算参数.xlsx');
+                            
+                            
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        LoadShip: function (FlowHandle) {
+
+            Param.FlowHandle = FlowHandle;
+            Param.TaskID = SoftwareCBZHelper.PopupOpenedTaskID;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('LoadShip', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        if (data.Success) {
+
+                            var ShipHtml = '';
+                            $(data.Data.Ships).each(function (index, dom) {
+
+                                ShipHtml += '<li><input type="checkbox" data-id="' + dom.ID + '" data-name="' + dom.ShipName + '"><a title="' + dom.ShipName + '" onclick="SoftwareCBZHelper.OpenShip(' + dom.ID + ');">' + dom.ShipName.substring(0,9) + '</a></li>';
+
+                            })
+                            $('#popup_ulShipList_CBZ').html(ShipHtml);
+
+                            var FileHtml = '';
+                            $(data.Data.Files).each(function (index, dom) {
+
+                                FileHtml += '<li><a href="' + dom.FilePath + '">' + dom.FileName + '</a></li>';
+
+                            })
+                            $('#popup_ShipFile_CBZ').html(FileHtml);
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        OpenShip: function (ShipID) {
+
+            if (ShipID == null || ShipID == '' || ShipID == 0)
+            {
+                return;
+            }
+
+            Param.ShipID = ShipID;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('OpenShip', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        if (data.Success) {
+
+                            $('#popup_LibraryShipInfoName_CBZ').html(data.Data.ShipName);
+                            
+                            $('#popup_Ship_ZTZJ').val(data.Data.ZTZJ);
+                            $('#popup_Ship_ZTJMJ').val(data.Data.ZTJMJ);
+                            $('#popup_Ship_ZTZC').val(data.Data.ZTZC);
+                            $('#popup_Ship_ZXCD').val(data.Data.ZXCD);
+                            $('#popup_Ship_ZXKD').val(data.Data.ZXKD);
+                            $('#popup_Ship_ZXGD').val(data.Data.ZXGD);
+                            $('#popup_Ship_ZXMJ').val(data.Data.ZXMJ);
+                            $('#popup_Ship_ZXZDJMZC').val(data.Data.ZXZDJMZC);
+                            $('#popup_Ship_ZXTJ').val(data.Data.ZXTJ);
+                            $('#popup_Ship_ZTZXZZ').val(data.Data.ZTZXZZ);
+                            $('#popup_Ship_ZTYYL').val(data.Data.ZTYYL);
+                            $('#popup_Ship_JSYYHZ').val(data.Data.JSYYHZ);
+                            $('#popup_Ship_BZL').val(data.Data.BZL);
+                            $('#popup_Ship_DDBY').val(data.Data.DDBY);
+                            $('#popup_Ship_YXZTCD').val(data.Data.YXZTCD);
+                            $('#popup_Ship_QX').val(data.Data.QX);
+                            $('#popup_Ship_ZTYXCD').val(data.Data.ZTYXCD);
+
+                            $('#Tk_ShipDetail').modal('show');
+
+                            $('#popup_LibraryShipID').val(data.Data.ID);
+                            
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        ChooseAllDKs: function (dom) {
+
+            var IsChecked = $(dom).prop('checked');
+
+            if (IsChecked == true) {
+                $('#popup_DKZL_CBZ input:checkbox').prop('checked', true);
+            }
+            else
+            {
+                $('#popup_DKZL_CBZ input:checkbox').prop('checked', false);
+            }
+        },
+
+
+        GetShipPreloading: function () {
+
+            //桩腿预压力
+            var ZTYYLValue = $('#popup_Ship_ZTYYL').val();
+            //桩腿、桩靴自重
+            var ZTZXZZValue = $('#popup_Ship_ZTZXZZ').val();
+            //桩靴体积
+            var ZXTJValue = $('#popup_Ship_ZXTJ').val();
+            //桩靴面积
+            var ZXMJValue = $('#popup_Ship_ZXMJ').val()
+
+            if (ZTYYLValue == '' || ZTZXZZValue == '' || ZXTJValue == '')
+            {
+                return;
+            }
+            //计算预压荷载（t）
+            var JSYYHZValue = (Number(ZTYYLValue) + Number(ZTZXZZValue) - ZXTJValue * 1.025).toFixed(2);
+
+            $('#popup_Ship_JSYYHZ').val(JSYYHZValue);
+
+            //对地比压（kpa）
+            var DDBYValue = (Number(JSYYHZValue) * 9.8 / Number(ZXMJValue)).toFixed(2);
+
+            $('#popup_Ship_DDBY').val(DDBYValue);
+
+        },
+
+        SaveLibraryShip: function () {
+
+            SoftwareCBZHelper.GetShipPreloading();
+
+            ModalPopup('information', '确认是否要保存船舶数据？');
+
+            $("#ModalSubmit").unbind('click').bind('click', function () {
+                SoftwareCBZHelper.DoSaveLibraryShip();
+            });
+
+        },
+        
+        DoSaveLibraryShip: function () {
+
+            Param.ShipID = $('#popup_LibraryShipID').val();
+            Param.ShipZTYYL = $('#popup_Ship_ZTYYL').val();
+            Param.ShipJSYYHZ = $('#popup_Ship_JSYYHZ').val();
+            Param.ShipDDBY = $('#popup_Ship_DDBY').val();
+            Param.ShipZTJMJ = $('#popup_Ship_ZTJMJ').val();
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('SaveLibraryShip', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        if (data.Success) {
+
+                            ModalPopup('success');
+                            $('#Tk_ShipDetail').modal('hide');
+                        }
+                        else
+                        {
+                            ModalPopup('error', data.Message);
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                    ModalClose('information');
+                });
+
+
+        },
+
+        QueryLibraryShip: function () {
+
+            var ShipNameKeyWord = $('#popup_LibraryShipNameKeyWord_CBZ').val();
+
+            if (ShipNameKeyWord == '') {
+                $('#popup_ulShipList_CBZ a').each(function (index, dom) {
+
+                    $(dom).parent().show();
+
+                })
+            }
+            else
+            {
+                $('#popup_ulShipList_CBZ a').each(function (index, dom) {
+
+                    var ShipName = $(dom).html();
+
+                    if (ShipName.indexOf(ShipNameKeyWord) == -1) {
+
+                        $(dom).parent().hide();
+
+                    }
+                    else {
+                        $(dom).parent().show();
+                    }
+
+                })
+            }
+
+            
+
+        },
+
+        CreateShipFile: function () {
+
+            var ShipIDs = [];
+
+            $('#popup_ulShipList_CBZ input:checkbox:checked').each(function (index, dom) {
+
+                var ID = $(dom).attr('data-id');
+                if (ID != 0) {
+                    ShipIDs.push(ID);
+                }
+
+            })
+
+            Param.ShipIDs = ShipIDs;
+            Param.TaskID = SoftwareCBZHelper.PopupOpenedTaskID;
+            Param.FlowHandle = SoftwareCBZHelper.PopupOpenedHandleType;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('CreateShipFile', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        var FileHtml = '';
+                        if (data.Success) {
+
+                            $(data.Data).each(function (index, dom) {
+
+                                FileHtml += '<li><a href="' + dom.FilePath + '">' + dom.FileName + '</a></li>';
+
+                            })
+                            $('#popup_ShipFile_CBZ').html(FileHtml);
+
+                            ModalPopup('success', '生成船舶数据表成功');
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+
+        },
+
+        OpenCreateLibraryShip: function () {
+
+            var IsDisplay = $('#popup_divLibraryShip_CBZ').css('display');
+            if (IsDisplay == 'none') {
+                $('#popup_divLibraryShip_CBZ').show();
+            }
+            else
+            {
+                $('#popup_divLibraryShip_CBZ').hide();
+            }
+
+        },
+
+        CreateNewLibraryShip: function () {
+
+            ModalPopup('information', '确认是否要新增船舶？');
+
+            $("#ModalSubmit").unbind('click').bind('click', function () {
+                SoftwareCBZHelper.DoCreateNewLibraryShip();
+            });
+
+        },
+
+        DoCreateNewLibraryShip: function () {
+
+            var ShipName = $('#popup_LibraryShipName_CBZ').val();
+            if (ShipName == '')
+            {
+                ModalPopup('error', '需要输入船名');
+                return;
+            }
+
+            var formData = new FormData();
+            var ShipFile = $('#popup_LibraryShipFile_CBZ')[0].files;
+            if (ShipFile.length == 0)
+            {
+                ModalPopup('error', '没有任何船舶文件');
+                return;
+            }
+            formData.append("ShipName", ShipName);
+            formData.append("FlowHandle", SoftwareCBZHelper.PopupOpenedHandleType);
+            formData.append("TaskID", SoftwareCBZHelper.PopupOpenedTaskID);
+            formData.append("LibraryShipFile", ShipFile[0]);
+
+            $.ajax({
+                url: 'CreateLibraryShip',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: formData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+
+                            var ShipHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                ShipHtml += '<li><input type="checkbox" data-id="' + dom.ID + '" data-name="' + dom.ShipName + '"><a title="' + dom.ShipName + '" onclick="SoftwareCBZHelper.OpenShip(' + dom.ID + ');">' + dom.ShipName.substring(0,9) + '</a></li>';
+
+                            })
+                            $('#popup_ulShipList_CBZ').html(ShipHtml);
+
+                            ModalPopup('success', '保存成功');
+
+                        }
+                        else
+                        {
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                    ModalClose('information');
+                }
+            });
+
+        },
+
+        SetTaskPopupWrite: function () {
+
+            //$('#popup_txtTaskName_CBZ').attr('disabled', false);
+
+            //$('#popup_txtDeliverUserName_CBZ').attr('disabled', false);
+            $('#popup_btnDeiverNameQuery_CBZ').attr('disabled', false);
+            $('#popup_divClearDeliverName_CBZ').show();
+
+            //$('#popup_TaskDeliverTime_CBZ').attr('disabled', false);
+
+            $('#popup_txtContent_CBZ').attr('disabled', false);
+
+            $('#popup_txtNodeUserName_CBZ').attr('disabled', false);
+            $('#popup_btnFindNodeUserName_CBZ').attr('disabled', false);
+            $('#popup_divClearNodeName_CBZ').show();
+
+            $('#popup_btnCreateDKFile_CBZ').attr('disabled', false);
+            $('#popup_btnQueryLibraryShip_CBZ').attr('disabled', false);
+            $('#popup_btnQueryLibraryShip').attr('disabled', false);
+            $('#popup_btnCreateNewLibraryShip').attr('disabled', false);
+            $('#popup_btnOpenCreateLibraryShip_CBZ').attr('disabled', false);
+            $('#popup_btnCreateShipFile_CBZ').attr('disabled', false);
+
+            $('#popup_uploadModifyReport_CBZ').attr('disabled', false);
+            $('#popup_btn_uploadModifyReport_CBZ').attr('disabled', false);
+
+            //$('#popup_ulLastNodeCommentFile_CBZ').attr('disabled', false);
+            //$('#popup_uploadCommentFile_CBZ').attr('disabled', false);
+            //$('#popup_ulNodeCommentFile_CBZ').attr('disabled', false);
+
+            //地勘数据
+            $('#popup_btn_uploadProjectFile_dkyszl').attr('disabled', false);
+            $('#popup_btn_uploadProjectFile_dksjb').attr('disabled', false);
+        },
+
+        SetTaskPopupRead: function () {
+
+            //$('#popup_txtTaskName_CBZ').attr('disabled', true);
+
+            //$('#popup_txtDeliverUserName_CBZ').attr('disabled', true);
+            $('#popup_btnDeiverNameQuery_CBZ').attr('disabled', true);
+            $('#popup_divClearDeliverName_CBZ').hide();
+
+            //$('#popup_TaskDeliverTime_CBZ').attr('disabled', true);
+
+            $('#popup_txtContent_CBZ').attr('disabled', true);
+
+            $('#popup_txtNodeUserName_CBZ').attr('disabled', true);
+            $('#popup_btnFindNodeUserName_CBZ').attr('disabled', true);
+            $('#popup_divClearNodeName_CBZ').hide();
+
+            $('#popup_btnCreateDKFile_CBZ').attr('disabled', true);
+            $('#popup_btnQueryLibraryShip_CBZ').attr('disabled', true);
+            $('#popup_btnQueryLibraryShip').attr('disabled', true);
+            $('#popup_btnCreateNewLibraryShip').attr('disabled', true);
+            $('#popup_btnOpenCreateLibraryShip_CBZ').attr('disabled', true);
+            $('#popup_btnCreateShipFile_CBZ').attr('disabled', true);
+
+            $('#popup_uploadModifyReport_CBZ').attr('disabled', true);
+            $('#popup_btn_uploadModifyReport_CBZ').attr('disabled', true);
+
+            //$('#popup_ulLastNodeCommentFile_CBZ').attr('disabled', true);
+            //$('#popup_uploadCommentFile_CBZ').attr('disabled', true);
+            //$('#popup_ulNodeCommentFile_CBZ').attr('disabled', true);
+
+            //地勘数据
+            $('#popup_btn_uploadProjectFile_dkyszl').attr('disabled', true);
+            $('#popup_btn_uploadProjectFile_dksjb').attr('disabled', true);
+
+        },
+
+        ClearTaskPopup: function () {
+
+            $('#popup_txtTaskName_CBZ').val('');
+
+            $('#popup_htmlTaskReportFile_CBZ').html('');
+            $('#popup_htmlTaskModifyReport_CBZ').html('');
+
+            $('#popup_uploadModifyReport_CBZ').val('');
+
+            //$('#popup_txtDeliverUserName_CBZ').val('');
+            //$('#popup_TaskDeliverTime_CBZ').val('');
+
+            $('#popup_txtLastContent_CBZ').val('');
+            $('#popup_txtContent_CBZ').val('');
+            $('#popup_txtNodeUserName_CBZ').val('');
+
+            //$('#popup_ulLastNodeCommentFile_CBZ').html('');
+            //$('#popup_uploadCommentFile_CBZ').val('');
+            //$('#popup_ulNodeCommentFile_CBZ').html('');
+
+            $('#popup_DKZL_CBZ').html('');
+            $('#popup_DKFile_CBZ').html('').attr('href', '');
+            $('#popup_DKFile_CBZ').html('');
+            $('#popup_DKFile_CBZ_JSCS').html('');
+
+            $('#popup_LibraryShipNameKeyWord_CBZ').val('');
+            $('#popup_ulShipList_CBZ').html('');
+            $('#popup_ShipFile_CBZ').html('');
+
+            //地勘数据
+            $('#popup_uploadProjectFile_dkyszl').val('');
+            $('#popup_htmlProjectFile_dkyszl').html('');
+            $('#popup_uploadProjectFile_dksjb').val('');
+            $('#popup_htmlProjectFile_dksjb').html('');
+
+            SoftwareCBZHelper.DeliverTimeInit();
+        },
+
+        ChoosedTaskNodeUser: { Name: '', UserCode: '', Depart: '', Phone: '', JobName: '', NextNodeID: '' },
+
+        FindShjNodeUserByName: function () {
+
+            Param.Name = $("#popup_txtNodeUserName_CBZ").val();
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('FindShjUser', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        if (data.Success) {
+
+                            var DataListHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                DataListHtml += '<li onclick="SoftwareCBZHelper.ChooseNodeUser(this);" data-usercode="' + dom.empcode + '" data-name="' + dom.name + '" data-depart="' + dom.wholeDeptPath + '" data-phone="' + dom.phone + '" data-jobname="' + dom.jobname + '" ><h3>' + dom.name + '(' + dom.jobname + ')</h3><div>' + dom.wholeDeptPath + '</div></li >';
+
+                            });
+                            $('ul#popup_ulNodeUserList_CBZ').html(DataListHtml);
+                            $('ul#popup_ulNodeUserList_CBZ').show();
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        ChooseNodeUser: function (dom) {
+
+            //SoftwareCBZHelper.ChoosedTaskNodeUser = {};
+
+            if (dom == null)
+                return;
+
+            var Name = $(dom).attr('data-name');
+            var UserCode = $(dom).attr('data-usercode');
+            var Depart = $(dom).attr('data-depart');
+            var Phone = $(dom).attr('data-phone');
+            var JobName = $(dom).attr('data-jobname');
+
+            SoftwareCBZHelper.ChoosedTaskNodeUser.Name = Name;
+            SoftwareCBZHelper.ChoosedTaskNodeUser.UserCode = UserCode;
+            SoftwareCBZHelper.ChoosedTaskNodeUser.Depart = Depart;
+            SoftwareCBZHelper.ChoosedTaskNodeUser.Phone = Phone;
+            SoftwareCBZHelper.ChoosedTaskNodeUser.JobName = JobName;
+
+            if (Name == '' || UserCode == '')
+                return;
+
+            $('#popup_txtNodeUserName_CBZ').val(Name + '(' + Depart + ')');
+
+            $('ul#popup_ulNodeUserList_CBZ').hide();
+
+        },
+
+        PopupOpenedTaskID: 0,
+        PopupIsBackFlow: false,
+        PopupOpenedHandleType: 'new',
+        LastNode: {},
+        OpenTaskInfo: function (TaskID) {
+
+            Param.TaskID = TaskID;
+
+            SoftwareCBZHelper.PopupOpenedTaskID = 0;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('TaskQuery_CBZ', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+                            SoftwareCBZHelper.PopupOpenedTaskID = TaskID;
+
+                            if (data.Data.FlowInfo.LastNode != null && data.Data.FlowInfo.LastNode.length > 0)
+                            {
+                                LastNode = data.Data.FlowInfo.LastNode.filter(a => a.FlowHandle != 0)[0];
+                            }
+
+                            
+
+                            var Task = data.Data;
+
+                            $('#hid_ProjectID').val(Task.ProjectID);
+
+                            //如果是已经结束的流程，直接打开文件获取弹窗
+                            if (Task.FlowInfo.FlowStatus == 2) {
+
+                                OpenReportPopup(TaskID);
+                                return;
+                            }
+
+
+                            SoftwareCBZHelper.OpenTaskPopup(Task.FlowInfo.FlowHandle, Task.ProjectID, Task.FlowInfo.FlowStatus);
+
+                            SoftwareCBZHelper.PopupOpenedHandleType = Task.FlowInfo.FlowHandle;
+
+                            SoftwareCBZHelper.PopupIsBackFlow = Task.FlowInfo.IsBackFlow;
+
+                            if (Task.FlowInfo.DoEditConfirm == true) {
+                                $('#popup_btnCreateDKFile_CBZ').attr('disabled', false);
+                                $('#popup_btnQueryLibraryShip_CBZ').attr('disabled', false);
+                                $('#popup_btnQueryLibraryShip').attr('disabled', false);
+                                $('#popup_btnCreateNewLibraryShip').attr('disabled', false);
+                                $('#popup_btnOpenCreateLibraryShip_CBZ').attr('disabled', false);
+                                $('#popup_btnCreateShipFile_CBZ').attr('disabled', false);
+                            }
+
+                            if (Task.FlowInfo.IsUsingFlowNode) {
+                                $('#popup_divContent_CBZ').hide();
+                                $('#popup_divNextNode_CBZ').hide();
+                                $('#popup_btnSubmit_CBZ').hide();
+                                $('#popup_btnBack_CBZ').hide();
+                                $('#popup_btnBackLast_CBZ').hide();
+                            }
+
+                            //如果是最后的流程
+                            SoftwareCBZHelper.ChoosedTaskNodeUser.NextNodeID = Task.FlowInfo.NextNodeID;
+                            if (Task.FlowInfo.NextNodeID == 0) {
+                                $('#popup_txtNodeUserName_CBZ').attr('disabled', true);
+                                $('#popup_btnFindNodeUserName_CBZ').attr('disabled', true);
+                                $('#popup_divClearNodeName_CBZ').hide();
+                            }
+
+                            //下一节点如果有默认人物
+                            if (Task.FlowInfo.NextNode != null && Task.FlowInfo.NextNode.length > 0) {
+
+                                $('#popup_txtNodeUserName_CBZ').attr('disabled', true);
+                                $('#popup_btnFindNodeUserName_CBZ').attr('disabled', true);
+                                $('#popup_divClearNodeName_CBZ').hide();
+
+                                var NodeUserHtml = '';
+                                $(Task.FlowInfo.NextNode).each(function (index, dom) {
+
+                                    NodeUserHtml += dom.UserName + '(' + dom.UserDepart + ');'
+
+                                });
+                                $('#popup_txtNodeUserName_CBZ').val(NodeUserHtml);
+
+                            }
+
+
+
+                            //填充数据
+                            $('#popup_txtTaskName_CBZ').val(Task.TaskName);
+
+                            //上一节点意见（可能多人）
+                            var CommentHtml = '';
+                            $(Task.FlowInfo.LastNode).each(function (index, dom) {
+                                CommentHtml += dom.UserName + ':' + dom.Comment + ';\n'
+                            });
+                            $('#popup_txtLastContent_CBZ').val(CommentHtml);
+                            //上一节点文件
+                            //var LastNodeCommentFileHtml = '';
+                            //$(Task.LastNodeCommentFiles).each(function (index, dom) {
+                            //    LastNodeCommentFileHtml += '<li><a href="' + dom.FilePath + '" download="' + dom.FileName + '">' + dom.FileName + '</a></li>';
+                            //});
+                            //$('#popup_ulLastNodeCommentFile_CBZ').html(LastNodeCommentFileHtml);
+
+                            //下一节点
+                            $('#popup_spanNextNodeName_CBZ').html(Task.FlowInfo.NextNodeName);
+
+
+                            var FileptcyszlHtml = '';
+                            $(Task.File_ptcyszl).each(function (index, dom) {
+                                FileptcyszlHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" >下载</a></td></tr>';
+                            });
+                            $('#popup_htmlTaskFile_ptcyszl_CBZ').html(FileptcyszlHtml);
+
+                            var FileptcsjbHtml = '';
+                            $(Task.File_ptcsjb).each(function (index, dom) {
+                                FileptcsjbHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" >下载</a></td></tr>';
+                            });
+                            $('#popup_htmlTaskFile_ptcsjb_CBZ').html(FileptcsjbHtml);
+
+                            var ReportFileHtml = '';
+                            $(Task.Report.ReportFile).each(function (index, dom) {
+                                ReportFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '" >下载</a></td></tr>';
+                            })
+                            $('#popup_htmlTaskReportFile_CBZ').html(ReportFileHtml);
+
+                            var ReportModifyFileHtml = '';
+                            $(Task.Report.ReportModifyFile).each(function (index, dom) {
+                                var ReportDeleteHtml = '';
+                                if (Task.FlowInfo.FlowHandle == 'approval' && Task.FlowInfo.NodeID == 7) {
+                                    ReportDeleteHtml = ' / <a class="xm_zt_red" onclick="SoftwareCBZHelper.DeleteModifyFile(' + dom.ID + ')">删除</a>'
+                                }
+                                ReportModifyFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '" >下载</a>' + ReportDeleteHtml + '</td></tr>';
+                            })
+                            $('#popup_htmlTaskModifyReport_CBZ').html(ReportModifyFileHtml);
+
+                            // / <a class="xm_zt_red" onclick="SoftwareCBZHelper.DeleteModifyFile(' + dom.ID + ')">删除</a>
+
+                            //地勘数据
+                            //SoftwareCBZHelper.LoadDKFile();
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+            
+
+        },
+
+        ClearShjNodeUserName: function () {
+            SoftwareCBZHelper.ChoosedTaskNodeUser = {};
+            $('#popup_txtNodeUserName_CBZ').val('');
+        },
+
+        DeleteModifyFile: function (FileID) {
+
+            if (FileID == '' || FileID == 0)
+            {
+                return;
+            }
+
+            Param.ID = FileID;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            //下一节点人员
+            $.post('DeleteModifyFile', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+                            var CommentFileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                CommentFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a class="xm_zt_green" download="' + dom.FileName + '" href="' + dom.FilePath + '">下载</a> / <a class="xm_zt_red" onclick="SoftwareCBZHelper.DeleteModifyFile(' + dom.ID + ')">删除</a></td></tr>';
+                            });
+
+                            $('#popup_htmlTaskModifyReport_CBZ').html(CommentFileHtml);
+
+                            ModalPopup('success', '删除成功');
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        UploadModifyReportFile: function () {
+
+            if (SoftwareCBZHelper.PopupOpenedTaskID == 0)
+                return;
+
+            var ModifyReports = $('#popup_uploadModifyReport_CBZ')[0].files;
+            if (ModifyReports == null || ModifyReports.length == 0)
+                return;
+
+            var formData = new FormData();
+            formData.append("TaskID", SoftwareCBZHelper.PopupOpenedTaskID);
+
+            var FileCount = ModifyReports.length;
+            formData.append("TaskModifyReportCount", FileCount);
+            var Count = 1;
+            $(ModifyReports).each(function (index, dom) {
+
+                formData.append("TaskModifyReportFile" + Count, dom);
+
+                Count++;
+            });
+
+            $.ajax({
+                url: 'TaskModifyReportUpload',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: formData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+
+                            var CommentFileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+                                CommentFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a class="xm_zt_green" download="' + dom.FileName + '" href="' + dom.FilePath + '">下载</a> / <a class="xm_zt_red" onclick="SoftwareCBZHelper.DeleteModifyFile(' + dom.ID + ')">删除</a></td></tr>';
+                            });
+
+                            $('#popup_htmlTaskModifyReport_CBZ').html(CommentFileHtml);
+
+                            ModalPopup('success', '上传成功');
+
+                        }
+                        else {
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                }
+            });
+
+        },
+
+        UploadLastCommentFile: function () {
+
+            if (SoftwareCBZHelper.PopupOpenedTaskID == 0)
+                return;
+
+            var CommentFiles = $('#popup_uploadCommentFile_CBZ')[0].files;
+            if (CommentFiles == null || CommentFiles.length == 0)
+                return;
+
+            var formData = new FormData();
+            formData.append("TaskID", SoftwareCBZHelper.PopupOpenedTaskID);
+
+            var FileCount = CommentFiles.length;
+            formData.append("TaskCommentFileCount", FileCount);
+            var Count = 1;
+            $(CommentFiles).each(function (index, dom) {
+
+                formData.append("TaskCommentFile" + Count, dom);
+
+                Count++;
+            });
+
+
+            $.ajax({
+                url: 'TaskCommentFileUpload',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: formData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+
+                            var CommentFileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                CommentFileHtml += '<li><a href="' + dom.FilePath + '">' + dom.FileName + '</a></li>';
+                            });
+
+                            $('#popup_ulNodeCommentFile_CBZ').html(CommentFileHtml);
+
+                            ModalPopup('success', '上传成功');
+
+                        }
+                        else {
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                }
+            });
+
+        },
+
+        AddTaskSubmit: function (dom) {
+
+            var type = $(dom).attr('data-type');
+            if (type == null || type == '')
+                return;
+
+            var InfoText = '';
+            if (type == 0) {
+                InfoText = '是否要流程退回？流程将退回至发起人';
+            }
+            else if (type == 1) {
+
+                var TaskName = SoftwareCBZHelper.CreateTaskName();
+                if (TaskName == '') {
+                    return;
+                }
+                $('#popup_txtTaskName_CBZ').val(TaskName);
+                InfoText = TaskName + '</br>是否要保存任务？';
+            }
+            else if (type == 2) {
+
+                if (SoftwareCBZHelper.PopupIsBackFlow == true) {
+                    var TaskName = SoftwareCBZHelper.CreateTaskName();
+                    if (TaskName == '') {
+                        return;
+                    }
+                    $('#popup_txtTaskName_CBZ').val(TaskName);
+                    InfoText = TaskName + '</br>是否要保存任务？';
+                }
+                else {
+                    InfoText = '是否要审批通过？';
+                }
+
+
+            }
+            else if (type == 3) {
+                InfoText = '是否要作废流程？';
+            }
+            else if (type == 4)
+            {
+                var txt = "是否要流程退回上一节点？";
+                if (LastNode != null)
+                {
+                    txt = '是否要流程退回上一节点(' + LastNode.UserName + ')';
+                }
+
+                InfoText = txt;
+            }
+
+            ModalPopup('information', InfoText);
+
+            $("#ModalSubmit").unbind('click').bind('click', function () {
+                SoftwareCBZHelper.DoTaskSubmit(type);
+            });
+
+        },
+
+        DoTaskSubmit: function (type) {
+
+            if (type == 1) {
+                SoftwareCBZHelper.DoTaskAdd();
+            }
+            else if (type == 0 || type == 2) {
+                SoftwareCBZHelper.DoTaskApproval(type);
+            }
+            else if (type == 3) {
+                SoftwareCBZHelper.DoTaskCancel();
+            }
+            else if (type == 4)
+            {
+                SoftwareCBZHelper.DoTaskBack();
+            }
+        },
+
+        CreateTaskName: function () {
+
+            var TaskName = '';
+
+            //地勘数据表
+            var DKs = [];
+            $('#popup_DKZL_CBZ input:checkbox:checked').each(function (index, dom) {
+                var ID = $(dom).attr('data-id');
+                if (ID != 0) {
+                    DKs.push(ID);
+                }
+            })
+            //平台船
+            var ShipIDs = [];
+            $('#popup_ulShipList_CBZ input:checkbox:checked').each(function (index, dom) {
+                var ID = $(dom).attr('data-id');
+                if (ID != 0) {
+                    ShipIDs.push(ID);
+                }
+            })
+
+            if (DKs.length == 0) {
+                ModalClose('information');
+                ModalPopup('error', '没有选择任何地勘数据');
+                return '';
+            }
+            if (ShipIDs.length == 0) {
+                ModalClose('information');
+                ModalPopup('error', '没有选择任何平台船');
+                return '';
+            }
+
+            if (ShipIDs.length == 1) {
+
+                TaskName += '(' + $('#popup_ulShipList_CBZ input:checkbox:checked').first().attr('data-name') + ')自升式平台船';
+            }
+            else {
+                TaskName += '(' + $('#popup_ulShipList_CBZ input:checkbox:checked').first().attr('data-name') + ')等' + ShipIDs.length + '条自升式平台船';
+            }
+
+            if (DKs.length == 1) {
+                TaskName += '(' + $('#popup_DKZL_CBZ input:checkbox:checked[data-id!="0"]').first().attr('data-name') + ')机位插拔腿计算';
+            }
+            else {
+                TaskName += '(' + $('#popup_DKZL_CBZ input:checkbox:checked[data-id!="0"]').first().attr('data-name') + ')等' + DKs.length + '个机位插拔腿计算';
+            }
+            TaskName += '(' + GetFullDateTimeString(new Date()) + ')';
+
+            return TaskName;
+
+        },
+
+        DoTaskAdd: function () {
+
+            var ProjectID = $('#hid_ProjectID').val();
+            if (ProjectID == null || ProjectID == '' || ProjectID == 0) {
+                ModalClose('information');
+                ModalPopup('error', '软件申请页面需要选择关联风电项目');
+                return;
+            }
+
+            var SubmitFormData = new FormData();
+            SubmitFormData.append("ProjectID", ProjectID);
+            SubmitFormData.append("TaskID", SoftwareCBZHelper.PopupOpenedTaskID);
+            SubmitFormData.append("SoftwareID", 2);
+
+            SubmitFormData.append("TaskNodeName", SoftwareCBZHelper.ChoosedTaskNodeUser.Name);
+            SubmitFormData.append("TaskNodeUserCode", SoftwareCBZHelper.ChoosedTaskNodeUser.UserCode);
+            SubmitFormData.append("TaskNodeDepart", SoftwareCBZHelper.ChoosedTaskNodeUser.Depart);
+            SubmitFormData.append("TaskNodePhone", SoftwareCBZHelper.ChoosedTaskNodeUser.Phone);
+            SubmitFormData.append("TaskNodeJobName", SoftwareCBZHelper.ChoosedTaskNodeUser.JobName);
+
+            //SubmitFormData.append("TaskDeliverTime", $('#popup_TaskDeliverTime_CBZ').val());
+
+            //地勘数据表
+            var DKs = '';
+            $('#popup_DKZL_CBZ input:checkbox:checked').each(function (index, dom) {
+                var ID = $(dom).attr('data-id');
+                if (ID != 0) {
+                    DKs += ID + ',';
+                }
+            })
+            SubmitFormData.append("DKIDstring", DKs.substring(0, DKs.length - 1));
+
+            //平台船
+            var ShipIDs = '';
+            $('#popup_ulShipList_CBZ input:checkbox:checked').each(function (index, dom) {
+                var ID = $(dom).attr('data-id');
+                if (ID != 0) {
+                    ShipIDs += ID + ',';
+                }
+            })
+            SubmitFormData.append("ShipIDstring", ShipIDs.substring(0, ShipIDs.length - 1));
+
+            SubmitFormData.append("TaskName", $('#popup_txtTaskName_CBZ').val());
+
+            $('#ModalSubmit').attr('disabled', true);
+            OpenMaskPopUp();
+
+            $.ajax({
+                url: 'TaskSubmit_CBZ',
+                dataType: 'json',
+                type: 'POST',
+                async: true,
+                data: SubmitFormData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+                            ModalPopup('success', '计算成功，请等待业务人员审批和核对结果。');
+                            $('#Tk_software_02').modal('hide');
+                            $('#tk_WorkTasks').modal('hide');
+
+                            Param.ProjectID = $('#hid_ProjectID').val();
+                            DoQuery();
+
+                            var CBZUrl = data.Data;
+                            if (CBZUrl != null && CBZUrl != '')
+                            {
+                                //window.open(CBZUrl, '_blank');
+                            }
+
+                        }
+                        else {
+
+                            ModalOpenCBZ(data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                    $('#ModalSubmit').attr('disabled', false);
+                    CloseMaskPopUp();
+                    ModalClose('information');
+                }
+            });
+
+        },
+
+        DoTaskApproval: function (type) {
+
+            if (SoftwareCBZHelper.PopupOpenedTaskID == 0) {
+                ModalClose('information');
+                ModalPopup('error', '数据出错，重新打开弹窗。');
+                return;
+            }
+
+            var SubmitFormData = new FormData();
+
+            SubmitFormData.append("ApprovalType", type);
+            SubmitFormData.append("IsBackFlow", SoftwareCBZHelper.PopupIsBackFlow);
+            SubmitFormData.append("NodeID", SoftwareCBZHelper.ChoosedTaskNodeUser.NextNodeID);
+            SubmitFormData.append("TaskID", SoftwareCBZHelper.PopupOpenedTaskID);
+            SubmitFormData.append("TaskComment", $('#popup_txtContent_CBZ').val());
+            if (SoftwareCBZHelper.ChoosedTaskNodeUser.NextNodeID == 0) {
+                //流程结束
+
+            }
+            else {
+                //正常审批
+                SubmitFormData.append("TaskNodeName", SoftwareCBZHelper.ChoosedTaskNodeUser.Name);
+                SubmitFormData.append("TaskNodeUserCode", SoftwareCBZHelper.ChoosedTaskNodeUser.UserCode);
+                SubmitFormData.append("TaskNodeDepart", SoftwareCBZHelper.ChoosedTaskNodeUser.Depart);
+                SubmitFormData.append("TaskNodePhone", SoftwareCBZHelper.ChoosedTaskNodeUser.Phone);
+                SubmitFormData.append("TaskNodeJobName", SoftwareCBZHelper.ChoosedTaskNodeUser.JobName);
+
+
+
+                if (SoftwareCBZHelper.PopupIsBackFlow) {
+
+                    SubmitFormData.append("TaskName", $('#popup_txtTaskName_CBZ').val());
+                   
+                    //SubmitFormData.append("TaskDeliverTime", $('#popup_TaskDeliverTime_CBZ').val());
+
+                    //地勘数据表
+                    var DKs = '';
+                    $('#popup_DKZL_CBZ input:checkbox:checked').each(function (index, dom) {
+                        var ID = $(dom).attr('data-id');
+                        if (ID != 0) {
+                            DKs += ID + ',';
+                        }
+                    })
+                    SubmitFormData.append("DKIDstring", DKs.substring(0, DKs.length - 1));
+
+                    //平台船
+                    var ShipIDs = '';
+                    $('#popup_ulShipList_CBZ input:checkbox:checked').each(function (index, dom) {
+                        var ID = $(dom).attr('data-id');
+                        if (ID != 0) {
+                            ShipIDs += ID + ',';
+                        }
+                    })
+                    SubmitFormData.append("ShipIDstring", ShipIDs.substring(0, ShipIDs.length - 1));
+
+
+                }
+
+
+            }
+
+            OpenMaskPopUp();
+            $('#ModalSubmit').attr('disabled', true);
+
+            $.ajax({
+                url: 'TaskApprovalSubmit_CBZ',
+                dataType: 'json',
+                type: 'POST',
+                async: true,
+                data: SubmitFormData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+                            ModalPopup('success', '操作成功');
+                            $('#Tk_software_02').modal('hide');
+
+                            Param.ProjectID = $('#hid_ProjectID').val();
+                            DoQuery();
+
+                            var CBZUrl = data.Data;
+                            if (CBZUrl != null && CBZUrl != '') {
+                                //window.open(CBZUrl, '_blank');
+                            }
+
+                        }
+                        else {
+
+                            ModalOpenCBZ(data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                    $('#ModalSubmit').attr('disabled', false);
+                    CloseMaskPopUp();
+                    ModalClose('information');
+                }
+            });
+
+        },
+
+        DoTaskBack: function () {
+
+            if (SoftwareCBZHelper.PopupOpenedTaskID == 0) {
+                ModalClose('information');
+                ModalPopup('error', '数据出错，重新打开弹窗。');
+                return;
+            }
+
+            var SubmitFormData = new FormData();
+
+            SubmitFormData.append("IsBackFlow", SoftwareCBZHelper.PopupIsBackFlow);
+            SubmitFormData.append("NodeID", SoftwareCBZHelper.ChoosedTaskNodeUser.NextNodeID);
+            SubmitFormData.append("TaskID", SoftwareCBZHelper.PopupOpenedTaskID);
+            SubmitFormData.append("TaskComment", $('#popup_txtContent_CBZ').val());
+            //if (SoftwareCBZHelper.ChoosedTaskNodeUser.NextNodeID == 0) {
+            //    //流程结束
+
+            //}
+            //else {
+            //    //正常审批
+            //    SubmitFormData.append("TaskNodeName", SoftwareCBZHelper.ChoosedTaskNodeUser.Name);
+            //    SubmitFormData.append("TaskNodeUserCode", SoftwareCBZHelper.ChoosedTaskNodeUser.UserCode);
+            //    SubmitFormData.append("TaskNodeDepart", SoftwareCBZHelper.ChoosedTaskNodeUser.Depart);
+            //    SubmitFormData.append("TaskNodePhone", SoftwareCBZHelper.ChoosedTaskNodeUser.Phone);
+            //    SubmitFormData.append("TaskNodeJobName", SoftwareCBZHelper.ChoosedTaskNodeUser.JobName);
+
+
+
+            //    if (SoftwareCBZHelper.PopupIsBackFlow) {
+
+            //        SubmitFormData.append("TaskName", $('#popup_txtTaskName_CBZ').val());
+
+            //        //SubmitFormData.append("TaskDeliverTime", $('#popup_TaskDeliverTime_CBZ').val());
+
+            //        //地勘数据表
+            //        var DKs = '';
+            //        $('#popup_DKZL_CBZ input:checkbox:checked').each(function (index, dom) {
+            //            var ID = $(dom).attr('data-id');
+            //            if (ID != 0) {
+            //                DKs += ID + ',';
+            //            }
+            //        })
+            //        SubmitFormData.append("DKIDstring", DKs.substring(0, DKs.length - 1));
+
+            //        //平台船
+            //        var ShipIDs = '';
+            //        $('#popup_ulShipList_CBZ input:checkbox:checked').each(function (index, dom) {
+            //            var ID = $(dom).attr('data-id');
+            //            if (ID != 0) {
+            //                ShipIDs += ID + ',';
+            //            }
+            //        })
+            //        SubmitFormData.append("ShipIDstring", ShipIDs.substring(0, ShipIDs.length - 1));
+
+
+            //    }
+
+
+            //}
+
+            OpenMaskPopUp();
+            $('#ModalSubmit').attr('disabled', true);
+
+            $.ajax({
+                url: 'TaskBackLastSubmit_CBZ',
+                dataType: 'json',
+                type: 'POST',
+                async: true,
+                data: SubmitFormData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+                            ModalPopup('success', '操作成功');
+                            $('#Tk_software_02').modal('hide');
+
+                            Param.ProjectID = $('#hid_ProjectID').val();
+                            DoQuery();
+
+                            var CBZUrl = data.Data;
+                            if (CBZUrl != null && CBZUrl != '') {
+                                //window.open(CBZUrl, '_blank');
+                            }
+
+                        }
+                        else {
+
+                            ModalOpenCBZ(data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                    $('#ModalSubmit').attr('disabled', false);
+                    CloseMaskPopUp();
+                    ModalClose('information');
+                }
+            });
+
+        },
+
+        DoTaskCancel: function () {
+
+            if (SoftwareCBZHelper.PopupOpenedTaskID == 0) {
+                ModalClose('information');
+                ModalPopup('error', '数据出错，重新打开弹窗。');
+                return;
+            }
+
+            var SubmitFormData = new FormData();
+            SubmitFormData.append("TaskID", SoftwareCBZHelper.PopupOpenedTaskID);
+
+            OpenMaskPopUp();
+            $('#ModalSubmit').attr('disabled', true);
+
+            $.ajax({
+                url: 'TaskCancelSubmit_CBZ',
+                dataType: 'json',
+                type: 'POST',
+                async: true,
+                data: SubmitFormData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+                            ModalPopup('success', '作废成功');
+                            $('#Tk_software_02').modal('hide');
+
+                            Param.ProjectID = $('#hid_ProjectID').val();
+                            DoQuery();
+
+                        }
+                        else {
+
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                    $('#ModalSubmit').attr('disabled', false);
+                    CloseMaskPopUp();
+                    ModalClose('information');
+                }
+            });
+
+        },
+
+        //地勘资料
+        UploadProjectDKFile: function (FileType) {
+
+            if (FileType == null || FileType == '' || FileType == 0)
+                return;
+
+            var ProjectID = $('#hid_ProjectID').val();
+            if (ProjectID == null || ProjectID == '' || ProjectID == 0)
+                return;
+
+            var formData = new FormData();
+            formData.append("ProjectID", ProjectID);
+            formData.append("FlowHandle", 'approval');
+            formData.append("FileType", FileType);
+            var TaskFiles = null;
+            if (FileType == 1) {
+                TaskFiles = $('#popup_uploadProjectFile_dkyszl')[0].files;
+            }
+            else if (FileType == 2) {
+                TaskFiles = $('#popup_uploadProjectFile_dksjb')[0].files;
+            }
+
+            if (TaskFiles == null || TaskFiles.length == 0)
+                return;
+
+            var FileCount = TaskFiles.length;
+            formData.append("ProjectFileCount", FileCount);
+            var Count = 1;
+            $(TaskFiles).each(function (index, dom) {
+
+                formData.append("ProjectFile" + Count, dom);
+
+                Count++;
+            });
+
+
+            $.ajax({
+                url: '/Cloud/Project/ProjectDKFileInfoUpload',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: formData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+
+                            var ProjectFileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                ProjectFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" >下载</a> / <a href="#" class="xm_zt_red" data-ID="' + dom.ID + '" download="' + dom.FileName + '" onclick="SoftwareCBZHelper.DeleteDKFile(this);">删除</a></td></tr>';  //<a href="#" class="xm_zt_red" onclick="SoftwareCBZHelper.DeleteTaskFile(this);">删除</a>
+                            });
+
+                            if (data.Data.length > 0) {
+                                if (FileType == 1) {
+                                    $('#popup_htmlProjectFile_dkyszl').html(ProjectFileHtml);
+                                    //$('#popup_htmlProjectFile_dkyszl').attr('data-tag', 1);
+                                }
+                                else if (FileType == 2) {
+                                    $('#popup_htmlProjectFile_dksjb').html(ProjectFileHtml);
+                                    //$('#popup_htmlProjectFile_dksjb').attr('data-tag', 1);
+
+                                    SoftwareCBZHelper.LoadDKData($('#hid_ProjectID').val());
+
+                                }
+                            }
+
+                            ModalPopup('success', '保存成功');
+
+                        }
+                        else {
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                }
+            });
+
+        },
+
+        LoadDKFile: function (type) {
+
+            var ProjectID = $('#hid_ProjectID').val();
+            //if (ProjectID == null || ProjectID == '' || ProjectID == 0)
+            //    return;
+
+            Param.ProjectID = ProjectID;
+            Param.TaskID = SoftwareCBZHelper.PopupOpenedTaskID;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            //下一节点人员
+            $.post('LoadDKFile', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+                            var GeologyFile_dkyszl_Html = '';
+                            $(data.Data.File_dkyszl).each(function (index, dom) {
+
+                                if (type != 'view') {
+                                    GeologyFile_dkyszl_Html += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a> / <a href="#" class="xm_zt_red" data-ID="' + dom.ID + '" onclick="SoftwareCBZHelper.DeleteDKFile(this);">删除</a></td></tr>';
+                                }
+                                else
+                                {
+                                    GeologyFile_dkyszl_Html += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a></td></tr>';
+                                }
+                                
+                            })
+                            $('#popup_htmlProjectFile_dkyszl').html(GeologyFile_dkyszl_Html);
+
+                            var GeologyFile_dksjb_Html = '';
+                            $(data.Data.File_dksjb).each(function (index, dom) {
+                                GeologyFile_dksjb_Html += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a></td></tr>';
+                            })
+                            $('#popup_htmlProjectFile_dksjb').html(GeologyFile_dksjb_Html);
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        DeleteDKFile: function (dom) {
+
+            var ID = $(dom).attr('data-ID');
+            if (ID == null || ID == '' || ID == 0)
+                return;
+
+            Param.ID = ID;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            //下一节点人员
+            $.post('DeleteDKFile', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+                            var GeologyFileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+                                GeologyFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" >下载</a> / <a href="#" class="xm_zt_red" data-ID="' + dom.ID + '" onclick="SoftwareCBZHelper.DeleteDKFile(this);">删除</a></td></tr>';
+                            })
+                            //$('#popup_htmlProjectFile_dkyszl').html(GeologyFile_dkyszl_Html);
+                            $(dom).parent().parent().parent().html(GeologyFileHtml);
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        }
+
+
+    }
+
+
+</script>

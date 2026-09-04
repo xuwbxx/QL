@@ -237,7 +237,7 @@ namespace Tool
 
             using (var stream = new FileStream(fileName, FileMode.Create))
             {
-                file.CopyToAsync(stream);
+                file.CopyTo(stream);
             }
         }
 

@@ -1,0 +1,1204 @@
+﻿@{
+    Layout = "~/Views/Shared/TowingLayout.cshtml";
+    ViewData["Title"] = "深远海风机安装拖航系统";
+    var loginInfoStr = ViewData["LoginInfo"];
+    var flashTimeStr = ViewData["FlashTime"];
+
+    var pxyKey = ViewData["PXYKey"].ToString();
+}
+@section Styles {
+    <link rel="stylesheet" type="text/css" href="~/Content/Towing/css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="~/Content/Towing/css/laydate.css" />
+    <link rel="stylesheet" type="text/css" href="~/Content/Towing/css/checkbox_radio.css" />
+    <link rel="stylesheet" type="text/css" href="~/Content/Towing/css/font-awesome.4.6.0.css" />
+
+    <link rel="stylesheet" type="text/css" href="~/Content/Towing/css/towing_main_style.css?t=@DateTime.Now.ToString("yyyyMMddHHmmss")" />
+    <script>
+        var loginUser = @Html.Raw(loginInfoStr);
+        var flashTime = @Html.Raw(flashTimeStr);
+    </script>
+}
+@section Scripts {
+    <script type="text/javascript" src="https://api.shipxy.com/h5/api/?v=3.0&k=@(pxyKey)"></script>
+    <script type="text/javascript" src="~/Content/Towing/lib/leaflet/dist/leaflet-ant-path.js"></script>
+    <script type="text/javascript" src="~/Content/Towing/js/checkbox.js"></script>
+    <script type="text/javascript" src="~/Content/Towing/js/laydate.js"></script>
+    <script type="text/javascript" src="~/Content/Towing/js/imgenlarge.js"></script>
+    <script type="text/javascript" src="~/Content/Towing/Scripts/towing/towing_script.js?t=@DateTime.Now.ToString("yyyyMMddHHmmss")"></script>
+
+}
+
+<input type="hidden" id="PXYKey" value="@pxyKey" />
+
+<!--背景 start-->
+<!--    <div class="bim-content"></div>-->
+<!--背景 end-->
+<!--	地图控件-->
+<div id="map" class="my-map"></div>
+<!--header start-->
+<div class="box-header">
+    <div class="title_fc_img">深远海风机安装拖航监控系统</div>
+    <div class="login_user"><img src="~/Content/Towing/img/icon_user.png"><a onClick="PopupConfigur();">陆上人员</a></div>
+</div>
+<!--header end-->
+<!--left content-->
+<div><a href="javascript:" class="left_bar"></a></div>
+<div class="left_main">
+
+    <div class="jiance_box clearfix">
+        <div class=" title"><img src="~/Content/Towing/img/title_icon.png"><span>卫星数据</span></div>
+
+        <div class="btn_hxgj">
+            <div class="pull-left"><img src="~/Content/Towing/img/icon_yuan.png"><span>航行轨迹</span><input type="checkbox" id="chkHangxing" name="chk"></div>
+            <div class="pull-left"><img src="~/Content/Towing/img/icon_yuan.png"><span>计划路径</span><input type="checkbox" id="chkJihua" name="chk"></div>
+            <div class="pull-left"><img src="~/Content/Towing/img/icon_yuan.png"><span>台风预警</span><input type="checkbox" id="chkTaifeng" name="chk"></div>
+            <div class="pull-left"><img src="~/Content/Towing/img/icon_yuan.png"><span>周边船舶</span><input type="checkbox" id="chkZhoubian" name="chk"></div>
+            <div class="pull-left"><img src="~/Content/Towing/img/icon_yuan.png"><span>预报数据</span><input type="checkbox" id="chkYuBao" name="chk"></div>
+        </div>
+    </div>
+
+    <div class="sssj_box clearfix">
+        <div class=" title"><img src="~/Content/Towing/img/title_icon.png"><span>实时监测数据</span></div>
+        <div class="sssj_box_son clearfix">
+            <div class="jiance_list clearfix" style="float: none;width: 100%">
+                <div class="pull-left"><img src="~/Content/Towing/img/icon_jwd.png"></div>
+                <div class="pull-left">
+                    <div><span id="shipLon">116°.24323</span>E&nbsp;&nbsp;<span id="shipLat">39°.324355</span>N</div>
+                    <div>经纬度</div>
+                </div>
+            </div>
+            <div class="jiance_list clearfix">
+                <div class="pull-left"><img src="~/Content/Towing/img/icon_chuansu.png"></div>
+                <div class="pull-left">
+                    <div><span id="speedNum">12.1</span>节</div>
+                    <div>船速</div>
+                </div>
+            </div>
+            <div class="jiance_list jiance_list02 clearfix">
+                <div class="pull-left"><img id="imgHeadingDegree" src="~/Content/Towing/img/icon_hangxiang.png"></div>
+                <div class="pull-left">
+                    <div><span id="headingDegree">55.1</span>°</div>
+                    <div>浮体方向</div>
+                </div>
+            </div>
+            <div class="jiance_list jiance_list02 clearfix">
+                <div class="pull-left"><img id="imgWindDirection" src="~/Content/Towing/img/icon_fx.png"></div>
+                <div class="pull-left">
+                    <div><span id="weatherInfo_direction">45</span>°</div>
+                    <div id="weatherInfo_directionName"></div>
+                </div>
+            </div>
+            <div class="jiance_list clearfix">
+                <div class="pull-left"><img src="~/Content/Towing/img/icon_fs.png"></div>
+                <div class="pull-left">
+                    <div><span id="weatherInfo_speed">45</span>m/s</div>
+                    <div>风速</div>
+                </div>
+            </div>
+
+            <div class="jiance_list clearfix">
+                <div class="pull-left"><img src="~/Content/Towing/img/icon_time_yhx.png"></div>
+                <div class="pull-left">
+                    <div><span id="spentTime">45</span>h</div>
+                    <div><span id="spentDistance">45</span>海里</div>
+                    <div>已航行</div>
+                </div>
+            </div>
+            <div class="jiance_list clearfix">
+                <div class="pull-left"><img src="~/Content/Towing/img/icon_time_sy.png"></div>
+                <div class="pull-left">
+                    <div><span id="remainingTime">45</span>h</div>
+                    @*<div><span id="remainingDistance">45</span>海里</div>*@
+                    <div>剩余航行估算</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ziyoudu_box">
+        <div class=" title"><img src="~/Content/Towing/img/title_icon.png"><span>六自由度运动</span></div>
+
+        <ul class="ziyoudu_ul clearfix">
+            @*<li class="clearfix">
+                  <div class="pull-left ziyoudu_div_one"><img src="~/Content/Towing/img/icon_cd.png"><span>垂荡</span></div>
+                  <div class="pull-left ziyoudu_div_two">
+                    <div><span class="cd_maxvalue">-4.413</span><span>m</span></div>
+                    <div><span class="cd_absvalue">-4.415</span><span>m</span></div>
+                  </div>
+                </li>
+                <li class="clearfix">
+                  <div class="pull-left ziyoudu_div_one"><img src="~/Content/Towing/img/icon_hd.png"><span>横荡</span></div>
+                  <div class="pull-left ziyoudu_div_two">
+                    <div><span class="hd_maxvalue">-4.413</span><span>m</span></div>
+                    <div><span class="hd_absvalue">-4.415</span><span>m</span></div>
+                  </div>
+                </li>
+                <li class="clearfix">
+                  <div class="pull-left ziyoudu_div_one"><img src="~/Content/Towing/img/icon_hy.png"><span>横摇</span></div>
+                  <div class="pull-left ziyoudu_div_two">
+                    <div><span class="hy_maxvalue">-4.4135</span><span>°</span></div>
+                    <div><span class="hy_absvalue">-4.4135</span><span>°</span></div>
+                  </div>
+                </li>
+                <li class="clearfix">
+                  <div class="pull-left ziyoudu_div_one"><img src="~/Content/Towing/img/icon_zd.png"><span>纵荡</span></div>
+                  <div class="pull-left ziyoudu_div_two">
+                    <div><span class="zd_maxvalue">-4.415</span><span>m</span></div>
+                    <div><span class="zd_absvalue">-4.415</span><span>m</span></div>
+                  </div>
+                </li>
+                <li class="clearfix">
+                  <div class="pull-left ziyoudu_div_one"><img src="~/Content/Towing/img/icon_zy.png"><span>纵摇</span></div>
+                  <div class="pull-left ziyoudu_div_two">
+                    <div><span class="zy_maxvalue">-4.413</span><span>°</span></div>
+                    <div><span class="zy_absvalue">-4.415</span><span>°</span></div>
+                  </div>
+                </li>
+                <li class="clearfix">
+                  <div class="pull-left ziyoudu_div_one"><img src="~/Content/Towing/img/icon_sy.png"><span>艏摇</span></div>
+                  <div class="pull-left ziyoudu_div_two">
+                    <div><span class="sy_maxvalue">-4.413</span><span>°</span></div>
+                    <div><span class="sy_absvalue">-4.415</span><span>°</span></div>
+                  </div>
+                </li>*@
+
+        </ul>
+
+    </div>
+
+
+</div>
+
+
+
+<!--right content-->
+<div><a href="javascript:" class="right_bar"></a></div>
+<div class="right_main">
+
+    <div class=" title"><img src="~/Content/Towing/img/title_icon.png"><span>基础资源信息</span></div>
+    <div class="btn_jczy clearfix">
+        <div>
+
+            <div><span>电池状态</span><i></i><span class="xcd" id="EleStatus">需充电</span></div>
+            <div><span>发电机1状态</span><i></i><span class="zc" id="EngineStatus1">正常</span></div>
+            <div><span>发电机2状态</span><i></i><span class="tzgz" id="EngineStatus2">停止工作</span></div>
+
+        </div>
+        <div><img src="~/Content/Towing/img/icon_yuan.png"><span>锚地资源</span><input type="checkbox" id="chkMaodi" name="chk"></div>
+    </div>
+    <div class="login_cgq clearfix">
+        <div class="pull-left clearfix online">
+            <div><img src="~/Content/Towing/img/icon_zaixian.png"></div>
+            <div>
+                <div id="monitorOnlineNum">46</div>
+                <div>在线</div>
+            </div>
+        </div>
+        <div class="pull-left clearfix offline">
+            <div><img src="~/Content/Towing/img/icon_lixian.png"></div>
+            <div>
+                <div id="monitorOfflineNum">46</div>
+                <div>离线</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table_div">
+        <table class="table_CGQ">
+            <thead>
+                <tr>
+                    <th width="25%">类型</th>
+                    <th width="35%">传感器名称</th>
+                    <th width="25%">更新时间</th>
+                    <th width="15%">状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td rowspan="6" class="leixing_box">
+                        类型1
+                    </td>
+                    <td>传感器名称</td>
+                    <td>04-12&nbsp;12:23</td>
+                    <td><span class="zx">在线</span></td>
+                </tr>
+                <tr>
+                    <td>传感器名称</td>
+                    <td>04-12&nbsp;12:23</td>
+                    <td><span class="zx">在线</span></td>
+                </tr>
+                <tr>
+                    <td>传感器名称</td>
+                    <td>04-12&nbsp;12:23</td>
+                    <td><span class="zx">在线</span></td>
+                </tr>
+                <tr>
+                    <td>传感器名称</td>
+                    <td>04-12&nbsp;12:23</td>
+                    <td><span class="lx">离线</span></td>
+                </tr>
+                <tr>
+                    <td>传感器名称</td>
+                    <td>04-12&nbsp;12:23</td>
+                    <td><span class="zx">在线</span></td>
+                </tr>
+                <tr class="border_bottom">
+                    <td>传感器名称</td>
+                    <td>04-12&nbsp;12:23</td>
+                    <td><span class="zx">在线</span></td>
+                </tr>
+                <tr>
+                    <td rowspan="5" class="leixing_box">
+                        类型2
+                    </td>
+                    <td>传感器名称</td>
+                    <td>04-12&nbsp;12:23</td>
+                    <td><span class="zx">在线</span></td>
+                </tr>
+                <tr>
+                    <td>传感器名称</td>
+                    <td>04-12&nbsp;12:23</td>
+                    <td><span class="zx">在线</span></td>
+                </tr>
+                <tr>
+                    <td>传感器名称</td>
+                    <td>04-12&nbsp;12:23</td>
+                    <td><span class="zx">在线</span></td>
+                </tr>
+                <tr>
+                    <td>传感器名称</td>
+                    <td>04-12&nbsp;12:23</td>
+                    <td><span class="zx">在线</span></td>
+                </tr>
+                <tr class="border_bottom">
+                    <td>传感器名称</td>
+                    <td>04-12&nbsp;12:23</td>
+                    <td><span class="zx">在线</span></td>
+                </tr>
+                <tr>
+                    <td rowspan="4" class="leixing_box">
+                        类型3
+                    </td>
+                    <td>传感器名称</td>
+                    <td>04-12&nbsp;12:23</td>
+                    <td><span class="lx">离线</span></td>
+                </tr>
+                <tr>
+                    <td>传感器名称</td>
+                    <td>04-12&nbsp;12:23</td>
+                    <td><span class="zx">在线</span></td>
+                </tr>
+                <tr>
+                    <td>传感器名称</td>
+                    <td>04-12&nbsp;12:23</td>
+                    <td><span class="zx">在线</span></td>
+                </tr>
+                <tr class="border_bottom">
+                    <td>传感器名称</td>
+                    <td>04-12&nbsp;12:23</td>
+                    <td><span class="zx">在线</span></td>
+                </tr>
+                <tr>
+                    <td rowspan="4" class="leixing_box">
+                        类型4
+                    </td>
+                    <td>传感器名称</td>
+                    <td>04-12&nbsp;12:23</td>
+                    <td><span class="zx">在线</span></td>
+                </tr>
+                <tr>
+                    <td>传感器名称</td>
+                    <td>04-12&nbsp;12:23</td>
+                    <td><span class="zx">在线</span></td>
+                </tr>
+                <tr>
+                    <td>传感器名称</td>
+                    <td>04-12&nbsp;12:23</td>
+                    <td><span class="zx">在线</span></td>
+                </tr>
+                <tr class="border_bottom">
+                    <td>传感器名称</td>
+                    <td>04-12&nbsp;12:23</td>
+                    <td><span class="lx">离线</span></td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+
+</div>
+
+<!-- 风向、风速内容 -->
+<div class="center_content clearfix">
+    <div class="bg_zhtx"><span>指挥通讯</span><img src="~/Content/Towing/img/icon_jiantou.png"></div>
+</div>
+
+<!--	信息详情弹框-->
+<div class="xinxi_content">
+    <div class="TK_title">
+        <span>信息详情</span>
+        <div class="time_box">
+            <span>
+                <input placeholder="开始时间" id="queryStartTime" class="laydate-icon timeUstyle stateUTime form-control" onclick="laydate({istime: true,format:'YYYY-MM-DD hh:mm' })">
+            </span>
+            <span class="zj_span"> - </span>
+            <span>
+                <input placeholder="截止时间" id="queryEndTime" class="laydate-icon timeUstyle stateUTime form-control" onclick="laydate({istime: true,format:'YYYY-MM-DD hh:mm' })">
+            </span>
+            <span class="zj_span">
+                <button id="btnQuery">查询</button>
+            </span>
+        </div>
+        <img src="~/Content/Towing/img/icon_close.png" id="qxxq_close">
+    </div>
+
+
+    <section class="tab qxxq_tab">
+        <div class="panel-body">
+            <div class="tab-content tasi-tab">
+                <div id="one" class="tab-pane fade in active">
+                    <table class="qxxq_table">
+                        <thead>
+                            <tr>
+                                <th width="9%"></th>
+                                <th width="13%">周一&nbsp;14</th>
+                                <th width="13%">周二&nbsp;15</th>
+                                <th width="13%">周三&nbsp;16</th>
+                                <th width="13%">周四&nbsp;17</th>
+                                <th width="13%">周五&nbsp;18</th>
+                                <th width="13%">周六&nbsp;19</th>
+                                <th width="13%">周日&nbsp;20</th>
+                            </tr>
+                        </thead>
+                        <tbody class="clearfix">
+                            <tr>
+                                <td>小时(h)：</td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>温度(°C)：</td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>风速(m/s)：</td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>风向(°C)：</td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>涌向(°C)：</td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                        <li><img src="~/Content/Towing/img/icon_fangxiang.png"></li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>浪高(m)：</td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>温度(RH)：</td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>能见度(km)：</td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="table_ul">
+                                        <li>2</li>
+                                        <li>8</li>
+                                        <li>14</li>
+                                        <li>20</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+                <div id="two" class="tab-pane fade">
+                    <div id="chartZMotion" class="bottom_chart"></div>
+                </div>
+                <div id="three" class="tab-pane fade">
+                    <div id="chartXMotion" class="bottom_chart"></div>
+                </div>
+                <div id="four" class="tab-pane fade">
+                    <div id="chartWindSpeed" class="bottom_chart"></div>
+                </div>
+                <div id="five" class="tab-pane fade">
+                    <div id="chartWindDir" class="bottom_chart"></div>
+                </div>
+                <div id="six" class="tab-pane fade">
+                    <div id="chartShipSpeed" class="bottom_chart"></div>
+                </div>
+                <div id="seven" class="tab-pane fade">
+                    <div id="chartShipDir" class="bottom_chart"></div>
+                </div>
+                <div id="eight" class="tab-pane fade">
+                    <div class="xczp_box">
+                        <ul class="clearfix">
+                        </ul>
+                    </div>
+                </div>
+                <div id="nine" class="tab-pane fade">
+                    <div class="xczp_box" id="div_TowingForecastFile">
+
+                    </div>
+                </div>
+                <div id="ten" class="tab-pane fade">
+                    <div class="xczp_box" id="div_TowingFile">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <header class="panel-heading tab_header_bottom">
+            <ul class="nav nav-tabs nav-justified qxxq_ul">
+                <li class="active">
+                    <a data-toggle="tab" href="#one">气象详情</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#two">垂向运动</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#three">横向运动</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#four">风速</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#five">风向</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#six">航速</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#seven">浮体方向</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#eight">现场照片</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#nine">拖航预报</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#ten">拖航报告</a>
+                </li>
+            </ul>
+        </header>
+    </section>
+</div>
+
+
+<!--	聊天室-->
+<div class="chatroom_content">
+    <div class="TK_title"><span>指挥通讯</span><img src="~/Content/Towing/img/icon_close.png" id="chatroom_close"></div>
+    <div class="chat_box">
+        <div class="chat_content">
+            <ul id="chatMsgList">
+                <li>
+                    张三(2024-03-02 12:12:12)：<span>在吗？</span>
+                </li>
+                <li>
+                    李四(2024-03-02 12:13:12)：<span>在的！</span>
+                </li>
+                <li>
+                    张三(2024-03-02 12:12:12)：<span class="text_jinji">重要事情宣布，今天台风！</span>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+    <div>
+        <div class="chat_gongneng">
+            <ul class="clearfix">
+                <li id="open_picture"><img src="~/Content/Towing/img/icon_zhaopian.png" alt="上传图片"></li>
+                <li id="open_history"><img src="~/Content/Towing/img/icon_lsjl.png"></li>
+                <li><button class="btn_jj">紧急</button></li>
+                <li><button class="btn_pt">普通</button></li>
+            </ul>
+        </div>
+        <div class="chat_textarea">
+            <textarea id="chatMsgContent" class="input_textarea" rows="3"></textarea>
+            <button id="btnChatSend" class="btn_send">发送</button>
+        </div>
+    </div>
+</div>
+
+
+<!--	聊天历史记录-->
+
+<div class="chat_history">
+    <div class="TK_title"><span>历史记录</span><img src="~/Content/Towing/img/icon_close.png" id="chat_history_close"></div>
+    <div class="search_box"><input id="chat_history_searchInput" type="text"></div>
+    @*<div class="search_lb">
+          <span>图片</span>
+          <span>
+            日期
+          </span>
+        </div>*@
+    <div class="history_content">
+        <ul id="chatHistoryList">
+        </ul>
+    </div>
+</div>
+
+
+
+<!--	地图上content-->
+@*<div class="btw_box">
+      <div class="map_btwicon"><a><img src="~/Content/Towing/img/icon_sjguiji_zj.png"></a></div>
+      <div class="map_popover clearfix">
+        <div class="map_popover_content"><img src="~/Content/Towing/img/icon_border.gif"></div>
+      </div>
+    </div>*@
+
+<!-- bottom 内容  -->
+<div class="bottom_content">
+    <ul class="clearfix">
+
+        <li id="qxxq_kg"><a>信息详情</a></li>
+        <!--
+                <li>
+                  <a class="bottom_bar">地图</a>
+
+                  <div class="bottom_menu">
+                     <div class="bottom_menu_son">海图</div>
+                     <div class="bottom_menu_son">卫星图</div>
+                      </div>
+                </li>
+        -->
+    </ul>
+</div>
+
+<!--	地图模式-->
+<div class="map_box">
+    <div class="bottom_bar">海图</div>
+    <div class="bottom_menu">
+        <div class="bottom_menu_son">卫星图</div>
+        <div class="bottom_menu_son">路线图</div>
+    </div>
+</div>
+<!--	弹框--配置页面-->
+
+
+<div class="modal fade" id="tk_configur" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog_width">
+        <div class="modal-content">
+            <div class="modal-header map_modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    功能配置
+                </h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="content_box">
+
+                    <div class="box_jcxx">
+                        <div class="tk_title">基础信息</div>
+                        <div class="input_box clearfix">
+                            <div class="col-md-4 p5">
+                                <input type="hidden" id="cfgProjID" />
+                                <label>项目名称：</label><input type="text" class="form-control" id="cfgProjName" placeholder="请输入项目名称">
+                            </div>
+                            <div class="col-md-4 p5">
+                                <label>项目开始时间：</label><input placeholder="请输入项目开始时间" id="cfgProjStartTime" class="laydate-icon timeUstyle stateUTime form-control" onclick="laydate({istime: true,format:'YYYY-MM-DD hh:mm'})">
+                            </div>
+                            <div class="col-md-4 p5">
+                                <label>船MMSI：</label><input type="text" class="form-control" id="cfgMMSI" placeholder="请输入船MMSI">
+                            </div>
+                            <div class="col-md-4 p5">
+                                <label>起点：</label><input type="text" class="form-control" id="cfgStartLon" placeholder="请输入经度" style="width: 31%;margin-right: 2%;"><input type="text" class="form-control" id="cfgStartLat" placeholder="请输入纬度" style="width: 31%">
+                            </div>
+                            <div class="col-md-4 p5">
+                                <label>终点：</label><input type="text" class="form-control" id="cfgEndLon" placeholder="请输入经度" style="width: 31%;margin-right: 2%;"><input type="text" class="form-control" id="cfgEndLat" placeholder="请输入纬度" style="width: 31%">
+                            </div>
+                            <div class="col-md-4 p5">
+                                <label>船名：</label><input type="text" class="form-control" id="cfgShipName" placeholder="请输入船名">
+                            </div>
+                            <div class="col-md-4 text-right" style="padding: 0.3vw;">
+                                <button id="btnSaveProjCfg" class="btn_save">保存</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="box_jcxx">
+                        <div class="tk_title">预定航线<a class="box_add" href="javascript:" onclick="addRoutePoint()"><i class="fa fa-plus"></i></a></div>
+                        <div class="ydhx_box">
+                            <div class="text-center mart2"> <button id="btnSavePlanRoutes" class="btn_save">保存</button></div>
+                        </div>
+                    </div>
+
+                    <div class="box_jcxx">
+                        <div class="tk_title">数据导出</div>
+                        <div class="ydhx_box">
+                            <div class="ydhx_box_son01 clearfix">
+
+                                <div><label>开始时间：</label><input placeholder="开始时间" id="DataStartTime" class="laydate-icon timeUstyle stateUTime form-control" onclick="laydate({istime: true,format:'YYYY-MM-DD hh:mm'})"></div>
+                                <div><label>截止时间：</label><input placeholder="截止时间" id="DataEndTime" class="laydate-icon timeUstyle stateUTime form-control" onclick="laydate({istime: true,format:'YYYY-MM-DD hh:mm'})"></div>
+
+                            </div>
+                            <div class="text-center" style="margin-top:1vh;">
+                                <button class="btn_save" onclick="DataExport();">数据导出</button>
+                                <button class="btn_save" onclick="PicExport();">图片导出</button>
+                                <span style="color:red;">图片导出，建议每次时间为一天，否则图片过多</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="box_jcxx">
+                        <div class="tk_title">拖航报告</div>
+                        <div class="ydhx_box">
+                            @*<div class="ydhx_box_son01 clearfix">
+
+                                    <div><label>开始时间：</label><input placeholder="开始时间" id="DataStartTime" class="laydate-icon timeUstyle stateUTime form-control" onclick="laydate({istime: true,format:'YYYY-MM-DD hh:mm'})"></div>
+                                    <div><label>截止时间：</label><input placeholder="截止时间" id="DataEndTime" class="laydate-icon timeUstyle stateUTime form-control" onclick="laydate({istime: true,format:'YYYY-MM-DD hh:mm'})"></div>
+
+                                </div>*@
+                            <div class="text-center" style="margin-top:1vh;">
+
+                                <input type="file" id="file_TowingReportFile" multiple />
+                                <button class="btn_save" onclick="DataUpload();">上传</button>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- 上传图片 -->
+<form id="uploadForm" enctype="multipart/form-data">
+    <label for="fileInput">选择文件：</label>
+    <input type="file" id="fileInput" accept="image/*" name="file">
+    <input type="hidden" id="fileSender" name="Sender" />
+    <input type="hidden" name="MsgType" value="image" />
+    <input type="hidden" id="fileMsgLevel" name="MsgLevel" value="" />
+    <input type="hidden" id="fileMsgContent" name="MsgContent" value="" />
+    <input type="hidden" id="fileMsgLastTime" name="LastTime" value="" />
+    <button type="button" id="uploadButton">上传文件</button>
+</form>
+
+<div id="showMsgImg">
+    <div class="TK_title"><span>图片</span><img src="~/Content/Towing/img/icon_close.png" id="showMsgImg_close"></div>
+    <div class="showMsgBody" style="cursor: pointer">
+        <img id="msgImgLarge" />
+    </div>
+</div>
+
+
+@*台风警报*@
+<div class="tfyj_content">
+
+
+    <div class="tfyj_tit"><span>台风警报</span><img src="~/Content/Towing/img/icon_close.png" onclick="CloseTyphoonPopup();"></div>
+    <div class="tfyj_box" id="div_htmlTyphoonAlarm">
+
+        @*<div class="tfyj_tit_sm"><img src="~/Content/Towing/img/icon_tfmc.png">杰拉华</div>
+            <ul class="list01 clearfix">
+                <li>
+                    <div>2025-09-12&nbsp;10:22:12</div>
+                    <div><span><i>7</i>级</span><span><i>12.9</i>米/秒</span><span>经过<i>1243987585,40935895</i></span></div>
+                </li>
+                <li>
+                    <div>2025-09-12&nbsp;10:22:12</div>
+                    <div><span><i>7</i>级</span><span><i>12.9</i>米/秒</span><span>经过<i>1243987585,40935895</i></span></div>
+                </li>
+                <li>
+                    <div>2025-09-12&nbsp;10:22:12</div>
+                    <div><span><i>7</i>级</span><span><i>12.9</i>米/秒</span><span>经过<i>1243987585,40935895</i></span></div>
+                </li>
+                <li>
+                    <div>2025-09-12&nbsp;10:22:12</div>
+                    <div><span><i>7</i>级</span><span><i>12.9</i>米/秒</span><span>经过<i>1243987585,40935895</i></span></div>
+                </li>
+            </ul>*@
+
+        @*<div class="tfyj_tit_sm"><img src="~/Content/Towing/img/icon_tfmc.png">格美</div>
+            <ul class="list01 clearfix">
+                <li>
+                    <div>2025-09-12&nbsp;10:22:12</div>
+                    <div><span><i>7</i>级</span><span><i>12.9</i>米/秒</span><span>经过<i>1243987585,40935895</i></span></div>
+                </li>
+                <li>
+                    <div>2025-09-12&nbsp;10:22:12</div>
+                    <div><span><i>7</i>级</span><span><i>12.9</i>米/秒</span><span>经过<i>1243987585,40935895</i></span></div>
+                </li>
+                <li>
+                    <div>2025-09-12&nbsp;10:22:12</div>
+                    <div><span><i>7</i>级</span><span><i>12.9</i>米/秒</span><span>经过<i>1243987585,40935895</i></span></div>
+                </li>
+                <li>
+                    <div>2025-09-12&nbsp;10:22:12</div>
+                    <div><span><i>7</i>级</span><span><i>12.9</i>米/秒</span><span>经过<i>1243987585,40935895</i></span></div>
+                </li>
+            </ul>*@
+    </div>
+    <div class="tfgj_box">
+        <button class="btn_tfgj" onclick="OpenTyphoonInfo();">查看活动台风轨迹</button>
+    </div>
+
+</div>
+
+
+
+<!--	预警详情-->
+@*<div class="mapyjxq_box" style="display:'';">
+
+
+
+    <div class="mapyjxq_box_img"><img src="~/Content/Towing/img/map_img_zx.png"></div>
+
+    <div class="mapyjxq_box_info">
+        <div class="mapyjxq_box_info_tit"><span>预警详情</span><img src="~/Content/Towing/img/icon_close.png"></div>
+        <div class="jcxq_box"><span>[0917-19时]</span><span>横摇：3957℃</span><span>纵摇：3957℃</span><span>垂荡：0.395m</span></div>
+        <ul class="yjsx_box">
+            <li>该位置处有义波高可能超过4m</li>
+            <li>该位置处有义波高可能超过4m</li>
+            <li>该位置处有义波高可能超过4m</li>
+        </ul>
+    </div>
+</div>*@

@@ -1,31 +1,40 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
+<PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Middleware\IdentityExtensions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="web.config" />
+  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Areas\Base\Data\" />
     <Folder Include="Areas\Base\Models\" />
+    <Folder Include="wwwroot\img\" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.29" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.30" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.23" />
 
-		<!-- JWT 核心包 -->
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.7.1" />
 		<!-- JWT 认证中间件（用于 ASP.NET Core） -->
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.7.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.30" />
 
-		<!-- 以下三个是 JWT 底层依赖包 -->
-		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="7.7.1" />
-		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.7.1" />
-		<PackageReference Include="Microsoft.IdentityModel.Logging" Version="7.7.1" />
-		<PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="7.7.1" />
-		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="7.7.1" />
+		<!-- ========= IdentityModel 8.22.0 全套统一版本 ========= -->
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.22.0" />
+		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.22.0" />
+		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.22.0" />
+		<PackageReference Include="Microsoft.IdentityModel.Logging" Version="8.22.0" />
+		<PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="8.22.0" />
+		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.22.0" />
   </ItemGroup>
 
   <ItemGroup>

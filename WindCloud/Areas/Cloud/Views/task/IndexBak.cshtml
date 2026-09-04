@@ -1,0 +1,2176 @@
+﻿
+@{
+    ViewBag.Title = "工作任务";
+    Layout = "~/Views/Shared/ManageLayout.cshtml";
+}
+
+@{
+    var ProjectSoftwareList = ViewData["ProjectSoftwareList"] as List<Model.Tech.Cloud.CloudProjectInfo>;
+}
+
+<div class="content clearfix">
+    <div class="col-md-2 pr0">
+        <div class="task_zt_box">
+            <ul class="clearfix">
+                <li>
+                    <div><i class="fa fa-calendar"></i></div>
+                    <h3>所有</h3>
+                </li>
+                <li>
+                    <div><i class="fa fa-calendar"></i><span id="span_ApprovalCount"></span></div>
+                    <h3>审批中</h3>
+                </li>
+                <li>
+                    <div><i class="fa fa-calendar"></i></div>
+                    <h3>退回</h3>
+                </li>
+                <li>
+                    <div><i class="fa fa-calendar"></i></div>
+                    <h3>激活</h3>
+                </li>
+                <li>
+                    <div><i class="fa fa-calendar"></i></div>
+                    <h3>删除</h3>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-10">
+        <div class="box_mode">
+            <div class="title">
+                <i class="icon iconfont">&#xe646;</i>工作列表
+                <div class="pull-right cjxm_btn_box">
+                    <button class="btn btn-warning" onclick="AddTaskPopup();"><i class="icon iconfont">&#xe728;</i>新增任务</button>
+                </div>
+            </div>
+
+            <div class="clearfix box_table_top">
+                <div class="search_box pull-left">
+                    <input type="text" class="form-control" placeholder="请输入工作名称" id="query_txtTaskName">
+                    <button class="btn btn-primary search_btn" onclick="DoQuery();"><i class="fa fa-search"></i></button>
+                </div>
+                <div class="btn_box pull-right">
+                    <button class="btn btn-primary" onclick="OpenProject();"><i class="icon iconfont">&#xe646;</i>项目列表</button>
+                    <button class="btn btn-grey" disabled><i class="icon iconfont">&#xe711;</i>工作任务</button>
+                </div>
+            </div>
+
+            <table class="table table_project">
+                <thead>
+                    <tr>
+                        <th width="7%">任务号</th>
+                        <th width="15%">任务名</th>
+                        <th width="20%">项目</th>
+                        <th width="8%">发起人</th>
+                        <th width="20%">当前节点</th>
+                        <th width="15%">任务软件</th>
+                        <th width="8%">状态</th>
+                        <th width="7%">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="html_DataList">
+                    <tr>
+                        <td class="xm_zt_orange">00001</td>
+                        <td>宁波舟山港基础设施重点项目</td>
+                        <td><a href="#">宁波舟山港基础设施重点项目(OW00001)</a></td>
+                        <td class="relative_position">
+                            <a href="#" class="xm_zt_blue table_ryxx_box">
+                                <span>刘杰</span>
+                                <div class="hover_ryxx">
+                                    <ul>
+                                        <li><i class="icon iconfont">&#xe752;</i>部门：三航局-技术中心-总部-BIM中心</li>
+                                        <li> <i class="icon iconfont">&#xe607;</i>手机号：15621459809</li>
+                                        <li> <i class="icon iconfont">&#xe673;</i>职位：高级工程师</li>
+                                    </ul>
+                                </div>
+                            </a>
+                        </td>
+                        <td>
+                            分子公司总工审批：
+                            <a href="#" class="xm_zt_blue table_ryxx_box">
+                                <span>刘杰</span>
+                                <div class="hover_ryxx">
+                                    <ul>
+                                        <li><i class="icon iconfont">&#xe752;</i>部门：三航局-技术中心-总部-BIM中心</li>
+                                        <li> <i class="icon iconfont">&#xe607;</i>手机号：15621459809</li>
+                                        <li> <i class="icon iconfont">&#xe673;</i>职位：高级工程师</li>
+                                    </ul>
+                                </div>
+                            </a>
+                        </td>
+                        <td>自升式平台桩腿插拔计算</td>
+                        <td><a class="zt_green" href="#">激活</a></td>
+                        <td><a class="cz_blue" href="#">审批</a></td>
+                    </tr>
+                    <tr>
+                        <td class="xm_zt_orange">00001</td>
+                        <td>宁波舟山港基础设施重点项目</td>
+                        <td><a href="#">宁波舟山港基础设施重点项目(OW00001)</a></td>
+                        <td class="relative_position">
+                            <a href="#" class="xm_zt_blue table_ryxx_box" >
+                                <span>刘杰</span>
+                                <div class="hover_ryxx">
+                                    <ul>
+                                        <li><i class="icon iconfont">&#xe752;</i>部门：三航局-技术中心-总部-BIM中心</li>
+                                        <li> <i class="icon iconfont">&#xe607;</i>手机号：15621459809</li>
+                                        <li> <i class="icon iconfont">&#xe673;</i>职位：高级工程师</li>
+                                    </ul>
+                                </div>
+                            </a>
+                        </td>
+                        <td>
+                            分子公司总工审批：
+                            <a href="#" class="xm_zt_blue table_ryxx_box">
+                                <span>刘杰</span>
+                                <div class="hover_ryxx">
+                                    <ul>
+                                        <li><i class="icon iconfont">&#xe752;</i>部门：三航局-技术中心-总部-BIM中心</li>
+                                        <li> <i class="icon iconfont">&#xe607;</i>手机号：15621459809</li>
+                                        <li> <i class="icon iconfont">&#xe673;</i>职位：高级工程师</li>
+                                    </ul>
+                                </div>
+                            </a>
+                        </td>
+                        <td>自升式平台桩腿插拔计算</td>
+                        <td><a class="zt_green" href="#">激活</a></td>
+                        <td><a class="cz_blue" href="#">审批</a></td>
+                    </tr>
+                    <tr>
+                        <td class="xm_zt_orange">00001</td>
+                        <td>宁波舟山港基础设施重点项目</td>
+                        <td><a href="#">宁波舟山港基础设施重点项目(OW00001)</a></td>
+                        <td class="relative_position">
+                            <a href="#" class="xm_zt_blue table_ryxx_box">
+                                <span>刘杰</span>
+                                <div class="hover_ryxx">
+                                    <ul>
+                                        <li><i class="icon iconfont">&#xe752;</i>部门：三航局-技术中心-总部-BIM中心</li>
+                                        <li> <i class="icon iconfont">&#xe607;</i>手机号：15621459809</li>
+                                        <li> <i class="icon iconfont">&#xe673;</i>职位：高级工程师</li>
+                                    </ul>
+                                </div>
+                            </a>
+                        </td>
+                        <td>
+                            分子公司总工审批：
+                            <a href="#" class="xm_zt_blue table_ryxx_box">
+                                <span>刘杰</span>
+                                <div class="hover_ryxx">
+                                    <ul>
+                                        <li><i class="icon iconfont">&#xe752;</i>部门：三航局-技术中心-总部-BIM中心</li>
+                                        <li> <i class="icon iconfont">&#xe607;</i>手机号：15621459809</li>
+                                        <li> <i class="icon iconfont">&#xe673;</i>职位：高级工程师</li>
+                                    </ul>
+                                </div>
+                            </a>
+                        </td>
+                        <td>自升式平台桩腿插拔计算</td>
+                        <td><a class="zt_green" href="#">激活</a></td>
+                        <td><a class="cz_blue" href="#">审批</a></td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul class="pagination">
+                <div id="Pagination"></div>
+            </ul>
+
+        </div>
+    </div>
+</div>
+
+<!--软件选择弹框-->
+<div class="modal fade" id="tk_WorkTasks" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog" style="left: -20vw;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    创建工作任务
+                </h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="search_box col-md-12">
+                    <select class="form-control form-con-width" id="popup_software_ProjectChoose" onchange="PopupChooseProject();">
+                        <option value="">请关联风场项目</option>
+                        @{
+                            if (ProjectSoftwareList != null && ProjectSoftwareList.Count > 0)
+                            {
+                                foreach (var item in ProjectSoftwareList)
+                                {
+                                    <option value="@item.ID">@item.ProjectName</option>
+                                }
+                            }
+                        }
+                    </select>
+                    <span class="bx_box">*</span>
+                </div>
+                <div class="clearfix">
+                    <div class="col-md-4">
+                        <div class="work_mode">
+                            <div><img src="~/Content/Cloud/img/img_webgis.png"></div>
+                            <h3>海上风电WebGIS平台</h3>
+                            <p>对特定船舶、特定工艺、特定坐标海域进行浮式船舶作业可行性以及每个月作业窗口期比例分析，在投标阶段或方案阶段根据指定海域波浪情况前十年的历史数据测算船舶作业的可行性。</p>
+                            <div><button class="btn btn-primary" id="Popup_btn_Software01" disabled>已申请</button></div>
+                            <div class="yxq_font" id="Popup_LimitTime01"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="work_mode">
+                            <div><img src="~/Content/Cloud/img/img_tcbjs.png"></div>
+                            <h3>自升式平台桩腿插拔计算</h3>
+                            <p>对特定船舶、特定工艺、特定坐标海域进行浮式船舶作业可行性以及每个月作业窗口期比例分析，在投标阶段或方案阶段根据指定海域波浪情况前十年的历史数据测算船舶作业的可行性。</p>
+                            <div><button class="btn btn-primary" id="Popup_btn_Software02" disabled onclick="OpenCBZPopup(2);">申请使用</button></div>
+                            <div class="yxq_font" id="Popup_LimitTime02"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="work_mode">
+                            <div><img src="~/Content/Cloud/img/img_fscb.png"></div>
+                            <h3>起重船基础施工可作业性预报</h3>
+                            <p>面向在建海上风电项目，在施工阶段对特定船舶、特定工艺根据第二天海浪预报进行浮式船舶作业可行性分析，按逐三小时进行预报。</p>
+                            <div><button class="btn btn-primary" id="Popup_btn_Software03" disabled>申请使用</button></div>
+                            <div class="yxq_font" id="Popup_LimitTime03"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="work_mode">
+                            <div><img src="~/Content/Cloud/img/img_azmn.png"></div>
+                            <h3>交互式风机整体安装模拟软件</h3>
+                            <p>对特定船舶、特定工艺、特定坐标海域进行浮式船舶作业可行性以及每个月作业窗口期比例分析，在投标阶段或方案阶段根据指定海域波浪情况前十年的历史数据测算船舶作业的可行性。</p>
+                            <div><button class="btn btn-primary" id="Popup_btn_Software04" disabled>申请使用</button></div>
+                            <div class="yxq_font" id="Popup_LimitTime04"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="work_mode">
+                            <div><img src="~/Content/Cloud/img/img_qysg.png"></div>
+                            <h3>海上风电单桩嵌岩施工孔壁失稳风险评估</h3>
+                            <p>对特定船舶、特定工艺、特定坐标海域进行浮式船舶作业可行性以及每个月作业窗口期比例分析，在投标阶段或方案阶段根据指定海域波浪情况前十年的历史数据测算船舶作业的可行性。</p>
+                            <div><button class="btn btn-primary" id="Popup_btn_Software05" disabled>申请使用</button></div>
+                            <div class="yxq_font" id="Popup_LimitTime05"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="work_mode">
+                            <div><img src="~/Content/Cloud/img/img_zjcz.png"></div>
+                            <h3>桩基沉桩可打性分析</h3>
+                            <p>面向在建海上风电项目，在施工阶段对特定船舶、特定工艺根据第二天海浪预报进行浮式船舶作业可行性分析，按逐三小时进行预报。</p>
+                            <div><button class="btn btn-primary" id="Popup_btn_Software06" disabled>申请使用</button></div>
+                            <div class="yxq_font" id="Popup_LimitTime06"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@*WebGIS弹窗*@
+<div class="tk_sqzl_tx bounceInRight animated wow" data-wow-delay="0.01s" style="visibility: visible; -webkit-animation-delay: 0.01s;">
+    <div class="modal-header">
+        <h4 class="modal-title text-center">
+            申请软件资料填写
+        </h4>
+    </div>
+    <div class="tk_sqzl_tx_close">
+        <button type="button" class="close">
+            &times;
+        </button>
+    </div>
+    <div class="sqzl_box">
+        <form class="form-horizontal form-horizontal_sqrjzl">
+            <div class="form-group">
+                <label class="col-md-2 control-label">风场名</label>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" placeholder="请输入风场名">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label control-label_position">风场坐标</label>
+                <div class="col-md-10">
+                    <div class="liru_box">（提示：可以选择excel文件导入方式或者手动添加方式）</div>
+                    <div class="zdtj_box clearfix">
+                        <div class="col-md-8 zdtj_box_son">
+                            <span>文件导入方式：</span><input type="file" class="form-control pull-left"><button class="btn btn-success">上传</button>
+                        </div>
+                        <div class="col-md-4 zdtj_box_son text-right"><button class="btn btn-primary">模板下载</button> </div>
+                    </div>
+                    <div class="table_project_box">
+                        <table class="table table_project table_fcjzb">
+                            <thead>
+                                <tr>
+                                    <th width="13%">序号</th>
+                                    <th width="37%">经度</th>
+                                    <th width="37%">纬度</th>
+                                    <th width="13%">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+                                    <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+                                    <td><a href="#" class="xm_zt_red">删除</a></td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+                                    <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+                                    <td><a href="#" class="xm_zt_red">删除</a></td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+                                    <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+                                    <td><a href="#" class="xm_zt_red">删除</a></td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+                                    <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+                                    <td><a href="#" class="xm_zt_red">删除</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="sdtj_box"><button class="btn">手动添加方式</button></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label control-label_position">风机坐标</label>
+                <div class="col-md-10">
+                    <div class="liru_box">（提示：可以选择excel文件导入方式或者手动添加方式）</div>
+                    <div class="zdtj_box clearfix">
+                        <div class="col-md-8 zdtj_box_son"><span>文件导入方式：</span><input type="file" class="form-control pull-left"><button class="btn btn-success">上传</button></div>
+                        <div class="col-md-4 zdtj_box_son text-right"><button class="btn btn-primary">模板下载</button> </div>
+                    </div>
+                    <div class="table_project_box">
+                        <table class="table table_project table_fcjzb">
+                            <thead>
+                                <tr>
+                                    <th width="13%">机位号</th>
+                                    <th width="37%">经度</th>
+                                    <th width="37%">纬度</th>
+                                    <th width="13%">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>机位号1</td>
+                                    <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+                                    <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+                                    <td><a href="#" class="xm_zt_red">删除</a></td>
+                                </tr>
+                                <tr>
+                                    <td>机位号2</td>
+                                    <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+                                    <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+                                    <td><a href="#" class="xm_zt_red">删除</a></td>
+                                </tr>
+                                <tr>
+                                    <td>机位号3</td>
+                                    <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+                                    <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+                                    <td><a href="#" class="xm_zt_red">删除</a></td>
+                                </tr>
+                                <tr>
+                                    <td>机位号4</td>
+                                    <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+                                    <td><input type="text" class="form-control" placeholder="44.1794393°"></td>
+                                    <td><a href="#" class="xm_zt_red">删除</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="sdtj_box"><button class="btn">手动添加方式</button></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label">项目管理员</label>
+                <div class="col-md-5">
+                    <div class="nice-select">
+                        <input id="customerId" type="text" class="form-control" placeholder="搜索" />
+                        <ul id="list">
+                            <li>
+                                <h3>张三</h3>
+                                <div>港湾院-常设公司-港湾院-数智工程设计研究所</div>
+                            </li>
+                            <li>
+                                <h3>李四</h3>
+                                <div>港湾院-常设公司-港湾院-数智工程设计研究所</div>
+                            </li>
+                            <li>
+                                <h3>李四</h3>
+                                <div>港湾院-常设公司-港湾院-数智工程设计研究所</div>
+                            </li>
+                            <li>
+                                <h3>李四</h3>
+                                <div>港湾院-常设公司-港湾院-数智工程设计研究所</div>
+                            </li>
+                            <li>
+                                <h3>李四（E）</h3>
+                                <div>港湾院-常设公司-港湾院-数智工程设计研究所</div>
+                            </li>
+                            <li>
+                                <h3>王刚</h3>
+                                <div>港湾院-常设公司-港湾院-数智工程设计研究所</div>
+                            </li>
+                            <li>
+                                <h3>王</h3>
+                                <div>港湾院-常设公司-港湾院-数智工程设计研究所</div>
+                            </li>
+
+                            <li>
+                                <h3>姜</h3>
+                                <div>三航局-常设公司-港湾院-数智工程设计研究所</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <select class="form-control">
+                        <option>项目角色</option>
+                        <option>项目经理</option>
+                        <option>开发人员</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label">云平台使用期限</label>
+                <div class="col-md-5">
+                    <input placeholder="开始时间" class="laydate-icon timeUstyle stateUTime form-control" onclick="laydate({istime: true,format:'YYYY-MM-DD hh:mm'})">
+
+                </div>
+                <div class="col-md-5">
+                    <input placeholder="结束时间" class="laydate-icon timeUstyle stateUTime form-control" onclick="laydate({istime: true,format:'YYYY-MM-DD hh:mm'})">
+
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="text-center sqzl_btn_box">
+        <button class="btn btn-primary">预览</button><button class="btn btn-success">申请</button>
+    </div>
+</div>
+
+@*插拔桩弹窗*@
+<div class="tk_sqzl_tx02 bounceInRight animated wow" data-wow-delay="0.01s" style="visibility: visible; -webkit-animation-delay: 0.01s;">
+    <div class="modal-header">
+        <h4 class="modal-title text-center">
+            自升式平台桩腿插拔计算
+        </h4>
+    </div>
+    <div class="tk_sqzl_tx02_close">
+        <button type="button" class="close">
+            &times;
+        </button>
+    </div>
+    <div class="sqzl_box">
+        <div class="form-horizontal form-horizontal_sqrjzl">
+
+            <div class="form-group">
+                <label class="col-md-2 control-label">任务名</label>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" placeholder="请输入任务名" id="popup_txtTaskName">
+                </div>
+            </div>
+
+            <div class="form-group mod_touying">
+                <label class="col-md-2 control-label control-label_position">机孔位地勘原始资料</label>
+                <div class="col-md-10">
+                    <div class="zdtj_box clearfix">
+                        <div class="col-md-6 pr0">
+                            <input type="file" multiple class="form-control pull-left" id="popup_uploadTaskFile_dkyszl">
+                        </div>
+                        <div class="col-md-1 text-center">
+                            <button class="btn search_btn btn-success" id="popup_btn_uploadTaskFile_dkyszl" onclick="UploadTaskFile(1);">上传</button>
+                        </div>
+                        <div class="col-md-5 zhuyi_zt pr0">
+
+                        </div>
+                    </div>
+
+                    <div class="table_project_box">
+                        <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                            <thead>
+                                <tr>
+                                    <th width="60%">文件名</th>
+                                    <th width="15%">类型</th>
+                                    <th width="15%">大小</th>
+                                    <th width="10%">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="popup_htmlTaskFile_dkyszl" data-tag="0">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+            <div class="form-group mod_touying">
+                <label class="col-md-2 control-label control-label_position">机孔位地勘数据表</label>
+                <div class="col-md-10">
+                    <div class="zdtj_box clearfix">
+                        <div class="col-md-6 pr0">
+                            <input type="file" class="form-control pull-left" accept=".xlsx" id="popup_uploadTaskFile_dksjb">
+                        </div>
+                        <div class="col-md-1 text-center">
+                            <button class="btn search_btn btn-success" id="popup_btn_uploadTaskFile_dksjb" onclick="UploadTaskFile(2);">上传</button>
+                        </div>
+                        <div class="col-md-5 text-right zhuyi_zt pr0">
+                            <a class="btn btn-primary btn-primary-a" href="~/File/Task/地勘数据表.xlsx">模板下载</a>
+                        </div>
+                    </div>
+
+                    <div class="table_project_box">
+                        <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                            <thead>
+                                <tr>
+                                    <th width="60%">文件名</th>
+                                    <th width="15%">类型</th>
+                                    <th width="15%">大小</th>
+                                    <th width="10%">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="popup_htmlTaskFile_dksjb" data-tag="0">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mod_touying">
+                <label class="col-md-2 control-label control-label_position">平台船原始资料</label>
+                <div class="col-md-10">
+                    <div class="zdtj_box clearfix">
+                        <div class="col-md-6 pr0">
+                            <input type="file" multiple class="form-control pull-left" id="popup_uploadTaskFile_ptcyszl">
+                        </div>
+                        <div class="col-md-1 text-center">
+                            <button class="btn search_btn btn-success" id="popup_btn_uploadTaskFile_ptcyszl" onclick="UploadTaskFile(3);">上传</button>
+                        </div>
+                        <div class="col-md-5 zhuyi_zt pr0">
+
+                        </div>
+                    </div>
+
+                    <div class="table_project_box">
+                        <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                            <thead>
+                                <tr>
+                                    <th width="60%">文件名</th>
+                                    <th width="15%">类型</th>
+                                    <th width="15%">大小</th>
+                                    <th width="10%">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="popup_htmlTaskFile_ptcyszl" data-tag="0">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+            <div class="form-group mod_touying">
+                <label class="col-md-2 control-label control-label_position02">平台船数据表</label>
+                <div class="col-md-10">
+                    <div class="zdtj_box clearfix">
+                        <div class="col-md-6 pr0">
+                            <input type="file" multiple class="form-control pull-left" accept=".xlsx" id="popup_uploadTaskFile_ptcsjb">
+                        </div>
+                        <div class="col-md-1 text-center">
+                            <button class="btn search_btn btn-success" id="popup_btn_uploadTaskFile_ptcsjb" onclick="UploadTaskFile(4);">上传</button>
+                        </div>
+                        <div class="col-md-5 text-right zhuyi_zt pr0">
+                            <a class="btn btn-primary btn-primary-a" href="~/File/Task/黄船33.xlsx">模板下载</a>
+                        </div>
+                    </div>
+
+                    <div class="table_project_box">
+                        <table class="table table_project table_fcjzb" style="margin-bottom: 0;">
+                            <thead>
+                                <tr>
+                                    <th width="60%">文件名</th>
+                                    <th width="15%">类型</th>
+                                    <th width="15%">大小</th>
+                                    <th width="10%">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="popup_htmlTaskFile_ptcsjb" data-tag="0">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-2 control-label">报告接收人</label>
+                <div class="col-md-4">
+                    <div class="nice-select">
+                        <input type="text" class="form-control" placeholder="姓名关键字搜索" id="popup_txtDeliverUserName" autocomplete="off" />
+                        <div class="search_div" onclick="ClearShjDeliverUserName();" id="popup_divClearDeliverName">
+                            <i class="fa fa-close"></i>
+                        </div>
+                        <ul id="popup_ulDeliverUserList" style="display:none;">
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-1 text-center">
+                    <button class="btn btn-primary search_btn" style="width: 100%" id="popup_btnDeiverNameQuery" onclick="FindShjDeliverUser();">搜索</button>
+                </div>
+                <div class="col-md-5 zhuyi_zt">
+                    注意：请选择最终报告文件的接收人员。
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-2 control-label">交付时间（之前）</label>
+                <div class="col-md-10">
+                    <input placeholder="交付时间" class="laydate-icon timeUstyle stateUTime form-control" id="popup_TaskDeliverTime" onclick="laydate({istime: true,format:'YYYY-MM-DD'})">
+                </div>
+            </div>
+
+            <div class="form-group" id="popup_divLastContent">
+                <label class="col-md-2 control-label control-label_position02">上一节点意见</label>
+
+                <div class="col-md-10">
+                    <textarea class="form-control" id="popup_txtLastContent" disabled></textarea>
+                </div>
+            </div>
+
+            <div class="form-group" id="popup_divContent">
+                <label class="col-md-2 control-label control-label_position02">审批意见</label>
+
+                <div class="col-md-10">
+                    <textarea class="form-control" id="popup_txtContent"></textarea>
+                </div>
+            </div>
+
+            <div class="form-group mod_touying" id="popup_divNextNode">
+                <label class="col-md-2 control-label" style="color:red;" id="popup_labNextNode">流程下一节点<br /><span id="popup_spanNextNodeName">111122222</span></label>
+                <div class="col-md-4">
+                    <div class="nice-select">
+                        <input type="text" class="form-control" placeholder="姓名关键字搜索" id="popup_txtNodeUserName" autocomplete="off" />
+                        <div class="search_div" onclick="ClearShjNodeUserName();" id="popup_divClearNodeName">
+                            <i class="fa fa-close"></i>
+                        </div>
+                        <ul id="popup_ulNodeUserList" style="display:none;">
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-1 pl0 text-center">
+                    <button class="btn btn-primary search_btn" style="width: 100%" id="popup_btnFindNodeUserName" onclick="FindShjNodeUser();">搜索</button>
+                </div>
+                <div class="col-md-5 zhuyi_zt">
+                    注意：请按照流程节点审批要求，指定下一节点审批人。如果节点审批人选错，整个流程将不能通过或者退回。
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="text-center sqzl_btn_box">
+        <button class="btn btn-success" onclick="AddTaskSubmit(this);" data-type="1" id="popup_btnSubmit">申请</button>
+        <button class="btn btn-success" style="color:red;" id="popup_btnBack" data-type="0" onclick="AddTaskSubmit(this);">审批退回</button>
+    </div>
+</div>
+
+
+<!--流程弹框-->
+<div class="modal fade" id="tk_path" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-s">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    流程图
+                </h4>
+            </div>
+            <div class="modal-body clearfix">
+
+                <!--流程 start-->
+                <div class="flowChart">
+                    <!--左侧轴-->
+                    <div class="flowChart-left">
+                        <!--虚线-->
+                        <div class="dashed"></div>
+                    </div>
+
+                    <!--右侧内容-->
+                    <div class="flowChart-right" id="html_TaskFlowHistory">
+                        <!--                                                节点1  -->
+                        <div class="oneNode">
+                            <!--左侧小球-->
+                            <div class="check check-prime">
+                                发起
+                            </div>
+
+                            <!--右侧内容-->
+                            <div class="NodeDetail">
+                                <!--上-->
+                                <div class="NodeDetail-title">
+                                    <!--内容-->
+                                    <div class="details">
+                                        <h4>程伟（高级工程师）</h4>
+                                        <p>三航局-技术中心-总部-BIM中心</p>
+                                    </div>
+                                </div>
+                                <!--中-->
+                                <div class="NodeDetail-content">
+                                    <p>流程环节名流程环节名流程环节名流程环节名</p>
+                                </div>
+
+                                <div class="NodeDetail-footer">
+                                    <span>2017-10-31 22:22:31</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="oneNode">
+                            <!--左侧小球-->
+                            <div class="check check-success">
+                                同意
+                            </div>
+                            <!--右侧内容-->
+                            <div class="NodeDetail">
+                                <!--上-->
+                                <div class="NodeDetail-title">
+                                    <!--内容-->
+                                    <div class="details">
+                                        <h4>程伟（高级工程师）</h4>
+                                        <p>三航局-技术中心-总部-BIM中心</p>
+                                    </div>
+                                </div>
+                                <!--中-->
+                                <div class="NodeDetail-content">
+                                    <p>流程环节名流程环节名流程环节名流程环节名</p>
+                                </div>
+
+                                <div class="NodeDetail-footer">
+                                    <span>2017-10-31 22:22:31</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="oneNode">
+                            <!--左侧小球-->
+
+                            <div class="check check-danger">
+                                退回
+                            </div>
+                            <!--右侧内容-->
+                            <div class="NodeDetail">
+                                <!--上-->
+                                <div class="NodeDetail-title">
+                                    <!--内容-->
+                                    <div class="details">
+                                        <h4>程伟（高级工程师）</h4>
+                                        <p>三航局-技术中心-总部-BIM中心</p>
+                                    </div>
+                                </div>
+                                <!--中-->
+                                <div class="NodeDetail-content">
+                                    <p>流程环节名流程环节名流程环节名流程环节名</p>
+                                </div>
+
+                                <div class="NodeDetail-footer">
+                                    <span>2017-10-31 22:22:31</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="oneNode">
+                            <!--左侧小球-->
+
+                            <div class="check check-daishenpi">
+                                待审批
+                            </div>
+                            <!--右侧内容-->
+                            <div class="NodeDetail">
+                                <!--上-->
+                                <div class="NodeDetail-title">
+                                    <!--内容-->
+                                    <div class="details">
+                                        <h4>程伟（高级工程师）</h4>
+                                        <p>三航局-技术中心-总部-BIM中心</p>
+                                    </div>
+                                </div>
+                                <!--中-->
+                                <div class="NodeDetail-content">
+                                    <p>流程环节名流程环节名流程环节名流程环节名</p>
+                                </div>
+
+                                <div class="NodeDetail-footer">
+                                    <span>2017-10-31 22:22:31</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="oneNode">
+                            <!--左侧小球-->
+
+                            <div class="check check-delete">
+                                删除
+                            </div>
+                            <!--右侧内容-->
+                            <div class="NodeDetail">
+                                <!--上-->
+                                <div class="NodeDetail-title">
+                                    <!--内容-->
+                                    <div class="details">
+                                        <h4>程伟（高级工程师）</h4>
+                                        <p>三航局-技术中心-总部-BIM中心</p>
+                                    </div>
+                                </div>
+                                <!--中-->
+                                <div class="NodeDetail-content">
+                                    <p>流程环节名流程环节名流程环节名流程环节名</p>
+                                </div>
+
+                                <div class="NodeDetail-footer">
+                                    <span>2017-10-31 22:22:31</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="oneNode">
+                            <!--左侧小球-->
+
+                            <div class="check check-end">
+                                结束
+                            </div>
+                            <!--右侧内容-->
+                            <div class="NodeDetail">
+                                <!--上-->
+                                <div class="NodeDetail-title">
+                                    <!--内容-->
+                                    <div class="details">
+                                        <h4>程伟（高级工程师）</h4>
+                                        <p>三航局-技术中心-总部-BIM中心</p>
+                                    </div>
+                                </div>
+                                <!--中-->
+                                <div class="NodeDetail-content">
+                                    <p>流程环节名流程环节名流程环节名流程环节名</p>
+                                </div>
+
+                                <div class="NodeDetail-footer">
+                                    <span>2017-10-31 22:22:31</span>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!--节点 end-->
+                    </div>
+
+
+
+                </div>
+                <!--流程 end-->
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@*列表事件*@
+<script>
+    $(document).ready(function () {
+        ParamInit();
+
+        DoQuery();
+    })
+
+    var Param = {};
+    var ParamInit = function () {
+        Param.PageIndex = 1;
+        Param.PageSize = 10;
+        Param.TotalPage = 0;
+        Param.TotalCount = 0;
+
+        Param.TaskName = $("#query_txtTaskName").val();
+        //Param.Name = $('#popup_txtUserName').val();
+    }
+
+    //查询
+    var Query = function () {
+
+        $.post('TaskListQuery', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+
+                    if (data.Success) {
+
+                        var DataListHtml = '';
+                        $(data.Data).each(function (index, dom) {
+
+                            var TaskCodeClass = dom.IsFinished ? 'xm_zt_green' : 'xm_zt_orange';
+                            var FlowStatusClass = 'zt_orange';
+                            if (dom.FlowStatus == 1) {
+                                FlowStatusClass = 'zt_red';
+                            }
+                            else if (dom.FlowStatus == 2) {
+                                FlowStatusClass = 'zt_green';
+                            }
+                            else if (dom.FlowStatus == 3) {
+                                FlowStatusClass = 'zt_grey';
+                            }
+                            var FlowOperateContent = dom.IsCurrentNodeUser ? '审批' : '查看';
+                            var FlowOperateClass = dom.IsCurrentNodeUser ? 'cz_orange' : 'cz_blue';
+
+
+                            var FlowOperateContent = '';
+                            var FlowOperateClass = '';
+                            var FlowOperateType = '';
+
+                            if (dom.IsFinished) {
+                                FlowOperateContent = '查看';
+                                FlowOperateClass = 'cz_blue';
+                                FlowOperateType = 'view'
+                            }
+                            else {
+                                FlowOperateContent = dom.IsCurrentNodeUser ? '审批' : '查看';
+                                FlowOperateClass = dom.IsCurrentNodeUser ? 'cz_orange' : 'cz_blue';
+                                FlowOperateType = dom.IsCurrentNodeUser ? 'approval' : 'view';
+                            }
+
+                            var FlowNodeHtml = '';
+                            if (dom.IsFinished) {
+                                FlowNodeHtml = '流程结束';
+                            }
+                            else {
+                                FlowNodeHtml = dom.FlowNode + '：<a href="#" class="xm_zt_blue table_ryxx_box"><span>' + dom.NodeUser.NodeUserName + '</span><div class="hover_ryxx"><ul><li><i class="icon iconfont">&#xe752;</i>部门：' + dom.NodeUser.NodeUserDepart + '</li><li><i class="icon iconfont">&#xe607;</i>手机号：' + dom.NodeUser.NodeUserPhone + '</li><li> <i class="icon iconfont">&#xe673;</i>职位：' + dom.NodeUser.NodeUserJobName + '</li></ul></div></a>';
+                            }
+
+
+
+                            DataListHtml += '<tr><td class="' + TaskCodeClass + '">' + dom.TaskCode + '</td><td>' + dom.TaskName + '</td><td><a href="#">' + dom.ProjectName + '(' + dom.ProjectCode + ')</a></td>'
+                                + '<td class="relative_position"><a href = "#" class="xm_zt_blue table_ryxx_box" ><span>' + dom.Applyer.ApplyerName + '</span><div class="hover_ryxx"><ul><li><i class="icon iconfont">&#xe752;</i>部门：' + dom.Applyer.ApplyerDepart + '</li><li> <i class="icon iconfont">&#xe607;</i>手机号：' + dom.Applyer.ApplyerPhone + '</li><li> <i class="icon iconfont">&#xe673;</i>职位：' + dom.Applyer.ApplyerJobName + '</li></ul></div></a></td>'
+                                + '<td>' + FlowNodeHtml + '</td>'
+                                + '<td><a href="' + dom.SoftUrl + '" target="_blank">' + dom.SoftwareName + '</a></td>'
+                                + '<td><a class="' + FlowStatusClass + '" href="#" onclick="QueryFlowHistory(' + dom.ID + ');">' + dom.FlowStatusName + '</a></td>'
+                                + '<td><a class="' + FlowOperateClass + '" href="#" onclick="OpenTaskInfo(' + dom.ID + ',\'' + FlowOperateType + '\');">' + FlowOperateContent + '</a></td></tr>';
+                        });
+
+                        $('#html_DataList').html(DataListHtml);
+
+                        //分页
+                        Param.TotalPage = data.TotalPage;
+                        Param.TotalCount = data.TotalCount;
+                        Param.PageIndex = data.PageIndex;
+
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+                Pagination();
+            });
+
+    }
+
+    var OpenWebGIS = function (ProjectID) {
+
+        if (ProjectID == null || ProjectID == '' || ProjectID == 0) {
+            return;
+        }
+
+        window.open('/Cloud/WebGIS/Index?ProjectID=' + ProjectID, '_blank')
+
+    }
+
+    var DoQuery = function () {
+
+        Param.TaskName = $("#query_txtTaskName").val();
+        Query();
+        GetTaskCount();
+    }
+
+    //分页
+    var Pagination = function () {
+        $("#Pagination").pagination({
+            currentPage: Param.PageIndex,
+            totalPage: Param.TotalPage,
+            isShow: true,
+            totalCount: Param.TotalCount,
+            count: 7,
+            homePageText: "首页",
+            endPageText: "尾页",
+            prevPageText: "上一页",
+            nextPageText: "下一页",
+            callback: function (current) {
+                Param.PageIndex = current;
+                Query();
+            }
+        });
+    }
+
+
+    var OpenTask = function () {
+
+        //window.open('/Cloud/Task/Index', '_blank')
+        window.location.href = '/Cloud/Task/Index';
+    }
+
+
+    var GetTaskCount = function () {
+
+        $.post('GetTaskCount', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+                    if (data.Success) {
+                        $('#span_ApprovalCount').html(data.Data);
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+                Pagination();
+            });
+
+    }
+
+
+    var QueryFlowHistory = function (TaskID) {
+
+        if (TaskID == null || TaskID == '' || TaskID == 0) {
+            return;
+        }
+
+        Param.TaskID = TaskID;
+
+        $.post('QueryFlowHistory', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+                    if (data.Success) {
+
+                        var TaskFlowHistoryHtml = '';
+                        $(data.Data).each(function (index, dom) {
+
+                            var PicType = '';
+                            if (dom.FlowType == 0) {
+                                PicType = 'check-prime';
+                            }
+                            else if (dom.FlowType == 2) {
+                                PicType = 'check-end';
+                            }
+                            else if (dom.FlowType == 1) {
+                                //正常流程
+                                if (dom.FlowHandle == 0) {
+                                    //待审批
+                                    PicType = 'check-daishenpi';
+                                }
+                                else if (dom.FlowHandle == 1) {
+                                    //审批通过
+                                    PicType = 'check-success';
+                                }
+                                else if (dom.FlowHandle == 2) {
+                                    //审批退回
+                                    PicType = 'check-danger';
+                                }
+                                else if (dom.FlowHandle == 3) {
+                                    //审批删除
+                                    PicType = 'check-delete';
+                                }
+                            }
+
+                            TaskFlowHistoryHtml += '<div class="oneNode"><div class="check ' + PicType + '">' + dom.FlowHandleName + '</div>'
+                                + '<div class="NodeDetail"><div class="NodeDetail-title"><div class="details"><h4>' + dom.NodeUserName + '（' + dom.NodeUserJobName + '）</h4><p>' + dom.NodeUserDepart + '</p></div></div>'
+                                + '<div class="NodeDetail-content"><p>' + dom.NodeName + '</p><p>' + dom.Comment + '</p></div>'
+                                + '<div class="NodeDetail-footer"><span>' + dom.FlowTime + '</span></div></div></div>';
+                        })
+                        $('#html_TaskFlowHistory').html(TaskFlowHistoryHtml);
+                        $('#tk_path').modal('show');
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+                Pagination();
+            });
+
+    }
+
+
+</script>
+
+@*软件选择脚本*@
+<script>
+
+    var AddTaskPopup = function () {
+
+        $('#tk_WorkTasks').modal('show');
+
+    }
+
+    var PopupSoftwareInit = function (SoftwareID) {
+
+        $('#Popup_btn_Software' + SoftwareID).removeClass('active');
+        $('#Popup_btn_Software' + SoftwareID).attr('disabled', true);
+        $('#Popup_btn_Software' + SoftwareID).html('申请使用');
+
+        $('#Popup_LimitTime' + SoftwareID).html('');
+
+    }
+
+    var PopupChooseProject = function () {
+
+        var ChooseProjectID = $('#popup_software_ProjectChoose').val();
+        if (ChooseProjectID == null || ChooseProjectID == '' || ChooseProjectID == 0)
+            return;
+
+        Param.ProjectID = ChooseProjectID;
+
+        $.post('ChooseProject', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+
+                    if (data.Success) {
+
+                        var WebGISModel = data.Data[0];
+                        var cbzModel = data.Data[1];
+
+                        //1.WebGIS
+                        PopupSoftwareInit('01');
+                        if (WebGISModel.IsUsed) {
+                            $('#Popup_btn_Software01').addClass('active');
+                            $('#Popup_btn_Software01').attr('disabled', true);
+                            $('#Popup_btn_Software01').html('已申请');
+                        }
+                        else {
+                            $('#Popup_btn_Software01').removeClass('active');
+                            $('#Popup_btn_Software01').attr('disabled', false);
+                            $('#Popup_btn_Software01').html('申请使用');
+                        }
+                        $('#Popup_LimitTime01').html(WebGISModel.TaskTimeString);
+
+                        //2.插拔桩
+                        PopupSoftwareInit('02');
+                        if (WebGISModel.IsUsed) {
+                            if (cbzModel.IsUsed) {
+                                $('#Popup_btn_Software02').addClass('active');
+                                $('#Popup_btn_Software02').attr('disabled', true);
+                                $('#Popup_btn_Software02').html('已申请');
+                            }
+                            else {
+                                $('#Popup_btn_Software02').removeClass('active');
+                                $('#Popup_btn_Software02').attr('disabled', false);
+                                $('#Popup_btn_Software02').html('申请使用');
+                            }
+                            $('#Popup_LimitTime02').html(cbzModel.TaskTimeString);
+                        }
+
+
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+                Pagination();
+            });
+
+    }
+
+
+
+
+</script>
+
+@*插拔桩弹窗*@
+<script>
+
+    $(document).ready(function () {
+
+        DatePickInit();
+
+    })
+
+    var DatePickInit = function () {
+
+        $('#popup_TaskDeliverTime').val(formatDateTimeByDay(new Date(new Date().setMonth(new Date().getMonth() + 1))));
+
+    }
+
+    var OpenCBZPopup = function () {
+
+        var ChooseProjectID = $('#popup_software_ProjectChoose').val();
+        if (ChooseProjectID == null || ChooseProjectID == '' || ChooseProjectID == 0) {
+            ModalPopup('error', '必须先选择所关联的风场');
+            return;
+        }
+
+        OpenTaskPopup('new');
+
+
+
+    }
+
+
+    var UploadTaskFile = function (FileType) {
+
+        if (FileType == null || FileType == '' || FileType == 0)
+            return;
+
+        var formData = new FormData();
+        formData.append("FileType", FileType);
+        var TaskFiles = null;
+        if (FileType == 1) {
+            TaskFiles = $('#popup_uploadTaskFile_dkyszl')[0].files;
+            $('#popup_htmlTaskFile_dkyszl').attr('data-tag', 1);
+        }
+        else if (FileType == 2) {
+            TaskFiles = $('#popup_uploadTaskFile_dksjb')[0].files;
+            $('#popup_htmlTaskFile_dksjb').attr('data-tag', 1);
+        }
+        else if (FileType == 3) {
+            TaskFiles = $('#popup_uploadTaskFile_ptcyszl')[0].files;
+            $('#popup_htmlTaskFile_ptcyszl').attr('data-tag', 1);
+        }
+        else if (FileType == 4) {
+            TaskFiles = $('#popup_uploadTaskFile_ptcsjb')[0].files;
+            $('#popup_htmlTaskFile_ptcsjb').attr('data-tag', 1);
+        }
+
+        if (TaskFiles == null || TaskFiles.length == 0)
+            return;
+
+        var FileCount = TaskFiles.length;
+        formData.append("TaskFileCount", FileCount);
+        var Count = 1;
+        $(TaskFiles).each(function (index, dom) {
+
+            formData.append("TaskFile" + Count, dom);
+
+            Count++;
+        });
+
+
+        $.ajax({
+            url: 'TaskFileUpload',
+            dataType: 'json',
+            type: 'POST',
+            async: false,
+            data: formData,
+            processData: false, // 使数据不做处理
+            contentType: false, // 不要设置Content-Type请求头
+            success: function (data) {
+
+                if (data) {
+                    if (data.Success) {
+
+                        var TaskFileHtml = '';
+                        var TaskFileCount = 1;
+                        $(data.Data).each(function (index, dom) {
+
+                            TaskFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileExtension + '</td><td>' + dom.FileLength + '</td><td><a href="#" class="xm_zt_red" onclick="DeleteTaskFile(this);">删除</a></td></tr>';
+                            TaskFileCount++;
+                        });
+                        if (FileType == 1) {
+                            $('#popup_htmlTaskFile_dkyszl').html(TaskFileHtml);
+                            $('#popup_htmlTaskFile_dkyszl').attr('data-tag', 1);
+                        }
+                        else if (FileType == 2) {
+                            $('#popup_htmlTaskFile_dksjb').html(TaskFileHtml);
+                            $('#popup_htmlTaskFile_dksjb').attr('data-tag', 1);
+                        }
+                        else if (FileType == 3) {
+                            $('#popup_htmlTaskFile_ptcyszl').html(TaskFileHtml);
+                            $('#popup_htmlTaskFile_ptcyszl').attr('data-tag', 1);
+                        }
+                        else if (FileType == 4) {
+                            $('#popup_htmlTaskFile_ptcsjb').html(TaskFileHtml);
+                            $('#popup_htmlTaskFile_ptcsjb').attr('data-tag', 1);
+                        }
+
+
+                    }
+
+                }
+
+            },
+            error: function (response) {
+                console.log(response);
+            },
+            complete: function (data) {
+            }
+        });
+
+    }
+
+    var DeleteTaskFile = function (dom) {
+
+        if (dom != null) {
+            $(dom).parent().parent().remove();
+        }
+
+    }
+
+
+
+    var ChoosedDeliverUser = {};
+    ChoosedDeliverUser.Name = '';
+    ChoosedDeliverUser.UserCode = '';
+    ChoosedDeliverUser.Depart = '';
+    ChoosedDeliverUser.Phone = '';
+    ChoosedDeliverUser.JobName = '';
+    var FindShjDeliverUser = function () {
+
+        Param.Name = $("#popup_txtDeliverUserName").val();
+
+        $.post('FindShjUser', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+
+                    if (data.Success) {
+
+                        var DataListHtml = '';
+                        $(data.Data).each(function (index, dom) {
+
+                            DataListHtml += '<li onclick="ChooseDeliverUser(this);" data-usercode="' + dom.empcode + '" data-name="' + dom.name + '" data-depart="' + dom.wholeDeptPath + '" data-phone="' + dom.phone + '" data-jobname="' + dom.jobname + '" ><h3>' + dom.name + '(' + dom.jobname + ')</h3><div>' + dom.wholeDeptPath + '</div></li >';
+
+                        });
+                        $('ul#popup_ulDeliverUserList').html(DataListHtml);
+                        $('ul#popup_ulDeliverUserList').show();
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+                Pagination();
+            });
+
+    }
+
+    var ChoosedDeliverUser = {};
+    var ChooseDeliverUser = function (dom) {
+
+        ChoosedDeliverUser = {};
+
+        if (dom == null)
+            return;
+
+        var Name = $(dom).attr('data-name');
+        var UserCode = $(dom).attr('data-usercode');
+        var Depart = $(dom).attr('data-depart');
+        var Phone = $(dom).attr('data-phone');
+        var JobName = $(dom).attr('data-jobname');
+
+        ChoosedDeliverUser.Name = Name;
+        ChoosedDeliverUser.UserCode = UserCode;
+        ChoosedDeliverUser.Depart = Depart;
+        ChoosedDeliverUser.Phone = Phone;
+        ChoosedDeliverUser.JobName = JobName;
+
+        if (Name == '' || UserCode == '')
+            return;
+
+        $('#popup_txtDeliverUserName').val(Name + '(' + Depart + ')');
+
+        $('ul#popup_ulDeliverUserList').hide();
+
+    }
+
+    var PopupOpenedTaskID = 0;
+    var PopupIsBackFlow = false;
+    var OpenTaskInfo = function (TaskID, Type) {
+
+        Param.TaskID = TaskID;
+
+        PopupOpenedTaskID = 0;
+
+        $.post('TaskQuery', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+                    if (data.Success) {
+                        PopupOpenedTaskID = TaskID;
+
+                        var Task = data.Data;
+
+                        OpenTaskPopup(Type);
+
+                        ChoosedTaskNodeManager.NextNodeID = Task.Node.ID;
+
+                        PopupIsBackFlow = Task.IsBackFlow;
+
+                        //退回重新走流程
+                        if (Task.IsBackFlow && Type == 'approval') {
+                            SetTaskPopupWrite();
+                            $('#popup_btnSubmit').show().html('提交');
+                            $('#popup_btnBack').hide();
+                            $('#popup_btnSubmit').attr('data-type', 2);
+                            $('#popup_divClearDeliverName').show();
+
+                            ChoosedDeliverUser.Name = Task.Deliver.DeliverName;
+                            ChoosedDeliverUser.UserCode = Task.Deliver.DeliverUserCode;
+                            ChoosedDeliverUser.Depart = Task.Deliver.DeliverDepart;
+                            ChoosedDeliverUser.Phone = Task.Deliver.DeliverPhone;
+                            ChoosedDeliverUser.JobName = Task.Deliver.DeliverJobName;
+                        }
+
+                        //判断流程是否结束
+                        if (Task.Node.ID == 0) {
+                            //流程结束
+
+                            $('#popup_txtNodeUserName').val('').attr('disabled', true);
+                            $('#popup_btnFindNodeUserName').attr('disabled', true);
+                            $('#popup_divClearNodeName').hide();
+
+                        }
+                        else {
+                            //正常流程
+                            $('#popup_txtNodeUserName').val(Task.Node.NodeManagerName + '(' + Task.Node.NodeManagerDepart + ')').attr('disabled', false);
+                            $('#popup_btnFindNodeUserName').attr('disabled', false);
+                            $('#popup_divClearNodeName').show();
+
+
+                            ChoosedTaskNodeManager.Name = Task.Node.NodeManagerName;
+                            ChoosedTaskNodeManager.UserCode = Task.Node.NodeManagerUserCode;
+                            ChoosedTaskNodeManager.Depart = Task.Node.NodeManagerDepart;
+                            ChoosedTaskNodeManager.Phone = Task.Node.NodeManagerPhone;
+                            ChoosedTaskNodeManager.JobName = Task.Node.NodeManagerJobName;
+
+                        }
+
+
+                        ////填充数据
+                        $('#popup_txtTaskName').val(Task.TaskName);
+
+                        //上一节点意见
+                        $('#popup_txtLastContent').val(Task.LastComment);
+
+                        //项目文件接收人
+                        $('#popup_TaskDeliverTime').val(Task.DeliverTime)
+                        $('#popup_txtDeliverUserName').val(Task.Deliver.DeliverName + '(' + Task.Deliver.DeliverDepart + ')');
+
+                        //下一节点
+                        $('#popup_spanNextNodeName').html(Task.Node.NodeName);
+
+                        var FiledkyszlHtml = '';
+                        $(Task.File_dkyszl).each(function (index, dom) {
+                            FiledkyszlHtml += '<tr><td>' + dom.FileName + '</td><td></td><td></td><td><a href="' + dom.FilePath + '" class="xm_zt_green" >下载</a></td></tr>';
+                        });
+                        $('#popup_htmlTaskFile_dkyszl').html(FiledkyszlHtml);
+
+                        var FiledksjbHtml = '';
+                        $(Task.File_dksjb).each(function (index, dom) {
+                            FiledksjbHtml += '<tr><td>' + dom.FileName + '</td><td></td><td></td><td><a href="' + dom.FilePath + '" class="xm_zt_green" >下载</a></td></tr>';
+                        });
+                        $('#popup_htmlTaskFile_dksjb').html(FiledksjbHtml);
+
+                        var FileptcyszlHtml = '';
+                        $(Task.File_ptcyszl).each(function (index, dom) {
+                            FileptcyszlHtml += '<tr><td>' + dom.FileName + '</td><td></td><td></td><td><a href="' + dom.FilePath + '" class="xm_zt_green" >下载</a></td></tr>';
+                        });
+                        $('#popup_htmlTaskFile_ptcyszl').html(FileptcyszlHtml);
+
+                        var FileptcsjbHtml = '';
+                        $(Task.File_ptcsjb).each(function (index, dom) {
+                            FileptcsjbHtml += '<tr><td>' + dom.FileName + '</td><td></td><td></td><td><a href="' + dom.FilePath + '" class="xm_zt_green" >下载</a></td></tr>';
+                        });
+                        $('#popup_htmlTaskFile_ptcsjb').html(FileptcsjbHtml);
+
+
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+                Pagination();
+            });
+
+    }
+
+
+
+    var OpenTaskPopup = function (type) {
+
+        if (type == 'new') {
+            //清空弹窗
+            ClearTaskPopup();
+            //设置可写
+            SetTaskPopupWrite();
+
+            $('#popup_divLastContent').hide();
+            $('#popup_divContent').hide();
+            $('#popup_divNextNode').hide();
+            $('#popup_divClearDeliverName').show();
+            $('#popup_btnSubmit').show().html('申请');
+
+            $('#popup_btnBack').hide();
+            $('#popup_btnSubmit').attr('data-type', 1);
+
+        }
+        else if (type == 'view') {
+            //清空弹窗
+            ClearTaskPopup();
+            //设置可写
+            SetTaskPopupRead();
+
+            $('#popup_divLastContent').hide();
+            $('#popup_divContent').hide();
+            $('#popup_divNextNode').hide();
+            $('#popup_divClearDeliverName').show();
+
+            $('#popup_btnSubmit').hide();
+            $('#popup_btnBack').hide();
+
+
+        }
+        else if (type == 'approval') {
+            //清空弹窗
+            ClearTaskPopup();
+            //设置可写
+            SetTaskPopupRead();
+
+            $('#popup_divLastContent').show();
+            $('#popup_divContent').show();
+            $('#popup_txtContent').attr('disabled', false);
+            $('#popup_divNextNode').show();
+            $('#popup_divClearDeliverName').hide();
+            $('#popup_btnSubmit').show().html('审批通过');
+            $('#popup_btnBack').show();
+            $('#popup_btnSubmit').attr('data-type', 2);
+
+            $('#popup_txtTitle').html('审批风场项目')
+
+        }
+
+        $('.tk_sqzl_tx02').stop(true, true).fadeIn();
+
+        $('#popup_htmlTaskFile_dkyszl').attr('data-tag', 0);
+        $('#popup_uploadTaskFile_dksjb').attr('data-tag', 0);
+        $('#popup_uploadTaskFile_ptcyszl').attr('data-tag', 0);
+        $('#popup_uploadTaskFile_ptcsjb').attr('data-tag', 0);
+    }
+
+
+    var ClearTaskPopup = function () {
+
+        $('#popup_txtTaskName').val('');
+        $('#popup_txtDeliverUserName').val('');
+        $('#popup_TaskDeliverTime').val('');
+
+        $('#popup_uploadTaskFile_dkyszl').val('');
+        $('#popup_uploadTaskFile_dksjb').val('');
+        $('#popup_uploadTaskFile_ptcyszl').val('');
+        $('#popup_uploadTaskFile_ptcsjb').val('');
+
+        $('#popup_htmlTaskFile_dkyszl').html('');
+        $('#popup_htmlTaskFile_dksjb').html('');
+        $('#popup_htmlTaskFile_ptcyszl').html('');
+        $('#popup_htmlTaskFile_ptcsjb').html('');
+
+        $('#popup_txtLastContent').val('');
+        $('#popup_txtContent').val('');
+        $('#popup_txtNodeUserName').val('');
+
+        DatePickInit();
+    }
+
+
+    var SetTaskPopupRead = function () {
+
+        $('#popup_txtTaskName').attr('disabled', true);
+
+        $('#popup_uploadTaskFile_dkyszl').attr('disabled', true);
+        $('#popup_uploadTaskFile_dksjb').attr('disabled', true);
+        $('#popup_uploadTaskFile_ptcyszl').attr('disabled', true);
+        $('#popup_uploadTaskFile_ptcsjb').attr('disabled', true);
+
+        $('#popup_btn_uploadTaskFile_dkyszl').attr('disabled', true);
+        $('#popup_btn_uploadTaskFile_dksjb').attr('disabled', true);
+        $('#popup_btn_uploadTaskFile_ptcyszl').attr('disabled', true);
+        $('#popup_btn_uploadTaskFile_ptcsjb').attr('disabled', true);
+
+        $('#popup_htmlTaskFile_dkyszl').attr('disabled', true);
+        $('#popup_htmlTaskFile_dksjb').attr('disabled', true);
+        $('#popup_htmlTaskFile_ptcyszl').attr('disabled', true);
+        $('#popup_htmlTaskFile_ptcsjb').attr('disabled', true);
+
+        $('#popup_txtDeliverUserName').attr('disabled', true);
+        $('#popup_btnDeiverNameQuery').attr('disabled', true);
+        $('#popup_divClearDeliverName').hide();
+
+        $('#popup_TaskDeliverTime').attr('disabled', true);
+
+        $('#popup_txtContent').attr('disabled', true);
+
+        $('#popup_txtNodeUserName').attr('disabled', true);
+        $('#popup_btnFindNodeUserName').attr('disabled', true);
+        $('#popup_divClearNodeName').hide();
+
+    }
+
+    var SetTaskPopupWrite = function () {
+
+        $('#popup_txtTaskName').attr('disabled', false);
+
+        $('#popup_uploadTaskFile_dkyszl').attr('disabled', false);
+        $('#popup_uploadTaskFile_dksjb').attr('disabled', false);
+        $('#popup_uploadTaskFile_ptcyszl').attr('disabled', false);
+        $('#popup_uploadTaskFile_ptcsjb').attr('disabled', false);
+
+        $('#popup_btn_uploadTaskFile_dkyszl').attr('disabled', false);
+        $('#popup_btn_uploadTaskFile_dksjb').attr('disabled', false);
+        $('#popup_btn_uploadTaskFile_ptcyszl').attr('disabled', false);
+        $('#popup_btn_uploadTaskFile_ptcsjb').attr('disabled', false);
+
+        $('#popup_htmlTaskFile_dkyszl').attr('disabled', false);
+        $('#popup_htmlTaskFile_dksjb').attr('disabled', false);
+        $('#popup_htmlTaskFile_ptcyszl').attr('disabled', false);
+        $('#popup_htmlTaskFile_ptcsjb').attr('disabled', false);
+
+        $('#popup_txtDeliverUserName').attr('disabled', false);
+        $('#popup_btnDeiverNameQuery').attr('disabled', false);
+        $('#popup_divClearDeliverName').hide();
+
+        $('#popup_TaskDeliverTime').attr('disabled', false);
+
+        $('#popup_txtContent').attr('disabled', false);
+
+        $('#popup_txtNodeUserName').attr('disabled', false);
+        $('#popup_btnFindNodeUserName').attr('disabled', false);
+        $('#popup_divClearNodeName').hide();
+    }
+
+    var FindShjNodeUser = function () {
+
+        Param.Name = $("#popup_txtNodeUserName").val();
+
+        $.post('FindShjUser', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+
+                    if (data.Success) {
+
+                        var DataListHtml = '';
+                        $(data.Data).each(function (index, dom) {
+
+                            DataListHtml += '<li onclick="ChooseTaskNodeManager(this);" data-usercode="' + dom.empcode + '" data-name="' + dom.name + '" data-depart="' + dom.wholeDeptPath + '" data-phone="' + dom.phone + '" data-jobname="' + dom.jobname + '" ><h3>' + dom.name + '(' + dom.jobname + ')</h3><div>' + dom.wholeDeptPath + '</div></li >';
+
+                        });
+                        $('#popup_ulNodeUserList').html(DataListHtml);
+                        $('ul#popup_ulNodeUserList').show();
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+                Pagination();
+            });
+
+    }
+
+    var ChoosedDeliverUser = {};
+    ChoosedDeliverUser.Name = '';
+    ChoosedDeliverUser.UserCode = '';
+    ChoosedDeliverUser.Depart = '';
+    ChoosedDeliverUser.Phone = '';
+    ChoosedDeliverUser.JobName = '';
+    var ChooseDeliverUser = function (dom) {
+
+        ChoosedDeliverUser = {};
+
+        if (dom == null)
+            return;
+
+        var Name = $(dom).attr('data-name');
+        var UserCode = $(dom).attr('data-usercode');
+        var Depart = $(dom).attr('data-depart');
+        var Phone = $(dom).attr('data-phone');
+        var JobName = $(dom).attr('data-jobname');
+
+        ChoosedDeliverUser.Name = Name;
+        ChoosedDeliverUser.UserCode = UserCode;
+        ChoosedDeliverUser.Depart = Depart;
+        ChoosedDeliverUser.Phone = Phone;
+        ChoosedDeliverUser.JobName = JobName;
+
+        if (Name == '' || UserCode == '')
+            return;
+
+        $('#popup_txtDeliverUserName').val(Name + '(' + Depart + ')');
+
+        $('ul#popup_ulDeliverUserList').hide();
+
+    }
+
+    var ClearShjDeliverUserName = function () {
+        ChoosedDeliverUser = {};
+        $('#popup_txtDeliverUserName').val('');
+    }
+
+    var ClearShjNodeUserName = function () {
+        ChoosedTaskNodeManager.Name = '';
+        ChoosedTaskNodeManager.UserCode = '';
+        ChoosedTaskNodeManager.Depart = '';
+        ChoosedTaskNodeManager.Phone = '';
+        ChoosedTaskNodeManager.JobName = '';
+        $('#popup_txtNodeUserName').val('');
+    }
+
+    var ChoosedTaskNodeManager = {};
+    ChoosedTaskNodeManager.NextNodeID = '';
+    ChoosedTaskNodeManager.Name = '';
+    ChoosedTaskNodeManager.UserCode = '';
+    ChoosedTaskNodeManager.Depart = '';
+    ChoosedTaskNodeManager.Phone = '';
+    ChoosedTaskNodeManager.JobName = '';
+    var ChooseTaskNodeManager = function (dom) {
+
+        //ChoosedTaskNodeManager = {};
+
+        if (dom == null)
+            return;
+
+        var Name = $(dom).attr('data-name');
+        var UserCode = $(dom).attr('data-usercode');
+        var Depart = $(dom).attr('data-depart');
+        var Phone = $(dom).attr('data-phone');
+        var JobName = $(dom).attr('data-jobname');
+
+        ChoosedTaskNodeManager.Name = Name;
+        ChoosedTaskNodeManager.UserCode = UserCode;
+        ChoosedTaskNodeManager.Depart = Depart;
+        ChoosedTaskNodeManager.Phone = Phone;
+        ChoosedTaskNodeManager.JobName = JobName;
+
+        if (Name == '' || UserCode == '')
+            return;
+
+        $('#popup_txtNodeUserName').val(Name + '(' + Depart + ')');
+
+        $('ul#popup_ulNodeUserList').hide();
+
+    }
+
+
+
+
+
+
+
+
+    //提交表单
+    var AddTaskSubmit = function (dom) {
+
+        var type = $(dom).attr('data-type');
+        if (type == null || type == '')
+            return;
+
+        var InfoText = '';
+        if (type == 0) {
+            InfoText = '是否要流程退回？流程将退回至发起人';
+        }
+        else if (type == 1) {
+            InfoText = '是否要保存任务？';
+        }
+        else if (type == 2) {
+            InfoText = '是否要审批通过？';
+        }
+
+        ModalPopup('information', InfoText);
+
+        $("#ModalSubmit").unbind('click').bind('click', function () {
+            DoTaskSubmit(type);
+        });
+
+    }
+
+    var DoTaskSubmit = function (type) {
+
+        if (type == 1) {
+            DoTaskAdd();
+        }
+        else if (type == 0 || type == 2) {
+            DoTaskApproval(type);
+        }
+
+    }
+
+    var DoTaskAdd = function () {
+
+        if (ChoosedDeliverUser == null || ChoosedDeliverUser.UserCode == null || ChoosedDeliverUser.UserCode == '') {
+            ModalClose('information');
+            ModalPopup('error', '需要选择报告接收人');
+            return;
+        }
+
+        var ProjectID = $('#popup_software_ProjectChoose').val();
+        if (ProjectID == null || ProjectID == '' || ProjectID == 0) {
+            ModalClose('information');
+            ModalPopup('error', '软件申请页面需要选择关联风电项目');
+            return;
+        }
+
+        var SubmitFormData = new FormData();
+        SubmitFormData.append("ProjectID", ProjectID);
+        SubmitFormData.append("SoftwareID", 2);
+        SubmitFormData.append("TaskName", $('#popup_txtTaskName').val());
+        SubmitFormData.append("TaskDeliverName", ChoosedDeliverUser.Name);
+        SubmitFormData.append("TaskDeliverUserCode", ChoosedDeliverUser.UserCode);
+        SubmitFormData.append("TaskDeliverDepart", ChoosedDeliverUser.Depart);
+        SubmitFormData.append("TaskDeliverPhone", ChoosedDeliverUser.Phone);
+        SubmitFormData.append("TaskDeliverJobName", ChoosedDeliverUser.JobName);
+        SubmitFormData.append("TaskDeliverTime", $('#popup_TaskDeliverTime').val());
+
+        //1.地勘原始资料
+        var FileCount_dkyszl = $('#popup_htmlTaskFile_dkyszl tr').length;
+        if (FileCount_dkyszl > 0) {
+            SubmitFormData.append("TaskFileCount_dkyszl", FileCount_dkyszl);
+            var Files = $('#popup_uploadTaskFile_dkyszl')[0].files;
+            var Count = 1;
+            $('#popup_htmlTaskFile_dkyszl tr').each(function (index, dom) {
+
+                var FileName = $(dom).find('td').first().html();
+                if (FileName != null && FileName != '') {
+
+                    $(Files).each(function (index2, dom2) {
+
+                        if (dom2.name == FileName) {
+                            SubmitFormData.append("TaskFile_dkyszl" + Count, dom2);
+                            Count++;
+                            return false;
+                        }
+                    });
+                }
+            })
+        }
+
+        //2.地勘数据表
+        var FileCount_dksjb = $('#popup_htmlTaskFile_dksjb tr').length;
+        if (FileCount_dksjb > 0) {
+            SubmitFormData.append("TaskFileCount_dksjb", FileCount_dksjb);
+            var Files = $('#popup_uploadTaskFile_dksjb')[0].files;
+            var Count = 1;
+            $('#popup_htmlTaskFile_dksjb tr').each(function (index, dom) {
+
+                var FileName = $(dom).find('td').first().html();
+                if (FileName != null && FileName != '') {
+
+                    $(Files).each(function (index2, dom2) {
+
+                        if (dom2.name == FileName) {
+                            SubmitFormData.append("TaskFile_dksjb" + Count, dom2);
+                            Count++;
+                            return false;
+                        }
+                    });
+                }
+            })
+        }
+
+        //3.平台船原始资料
+        var FileCount_ptcyszl = $('#popup_htmlTaskFile_ptcyszl tr').length;
+        if (FileCount_ptcyszl > 0) {
+            SubmitFormData.append("TaskFileCount_ptcyszl", FileCount_ptcyszl);
+            var Files = $('#popup_uploadTaskFile_ptcyszl')[0].files;
+            var Count = 1;
+            $('#popup_htmlTaskFile_ptcyszl tr').each(function (index, dom) {
+
+                var FileName = $(dom).find('td').first().html();
+                if (FileName != null && FileName != '') {
+
+                    $(Files).each(function (index2, dom2) {
+
+                        if (dom2.name == FileName) {
+                            SubmitFormData.append("TaskFile_ptcyszl" + Count, dom2);
+                            Count++;
+                            return false;
+                        }
+                    });
+                }
+            })
+        }
+
+        //4.平台船数据表
+        var FileCount_ptcsjb = $('#popup_htmlTaskFile_ptcsjb tr').length;
+        if (FileCount_ptcsjb > 0) {
+            SubmitFormData.append("TaskFileCount_ptcsjb", FileCount_ptcsjb);
+            var Files = $('#popup_uploadTaskFile_ptcsjb')[0].files;
+            var Count = 1;
+            $('#popup_htmlTaskFile_ptcsjb tr').each(function (index, dom) {
+
+                var FileName = $(dom).find('td').first().html();
+                if (FileName != null && FileName != '') {
+
+                    $(Files).each(function (index2, dom2) {
+
+                        if (dom2.name == FileName) {
+                            SubmitFormData.append("TaskFile_ptcsjb" + Count, dom2);
+                            Count++;
+                            return false;
+                        }
+                    });
+                }
+            })
+        }
+
+
+
+        $.ajax({
+            url: 'TaskSubmit',
+            dataType: 'json',
+            type: 'POST',
+            async: false,
+            data: SubmitFormData,
+            processData: false, // 使数据不做处理
+            contentType: false, // 不要设置Content-Type请求头
+            success: function (data) {
+
+                if (data) {
+                    if (data.Success) {
+                        ModalPopup('success', '保存成功');
+                        $('.tk_sqzl_tx02').stop(true, true).fadeOut()
+                        DoQuery();
+                    }
+                    else {
+
+                        ModalPopup('error', data.Message);
+                    }
+
+                }
+
+            },
+            error: function (response) {
+                console.log(response);
+            },
+            complete: function (data) {
+                ModalClose('information');
+            }
+        });
+
+    }
+
+
+    //通过或者退回0和2
+    var DoTaskApproval = function (type) {
+
+        if (PopupOpenedTaskID == 0) {
+            ModalClose('information');
+            ModalPopup('error', '数据出错，重新打开弹窗。');
+            return;
+        }
+
+        var SubmitFormData = new FormData();
+        SubmitFormData.append("ApprovalType", type);
+        SubmitFormData.append("NodeID", ChoosedTaskNodeManager.NextNodeID);
+        SubmitFormData.append("TaskID", PopupOpenedTaskID);
+        SubmitFormData.append("TaskComment", $('#popup_txtContent').val());
+        if (ChoosedTaskNodeManager.NextNodeID == 0) {
+            //流程结束
+
+        }
+        else {
+            //正常审批
+            SubmitFormData.append("TaskNodeName", ChoosedTaskNodeManager.Name);
+            SubmitFormData.append("TaskNodeUserCode", ChoosedTaskNodeManager.UserCode);
+            SubmitFormData.append("TaskNodeDepart", ChoosedTaskNodeManager.Depart);
+            SubmitFormData.append("TaskNodePhone", ChoosedTaskNodeManager.Phone);
+            SubmitFormData.append("TaskNodeJobName", ChoosedTaskNodeManager.JobName);
+
+
+
+            if (PopupIsBackFlow) {
+                SubmitFormData.append("TaskName", $('#popup_txtTaskName').val());
+                SubmitFormData.append("TaskDeliverName", ChoosedDeliverUser.Name);
+                SubmitFormData.append("TaskDeliverUserCode", ChoosedDeliverUser.UserCode);
+                SubmitFormData.append("TaskDeliverDepart", ChoosedDeliverUser.Depart);
+                SubmitFormData.append("TaskDeliverPhone", ChoosedDeliverUser.Phone);
+                SubmitFormData.append("TaskDeliverJobName", ChoosedDeliverUser.JobName);
+
+                SubmitFormData.append("TaskDeliverTime", $('#popup_TaskDeliverTime').val());
+
+
+
+                //1.地勘原始资料
+                var TaskFile_dkyszl_tag = $('#popup_htmlTaskFile_dkyszl').attr('data-tag');
+                SubmitFormData.append("TaskFile_dkyszl_tag", TaskFile_dkyszl_tag);
+                if (TaskFile_dkyszl_tag == '1')
+                {
+                    var FileCount_dkyszl = $('#popup_htmlTaskFile_dkyszl tr').length;
+                    if (FileCount_dkyszl > 0) {
+                        SubmitFormData.append("TaskFileCount_dkyszl", FileCount_dkyszl);
+                        var Files = $('#popup_uploadTaskFile_dkyszl')[0].files;
+                        var Count = 1;
+                        $('#popup_htmlTaskFile_dkyszl tr').each(function (index, dom) {
+
+                            var FileName = $(dom).find('td').first().html();
+                            if (FileName != null && FileName != '') {
+
+                                $(Files).each(function (index2, dom2) {
+
+                                    if (dom2.name == FileName) {
+                                        SubmitFormData.append("TaskFile_dkyszl" + Count, dom2);
+                                        Count++;
+                                        return false;
+                                    }
+                                });
+                            }
+                        })
+                    }
+                }
+
+                
+
+                //2.地勘数据表
+                var TaskFile_dksjb_tag = $('#popup_htmlTaskFile_dksjb').attr('data-tag');
+                SubmitFormData.append("TaskFile_dksjb_tag", TaskFile_dksjb_tag);
+                if (TaskFile_dksjb_tag == '1')
+                {
+                    var FileCount_dksjb = $('#popup_htmlTaskFile_dksjb tr').length;
+                    if (FileCount_dksjb > 0) {
+                        SubmitFormData.append("TaskFileCount_dksjb", FileCount_dksjb);
+                        var Files = $('#popup_uploadTaskFile_dksjb')[0].files;
+                        var Count = 1;
+                        $('#popup_htmlTaskFile_dksjb tr').each(function (index, dom) {
+
+                            var FileName = $(dom).find('td').first().html();
+                            if (FileName != null && FileName != '') {
+
+                                $(Files).each(function (index2, dom2) {
+
+                                    if (dom2.name == FileName) {
+                                        SubmitFormData.append("TaskFile_dksjb" + Count, dom2);
+                                        Count++;
+                                        return false;
+                                    }
+                                });
+                            }
+                        })
+                    }
+                }
+                
+
+                //3.平台船原始资料
+                var TaskFile_ptcyszl_tag = $('#popup_htmlTaskFile_ptcyszl').attr('data-tag');
+                SubmitFormData.append("TaskFile_ptcyszl_tag", TaskFile_ptcyszl_tag);
+                if (TaskFile_ptcyszl_tag == '1')
+                {
+                    var FileCount_ptcyszl = $('#popup_htmlTaskFile_ptcyszl tr').length;
+                    if (FileCount_ptcyszl > 0) {
+                        SubmitFormData.append("TaskFileCount_ptcyszl", FileCount_ptcyszl);
+                        var Files = $('#popup_uploadTaskFile_ptcyszl')[0].files;
+                        var Count = 1;
+                        $('#popup_htmlTaskFile_ptcyszl tr').each(function (index, dom) {
+
+                            var FileName = $(dom).find('td').first().html();
+                            if (FileName != null && FileName != '') {
+
+                                $(Files).each(function (index2, dom2) {
+
+                                    if (dom2.name == FileName) {
+                                        SubmitFormData.append("TaskFile_ptcyszl" + Count, dom2);
+                                        Count++;
+                                        return false;
+                                    }
+                                });
+                            }
+                        })
+                    }
+                }
+                
+
+                //4.平台船数据表
+                var TaskFile_ptcsjb_tag = $('#popup_htmlTaskFile_ptcsjb').attr('data-tag');
+                SubmitFormData.append("TaskFile_ptcsjb_tag", TaskFile_ptcsjb_tag);
+                if (TaskFile_ptcsjb_tag == '1')
+                {
+                    var FileCount_ptcsjb = $('#popup_htmlTaskFile_ptcsjb tr').length;
+                    if (FileCount_ptcsjb > 0) {
+                        SubmitFormData.append("TaskFileCount_ptcsjb", FileCount_ptcsjb);
+                        var Files = $('#popup_uploadTaskFile_ptcsjb')[0].files;
+                        var Count = 1;
+                        $('#popup_htmlTaskFile_ptcsjb tr').each(function (index, dom) {
+
+                            var FileName = $(dom).find('td').first().html();
+                            if (FileName != null && FileName != '') {
+
+                                $(Files).each(function (index2, dom2) {
+
+                                    if (dom2.name == FileName) {
+                                        SubmitFormData.append("TaskFile_ptcsjb" + Count, dom2);
+                                        Count++;
+                                        return false;
+                                    }
+                                });
+                            }
+                        })
+                    }
+                }
+                
+
+            }
+
+
+        }
+
+        $.ajax({
+            url: 'TaskApprovalSubmit',
+            dataType: 'json',
+            type: 'POST',
+            async: false,
+            data: SubmitFormData,
+            processData: false, // 使数据不做处理
+            contentType: false, // 不要设置Content-Type请求头
+            success: function (data) {
+
+                if (data) {
+                    if (data.Success) {
+                        ModalPopup('success', '保存成功');
+                        $('.tk_sqzl_tx02').stop(true, true).fadeOut();
+                        DoQuery();
+                    }
+                    else {
+
+                        ModalPopup('error', data.Message);
+                    }
+
+                }
+
+            },
+            error: function (response) {
+                console.log(response);
+            },
+            complete: function (data) {
+                ModalClose('information');
+            }
+        });
+
+    }
+
+</script>
+
+<script>
+
+
+
+    var OpenProject = function () {
+
+        window.location.href = '/Cloud/Project/Index';
+    }
+
+
+</script>
+

@@ -278,20 +278,28 @@
         }
       },
 
-      // ===== 5. 选中图标，回填表单，格式 el-icon-xxx
+      // ===== 5. 选中图标，回填表单，格式 iconName
       onIconSelected(iconName) {
-        // iconName: "Setting" → 转为 "el-icon-setting"
-        const kebabName = iconName.replace(/([A-Z])/g, "-$1").toLowerCase().replace(/^-/, '');
-        this.formData.icon = "el-icon-" + kebabName;
+        // // iconName: "Setting" → 转为 "el-icon-setting"
+        // const kebabName = iconName.replace(/([A-Z])/g, "-$1").toLowerCase().replace(/^-/, '');
+        // this.formData.icon = "el-icon-" + kebabName;
+        this.formData.icon = iconName;
         this.openIconSelectDialog = false;
       },
     }
   });
 
   // ---------------- 3. 注册组件与启动 ----------------
-  // 注册所有图标
-  for (const [key, component] of Object.entries(Icons)) {
-    app.component(key, component);
+  // 业务实际用到的图标白名单，新增图标在这里追加名字（大写）
+  const exportIconList = []; // ['Search', 'Edit', 'Delete', 'View'];
+
+  // 只把白名单内图标注册为Vue全局组件
+  for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+    if (exportIconList.includes(key)) {
+      app.component(key, component);
+    } else if (exportIconList.length == 0) {
+      app.component(key, component);
+    }
   }
   // 注册 Vue I18n
   app.use(appI18n);
@@ -301,6 +309,10 @@
     locale: ElementPlusLocaleZhCn
   });
   app.mount('#app');
+
+
+  window.myapp = app;
+  console.log("已注册组件", app._componentMap.RefreshLeft);
 
   siteUtils.append(app, { iconMap: iconMap });
 });

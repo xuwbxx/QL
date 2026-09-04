@@ -15,6 +15,21 @@ namespace DataFactory.KingBase.Towing
         public TowingDbContext(string connectionString, DatabaseType databaseType)
             : base(connectionString, databaseType) { }
 
+        //protected override void OnModelCreating(ModelBuilder modelBuilder)
+        //{
+        //    base.OnModelCreating(modelBuilder);
+        //    foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        //    {
+        //        foreach (var property in entityType.GetProperties())
+        //        {
+        //            if (property.ClrType == typeof(string))
+        //            {
+        //                property.SetColumnType("text");
+        //            }
+        //        }
+        //    }
+        //}
+
         public DbSet<Data_Backup> Data_Backup { set; get; }
 
         /// <summary>

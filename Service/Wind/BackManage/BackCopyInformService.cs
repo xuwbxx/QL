@@ -1,5 +1,6 @@
 using DataFactory.Factory;
 using DataFactory.KingBase.CloudWind;
+using Microsoft.EntityFrameworkCore;
 using Model.Tech.Cloud.BackManage;
 using Tool;
 
@@ -41,7 +42,7 @@ namespace Service.Wind.BackManage
                     if (!string.IsNullOrEmpty(request.UserName))
                     {
                         var userName = request.UserName;
-                        predicate = PredicateBuilder.And(predicate, a => a.UserName != null && a.UserName.Contains(userName));
+                        predicate = PredicateBuilder.And(predicate, a => a.UserName != null && EF.Functions.Like(a.UserName, $"%{userName}%"));
                     }
 
                     if (request.SoftwareID != 0)
@@ -112,7 +113,7 @@ namespace Service.Wind.BackManage
                         UserDepart = user.UserDepartName ?? "",
                         UserPhone = user.UserPhone ?? "",
                         UserJobName = user.UserJobName ?? "",
-                        CreateTime = DateTime.UtcNow,
+                        CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified),
                         IsDelete = false
                     };
 

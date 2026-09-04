@@ -1,15 +1,21 @@
 ﻿using DataFactory.Factory;
 using DataFactory.KingBase;
+using Microsoft.AspNetCore.Http;
 using Model.tech.QL.DTO.SysMenu;
 using Tool;
 
 namespace Service.PreAssembled
 {
-    public class SysMenuService(QlPreAssembled_KingBase_UnitOfWorkFactory qlUowFactory) : ServiceBase<sys_menu>(qlUowFactory)
+    public class SysMenuService(QlPreAssembled_KingBase_UnitOfWorkFactory qlUowFactory, IHttpContextAccessor httpContextAccessor)
+            : ServiceBase<sys_menu>(qlUowFactory, httpContextAccessor)
     {
         public async Task<List<SysMenuItemDTO>> List(SysMenuQueryDTO req)
         {
             var menu = Db.Query<sys_menu>().Where(a => a.Status != -1).DefaultIfEmpty().ToList();
+            string userAccount = CurrUser.Account;
+            string userName = CurrUser.Name;
+            string deptName = CurrUser.DeptName;
+            string deptOID = CurrUser.DeptOID;
             var list = new List<SysMenuItemDTO>();
             if (menu == null) return null;
             foreach (var data in menu)
@@ -24,7 +30,7 @@ namespace Service.PreAssembled
         public async Task<SysMenuItemDTO> Save(SysMenuItemDTO item)
         {
 
-            item.ID = base.SaveInt(item, (entity) =>
+            item.ID = base.Save(item, (entity) =>
             {
                 if (entity.ParentID != null)
                 {

@@ -1,0 +1,12 @@
+label.chkbox {display: inline-block;*display: inline;*zoom: 1;position: relative; z-index: 2;vertical-align:middle;width:3.2vw;height: 2.2vh;border-radius: 20px;cursor: pointer;overflow: hidden;color:#fff;box-shadow: 0 1px 15px rgba(0, 240, 255, 0.1) inset;background: rgb(0 240 255 / 0%);border:0.3vh solid rgb(0 240 255 / 30%);  -webkit-transition: background-color 0.4s ease;-moz-transition: background-color 0.4s ease;-ms-transition: background-color 0.4s ease;-o-transition: background-color 0.4s ease;transition: background-color 0.4s ease;}
+
+label.chkbox .yes,
+label.chkbox .no {position: absolute;right: 0px;text-indent: -999em;background-repeat: no-repeat;}
+
+label.chkbox .toggle {content: " ";width: 1.8vh;height: 1.8vh;border-radius: 20px;display: block;position: absolute;overflow: hidden;z-index: 3;left: 0vw;top: 0px;
+background: transparent;transform: translateX(1px);-webkit-transition: -webkit-transform 0.3s ease;-moz-transition: -moz-transform 0.3s ease;-ms-transition: -ms-transform 0.3s ease;-o-transition: -o-transform 0.3s ease;transition: transform 0.3s ease;background-image: linear-gradient(#ffffff 0%, #e7e7e7 100%);box-shadow: 0 0 3px #fff;}
+label.chkbox.on {background: rgb(0 240 255 / 0%);border:0.3vh solid rgb(0 240 255 / 100%);box-shadow: 0 0 3px #fff;}
+label.chkbox.on .toggle {transform: translateX(2.05vw);}
+label.chkbox.focus {outline: 0;}
+input[type=checkbox].replaced{position: absolute;left: -9999em;}
+label {margin-bottom:0;}

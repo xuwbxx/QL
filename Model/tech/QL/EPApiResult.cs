@@ -7,12 +7,18 @@
     public class EPApiResult<T>
     {
         public int Code { get; set; }
+        public bool Success => Code == 200;
         public string Msg { get; set; }
         public T Data { get; set; }
     }
 
     public class EPApiResult : EPApiResult<object>
     {
+        public static EPApiResult<object> Success(string msg)
+        {
+            return new EPApiResult<object> { Code = 200, Msg = msg };
+        }
+
         public static EPApiResult<T> Success<T>(T data, string msg = "ok")
         {
             return new EPApiResult<T> { Code = 200, Msg = msg, Data = data };

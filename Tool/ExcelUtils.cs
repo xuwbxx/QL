@@ -531,6 +531,95 @@ namespace Tool
             return fields.ToArray();
         }
 
+
+
+        public static bool DataSetToExcel(DataSet dataSet, string Outpath, bool AddFirstColumn)
+        {
+            bool result = false;
+            try
+            {
+                if (dataSet == null || dataSet.Tables == null || dataSet.Tables.Count == 0 || string.IsNullOrEmpty(Outpath))
+                    throw new Exception("输入的DataSet或路径异常");
+                int sheetIndex = 0;
+                //根据输出路径的扩展名判断workbook的实例类型
+                IWorkbook workbook = null;
+                string pathExtensionName = Outpath.Trim().Substring(Outpath.Length - 5);
+                if (pathExtensionName.Contains(".xlsx"))
+                {
+                    workbook = new XSSFWorkbook();
+                }
+                else if (pathExtensionName.Contains(".xls"))
+                {
+                    workbook = new HSSFWorkbook();
+                }
+                else
+                {
+                    Outpath = Outpath.Trim() + ".xls";
+                    workbook = new HSSFWorkbook();
+                }
+                //将DataSet导出为Excel
+                foreach (DataTable dt in dataSet.Tables)
+                {
+                    sheetIndex++;
+                    if (dt != null && dt.Rows.Count > 0)
+                    {
+                        ISheet sheet = workbook.CreateSheet(string.IsNullOrEmpty(dt.TableName) ? ("sheet" + sheetIndex) : dt.TableName);//创建一个名称为Sheet0的表
+                        int rowCount = dt.Rows.Count;//行数
+                        int columnCount = dt.Columns.Count;//列数
+
+                        if (AddFirstColumn)
+                        {
+                            //设置列头
+                            IRow row = sheet.CreateRow(0);//excel第一行设为列头
+                            for (int c = 0; c < columnCount; c++)
+                            {
+                                ICell cell = row.CreateCell(c);
+                                cell.SetCellValue(dt.Columns[c].ColumnName);
+                            }
+
+                            //设置每行每列的单元格,
+                            for (int i = 0; i < rowCount; i++)
+                            {
+                                row = sheet.CreateRow(i + 1);
+                                for (int j = 0; j < columnCount; j++)
+                                {
+                                    ICell cell = row.CreateCell(j);//excel第二行开始写入数据
+                                    cell.SetCellValue(dt.Rows[i][j].ToString());
+                                }
+                            }
+                        }
+                        else
+                        {
+                            IRow row = null;
+                            //设置每行每列的单元格,
+                            for (int i = 0; i < rowCount; i++)
+                            {
+                                row = sheet.CreateRow(i);
+                                for (int j = 0; j < columnCount; j++)
+                                {
+                                    ICell cell = row.CreateCell(j);//excel第二行开始写入数据
+                                    cell.SetCellValue(dt.Rows[i][j].ToString());
+                                }
+                            }
+                        }
+                    }
+                }
+                //向outPath输出数据
+                using (FileStream fs = File.OpenWrite(Outpath))
+                {
+                    workbook.Write(fs);//向打开的这个xls文件中写入数据
+                    result = true;
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                LoggerUtils.Error(ex.ToString(), typeof(ExcelUtils));
+                return false;
+            }
+        }
+
+
     }
 
     public class CsvService<T> where T : class

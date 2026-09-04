@@ -1,6 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
+<PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -19,13 +19,18 @@
     <Folder Include="Areas\Cloud\Models\" />
     <Folder Include="Areas\Towing\Data\" />
     <Folder Include="Areas\Towing\Models\" />
-    <Folder Include="Areas\Towing\Views\" />
     <Folder Include="Areas\WindDoor\Data\" />
     <Folder Include="Areas\WindDoor\Models\" />
+    <Folder Include="wwwroot\Content\Towing\lib\lib\echarts\dist\extension\" />
+    <Folder Include="wwwroot\Content\Towing\lib\lib\leaflet\.github\" />
+    <Folder Include="wwwroot\Content\Towing\lib\lib\leaflet\dist\" />
+    <Folder Include="wwwroot\Content\Towing\lib\lib\leaflet\examples\" />
+    <Folder Include="wwwroot\Content\Towing\lib\lib\leaflet\src\layer\" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="wwwroot\Content\leaflet\.github\FUNDING.yml" />
+    <None Include="wwwroot\Content\Towing\lib\leaflet\.github\FUNDING.yml" />
   </ItemGroup>
 
   <ItemGroup>

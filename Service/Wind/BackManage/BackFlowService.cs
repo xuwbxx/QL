@@ -1,5 +1,6 @@
 using DataFactory.Factory;
 using DataFactory.KingBase.CloudWind;
+using Microsoft.EntityFrameworkCore;
 using Model.Tech.Cloud;
 using Model.Tech.Cloud.BackManage;
 using Tool;
@@ -44,7 +45,7 @@ namespace Service.Wind.BackManage
                     if (!string.IsNullOrEmpty(request.NodeName))
                     {
                         var nodeName = request.NodeName;
-                        predicate = PredicateBuilder.And(predicate, a => a.NodeName != null && a.NodeName.Contains(nodeName));
+                        predicate = PredicateBuilder.And(predicate, a => a.NodeName != null && EF.Functions.Like(a.NodeName, $"%{nodeName}%"));
                     }
 
                     if (request.SoftwareID != 0)
@@ -180,7 +181,7 @@ namespace Service.Wind.BackManage
                                 ManageDepart = a.UserDepartName,
                                 ManagePhone = a.UserPhone,
                                 ManageJobName = a.UserJobName,
-                                CreateTime = DateTime.UtcNow,
+                                CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified),
                                 IsDelete = false
                             };
                             managerRepo.Add(manager);

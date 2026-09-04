@@ -45,6 +45,8 @@
       var userInfo = Vue.reactive({
         userName: ''
       });
+
+      var elMenuRef = Vue.ref(null);
       var rawMenuList = Vue.ref([]);
       var menuTree = Vue.ref([]);
       var activeMenuId = Vue.ref('');
@@ -56,6 +58,36 @@
 
       var isCollapsed = Vue.ref(false);
       var currentLang = Vue.ref(localStorage.getItem('app-lang') || 'zh-cn');
+
+      // 修改密码弹窗
+      var passwordDialogVisible = Vue.ref(false);
+      var passwordLoading = Vue.ref(false);
+      var passwordFormRef = Vue.ref(null);
+      var passwordForm = Vue.reactive({
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      var passwordRules = {
+        oldPassword: [{ required: true, message: '请输入旧密码', trigger: 'blur' }],
+        newPassword: [
+          { required: true, message: '请输入新密码', trigger: 'blur' },
+          { min: 6, max: 30, message: '密码长度在 6 到 30 个字符', trigger: 'blur' }
+        ],
+        confirmPassword: [
+          { required: true, message: '请再次输入新密码', trigger: 'blur' },
+          {
+            validator: function (rule, value, callback) {
+              if (value !== passwordForm.newPassword) {
+                callback(new Error('两次输入密码不一致'));
+              } else {
+                callback();
+              }
+            },
+            trigger: 'blur'
+          }
+        ]
+      };
 
       // ========== Axios 请求实例 ==========
       var api = axios.create({ baseURL: '' });
@@ -154,7 +186,14 @@
       // ========== 菜单加载 ==========
       async function loadMenus() {
         try {
-          var res = await api.post('/api/Sys/User/Menu');
+          var res = {
+            data: [
+              { id: 1, parentID: 0, name: '系统管理', enName: 'sys mgmt', icon: 'el-icon-user' },
+              { id: 2, parentID: 1, name: '用户管理', enName: 'user mgmt', icon: 'el-icon-user', action: '/Sys/User/Index' },
+              { id: 3, parentID: 1, name: '菜单管理', enName: 'menu mgmt', icon: 'el-icon-user', action: '/Sys/Menu/Index' },
+            ]
+          };
+          res = await api.post('/api/sys/User/Menu');
           try {
             mergeMenuToI18n(res.data);
           } catch (e) { console.log('mergeMenuToI18n:error', e) }
@@ -183,6 +222,53 @@
         }
       }
 
+      // tab切换事件：同步左侧菜单高亮
+      async function handleTabChange(tabKey) {
+        if (tabKey === 'home') {
+          // 首页：清空菜单选中
+          activeMenuId.value = '';
+          return;
+        }
+        // 找到当前tab对象
+        const foundTab = tabList.value.find(t => t.action === tabKey);
+        if (foundTab && foundTab.id != null && foundTab.id != undefined) {
+          activeMenuId.value = String(foundTab.id);
+        } else {
+          activeMenuId.value = '';
+        }
+        await Vue.nextTick();
+
+        if (elMenuRef.value && typeof elMenuRef.value.updateActiveIndex === 'function') {
+          elMenuRef.value.updateActiveIndex(activeMenuId.value);
+        }
+        window.mymenu = elMenuRef;
+        console.log('handleTabChange:', activeMenuId.value, elMenuRef)
+      };
+      ``
+
+      // tab切换事件：同步左侧菜单高亮
+      async function handleTabChange(tabKey) {
+        if (tabKey === 'home') {
+          // 首页：清空菜单选中
+          activeMenuId.value = '';
+          return;
+        }
+        // 找到当前tab对象
+        const foundTab = tabList.value.find(t => t.action === tabKey);
+        if (foundTab && foundTab.id != null && foundTab.id != undefined) {
+          activeMenuId.value = String(foundTab.id);
+        } else {
+          activeMenuId.value = '';
+        }
+        await Vue.nextTick();
+
+        if (elMenuRef.value && typeof elMenuRef.value.updateActiveIndex === 'function') {
+          elMenuRef.value.updateActiveIndex(activeMenuId.value);
+        }
+        window.mymenu = elMenuRef;
+        console.log('handleTabChange:', activeMenuId.value, elMenuRef)
+      };
+
       // 关闭标签页：禁止删除首页home
       function handleTabRemove(targetKey) {
         // 拦截首页，不允许关闭
@@ -208,8 +294,58 @@
         }
       }
 
+      // 用户下拉菜单命令处理
+      function handleUserCommand(command) {
+        if (command === 'changePassword') {
+          passwordForm.oldPassword = '';
+          passwordForm.newPassword = '';
+          passwordForm.confirmPassword = '';
+          passwordDialogVisible.value = true;
+        } else if (command === 'logout') {
+          logout();
+        }
+      }
+
+      // 提交修改密码
+      async function submitPasswordChange() {
+        if (!passwordFormRef.value) return;
+        passwordFormRef.value.validate(function (valid) {
+          if (!valid) return;
+          passwordLoading.value = true;
+          var oldPwdHashed = CryptoJS.MD5(passwordForm.oldPassword).toString();
+          var newPwdHashed = CryptoJS.MD5(passwordForm.newPassword).toString();
+          api.post('/api/Sys/Auth/ChangePassword', {
+            oldPassword: oldPwdHashed,
+            newPassword: newPwdHashed
+          })
+            .then(function (res) {
+              if (res.data.success) {
+                ElMessage.success('密码修改成功，请重新登录');
+                passwordDialogVisible.value = false;
+                setTimeout(function () { logout(); }, 1500);
+              } else {
+                ElMessage.error(res.data.message || '密码修改失败');
+              }
+            })
+            .catch(function (err) {
+              ElMessage.error('密码修改失败');
+            })
+            .finally(function () {
+              passwordLoading.value = false;
+            });
+        });
+      }
+
       function toggleCollapse() {
         isCollapsed.value = !isCollapsed.value;
+      }
+
+      async function loadUserInfo() {
+        var res = await siteUtils.getUserInfoAsync();
+        console.log('loadUserInfo', res);
+        localStorage.setItem('userName', res.user?.name);
+        localStorage.setItem('userAccount', res.user?.account);
+        userInfo.userName = res.user?.name;
       }
 
       // ========== 页面挂载初始化 ==========
@@ -220,7 +356,13 @@
         loadMenus();
 
         var savedName = localStorage.getItem('userName');
-        userInfo.userName = savedName || '未知用户';
+        if (savedName) {
+          userInfo.userName = savedName || '未知用户';
+        } else {
+          loadUserInfo().catch(function (e) {
+            console.error('[ERROR] loadUserInfo', e);
+          });
+        }
 
         // 监听子页面请求语言
         window.addEventListener('message', (event) => {
@@ -262,16 +404,32 @@
 
       // 对外暴露变量方法
       return {
-        userInfo, menuTree, activeMenuId, tabList, activeTabKey,
+        userInfo, elMenuRef, menuTree, activeMenuId, tabList, activeTabKey,
         isCollapsed, currentLang, iconMap,
+        passwordDialogVisible, passwordLoading, passwordFormRef,
+        passwordForm, passwordRules,
         hasChildren, toggleCollapse, handleMenuSelect,
-        handleTabRemove, logout, switchGlobalLang, consoleLog
+        handleTabRemove, handleTabChange, logout, switchGlobalLang, consoleLog,
+        handleUserCommand, submitPasswordChange
       };
     }
   });
 
+  // 业务实际用到的图标白名单，新增图标在这里追加名字（大写）
+  const exportIconList = []; // ['Search', 'Edit', 'Delete', 'View'];
+
+  // 只把白名单内图标注册为Vue全局组件
+  for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+    if (exportIconList.includes(key)) {
+      app.component(key, component);
+    } else if (exportIconList.length == 0) {
+      app.component(key, component);
+    }
+  }
+
   app.use(appI18n);
   app.use(ElementPlus, { locale: ElementPlusLocaleZhCn });
+
   app.mount('#app');
   siteUtils.append(app);
   console.log('主页 Vue 应用初始化完成');

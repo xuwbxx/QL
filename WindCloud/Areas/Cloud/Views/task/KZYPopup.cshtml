@@ -1,0 +1,1192 @@
+﻿<!--	    起重船基础施工可作业性预报-->
+<div class="modal fade" id="Tk_software_03" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog" style="right: -24vw;width: 48vw;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    起重船基础施工可作业性预报
+                </h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="sqzl_box">
+                    <div class="form-horizontal form-horizontal_sqrjzl">
+
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">任务名</label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" placeholder="任务名自动生成" id="popup_txtTaskName_KZY" disabled>
+                            </div>
+                        </div>
+
+                        <div class="form-group mod_touying">
+
+                            <div class="cb_check_f clearfix mb1">
+                                <h3 class="title_tx"><i class="fa fa-edit"></i>项目部</h3>
+                                <label class="col-md-2 control-label">浮式船舶选择</label>
+                                <div class="col-md-10 clearfix">
+                                    <div class="cb_checkbox">
+                                        <div class="clearfix mb1 mt1">
+                                            <div class="col-md-6">
+                                                <input type="text" class="form-control" placeholder="请输入船名" id="popup_txtFloatShipName_KZY" />
+                                            </div>
+                                            <div class="col-md-1 pl0">
+                                                <button class="btn btn-primary search_btn" style="width: 100%" id="popup_btnQueryFloatShip_KZY" onclick="SoftwareKZYHelper.QueryFloatShip();">搜索</button>
+                                            </div>
+                                        </div>
+
+                                        <ul class="clearfix" id="popup_ulFloatList_KZY">
+                                            <li><input type="checkbox" data-id="1"><a>秦航工2300</a></li>
+                                            <li><input type="checkbox" data-id="2"><a>华西5000</a></li>
+                                            <li><input type="checkbox" data-id="3"><a>长胜5000</a></li>
+                                            <li><input type="checkbox" data-id="4"><a>秦航工5000</a></li>
+                                            <li><input type="checkbox" data-id="5"><a>宇航29</a></li>
+                                            <li><input type="checkbox" data-id="6"><a>宇航23</a></li>
+                                            <li><input type="checkbox" data-id="7"><a>振华30</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                         </div>
+                            
+
+                        <div class="form-group" id="popup_divTechEdit_KZY">
+                            <div class="cb_check_f clearfix mb1">
+                                <h3 class="title_tx"><i class="fa fa-edit"></i>技术中心</h3>
+                                <label class="col-md-2 control-label">可作业预报信息</label>
+                                <div class="col-md-10 p0 xmjbxx_box">
+
+                                    <div class="col-md-5">
+                                        <span>亿方云TaskNo</span>
+                                        <input type="text" class="form-control" placeholder="例如：TN10503" id="popup_txtYFYTask_KZY">
+                                    </div>
+
+                                    <div class="col-md-5">
+                                        <span>衡准</span>
+                                        <input type="number" class="form-control" placeholder="例如：0.3" id="popup_txtHZ_KZY">
+                                    </div>
+
+                                    <div class="col-md-5">
+                                        <span>风场经度</span>
+                                        <input type="number" class="form-control" placeholder="例如：122.053478" id="popup_txtLon_KZY">
+                                    </div>
+
+                                    <div class="col-md-5">
+                                        <span>风场纬度</span>
+                                        <input type="number" class="form-control" placeholder="例如：29.664924" id="popup_txtLat_KZY">
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">推送时间</label>
+                            <div class="col-md-5">
+                                <input placeholder="开始时间" class="laydate-icon timeUstyle stateUTime form-control" id="popup_ForecastStartTime_KZY" onclick="laydate({istime: true,format:'YYYY-MM-DD'})">
+
+                            </div>
+                            <div class="col-md-5">
+                                <input placeholder="结束时间" class="laydate-icon timeUstyle stateUTime form-control" id="popup_ForecastEndTime_KZY" onclick="laydate({istime: true,format:'YYYY-MM-DD'})">
+
+                            </div>
+
+                        </div>
+
+                        <div class="form-group mod_touying clearfix" id="popup_divReport_KZY">
+                            <label class="col-md-2 control-label">文件报告</label>
+                            <div class="col-md-10">
+                                <button class="btn btn-primary" onclick="SoftwareKZYHelper.OpenReport();">提取可作业预报文件</button>
+                            </div>
+                        </div>
+
+
+
+                        <div class="form-group mod_touying" id="popup_divLastContent_KZY">
+
+                            <label class="col-md-2 control-label">上一节点意见</label>
+                            <div class="col-md-10">
+                                <textarea class="form-control" id="popup_txtLastContent_KZY" disabled></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group mod_touying" id="popup_divContent_KZY">
+
+                            <label class="col-md-2 control-label">审批意见</label>
+                            <div class="col-md-10">
+                                <textarea class="form-control" id="popup_txtContent_KZY"></textarea>
+                            </div>
+                            
+                        </div>
+
+                        <div class="form-group mod_touying" id="popup_divNextNode_KZY">
+
+                            <label class="col-md-2 control-label lcjd_next">流程下一节点</label>
+                            <div class="col-md-4 pr0">
+                                <div class="lcjd_next_sp"><i class="icon iconfont">&#xe63e;</i><span id="popup_spanNextNodeName_KZY">分子公司审批</span></div>
+                                <div class="nice-select">
+                                    <input id="popup_txtNodeUserName_KZY" type="text" class="form-control" placeholder="搜索" autocomplete="off" />
+                                    <div class="search_div" onclick="SoftwareKZYHelper.ClearShjNodeUserName();" id="popup_divClearNodeName_KZY">
+                                        <i class="fa fa-close"></i>
+                                    </div>
+                                    <ul id="popup_ulNodeUserList_KZY" style="display:none;">
+                                    </ul>
+                                </div>
+
+                            </div>
+                            <div class="col-md-1 text-center mt4">
+                                <button class="btn btn-primary search_btn" style="width: 100%" id="popup_btnFindNodeUserName_KZY" onclick="SoftwareKZYHelper.FindShjNodeUserByName();">搜索</button>
+                            </div>
+                            <div class="col-md-5 zhuyi_zt mt4">
+                                注意：请按照流程节点审批要求，指定下一节点审批人。如果节点审批人选错，整个流程将不能通过或者退回。
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <div class="text-center sqzl_btn_box" id="popup_divSubmit_KZY">
+                    <button class="btn btn-success" id="popup_btnSubmit_KZY" data-type="1" onclick="SoftwareKZYHelper.AddTaskSubmit(this);">申请</button>
+                    <button class="btn btn-danger" id="popup_btnBack_KZY" data-type="0" onclick="SoftwareKZYHelper.AddTaskSubmit(this);">审批退回</button>
+                    <button class="btn btn-warning" id="popup_btnCancel_KZY" data-type="3" onclick="SoftwareKZYHelper.AddTaskSubmit(this);">作废</button>
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!--	   提前可作业预报文件-->
+<div class="modal fade" id="Tk_KZYReport" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog" style="right: -24vw;width: 30vw; top:10vh;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    可作业预报文件
+                </h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="sqzl_box" style="height:50vh; ">
+
+                    <table class="table table_project table_project02">
+                        <thead>
+                            <tr>
+                                <th width="70%">文件名</th>
+                                <th width="20%">时间</th>
+                                <th width="10%">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="popup_html_KZYFile">
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+                            <tr>
+                                <td>宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项目宁波舟山港基础设施重点项</td>
+                                <td>2024-02-03</td>
+                                <td><a class="xm_zt_green" href="#">下载</a></td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+        SoftwareKZYHelper.Init();
+        SoftwareKZYHelper.LoadKZYShip();
+    })
+
+    var SoftwareKZYHelper = {
+        Init: function () {
+            SoftwareKZYHelper.ForecastTimeInit();
+        },
+        ForecastTimeInit: function () {
+            $('#popup_ForecastStartTime_KZY').val(formatDateTimeByDay(new Date()));
+            $('#popup_ForecastEndTime_KZY').val(formatDateTimeByDay(new Date(new Date().setDate(new Date().getDate() + 90))));
+        },
+        LoadKZYShip: function () {
+
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('LoadKZYShip', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        if (data.Success) {
+
+                            var ShipHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                ShipHtml += '<li><input type="checkbox" data-id="' + dom.ID + '" data-name="' + dom.ShipName + '"><a onclick="SoftwareKZYHelper.OpenShip(' + dom.ID + ');">' + dom.ShipName + '</a></li>';
+
+                            })
+                            $('#popup_ulFloatList_KZY').html(ShipHtml);
+
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+        OpenPopup: function () {
+
+            var ChooseProjectID = $('#hid_ProjectID').val();
+            if (ChooseProjectID == null || ChooseProjectID == '' || ChooseProjectID == 0) {
+                ModalPopup('error', '必须先选择所关联的风场');
+                return;
+            }
+            SoftwareKZYHelper.PopupOpenedHandleType = 'new';
+            SoftwareKZYHelper.OpenTaskPopup('new', ChooseProjectID);
+
+            Param.SoftwareID = 3;
+            //下一节点人员
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('NextNodeQuery', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+
+                            $('#popup_spanNextNodeName_KZY').html(data.Data.NodeName);
+
+                            if (data.Data.NodeUsers.length > 0) {
+
+                                $('#popup_txtNodeUserName_KZY').attr('disabled', true);
+                                $('#popup_btnFindNodeUserName_KZY').attr('disabled', true);
+                                $('#popup_divClearNodeName_KZY').hide();
+
+                                var NodeUserHtml = '';
+                                $(data.Data.NodeUsers).each(function (index, dom) {
+
+                                    NodeUserHtml += dom.ManageName + '(' + dom.ManageDepart + ');'
+
+                                });
+                                $('#popup_txtNodeUserName_KZY').val(NodeUserHtml);
+
+                            }
+                            else {
+                                $('#popup_txtNodeUserName_KZY').attr('disabled', false);
+                                $('#popup_btnFindNodeUserName_KZY').attr('disabled', false);
+                                $('#popup_divClearNodeName_KZY').show();
+                            }
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        OpenTaskPopup: function (type, ProjectID, FlowStatus) {
+            $('#popup_divSubmit_KZY').show();
+            if (type == 'new') {
+                //清空弹窗
+                SoftwareKZYHelper.ClearTaskPopup();
+                //设置可写
+                SoftwareKZYHelper.SetTaskPopupWrite();
+
+                //技术中心区域
+                $('#popup_divTechEdit_KZY').hide();
+                //报告文件
+                $('#popup_divReport_KZY').hide();
+                /*上一节点审批意见*/
+                $('#popup_divLastContent_KZY').hide();
+                //审批意见
+                $('#popup_divContent_KZY').hide();
+                //下一节点
+                $('#popup_divNextNode_KZY').show();
+
+                //提交按钮
+                $('#popup_btnSubmit_KZY').show().html('申请').attr('data-type', 1);
+                $('#popup_btnBack_KZY').hide();
+                $('#popup_btnCancel_KZY').hide();
+
+                
+
+            }
+            else if (type == 'view') {
+                //清空弹窗
+                SoftwareKZYHelper.ClearTaskPopup();
+                //设置可写
+                SoftwareKZYHelper.SetTaskPopupRead();
+
+                $('#popup_ulFloatList_KZY input:checkbox').attr('disabled', true);
+
+                //技术中心区域
+                $('#popup_divTechEdit_KZY').show();
+
+                //成果报告（需要另外判断）
+                $('#popup_divReport_KZY').show();
+
+                /*上一节点审批意见*/
+                $('#popup_divLastContent_KZY').show();
+                //审批意见
+                $('#popup_divContent_KZY').hide();
+                //下一节点
+                $('#popup_divNextNode_KZY').hide();
+
+                $('#popup_btnSubmit_KZY').hide();
+                $('#popup_btnBack_KZY').hide();
+                $('#popup_btnCancel_KZY').hide();
+
+                //作废的流程
+                if (FlowStatus == 3) {
+                    $('#popup_divSubmit_KZY').hide();
+                }
+
+            }
+            else if (type == 'approval') {
+                //清空弹窗
+                SoftwareKZYHelper.ClearTaskPopup();
+                //设置只读
+                SoftwareKZYHelper.SetTaskPopupRead();
+
+
+
+                //技术中心区域
+                $('#popup_divTechEdit_KZY').show();
+                $('#popup_txtYFYTask_KZY').attr('disabled', false);
+                $('#popup_txtHZ_KZY').attr('disabled', false);
+                $('#popup_txtLon_KZY').attr('disabled', false);
+                $('#popup_txtLat_KZY').attr('disabled', false);
+
+                $('#popup_ForecastStartTime_KZY').attr('disabled', false);
+                $('#popup_ForecastEndTime_KZY').attr('disabled', false);
+
+                //成果报告（需要另外判断）
+                $('#popup_divReport_KZY').show();
+
+                /*上一节点审批意见*/
+                $('#popup_divLastContent_KZY').show();
+                //审批意见
+                $('#popup_divContent_KZY').show();
+                //下一节点
+                $('#popup_divNextNode_KZY').show();
+
+                $('#popup_txtNodeUserName_KZY').attr('disabled', false);
+                $('#popup_btnFindNodeUserName_KZY').attr('disabled', false);
+                $('#popup_divClearNodeName_KZY').show();
+
+                $('#popup_btnBack_KZY').show();
+                $('#popup_btnSubmit_KZY').show().html('审批通过').attr('data-type', 2);
+                $('#popup_btnCancel_KZY').show();
+
+                //个性化要求
+                //$('#popup_txtLon_KZY').attr('disabled', false);
+                //$('#popup_txtLat_KZY').attr('disabled', false);
+                //$('#popup_txtWaterDepth_KZY').attr('disabled', false);
+                //$('#popup_txtStandard_KZY').attr('disabled', false);
+
+
+            }
+            else if (type == 'renew') {
+                //清空弹窗
+                SoftwareKZYHelper.ClearTaskPopup();
+                //设置可写
+                SoftwareKZYHelper.SetTaskPopupWrite();
+
+                //技术中心区域
+
+                $('#popup_divTechEdit_KZY').hide();
+
+                //成果报告（需要另外判断）
+                $('#popup_divReport_KZY').show();
+
+                /*上一节点审批意见*/
+                $('#popup_divLastContent_KZY').show();
+                //审批意见
+                $('#popup_divContent_KZY').show();
+                //下一节点
+                $('#popup_divNextNode_KZY').show();
+
+                $('#popup_btnBack_KZY').hide();
+                $('#popup_btnSubmit_KZY').show().html('重新提交').attr('data-type', 2);
+                $('#popup_btnCancel_KZY').show();
+
+            }
+
+            $('#Tk_software_03').modal('show');
+            
+        },
+
+        SetTaskPopupWrite: function () {
+
+            //$('#popup_txtTaskName_KZY').attr('disabled', false);
+
+            $('#popup_ulFloatList_KZY input:checkbox').attr('disabled', false);
+
+            $('#popup_txtYFYTask_KZY').attr('disabled', false);
+            $('#popup_txtHZ_KZY').attr('disabled', false);
+            $('#popup_txtLon_KZY').attr('disabled', false);
+            $('#popup_txtLat_KZY').attr('disabled', false);
+
+            $('#popup_ForecastStartTime_KZY').attr('disabled', false);
+            $('#popup_ForecastEndTime_KZY').attr('disabled', false);
+
+            $('#popup_txtNodeUserName_KZY').attr('disabled', false);
+            $('#popup_btnFindNodeUserName_KZY').attr('disabled', false);
+            $('#popup_divClearNodeName_KZY').show();
+
+        },
+
+        SetTaskPopupRead: function () {
+
+            //$('#popup_txtTaskName_KZY').attr('disabled', true);
+
+            $('#popup_ulFloatList_KZY input:checkbox').attr('disabled', true);
+
+            $('#popup_txtYFYTask_KZY').attr('disabled', true);
+            $('#popup_txtHZ_KZY').attr('disabled', true);
+            $('#popup_txtLon_KZY').attr('disabled', true);
+            $('#popup_txtLat_KZY').attr('disabled', true);
+
+            $('#popup_ForecastStartTime_KZY').attr('disabled', true);
+            $('#popup_ForecastEndTime_KZY').attr('disabled', true);
+
+            $('#popup_txtNodeUserName_KZY').attr('disabled', true);
+            $('#popup_btnFindNodeUserName_KZY').attr('disabled', true);
+            $('#popup_divClearNodeName_KZY').hide();
+
+        },
+
+        ClearTaskPopup: function () {
+
+            $('#popup_txtTaskName_KZY').val('');
+
+            $('#popup_ulFloatList_KZY input:checkbox').prop('checked', false);
+
+
+            $('#popup_ForecastStartTime_KZY').val('');
+            $('#popup_ForecastEndTime_KZY').val('');
+
+            //$('#popup_txtLon_KZY').val('');
+            //$('#popup_txtLat_KZY').val('');
+
+            //$('#popup_txtWaterDepth_KZY').val('');
+            //$('#popup_txtStandard_KZY').val('');
+
+            $('#popup_htmlTaskReportFile_KZY').html('');
+
+            $('#popup_txtNodeUserName_KZY').val('');
+
+            $('#popup_txtLastContent_KZY').val('');
+            //$('#popup_ulLastNodeCommentFile_KZY').html('');
+
+            $('#popup_txtContent_KZY').val('');
+            $('#popup_ulNodeCommentFile_KZY').html('');
+
+
+            SoftwareKZYHelper.ForecastTimeInit();
+        },
+
+        ChoosedTaskNodeUser: { Name: '', UserCode: '', Depart: '', Phone: '', JobName: '', NextNodeID: '' },
+
+        FindShjNodeUserByName: function () {
+
+            Param.Name = $("#popup_txtNodeUserName_KZY").val();
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('FindShjUser', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        if (data.Success) {
+
+                            var DataListHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                DataListHtml += '<li onclick="SoftwareKZYHelper.ChooseNodeUser(this);" data-usercode="' + dom.empcode + '" data-name="' + dom.name + '" data-depart="' + dom.wholeDeptPath + '" data-phone="' + dom.phone + '" data-jobname="' + dom.jobname + '" ><h3>' + dom.name + '(' + dom.jobname + ')</h3><div>' + dom.wholeDeptPath + '</div></li >';
+
+                            });
+                            $('ul#popup_ulNodeUserList_KZY').html(DataListHtml);
+                            $('ul#popup_ulNodeUserList_KZY').show();
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        ChooseNodeUser: function (dom) {
+
+            //SoftwareKZYHelper.ChoosedTaskNodeUser = {};
+
+            if (dom == null)
+                return;
+
+            var Name = $(dom).attr('data-name');
+            var UserCode = $(dom).attr('data-usercode');
+            var Depart = $(dom).attr('data-depart');
+            var Phone = $(dom).attr('data-phone');
+            var JobName = $(dom).attr('data-jobname');
+
+            SoftwareKZYHelper.ChoosedTaskNodeUser.Name = Name;
+            SoftwareKZYHelper.ChoosedTaskNodeUser.UserCode = UserCode;
+            SoftwareKZYHelper.ChoosedTaskNodeUser.Depart = Depart;
+            SoftwareKZYHelper.ChoosedTaskNodeUser.Phone = Phone;
+            SoftwareKZYHelper.ChoosedTaskNodeUser.JobName = JobName;
+
+            if (Name == '' || UserCode == '')
+                return;
+
+            $('#popup_txtNodeUserName_KZY').val(Name + '(' + Depart + ')');
+
+            $('ul#popup_ulNodeUserList_KZY').hide();
+
+        },
+
+        PopupOpenedTaskID: 0,
+        PopupIsBackFlow: false,
+        PopupOpenedHandleType: 'new',
+        OpenTaskInfo: function (TaskID) {
+
+            Param.TaskID = TaskID;
+
+            SoftwareKZYHelper.PopupOpenedTaskID = 0;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            $.post('TaskQuery_KZY', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+                        if (data.Success) {
+                            SoftwareKZYHelper.PopupOpenedTaskID = TaskID;
+
+                            var Task = data.Data;
+
+                            //如果是已经结束的流程，直接打开文件获取弹窗
+                            if (Task.FlowInfo.FlowStatus == 2) {
+
+                                OpenReportPopup(TaskID);
+                                return;
+                            }
+
+                            SoftwareKZYHelper.OpenTaskPopup(Task.FlowInfo.FlowHandle, Task.ProjectID, Task.FlowInfo.FlowStatus);
+
+                            SoftwareKZYHelper.PopupOpenedHandleType = Task.FlowInfo.FlowHandle;
+
+                            SoftwareKZYHelper.PopupIsBackFlow = Task.FlowInfo.IsBackFlow;
+
+                            //if (Task.FlowInfo.FlowHandle == 'renew' && Task.FlowInfo.NodeID == 9)
+                            //{
+                            //    $('#popup_divTechEdit_KZY').show();
+                            //}
+
+
+                            if (Task.FlowInfo.DoEditConfirm == true) {
+                                
+                            }
+
+                            if (Task.FlowInfo.IsUsingFlowNode) {
+                                $('#popup_divContent_KZY').hide();
+                                $('#popup_divNextNode_KZY').hide();
+                                $('#popup_btnSubmit_KZY').hide();
+                                $('#popup_btnBack_KZY').hide();
+                            }
+
+                            //如果是最后的流程
+                            SoftwareKZYHelper.ChoosedTaskNodeUser.NextNodeID = Task.FlowInfo.NextNodeID;
+                            if (Task.FlowInfo.NextNodeID == 0) {
+                                $('#popup_txtNodeUserName_KZY').attr('disabled', true);
+                                $('#popup_btnFindNodeUserName_KZY').attr('disabled', true);
+                                $('#popup_divClearNodeName_KZY').hide();
+                            }
+
+                            //下一节点如果有默认人物
+                            if (Task.FlowInfo.NextNode != null && Task.FlowInfo.NextNode.length > 0) {
+
+                                $('#popup_txtNodeUserName_KZY').attr('disabled', true);
+                                $('#popup_btnFindNodeUserName_KZY').attr('disabled', true);
+                                $('#popup_divClearNodeName_KZY').hide();
+
+                                var NodeUserHtml = '';
+                                $(Task.FlowInfo.NextNode).each(function (index, dom) {
+
+                                    NodeUserHtml += dom.UserName + '(' + dom.UserDepart + ');'
+
+                                });
+                                $('#popup_txtNodeUserName_KZY').val(NodeUserHtml);
+
+                            }
+
+                            //上一节点意见（可能多人）
+                            var CommentHtml = '';
+                            $(Task.FlowInfo.LastNode).each(function (index, dom) {
+                                CommentHtml += dom.UserName + ':' + dom.Comment + ';\n'
+                            });
+                            $('#popup_txtLastContent_KZY').val(CommentHtml);
+                            //下一节点
+                            $('#popup_spanNextNodeName_KZY').html(Task.FlowInfo.NextNodeName);
+
+                            //填充表单数据
+                            $('#popup_txtTaskName_KZY').val(Task.TaskName);
+                            $(Task.TaskInfo_KZY.ShipIDs).each(function (index, dom) {
+                                $('#popup_ulFloatList_KZY input[data-id="' + dom + '"]').prop('checked', true);
+                            });
+
+                            $('#popup_ForecastStartTime_KZY').val(Task.TaskInfo_KZY.ForecastStartTime);
+                            $('#popup_ForecastEndTime_KZY').val(Task.TaskInfo_KZY.ForecastEndTime);
+                            $('#popup_txtLon_KZY').val(Task.TaskInfo_KZY.Lon);
+                            $('#popup_txtLat_KZY').val(Task.TaskInfo_KZY.Lat);
+                            $('#popup_txtHZ_KZY').val(Task.TaskInfo_KZY.Balance);
+                            $('#popup_txtYFYTask_KZY').val(Task.TaskInfo_KZY.YFYNo);
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+        },
+
+        ClearShjNodeUserName: function () {
+            SoftwareKZYHelper.ChoosedTaskNodeUser = {};
+            $('#popup_txtNodeUserName_KZY').val('');
+        },
+
+        UploadLastCommentFile: function () {
+
+            if (SoftwareKZYHelper.PopupOpenedTaskID == 0)
+                return;
+
+            var CommentFiles = $('#popup_uploadCommentFile_KZY')[0].files;
+            if (CommentFiles == null || CommentFiles.length == 0)
+                return;
+
+            var formData = new FormData();
+            formData.append("TaskID", SoftwareKZYHelper.PopupOpenedTaskID);
+
+            var FileCount = CommentFiles.length;
+            formData.append("TaskCommentFileCount", FileCount);
+            var Count = 1;
+            $(CommentFiles).each(function (index, dom) {
+
+                formData.append("TaskCommentFile" + Count, dom);
+
+                Count++;
+            });
+
+
+            $.ajax({
+                url: 'TaskCommentFileUpload',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: formData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+
+                            var CommentFileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                CommentFileHtml += '<li><a href="' + dom.FilePath + '">' + dom.FileName + '</a></li>';
+                            });
+
+                            $('#popup_ulNodeCommentFile_KZY').html(CommentFileHtml);
+
+                            ModalPopup('success', '上传成功');
+
+                        }
+                        else {
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                }
+            });
+
+        },
+
+        AddTaskSubmit: function (dom) {
+
+            var type = $(dom).attr('data-type');
+            if (type == null || type == '')
+                return;
+
+            var InfoText = '';
+            if (type == 0) {
+                InfoText = '是否要流程退回？流程将退回至上一节点人员';
+            }
+            else if (type == 1) {
+
+                var TaskName = SoftwareKZYHelper.CreateTaskName();
+                if (TaskName == '') {
+                    return;
+                }
+                $('#popup_txtTaskName_KZY').val(TaskName);
+                InfoText = TaskName + '</br>是否要保存任务？';
+            }
+            else if (type == 2) {
+
+                if (SoftwareKZYHelper.PopupIsBackFlow == true) {
+                    var TaskName = SoftwareKZYHelper.CreateTaskName();
+                    if (TaskName == '') {
+                        return;
+                    }
+                    $('#popup_txtTaskName_KZY').val(TaskName);
+                    InfoText = TaskName + '</br>是否要保存任务？';
+                }
+                else {
+                    InfoText = '是否要审批通过？';
+                }
+            }
+            else if (type == 3) {
+                InfoText = '是否要作废流程？';
+            }
+
+            ModalPopup('information', InfoText);
+
+            $("#ModalSubmit").unbind('click').bind('click', function () {
+                SoftwareKZYHelper.DoTaskSubmit(type);
+            });
+
+        },
+
+        DoTaskSubmit: function (type) {
+
+            if (type == 1) {
+                SoftwareKZYHelper.DoTaskAdd();
+            }
+            else if (type == 0 || type == 2) {
+                SoftwareKZYHelper.DoTaskApproval(type);
+            }
+            else if (type == 3) {
+                SoftwareKZYHelper.DoTaskCancel();
+            }
+        },
+
+        CreateTaskName: function () {
+
+            var TaskName = '';
+
+            //平台船
+            var ShipIDs = [];
+            $('#popup_ulFloatList_KZY input:checkbox:checked').each(function (index, dom) {
+                var ID = $(dom).attr('data-id');
+                if (ID != 0) {
+                    ShipIDs.push(ID);
+                }
+            })
+
+            if (ShipIDs.length == 0) {
+                ModalClose('information');
+                ModalPopup('error', '没有选择任何平台船');
+                return '';
+            }
+
+
+
+            //if (ShipIDs.length == 1) {
+
+            //    TaskName += '(' + $('#popup_ulFloatList_KZY input:checkbox:checked').next().first().html() + ')起重船基础施工可作业性预报';
+            //}
+            //else {
+            //    TaskName += '(' + $('#popup_ulFloatList_KZY input:checkbox:checked').next().first().html() + ')等' + ShipIDs.length + '条起重船基础施工可作业性预报';
+            //}
+
+            TaskName += '起重船基础施工可作业性预报(' + GetFullDateTimeString(new Date()) + ')';
+
+            return TaskName;
+
+        },
+
+        DoTaskAdd: function () {
+
+            var ProjectID = $('#hid_ProjectID').val();
+            if (ProjectID == null || ProjectID == '' || ProjectID == 0) {
+                ModalClose('information');
+                ModalPopup('error', '软件申请页面需要选择关联风电项目');
+                return;
+            }
+
+            var SubmitFormData = new FormData();
+            SubmitFormData.append("ProjectID", ProjectID);
+            SubmitFormData.append("TaskID", SoftwareKZYHelper.PopupOpenedTaskID);
+            SubmitFormData.append("SoftwareID", 3);
+
+            //节点人员
+            SubmitFormData.append("TaskNodeName", SoftwareKZYHelper.ChoosedTaskNodeUser.Name);
+            SubmitFormData.append("TaskNodeUserCode", SoftwareKZYHelper.ChoosedTaskNodeUser.UserCode);
+            SubmitFormData.append("TaskNodeDepart", SoftwareKZYHelper.ChoosedTaskNodeUser.Depart);
+            SubmitFormData.append("TaskNodePhone", SoftwareKZYHelper.ChoosedTaskNodeUser.Phone);
+            SubmitFormData.append("TaskNodeJobName", SoftwareKZYHelper.ChoosedTaskNodeUser.JobName);
+
+            //浮式船舶
+            var ShipIDs = '';
+            $('#popup_ulFloatList_KZY input:checkbox:checked').each(function (index, dom) {
+                var ID = $(dom).attr('data-id');
+                if (ID != 0) {
+                    ShipIDs += ID + ',';
+                }
+            })
+            SubmitFormData.append("ShipIDstring", ShipIDs.substring(0, ShipIDs.length - 1));
+            SubmitFormData.append("KZYForecastStartTime", $('#popup_ForecastStartTime_KZY').val());
+            SubmitFormData.append("KZYForecastEndTime", $('#popup_ForecastEndTime_KZY').val());
+
+            //SubmitFormData.append("KZYLon", $('#popup_txtLon_KZY').val());
+            //SubmitFormData.append("KZYLat", $('#popup_txtLat_KZY').val());
+            //SubmitFormData.append("KZYWaterDepth", $('#popup_txtWaterDepth_KZY').val());
+            //SubmitFormData.append("KZYStandard", $('#popup_txtStandard_KZY').val());
+
+            SubmitFormData.append("TaskName", $('#popup_txtTaskName_KZY').val());
+
+            $.ajax({
+                url: 'TaskSubmit_KZY',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: SubmitFormData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+                            ModalPopup('success', '保存成功');
+                            $('#Tk_software_03').modal('hide');
+                            $('#tk_WorkTasks').modal('hide');
+
+                            Param.ProjectID = $('#hid_ProjectID').val();
+                            DoQuery();
+
+
+                        }
+                        else {
+
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                    ModalClose('information');
+                }
+            });
+
+        },
+
+        DoTaskApproval: function (type) {
+
+            if (SoftwareKZYHelper.PopupOpenedTaskID == 0) {
+                ModalClose('information');
+                ModalPopup('error', '数据出错，重新打开弹窗。');
+                return;
+            }
+
+            var SubmitFormData = new FormData();
+
+            SubmitFormData.append("ApprovalType", type);
+            SubmitFormData.append("IsBackFlow", SoftwareKZYHelper.PopupIsBackFlow);
+            SubmitFormData.append("NodeID", SoftwareKZYHelper.ChoosedTaskNodeUser.NextNodeID);
+            SubmitFormData.append("TaskID", SoftwareKZYHelper.PopupOpenedTaskID);
+            SubmitFormData.append("TaskComment", $('#popup_txtContent_KZY').val());
+
+
+            //正常审批
+            SubmitFormData.append("TaskNodeName", SoftwareKZYHelper.ChoosedTaskNodeUser.Name);
+            SubmitFormData.append("TaskNodeUserCode", SoftwareKZYHelper.ChoosedTaskNodeUser.UserCode);
+            SubmitFormData.append("TaskNodeDepart", SoftwareKZYHelper.ChoosedTaskNodeUser.Depart);
+            SubmitFormData.append("TaskNodePhone", SoftwareKZYHelper.ChoosedTaskNodeUser.Phone);
+            SubmitFormData.append("TaskNodeJobName", SoftwareKZYHelper.ChoosedTaskNodeUser.JobName);
+
+            SubmitFormData.append("TaskName", $('#popup_txtTaskName_KZY').val());
+            SubmitFormData.append("KZYForecastStartTime", $('#popup_ForecastStartTime_KZY').val());
+            SubmitFormData.append("KZYForecastEndTime", $('#popup_ForecastEndTime_KZY').val());
+            SubmitFormData.append("KZYLat", $('#popup_txtLat_KZY').val());
+            SubmitFormData.append("KZYLon", $('#popup_txtLon_KZY').val());
+            SubmitFormData.append("KZYBalance", $('#popup_txtHZ_KZY').val());
+            SubmitFormData.append("KZYYFYNo", $('#popup_txtYFYTask_KZY').val());
+
+            //浮式船舶
+            var ShipIDs = '';
+            $('#popup_ulFloatList_KZY input:checkbox:checked').each(function (index, dom) {
+                var ID = $(dom).attr('data-id');
+                if (ID != 0) {
+                    ShipIDs += ID + ',';
+                }
+            })
+            SubmitFormData.append("ShipIDstring", ShipIDs.substring(0, ShipIDs.length - 1));
+
+
+            if (SoftwareKZYHelper.ChoosedTaskNodeUser.NextNodeID == 0) {
+
+                //流程结束
+                //SubmitFormData.append("KZYLon", $('#popup_txtLon_KZY').val());
+                //SubmitFormData.append("KZYLat", $('#popup_txtLat_KZY').val());
+                //SubmitFormData.append("KZYWaterDepth", $('#popup_txtWaterDepth_KZY').val());
+                //SubmitFormData.append("KZYStandard", $('#popup_txtStandard_KZY').val());
+            }
+
+            $.ajax({
+                url: 'TaskApprovalSubmit_KZY',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: SubmitFormData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+                            ModalPopup('success', '保存成功');
+                            $('#Tk_software_03').modal('hide');
+
+                            Param.ProjectID = $('#hid_ProjectID').val();
+                            DoQuery();
+
+                        }
+                        else {
+
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                    ModalClose('information');
+                }
+            });
+
+        },
+
+        DoTaskCancel: function () {
+
+            if (SoftwareKZYHelper.PopupOpenedTaskID == 0) {
+                ModalClose('information');
+                ModalPopup('error', '数据出错，重新打开弹窗。');
+                return;
+            }
+
+            var SubmitFormData = new FormData();
+            SubmitFormData.append("TaskID", SoftwareKZYHelper.PopupOpenedTaskID);
+
+            $.ajax({
+                url: 'TaskCancelSubmit_KZY',
+                dataType: 'json',
+                type: 'POST',
+                async: false,
+                data: SubmitFormData,
+                processData: false, // 使数据不做处理
+                contentType: false, // 不要设置Content-Type请求头
+                success: function (data) {
+
+                    if (data) {
+                        if (data.Success) {
+                            ModalPopup('success', '作废成功');
+                            $('#Tk_software_03').modal('hide');
+
+                            Param.ProjectID = $('#hid_ProjectID').val();
+                            DoQuery();
+
+                        }
+                        else {
+
+                            ModalPopup('error', data.Message);
+                        }
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                },
+                complete: function (data) {
+                    ModalClose('information');
+                }
+            });
+
+        },
+
+        ShowPositionMap: function () {
+
+            var Lon = $('#popup_Lon_KZY').val();
+            var Lat = $('#popup_Lat_KZY').val();
+            var ProjectID = $('#popup_btnShowPosition').attr('data-ProjectID');
+
+            if (Lon == '' || Lat == '' || ProjectID == 0) {
+                return;
+            }
+
+            var Url = '/Cloud/WebGIS/ShowPosition?ProjectID=' + ProjectID + '&TaskLon=' + Lon + '&TaskLat=' + Lat;
+
+            window.open(Url, '_blank');
+
+        },
+
+        QueryFloatShip: function () {
+
+            var ShipNameKeyWord = $('#popup_txtFloatShipName_KZY').val();
+
+            if (ShipNameKeyWord == '') {
+                $('#popup_ulFloatList_KZY a').each(function (index, dom) {
+
+                    $(dom).parent().show();
+
+                })
+            }
+            else {
+                $('#popup_ulFloatList_KZY a').each(function (index, dom) {
+
+                    var ShipName = $(dom).html();
+
+                    if (ShipName.indexOf(ShipNameKeyWord) == -1) {
+
+                        $(dom).parent().hide();
+
+                    }
+                    else {
+                        $(dom).parent().show();
+                    }
+
+                })
+            }
+
+
+
+        },
+
+        OpenReport: function () {
+
+            if (SoftwareKZYHelper.PopupOpenedTaskID == 0)
+            {
+                return;
+            }
+            Param.TaskID = SoftwareKZYHelper.PopupOpenedTaskID;
+            Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+            //alert('123');
+            $('#Tk_KZYReport').modal('show');
+
+
+            $.post('LoadTaskFile', Param)
+                .success(function (data, statusText, jqXRH) {
+                    if (data) {
+
+                        if (data.Success) {
+
+                            var FileHtml = '';
+                            $(data.Data).each(function (index, dom) {
+
+                                FileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a class="xm_zt_green" href="' + dom.FilePath + '">下载</a></td></tr>';
+
+                            })
+                            $('#popup_html_KZYFile').html(FileHtml);
+
+
+                        }
+                    }
+                })
+                .fail(function (jqXHR, statusText, errorMessage) {
+                    //console.error(arguments);
+                })
+                .always(function (data) {
+                });
+
+
+
+        }
+
+    }
+
+
+</script>

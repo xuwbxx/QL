@@ -1,11 +1,13 @@
 ﻿using DataFactory.Factory;
 using DataFactory.KingBase;
+using Microsoft.AspNetCore.Http;
 using Model.tech.QL.DTO.BizProject;
 using Tool;
 
 namespace Service.PreAssembled
 {
-    public class BizProjectBridgeCastingGroupService(QlPreAssembled_KingBase_UnitOfWorkFactory qlUowFactory) : ServiceBase<biz_project_bridge_castingGroup>(qlUowFactory)
+    public class BizProjectBridgeCastingGroupService(QlPreAssembled_KingBase_UnitOfWorkFactory qlUowFactory, IHttpContextAccessor httpContextAccessor) 
+        : ServiceBase<biz_project_bridge_castingGroup>(qlUowFactory, httpContextAccessor)
     {
         public async Task<List<BizProjectBridgeCastingGroupItemDTO>> CastingGroupList(BizProjectBridgeCastingGroupQueryDTO req)
         {

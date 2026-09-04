@@ -14,6 +14,9 @@ public sealed record SteelBeamMeasuredImportRow(
 public sealed record SteelBeamImportError(
     int ExcelRow, string PointCode, string FieldName, string OriginalValue, string Reason);
 
+public sealed record SteelBeamTheoreticalPoint(
+    string PointCode, string SegmentNo);
+
 public sealed class SteelBeamParseResult<T>
 {
     public List<T> Rows { get; } = new();
@@ -70,10 +73,10 @@ public static class SteelBeamExcelHelper
             if (!string.IsNullOrEmpty(point) && !seen.Add(point))
                 result.Errors.Add(new(rowNumber, point, "测点编号", point, "文件内测点编号重复（忽略大小写）"));
 
-            var x = ReadDecimal(sheet.Cell(rowNumber, columns["设计坐标X(m)"]), rowNumber, point, "设计坐标X(m)", 6, null, null, result.Errors);
-            var y = ReadDecimal(sheet.Cell(rowNumber, columns["设计坐标Y(m)"]), rowNumber, point, "设计坐标Y(m)", 6, null, null, result.Errors);
-            var z = ReadDecimal(sheet.Cell(rowNumber, columns["设计坐标Z(m)"]), rowNumber, point, "设计坐标Z(m)", 6, null, null, result.Errors);
-            var camber = ReadDecimal(sheet.Cell(rowNumber, columns["预拱度(m)"]), rowNumber, point, "预拱度(m)", 6, null, null, result.Errors);
+            var x = ReadDecimal(sheet.Cell(rowNumber, columns["设计坐标X(m)"]), rowNumber, point, "设计坐标X(m)", 4, null, null, result.Errors);
+            var y = ReadDecimal(sheet.Cell(rowNumber, columns["设计坐标Y(m)"]), rowNumber, point, "设计坐标Y(m)", 4, null, null, result.Errors);
+            var z = ReadDecimal(sheet.Cell(rowNumber, columns["设计坐标Z(m)"]), rowNumber, point, "设计坐标Z(m)", 4, null, null, result.Errors);
+            var camber = ReadDecimal(sheet.Cell(rowNumber, columns["预拱度(m)"]), rowNumber, point, "预拱度(m)", 4, null, null, result.Errors);
             var weight = ReadDecimal(sheet.Cell(rowNumber, columns["权值"]), rowNumber, point, "权值", 4, 0, 1, result.Errors);
             var segment = ReadText(sheet.Cell(rowNumber, columns["所属梁段号"])).Trim();
             var position = ReadText(sheet.Cell(rowNumber, columns["测位名称"])).Trim();
@@ -117,9 +120,9 @@ public static class SteelBeamExcelHelper
             ValidatePointCode(rowNumber, point, result.Errors);
             if (!string.IsNullOrEmpty(point) && !seen.Add(point))
                 result.Errors.Add(new(rowNumber, point, "测点编号", point, "文件内测点编号重复（忽略大小写）"));
-            var x = ReadDecimal(sheet.Cell(rowNumber, columns["实测坐标X(m)"]), rowNumber, point, "实测坐标X(m)", 6, null, null, result.Errors);
-            var y = ReadDecimal(sheet.Cell(rowNumber, columns["实测坐标Y(m)"]), rowNumber, point, "实测坐标Y(m)", 6, null, null, result.Errors);
-            var z = ReadDecimal(sheet.Cell(rowNumber, columns["实测坐标Z(m)"]), rowNumber, point, "实测坐标Z(m)", 6, null, null, result.Errors);
+            var x = ReadDecimal(sheet.Cell(rowNumber, columns["实测坐标X(m)"]), rowNumber, point, "实测坐标X(m)", 4, null, null, result.Errors);
+            var y = ReadDecimal(sheet.Cell(rowNumber, columns["实测坐标Y(m)"]), rowNumber, point, "实测坐标Y(m)", 4, null, null, result.Errors);
+            var z = ReadDecimal(sheet.Cell(rowNumber, columns["实测坐标Z(m)"]), rowNumber, point, "实测坐标Z(m)", 4, null, null, result.Errors);
             if (!result.Errors.Any(e => e.ExcelRow == rowNumber))
                 result.Rows.Add(new(rowNumber, point, x!.Value, y!.Value, z!.Value));
         }
@@ -129,8 +132,8 @@ public static class SteelBeamExcelHelper
     public static byte[] CreateTheoreticalTemplate() => CreateTemplate(TheoreticalHeaders, new[]
     {
         new[] { "测点编号", "是", "1-50位可见半角字符；禁止空格、中文、换行及以=、+、-、@开头", "GS-Z-1-4" },
-        new[] { "设计坐标X/Y/Z(m)", "是", "允许正负数和0，最多6位小数", "713033.449300" },
-        new[] { "预拱度(m)", "是", "允许正负数和0，最多6位小数", "0.015000" },
+        new[] { "设计坐标X/Y/Z(m)", "是", "允许正负数和0，最多4位小数", "713033.4493" },
+        new[] { "预拱度(m)", "是", "允许正负数和0，最多4位小数", "0.0150" },
         new[] { "权值", "是", "0到1，最多4位小数", "1" },
         new[] { "所属梁段号", "是", "1-50个字符", "A" },
         new[] { "测位名称", "是", "1-100个字符", "测位1" }
@@ -139,7 +142,7 @@ public static class SteelBeamExcelHelper
     public static byte[] CreateMeasuredTemplate() => CreateTemplate(MeasuredHeaders, new[]
     {
         new[] { "测点编号", "是", "必须匹配当前桥梁理论测点，忽略大小写", "GS-Z-1-4" },
-        new[] { "实测坐标X/Y/Z(m)", "是", "允许正负数和0，最多6位小数", "713033.449300" },
+        new[] { "实测坐标X/Y/Z(m)", "是", "允许正负数和0，最多4位小数", "713033.4493" },
         new[] { "说明", "-", "只录入未发生变形的测点", "" }
     });
 
@@ -178,6 +181,34 @@ public static class SteelBeamExcelHelper
         var bits = decimal.GetBits(value);
         var scale = (bits[3] >> 16) & 0x7F;
         return scale <= maximumScale;
+    }
+
+    public static List<SteelBeamImportError> ValidateMeasuredSegmentCompleteness(
+        IEnumerable<SteelBeamTheoreticalPoint> theoreticalPoints,
+        IEnumerable<string> uploadedPointCodes)
+    {
+        var theory = theoreticalPoints.ToList();
+        var uploaded = new HashSet<string>(
+            uploadedPointCodes.Where(a => !string.IsNullOrEmpty(a)),
+            StringComparer.OrdinalIgnoreCase);
+        var uploadedTheory = new HashSet<string>(
+            theory.Where(a => uploaded.Contains(a.PointCode)).Select(a => a.PointCode),
+            StringComparer.OrdinalIgnoreCase);
+        var touchedSegments = new HashSet<string>(
+            theory.Where(a => uploadedTheory.Contains(a.PointCode)).Select(a => a.SegmentNo),
+            StringComparer.OrdinalIgnoreCase);
+
+        return theory
+            .Where(a => touchedSegments.Contains(a.SegmentNo) && !uploadedTheory.Contains(a.PointCode))
+            .OrderBy(a => a.SegmentNo, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(a => a.PointCode, StringComparer.OrdinalIgnoreCase)
+            .Select(a => new SteelBeamImportError(
+                0,
+                a.PointCode,
+                "所属梁段号",
+                a.SegmentNo,
+                "该梁段实测数据不完整"))
+            .ToList();
     }
 
     private static Dictionary<string, int> ValidateHeaders(IXLWorksheet sheet, string[] required, List<SteelBeamImportError> errors)

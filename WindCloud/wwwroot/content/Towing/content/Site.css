@@ -1,0 +1,35 @@
+﻿/* 自定义遮罩层样式 */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 148, 255, 0.2); /* 半透明背景 */
+    z-index: 9999; /* 确保遮罩在其他内容之上 */
+    display: table; /* 使用表格布局 */
+    text-align: center; /* 文本水平居中 */
+}
+
+/* 加载动画样式 */
+.spinner-border {
+    margin: 0 auto; /* 确保加载动画自身居中 */
+    display: inline-block; /* 使加载动画成为行内块元素 */
+}
+
+/* 网格容器样式 */
+.modal-dialog {
+    width: auto; /* 自适应宽度 */
+    max-width: 100%; /* 最大宽度为 100% */
+    margin: 0 auto; /* 水平居中 */
+    transform: translateY(-50%); /* 垂直偏移 */
+}
+/* 点击区域禁用事件 */
+.overlay .modal-content {
+    pointer-events: none; /* 禁止遮罩上的所有点击事件 */
+}
+
+/* 点击区域允许事件 */
+.overlay .modal-footer button {
+    pointer-events: auto; /* 允许点击&ldquo;确定&rdquo;按钮 */
+}

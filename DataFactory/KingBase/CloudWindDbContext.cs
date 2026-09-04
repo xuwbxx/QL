@@ -1,5 +1,6 @@
 ﻿using DataFactory.Factory;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataFactory.KingBase.CloudWind
 {
@@ -10,6 +11,21 @@ namespace DataFactory.KingBase.CloudWind
     {
         public CloudWindDbContext(string connectionString, DatabaseType databaseType)
             : base(connectionString, databaseType) { }
+
+        //protected override void OnModelCreating(ModelBuilder modelBuilder)
+        //{
+        //    base.OnModelCreating(modelBuilder);
+        //    foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        //    {
+        //        foreach (var property in entityType.GetProperties())
+        //        {
+        //            if (property.ClrType == typeof(string))
+        //            {
+        //                property.SetColumnType("text");
+        //            }
+        //        }
+        //    }
+        //}
 
         // 仅定义CloudWind数据库的表（实体类带CloudWind_前缀）
         public DbSet<WindDbUsers> Users { get; set; } // 映射到CloudWind的Users表
@@ -73,6 +89,22 @@ namespace DataFactory.KingBase.CloudWind
         public DbSet<WebGIS_Ship> WebGIS_Ship { set; get; }
         public DbSet<WebGIS_ShipAnchor> WebGIS_ShipAnchor { set; get; }
 
+        public DbSet<Wind_TaskInfo_QXSJ> Wind_TaskInfo_QXSJ { set; get; }
+        public DbSet<View_Wind_TaskInfo_QXSJ> View_Wind_TaskInfo_QXSJ { set; get; }
+        public DbSet<Data_PXYWeather> Data_PXYWeather { set; get; }
+        public DbSet<Data_Typhoon> Data_Typhoon { set; get; }
+
+        public DbSet<Wind_Task_JJTResult> Wind_Task_JJTResult { set; get; }
+
+        public DbSet<Flow_TaskApply> Flow_TaskApply { set; get; }
+
+        public DbSet<View_Wind_TaskApply> View_Wind_TaskApply { set; get; }
+
+        public DbSet<View_Wind_TaskFlow> View_Wind_TaskFlow { set; get; }
+
+        public DbSet<View_Flow_TaskApply> View_Flow_TaskApply { set; get; }
+
+        public DbSet<Library_Ship_KZY> Library_Ship_KZY { set; get; }
     }
 
     public class WindDbUsers
@@ -198,6 +230,7 @@ namespace DataFactory.KingBase.CloudWind
 
     public class Wind_ProjectRole
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { set; get; }
         public int? ProjectID { set; get; }
         public int? RoleID { set; get; }
@@ -915,6 +948,217 @@ namespace DataFactory.KingBase.CloudWind
         public string? Lat { set; get; }
         public DateTime? CreateTime { set; get; }
         public bool? IsDelete { set; get; }
+    }
+
+    public class Wind_TaskInfo_QXSJ
+    {
+        public int id { set; get; }
+        public int? TaskID { set; get; }
+        public DateTime? CollectStartTime { set; get; }
+        public DateTime? CollectEndTime { set; get; }
+        public string? Points { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool? IsDelete { set; get; }
+    }
+
+    public class View_Wind_TaskInfo_QXSJ
+    {
+        public int id { set; get; }
+        public string? TaskCode { set; get; }
+        public string? TaskName { set; get; }
+        public int? FlowStatus { set; get; }
+        public int? SoftwareID { set; get; }
+        public string? ApplyerJobName { set; get; }
+        public DateTime? CollectStartTime { set; get; }
+        public DateTime? CollectEndTime { set; get; }
+        public string? Points { set; get; }
+    }
+
+    /// <summary>
+    /// 船讯网点气象数据
+    /// </summary>
+    public class Data_PXYWeather
+    {
+        public int id { set; get; }
+        public int? TaskID { set; get; }
+        public string? PointName { set; get; }
+        public string? LonLat { set; get; }
+        public string? bm500 { set; get; }
+        public string? humidity { set; get; }
+        public string? pressure { set; get; }
+        public string? swelldir { set; get; }
+        public string? swellheight { set; get; }
+        public string? swellperiod { set; get; }
+        public string? temperature { set; get; }
+        public string? visibility { set; get; }
+        public string? waveheight { set; get; }
+        public string? winddir { set; get; }
+        public string? windspeed { set; get; }
+        public string? windlevel { set; get; }
+        public string? windwarninglevel { set; get; }
+        public bool? windalarm { set; get; }
+        public DateTime? time { set; get; }
+    }
+
+    /// <summary>
+    /// 台风数据
+    /// </summary>
+    public class Data_Typhoon
+    {
+        public int id { set; get; }
+        public string? chnCode { set; get; }
+        public string? chnName { set; get; }
+        public int? currentyear { set; get; }
+        public string? xuHao { set; get; }
+        public string? time { set; get; }
+        public DateTime? dateTime { set; get; }
+        public string? forecast { set; get; }
+        public decimal? fhour { set; get; }
+        public decimal? lat { set; get; }
+        public decimal? lon { set; get; }
+        public decimal? grade { set; get; }
+        public decimal? mspeed { set; get; }
+        public decimal? pressure { set; get; }
+        public decimal? kspeed { set; get; }
+        public string? direction { set; get; }
+        public decimal? radius7 { set; get; }
+        public decimal? radius10 { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool IsDelete { set; get; }
+    }
+
+    public class Wind_Task_JJTResult
+    {
+        public int id { set; get; }
+        public string? Type { set; get; }
+        public string? UserCode { set; get; }
+        public string? DirectUrl { set; get; }
+        public bool? Result { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool? IsDelete { set; get; }
+    }
+
+    public class Flow_TaskApply
+    {
+        public int id { set; get; }
+        public int? TaskID { set; get; }
+        public int? NodeID { set; get; }
+        public int? FlowOrder { set; get; }
+        public string? NodeUserName { set; get; }
+        public string? NodeUserCode { set; get; }
+        public string? NodeUserDepart { set; get; }
+        public string? NodeUserPhone { set; get; }
+        public string? NodeUserJobName { set; get; }
+        public int? FlowHandle { set; get; }
+        public DateTime? ApprovalTime { set; get; }
+        public string? Comment { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool? IsDelete { set; get; }
+    }
+
+    public class View_Wind_TaskApply
+    {
+        public int id { set; get; }
+        public int? TaskID { set; get; }
+        public int? NodeID { set; get; }
+        public int? FlowOrder { set; get; }
+        public string? NodeUserName { set; get; }
+        public string? NodeUserCode { set; get; }
+        public string? NodeUserDepart { set; get; }
+        public string? NodeUserPhone { set; get; }
+        public string? NodeUserJobName { set; get; }
+        public int? FlowHandle { set; get; }
+        public DateTime? ApprovalTime { set; get; }
+        public string? Comment { set; get; }
+        public int? ProjectID { set; get; }
+        public string? TaskName { set; get; }
+        public int? FlowStatus { set; get; }
+        public int? SoftwareID { set; get; }
+        public string? Applyer { set; get; }
+        public string? ApplyerCode { set; get; }
+        public string? ApplyerDepart { set; get; }
+        public string? ApplyerPhone { set; get; }
+        public string? ApplyerJobName { set; get; }
+        public DateTime? DeliverTime { set; get; }
+        public string? ProjectCode { set; get; }
+        public string? ProjectName { set; get; }
+        public string? SoftwareName { set; get; }
+        public int? DepartID { set; get; }
+        public int? FlowType { set; get; }
+        public string? DeliverName { set; get; }
+        public string? DeliverCode { set; get; }
+        public string? DeliverDepart { set; get; }
+        public string? DeliverPhone { set; get; }
+        public string? DeliverJobName { set; get; }
+        public string? TaskCode { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public int? RoleID { set; get; }
+        public string? RoleUserCode { set; get; }
+        public bool? IsRoleExist { set; get; }
+    }
+
+    [Keyless]
+    public class View_Wind_TaskFlow
+    {
+        public int id { set; get; }
+        public int? TaskID { set; get; }
+        public int? ProjectID { set; get; }
+        public string? TaskCode { set; get; }
+        public string? TaskName { set; get; }
+        public string? ProjectCode { set; get; }
+        public string? ProjectName { set; get; }
+        public int? FlowStatus { set; get; }
+        public int? SoftwareID { set; get; }
+        public string? SoftwareName { set; get; }
+        public string? Applyer { set; get; }
+        public string? ApplyerCode { set; get; }
+        public string? ApplyerDepart { set; get; }
+        public string? ApplyerPhone { set; get; }
+        public string? ApplyerJobName { set; get; }
+        public string? DeliverCode { set; get; }
+        public int? RoleID { set; get; }
+        public string? RoleUserCode { set; get; }
+        public bool? IsRoleExist { set; get; }
+        public string? NodeUserCode { set; get; }
+        public DateTime? CreateTime { set; get; }
+    }
+
+
+    public class View_Flow_TaskApply
+    {
+        // Flow_TaskApply (a)
+        public int id { set; get; }
+        public int? TaskID { set; get; }
+        public int? NodeID { set; get; }
+        public int? FlowOrder { set; get; }
+        public string? NodeUserName { set; get; }
+        public string? NodeUserCode { set; get; }
+        public string? NodeUserDepart { set; get; }
+        public string? NodeUserPhone { set; get; }
+        public string? NodeUserJobName { set; get; }
+        public int? FlowHandle { set; get; }
+        public DateTime? ApprovalTime { set; get; }
+        public string? Comment { set; get; }
+        public DateTime? CreateTime { set; get; }
+
+        // Wind_Task (b)
+        public int? ProjectID { set; get; }
+        public string? TaskCode { set; get; }
+        public string? TaskName { set; get; }
+        public int? FlowStatus { set; get; }
+        public int? SoftwareID { set; get; }
+        public string? Applyer { set; get; }
+        public string? ApplyerCode { set; get; }
+        public string? ApplyerDepart { set; get; }
+        public string? ApplyerPhone { set; get; }
+        public string? ApplyerJobName { set; get; }
+        public DateTime? DeliverTime { set; get; }
+
+        // Flow_Node (c)
+        public string? NodeName { set; get; }
+
+        // Manage_Software (d)
+        public string? SoftwareName { set; get; }
     }
 
 }

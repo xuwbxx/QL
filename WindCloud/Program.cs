@@ -95,6 +95,8 @@ builder.Services.AddScoped<TechCenterService>();
 builder.Services.AddScoped<WebValidateService>();
 // 注册项目服务，处理项目管理相关业务
 builder.Services.AddScoped<ProjectService>();
+// 注册任务服务，处理任务管理相关业务
+builder.Services.AddScoped<TaskService>();
 // 注册后台项目管理服务
 builder.Services.AddScoped<BackProjectService>();
 // 注册后台管理服务
@@ -126,9 +128,17 @@ builder.Services.AddScoped<MRUStatusInfoService>();
 builder.Services.AddScoped<SatellteInfoService>();
 builder.Services.AddScoped<NavigationalStatusService>();
 builder.Services.AddScoped<EGYROInfoService>();
+builder.Services.AddScoped<PXYShipService>();
 builder.Services.AddScoped<WeatherInfoService>();
 builder.Services.AddScoped<DeviceStatusInfoService>();
 builder.Services.AddScoped<ProjectPlanRouteInfoService>();
+builder.Services.AddScoped<MessageInfoService>();
+builder.Services.AddScoped<HikInfoService>();
+builder.Services.AddScoped<Service.Towing.Tool.HikHttpUtilLib>();
+builder.Services.AddScoped<FileInfoService>();
+builder.Services.AddScoped<AnchorageInfoService>();
+builder.Services.AddScoped<ProjectBasicInfoService>();
+builder.Services.AddScoped<ShipInfoService>();
 // 注册登录服务，处理用户登录登出逻辑
 builder.Services.AddScoped<LoginService>();
 // 注册云平台信息服务，处理云平台数据查询
@@ -137,6 +147,7 @@ builder.Services.AddScoped<CloudWindInfoService>();
 builder.Services.AddScoped<CloudCenterService>();
 // 注册WebGIS服务，用于船讯网船舶查询和气象数据
 builder.Services.AddScoped<WebGISService>();
+builder.Services.AddScoped<CloudWindTyphoonService>();
 // 注册看板头部服务（接口+实现），用于看板数据展示
 builder.Services.AddScoped<IBoardHeaderService, BoardHeaderService>();
 

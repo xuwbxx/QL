@@ -1,6 +1,7 @@
 using DataFactory.Factory;
 using DataFactory.KingBase.CloudWind;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Model.Tech.Cloud;
 using Model.Tech.Cloud.BackManage;
 using Tool;
@@ -37,7 +38,7 @@ namespace Service.Wind.BackManage
                     if (!string.IsNullOrEmpty(request.ShipName))
                     {
                         var shipName = request.ShipName;
-                        predicate = PredicateBuilder.And(predicate, a => a.ShipName != null && a.ShipName.Contains(shipName));
+                        predicate = PredicateBuilder.And(predicate, a => a.ShipName != null && EF.Functions.Like(a.ShipName, $"%{shipName}%"));
                     }
 
                     if (request.ShipIsConfirm != 0)
@@ -203,7 +204,7 @@ namespace Service.Wind.BackManage
                     if (!string.IsNullOrEmpty(request.ProjectName))
                     {
                         var projectName = request.ProjectName;
-                        predicate = PredicateBuilder.And(predicate, a => a.ProjectName != null && a.ProjectName.Contains(projectName));
+                        predicate = PredicateBuilder.And(predicate, a => a.ProjectName != null && EF.Functions.Like(a.ProjectName, $"%{projectName}%"));
                     }
 
                     var (pageList, count) = repo.FindPage(predicate, a => a.ID, request.PageIndex, request.PageSize);

@@ -14,11 +14,19 @@ html {
 
 html {
   position: relative;
-  min-height: 100%;
+  min-height: 100vh;
 }
 
 body {
-  margin-bottom: 60px;
 }
 
 [v-cloak] { display: none !important; }
+
+/*fix elplus default setting*/
+.el-button--primary.is-link { background-color: transparent !important; color: #1261bd !important; }
+.el-button--primary.is-link:hover { background-color: transparent !important; color: #4094ff !important; }
+.el-button--primary { background-color: #1261bd !important }
+.el-button--primary:hover { background-color: #4094ff !important }
+    .el-button :not(.el-button__icon) > .el-icon {
+        margin-right: 6px;
+    }

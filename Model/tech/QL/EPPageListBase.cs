@@ -21,6 +21,6 @@
         /// <summary>
         /// Current Page Items
         /// </summary>
-        List<T> Items { get; set; }
+        public List<T> Items { get; set; } = new();
     }
 }

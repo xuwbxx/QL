@@ -1,5 +1,6 @@
 using DataFactory.Factory;
 using DataFactory.KingBase.CloudWind;
+using Microsoft.EntityFrameworkCore;
 using Model.Tech.Cloud;
 using Model.Tech.Cloud.BackManage;
 using System;
@@ -38,7 +39,7 @@ namespace Service.Wind.BackManage
                     if (!string.IsNullOrEmpty(request.ProjectName))
                     {
                         var projectName = request.ProjectName;
-                        predicate = PredicateBuilder.And(predicate, a => a.ProjectName != null && a.ProjectName.Contains(projectName));
+                        predicate = PredicateBuilder.And(predicate, a => a.ProjectName != null && EF.Functions.Like(a.ProjectName, $"%{projectName}%"));
                     }
 
                     var (pageList, count) = repo.FindPage(predicate, a => a.id, request.PageIndex, request.PageSize);
@@ -162,7 +163,7 @@ namespace Service.Wind.BackManage
                                 UserPhone = a.UserPhone,
                                 UserJobName = a.UserJobName,
                                 IsDelete = false,
-                                CreateTime = DateTime.UtcNow
+                                CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified)
                             };
                             projectRoleRepo.Add(newRole);
                         }

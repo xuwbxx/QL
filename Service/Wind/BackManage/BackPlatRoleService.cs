@@ -1,5 +1,6 @@
 using DataFactory.Factory;
 using DataFactory.KingBase.CloudWind;
+using Microsoft.EntityFrameworkCore;
 using Model.Tech.Cloud.BackManage;
 using Tool;
 
@@ -33,7 +34,7 @@ namespace Service.Wind.BackManage
                     if (!string.IsNullOrEmpty(request.UserName))
                     {
                         var userName = request.UserName;
-                        predicate = PredicateBuilder.And(predicate, a => a.UserName != null && a.UserName.Contains(userName));
+                        predicate = PredicateBuilder.And(predicate, a => a.UserName != null && EF.Functions.Like(a.UserName, $"%{userName}%"));
                     }
 
                     var (pageList, count) = repo.FindPage(predicate, a => a.ID, request.PageIndex, request.PageSize);
@@ -97,7 +98,7 @@ namespace Service.Wind.BackManage
                         UserDepartName = user.UserDepartName,
                         UserJobName = user.UserJobName,
                         UserPhone = user.UserPhone,
-                        CreateTime = DateTime.UtcNow,
+                        CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified),
                         IsDelete = false
                     };
 

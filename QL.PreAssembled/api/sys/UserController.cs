@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
 using Service.PreAssembled;
+using QL.PreAssembled.Middleware;
 
 namespace QL.PreAssembled.api.sys
 {
@@ -16,8 +17,7 @@ namespace QL.PreAssembled.api.sys
         [HttpPost]
         public JsonResult Menu()
         {
-
-            return new JsonResult(_userService.GetMenu("admin"));
+            return new JsonResult(_userService.GetMenu(User.Identity?.GetAccount()));
         }
     }
 }

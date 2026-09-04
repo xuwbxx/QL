@@ -163,17 +163,25 @@ namespace DataFactory.KingBase
         /// </summary>
         public DbSet<sys_dic_data_item> sys_dic_data_item { get; set; }
 
+
         #endregion
 
         #region biz tables
 
         public DbSet<biz_project> biz_project { get; set; }
+        /// <summary>
+        /// 项目授权人员关联表
+        /// </summary>
+        public DbSet<biz_project_user> biz_project_user { get; set; }
         public DbSet<biz_project_bridge> biz_project_bridge { get; set; }
 
         public DbSet<biz_project_bridge_castingGroup> biz_project_bridge_castingGroup { get; set; }
         public DbSet<biz_steel_beam_theoretical> biz_steel_beam_theoretical { get; set; }
         public DbSet<biz_steel_beam_measure_batch> biz_steel_beam_measure_batch { get; set; }
         public DbSet<biz_steel_beam_measured> biz_steel_beam_measured { get; set; }
+        public DbSet<biz_concrete_beam_config> biz_concrete_beam_config { get; set; }
+        public DbSet<biz_concrete_beam_segment> biz_concrete_beam_segment { get; set; }
+        public DbSet<biz_concrete_beam_design_coordinate> biz_concrete_beam_design_coordinate { get; set; }
 
         #endregion
     }
@@ -314,7 +322,14 @@ namespace DataFactory.KingBase
         /// <summary>
         /// 部门OID（关联sys_dept.OID，用于对接外部系统）
         /// </summary>
-        public long? DeptOID { set; get; }
+        [MaxLength(256)]
+        public string? DeptOID { set; get; }
+
+        /// <summary>
+        /// 部门名称（完整部门路径）
+        /// </summary>
+        [MaxLength(500)]
+        public string? DeptName { set; get; }
 
         /// <summary>
         /// 最后登录时间（业务时区时间）
@@ -398,6 +413,17 @@ namespace DataFactory.KingBase
         /// </summary>
         [MaxLength(50)]
         public string? Code { set; get; }
+
+        [MaxLength(20)]
+        [Required]
+        public string RoleType { set; get; } = "custom";
+
+        public int Sort { set; get; }
+
+        [MaxLength(500)]
+        public string? Remark { set; get; }
+
+        public bool IsDeleted { set; get; }
 
         /// <summary>
         /// 状态：0-保存，1-提交，-1-删除
@@ -987,67 +1013,268 @@ namespace DataFactory.KingBase
         public DateTime? UpdatedTime { set; get; }
     }
 
+    /// <summary>
+    /// 混凝土梁浇筑组测点偏位及参考高程配置表。
+    /// 每个有效浇筑组最多对应一条有效配置记录。
+    /// </summary>
+    public class biz_concrete_beam_config : IIDTable
+    {
+        /// <summary>主键ID。</summary>
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity), Column("ID")]
+        public int ID { get; set; }
+        /// <summary>所属项目ID。</summary>
+        public int ProjID { get; set; }
+        /// <summary>所属梁ID，对应项目梁表主键。</summary>
+        public int GirderID { get; set; }
+        /// <summary>所属浇筑组ID。</summary>
+        public int CastingGroupID { get; set; }
+        /// <summary>测点偏位A，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal OffsetA { get; set; }
+        /// <summary>测点偏位B，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal OffsetB { get; set; }
+        /// <summary>测点偏位C，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal OffsetC { get; set; }
+        /// <summary>浇筑参考高程偏移量H，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal OffsetH { get; set; }
+        /// <summary>数据状态：0正常，-1逻辑删除。</summary>
+        public int Status { get; set; }
+        /// <summary>创建人账号。</summary>
+        [MaxLength(100)] public string? CreatedBy { get; set; }
+        /// <summary>创建时间。</summary>
+        public DateTime? CreatedTime { get; set; }
+        /// <summary>最后更新人账号。</summary>
+        [MaxLength(100)] public string? UpdatedBy { get; set; }
+        /// <summary>最后更新时间。</summary>
+        public DateTime? UpdatedTime { get; set; }
+    }
+
+    /// <summary>混凝土梁梁段信息表，保存浇筑组导入的梁段及上下游关系。</summary>
+    public class biz_concrete_beam_segment : IIDTable
+    {
+        /// <summary>主键ID。</summary>
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity), Column("ID")]
+        public int ID { get; set; }
+        /// <summary>所属项目ID。</summary>
+        public int ProjID { get; set; }
+        /// <summary>所属梁ID，对应项目梁表主键。</summary>
+        public int GirderID { get; set; }
+        /// <summary>所属浇筑组ID。</summary>
+        public int CastingGroupID { get; set; }
+        /// <summary>梁段名称，同一浇筑组内唯一。</summary>
+        [MaxLength(100)] public string SegmentName { get; set; } = string.Empty;
+        /// <summary>下游梁段名称，可为空。</summary>
+        [MaxLength(100)] public string? Downstream { get; set; }
+        /// <summary>上游梁段名称，可为空。</summary>
+        [MaxLength(100)] public string? Upstream { get; set; }
+        /// <summary>梁段节点1名称。</summary>
+        [MaxLength(100)] public string Node1 { get; set; } = string.Empty;
+        /// <summary>梁段节点2名称。</summary>
+        [MaxLength(100)] public string Node2 { get; set; } = string.Empty;
+        /// <summary>浇筑日期，可为空。</summary>
+        public DateTime? PouringDate { get; set; }
+        /// <summary>数据状态：0正常，-1逻辑删除。</summary>
+        public int Status { get; set; }
+        /// <summary>创建人账号。</summary>
+        [MaxLength(100)] public string? CreatedBy { get; set; }
+        /// <summary>创建时间。</summary>
+        public DateTime? CreatedTime { get; set; }
+        /// <summary>最后更新人账号。</summary>
+        [MaxLength(100)] public string? UpdatedBy { get; set; }
+        /// <summary>最后更新时间。</summary>
+        public DateTime? UpdatedTime { get; set; }
+    }
+
+    /// <summary>混凝土梁设计坐标表，保存节点东侧、中间和西侧控制点坐标。</summary>
+    public class biz_concrete_beam_design_coordinate : IIDTable
+    {
+        /// <summary>主键ID。</summary>
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity), Column("ID")]
+        public int ID { get; set; }
+        /// <summary>所属项目ID。</summary>
+        public int ProjID { get; set; }
+        /// <summary>所属梁ID，对应项目梁表主键。</summary>
+        public int GirderID { get; set; }
+        /// <summary>所属浇筑组ID。</summary>
+        public int CastingGroupID { get; set; }
+        /// <summary>节点名称，同一浇筑组内唯一。</summary>
+        [MaxLength(100)] public string NodeName { get; set; } = string.Empty;
+        /// <summary>东侧控制点X坐标，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal XE { get; set; }
+        /// <summary>东侧控制点Y坐标，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal YE { get; set; }
+        /// <summary>东侧控制点Z坐标，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal ZE { get; set; }
+        /// <summary>中间控制点X坐标，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal XC { get; set; }
+        /// <summary>中间控制点Y坐标，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal YC { get; set; }
+        /// <summary>中间控制点Z坐标，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal ZC { get; set; }
+        /// <summary>西侧控制点X坐标，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal XW { get; set; }
+        /// <summary>西侧控制点Y坐标，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal YW { get; set; }
+        /// <summary>西侧控制点Z坐标，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal ZW { get; set; }
+        /// <summary>数据状态：0正常，-1逻辑删除。</summary>
+        public int Status { get; set; }
+        /// <summary>创建人账号。</summary>
+        [MaxLength(100)] public string? CreatedBy { get; set; }
+        /// <summary>创建时间。</summary>
+        public DateTime? CreatedTime { get; set; }
+        /// <summary>最后更新人账号。</summary>
+        [MaxLength(100)] public string? UpdatedBy { get; set; }
+        /// <summary>最后更新时间。</summary>
+        public DateTime? UpdatedTime { get; set; }
+    }
+
+    /// <summary>钢梁理论数据。</summary>
     public class biz_steel_beam_theoretical : IIDTable
     {
+        /// <summary>主键ID。</summary>
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
+        /// <summary>所属项目ID。</summary>
         public int ProjID { get; set; }
-        public int BridgeID { get; set; }
+        /// <summary>所属梁体ID，关联 biz_project_bridge.ID。</summary>
+        public int GirderID { get; set; }
+        /// <summary>测点编号，同一项目内忽略大小写唯一。</summary>
         [Required, MaxLength(50)] public string PointCode { get; set; } = string.Empty;
-        [Column(TypeName = "decimal(20,6)")] public decimal DesignX { get; set; }
-        [Column(TypeName = "decimal(20,6)")] public decimal DesignY { get; set; }
-        [Column(TypeName = "decimal(20,6)")] public decimal DesignZ { get; set; }
-        [Column(TypeName = "decimal(20,6)")] public decimal PreCamber { get; set; }
+        /// <summary>设计坐标X，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal DesignX { get; set; }
+        /// <summary>设计坐标Y，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal DesignY { get; set; }
+        /// <summary>设计坐标Z，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal DesignZ { get; set; }
+        /// <summary>预拱度，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal PreCamber { get; set; }
+        /// <summary>测点权值。</summary>
         [Column(TypeName = "decimal(5,4)")] public decimal Weight { get; set; }
+        /// <summary>所属梁段号。</summary>
         [Required, MaxLength(50)] public string SegmentNo { get; set; } = string.Empty;
+        /// <summary>测位名称。</summary>
         [Required, MaxLength(100)] public string PositionName { get; set; } = string.Empty;
+        /// <summary>是否为首坐标，暂不计算时为空。</summary>
         public bool? IsFirstCoordinate { get; set; }
+        /// <summary>测点顺序，暂不计算时为空。</summary>
         public int? PositionOrder { get; set; }
-        [Column(TypeName = "decimal(20,6)")] public decimal? DistanceFromStart { get; set; }
+        /// <summary>距起点距离，单位：米；暂不计算时为空。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal? DistanceFromStart { get; set; }
+        /// <summary>乐观锁版本号。</summary>
         public int Version { get; set; } = 1;
+        /// <summary>数据状态：0正常，-1逻辑删除。</summary>
         public int Status { get; set; }
+        /// <summary>创建人。</summary>
         [MaxLength(100)] public string? CreatedBy { get; set; }
+        /// <summary>创建时间。</summary>
         public DateTime? CreatedTime { get; set; }
+        /// <summary>最后更新人。</summary>
         [MaxLength(100)] public string? UpdatedBy { get; set; }
+        /// <summary>最后更新时间。</summary>
         public DateTime? UpdatedTime { get; set; }
     }
 
+    /// <summary>钢梁实测数据导入批次。</summary>
     public class biz_steel_beam_measure_batch : IIDTable
     {
+        /// <summary>主键ID。</summary>
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
+        /// <summary>所属项目ID。</summary>
         public int ProjID { get; set; }
-        public int BridgeID { get; set; }
+        /// <summary>所属梁体ID，关联 biz_project_bridge.ID。</summary>
+        public int GirderID { get; set; }
+        /// <summary>顶推次数，从0开始。</summary>
         public int PushCount { get; set; }
+        /// <summary>测量时间，精确到小时。</summary>
         public DateTime MeasureTime { get; set; }
+        /// <summary>本批次导入的数据条数。</summary>
         public int ImportCount { get; set; }
+        /// <summary>覆盖本批次的新批次ID。</summary>
         public int? ReplacedByBatchID { get; set; }
+        /// <summary>数据状态：0正常，-1逻辑删除。</summary>
         public int Status { get; set; }
+        /// <summary>创建人。</summary>
         [MaxLength(100)] public string? CreatedBy { get; set; }
+        /// <summary>创建时间，即导入时间。</summary>
         public DateTime? CreatedTime { get; set; }
+        /// <summary>最后更新人。</summary>
         [MaxLength(100)] public string? UpdatedBy { get; set; }
+        /// <summary>最后更新时间。</summary>
         public DateTime? UpdatedTime { get; set; }
     }
 
+    /// <summary>钢梁实测数据明细。</summary>
     public class biz_steel_beam_measured : IIDTable
     {
+        /// <summary>主键ID。</summary>
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
+        /// <summary>所属项目ID。</summary>
         public int ProjID { get; set; }
-        public int BridgeID { get; set; }
+        /// <summary>所属梁体ID，关联 biz_project_bridge.ID。</summary>
+        public int GirderID { get; set; }
+        /// <summary>实测数据导入批次ID。</summary>
         public int BatchID { get; set; }
+        /// <summary>关联的理论数据ID。</summary>
         public int TheoreticalID { get; set; }
+        /// <summary>测点编号。</summary>
         [Required, MaxLength(50)] public string PointCode { get; set; } = string.Empty;
-        [Column(TypeName = "decimal(20,6)")] public decimal MeasuredX { get; set; }
-        [Column(TypeName = "decimal(20,6)")] public decimal MeasuredY { get; set; }
-        [Column(TypeName = "decimal(20,6)")] public decimal MeasuredZ { get; set; }
+        /// <summary>实测坐标X，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal MeasuredX { get; set; }
+        /// <summary>实测坐标Y，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal MeasuredY { get; set; }
+        /// <summary>实测坐标Z，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal MeasuredZ { get; set; }
+        /// <summary>导入时间。</summary>
         public DateTime ImportTime { get; set; }
+        /// <summary>乐观锁版本号。</summary>
         public int Version { get; set; } = 1;
+        /// <summary>数据状态：0正常，-1逻辑删除。</summary>
         public int Status { get; set; }
+        /// <summary>创建人。</summary>
         [MaxLength(100)] public string? CreatedBy { get; set; }
+        /// <summary>创建时间。</summary>
         public DateTime? CreatedTime { get; set; }
+        /// <summary>最后更新人。</summary>
         [MaxLength(100)] public string? UpdatedBy { get; set; }
+        /// <summary>最后更新时间。</summary>
         public DateTime? UpdatedTime { get; set; }
+    }
+    /// <summary>
+    /// 项目授权人员关联表
+    /// </summary>
+    public class biz_project_user : IIDTable
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column("ID")]
+        public int ID { set; get; }
+
+        /// <summary>
+        /// 项目ID
+        /// </summary>
+        public int ProjID { set; get; }
+
+        /// <summary>
+        /// 用户ID
+        /// </summary>
+        public int UserID { set; get; }
+
+        /// <summary>
+        /// 状态：1-正常，-1-删除
+        /// </summary>
+        public int Status { set; get; }
+
+        [MaxLength(100)]
+        public string? CreatedBy { set; get; }
+
+        public DateTime? CreatedTime { set; get; }
+
+        [MaxLength(100)]
+        public string? UpdatedBy { set; get; }
+
+        public DateTime? UpdatedTime { set; get; }
     }
 
     #endregion
