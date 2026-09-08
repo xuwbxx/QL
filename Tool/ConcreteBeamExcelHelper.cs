@@ -12,6 +12,7 @@ public sealed record ConcreteBeamDesignCoordinateImportRow(
     decimal XE, decimal YE, decimal ZE,
     decimal XC, decimal YC, decimal ZC,
     decimal XW, decimal YW, decimal ZW);
+public sealed record ConcreteBeamCamberImportRow(int ExcelRow, string NodeName, decimal? ZE, decimal ZC, decimal? ZW);
 
 public sealed record ConcreteBeamImportError(
     int ExcelRow, string RecordKey, string FieldName, string OriginalValue, string Reason);
@@ -33,6 +34,7 @@ public static class ConcreteBeamExcelHelper
 
     public static readonly string[] DesignCoordinateHeaders =
         ["节点名称", "XE", "YE", "ZE", "XC", "YC", "ZC", "XW", "YW", "ZW"];
+    public static readonly string[] CamberHeaders = ["节点名称", "ZE", "ZC", "ZW"];
 
     public static ConcreteBeamParseResult<ConcreteBeamSegmentImportRow> ParseSegments(Stream stream)
     {
@@ -79,6 +81,7 @@ public static class ConcreteBeamExcelHelper
         if (result.Errors.Count > 0) return result;
 
         var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var xcValues = new List<(int ExcelRow, string NodeName, decimal Value, string RawValue)>();
         for (var row = 2; row <= lastRow; row++)
         {
             if (IsEmptyRow(sheet, row, columns.Values)) continue;
@@ -90,10 +93,37 @@ public static class ConcreteBeamExcelHelper
             var values = DesignCoordinateHeaders.Skip(1)
                 .Select(field => ReadRequiredDecimal(sheet.Cell(row, columns[field]), row, name, field, result.Errors))
                 .ToArray();
+            if (values[3] is decimal xcValue)
+                xcValues.Add((row, name, xcValue,
+                    sheet.Cell(row, columns["XC"]).GetFormattedString()));
             if (!result.Errors.Any(a => a.ExcelRow == row))
                 result.Rows.Add(new(row, name, values[0]!.Value, values[1]!.Value, values[2]!.Value,
                     values[3]!.Value, values[4]!.Value, values[5]!.Value,
                     values[6]!.Value, values[7]!.Value, values[8]!.Value));
+        }
+        ValidateXcMonotonicity(xcValues, result.Errors);
+        return result;
+    }
+
+    public static ConcreteBeamParseResult<ConcreteBeamCamberImportRow> ParseCamber(Stream stream)
+    {
+        var result = new ConcreteBeamParseResult<ConcreteBeamCamberImportRow>();
+        using var workbook = new XLWorkbook(stream); var sheet = workbook.Worksheet(1);
+        var columns = ValidateHeaders(sheet, CamberHeaders, result.Errors);
+        if (result.Errors.Count > 0) return result;
+        var lastRow = ValidateDataCount(sheet, columns.Values, result.Errors);
+        var names = new HashSet<string>(StringComparer.Ordinal);
+        for (var row = 2; row <= lastRow; row++)
+        {
+            if (IsEmptyRow(sheet, row, columns.Values)) continue;
+            var name = ReadText(sheet.Cell(row, columns["节点名称"]));
+            ValidateNoFormula(sheet, row, columns, result.Errors, name);
+            ValidateRequiredText(row, name, "节点名称", name, 100, result.Errors);
+            if (!string.IsNullOrWhiteSpace(name) && !names.Add(name)) result.Errors.Add(new(row, name, "节点名称", name, "同一文件内节点名称重复"));
+            var ze = ReadOptionalDecimal(sheet.Cell(row, columns["ZE"]), row, name, "ZE", result.Errors);
+            var zc = ReadRequiredDecimal(sheet.Cell(row, columns["ZC"]), row, name, "ZC", result.Errors);
+            var zw = ReadOptionalDecimal(sheet.Cell(row, columns["ZW"]), row, name, "ZW", result.Errors);
+            if (!result.Errors.Any(a => a.ExcelRow == row)) result.Rows.Add(new(row, name, ze, zc!.Value, zw));
         }
         return result;
     }
@@ -110,8 +140,15 @@ public static class ConcreteBeamExcelHelper
     [
         ["节点名称", "是", "同一浇筑组内唯一，最多100个字符", "KF-P2-1U"],
         ["XE/YE/ZE", "是", "东侧控制点坐标，单位m，最多4位小数", "713038.0931"],
-        ["XC/YC/ZC", "是", "中间控制点坐标，单位m，最多4位小数", "713038.0931"],
+        ["XC", "是", "单位m，最多4位小数；按数据行顺序必须严格递增或严格递减，不允许相等", "713038.0931"],
+        ["YC/ZC", "是", "中间控制点坐标，单位m，最多4位小数", "713038.0931"],
         ["XW/YW/ZW", "是", "西侧控制点坐标，单位m，最多4位小数", "713038.0931"]
+    ]);
+    public static byte[] CreateCamberTemplate() => CreateTemplate(CamberHeaders,
+    [
+        ["节点名称", "是", "名称和数量必须与当前浇筑组的设计坐标完全一致", "KF-P2-1U"],
+        ["ZE/ZW", "否", "允许为空；为空时计算表使用ZC填充；有值时最多4位小数", "0.0150"],
+        ["ZC", "是", "不能为空，最多4位小数", "0.0120"]
     ]);
 
     public static byte[] CreateErrorFile(IEnumerable<ConcreteBeamImportError> errors)
@@ -141,6 +178,34 @@ public static class ConcreteBeamExcelHelper
     {
         var bits = decimal.GetBits(value);
         return ((bits[3] >> 16) & 0x7F) <= maximumScale;
+    }
+
+    private static void ValidateXcMonotonicity(
+        IReadOnlyList<(int ExcelRow, string NodeName, decimal Value, string RawValue)> values,
+        List<ConcreteBeamImportError> errors)
+    {
+        var direction = 0;
+        for (var index = 1; index < values.Count; index++)
+        {
+            var current = values[index];
+            var comparison = current.Value.CompareTo(values[index - 1].Value);
+            if (comparison == 0)
+            {
+                errors.Add(new(current.ExcelRow, current.NodeName, "XC", current.RawValue,
+                    "XC必须按数据行顺序严格递增或严格递减，不允许相邻行相等"));
+                continue;
+            }
+
+            if (direction == 0)
+            {
+                direction = comparison;
+                continue;
+            }
+
+            if (comparison != direction)
+                errors.Add(new(current.ExcelRow, current.NodeName, "XC", current.RawValue,
+                    "XC必须按数据行顺序保持同一递增或递减方向"));
+        }
     }
 
     private static int ValidateDataCount(IXLWorksheet sheet, IEnumerable<int> columns, List<ConcreteBeamImportError> errors)
@@ -197,6 +262,16 @@ public static class ConcreteBeamExcelHelper
             errors.Add(new(row, key, field, raw, $"{field}必须是有效数字"));
             return null;
         }
+        if (!HasScale(value, 4)) errors.Add(new(row, key, field, raw, $"{field}最多保留4位小数"));
+        return value;
+    }
+    private static decimal? ReadOptionalDecimal(IXLCell cell, int row, string key, string field, List<ConcreteBeamImportError> errors)
+    {
+        if (cell.IsEmpty() || string.IsNullOrWhiteSpace(cell.GetFormattedString())) return null;
+        var raw = cell.GetFormattedString(); decimal value;
+        if (cell.DataType == XLDataType.Number) value = Convert.ToDecimal(cell.GetDouble(), CultureInfo.InvariantCulture);
+        else if (!decimal.TryParse(cell.GetString(), NumberStyles.Number, CultureInfo.InvariantCulture, out value))
+        { errors.Add(new(row, key, field, raw, $"{field}必须是有效数字或为空")); return null; }
         if (!HasScale(value, 4)) errors.Add(new(row, key, field, raw, $"{field}最多保留4位小数"));
         return value;
     }

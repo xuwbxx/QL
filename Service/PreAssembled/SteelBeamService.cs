@@ -431,17 +431,18 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         var isAdmin = await (from user in users
                              join userRole in Db.Query<sys_user_role>().Where(a => a.Status == 1)
                                  on user.ID equals userRole.UserID
-                             join role in Db.Query<sys_role>().Where(a => a.Status == 1 && !a.IsDeleted)
+                             join role in Db.Query<sys_role>().Where(a => a.Status == 1)
                                  on userRole.RoleID equals role.ID
                              where role.Code != null &&
                                    (role.Code.ToLower() == "role_admin" || role.Code.ToLower() == "role_biz_admin")
                              select role.ID).AnyAsync();
         if (isAdmin) return null;
 
-        return await (from user in users
-                      join projectUser in Db.Query<biz_project_user>().Where(a => a.Status == 1)
-                          on user.ID equals projectUser.UserID
-                      select projectUser.ProjID).Distinct().ToHashSetAsync();
+        var projectIds = await (from user in users
+                                join projectUser in Db.Query<biz_project_user>().Where(a => a.Status == 1)
+                                    on user.ID equals projectUser.UserID
+                                select projectUser.ProjID).Distinct().ToListAsync();
+        return projectIds.ToHashSet();
     }
 
     private async Task EnsureProjectAccess(int projID)

@@ -35,8 +35,6 @@
             var importMeasureTime = Vue.ref(null);
             var uploadRef = Vue.ref(null);
 
-            function goBack() { window.history.back(); }
-
             async function loadGirderInfo() {
                 try {
                     var data = await HttpUtils.get('/Biz/SteelBeam/GirderInfo?girderID=' + girderID);
@@ -244,7 +242,7 @@
                 state: state, theoryQuery: theoryQuery, measuredQuery: measuredQuery, editingId: editingId, editForm: editForm,
                 importDialogVisible: importDialogVisible, importLoading: importLoading, importType: importType,
                 importPushCount: importPushCount, importMeasureTime: importMeasureTime, uploadRef: uploadRef,
-                goBack: goBack, onTabChange: onTabChange, searchTheory: searchTheory, resetTheory: resetTheory, loadTheory: loadTheory,
+                onTabChange: onTabChange, searchTheory: searchTheory, resetTheory: resetTheory, loadTheory: loadTheory,
                 onTheorySize: onTheorySize, searchMeasured: searchMeasured, resetMeasured: resetMeasured, loadMeasured: loadMeasured,
                 onMeasuredSize: onMeasuredSize, onPushChange: onPushChange, startEdit: startEdit, cancelEdit: cancelEdit, saveEdit: saveEdit,
                 openImport: openImport, onFileChange: onFileChange, onFileRemove: onFileRemove, onFileExceed: onFileExceed,

@@ -45,6 +45,8 @@
         public decimal? OffsetB { get; set; }
         public decimal? OffsetC { get; set; }
         public decimal? ReferenceElevation { get; set; }
+        public bool IsConfigured { get; set; }
+        public bool ElevationIncludesCamber { get; set; }
         public DateTime? CreatedTime { get; set; }
         public DateTime? UpdatedTime { get; set; }
     }
@@ -55,7 +57,7 @@
         public decimal OffsetA { get; set; }
         public decimal OffsetB { get; set; }
         public decimal OffsetC { get; set; }
-        public decimal ReferenceElevation { get; set; }
+        public decimal? ReferenceElevation { get; set; }
     }
 
     public class ConcreteBeamDataQueryDTO
@@ -63,6 +65,7 @@
         public int CastingGroupID { get; set; }
         public int PageIndex { get; set; } = 1;
         public int PageSize { get; set; } = 10;
+        public bool UseCalculation { get; set; }
     }
 
     public class ConcreteBeamSegmentDTO
@@ -87,6 +90,11 @@
         public decimal XW { get; set; }
         public decimal YW { get; set; }
         public decimal ZW { get; set; }
+    }
+    public class ConcreteBeamCamberDTO
+    {
+        public string NodeName { get; set; } = string.Empty;
+        public decimal ZE { get; set; } public decimal ZC { get; set; } public decimal ZW { get; set; }
     }
 
     public class ConcreteBeamPagedResultDTO<T>

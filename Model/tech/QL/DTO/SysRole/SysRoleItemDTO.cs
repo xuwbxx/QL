@@ -9,7 +9,6 @@
         public int Sort { get; set; }
         public string? Remark { get; set; }
         public int Status { get; set; } = 1;
-        public bool IsDeleted { get; set; }
         public int UserCount { get; set; }
         public DateTime? CreatedTime { get; set; }
     }

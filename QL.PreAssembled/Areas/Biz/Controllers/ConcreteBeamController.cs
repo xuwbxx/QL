@@ -40,14 +40,9 @@ public class ConcreteBeamController(ConcreteBeamService concreteBeamService) : C
     [HttpPost]
     public async Task<JsonResult> DesignCoordinateList([FromBody] ConcreteBeamDataQueryDTO req) =>
         await JsonCall(() => concreteBeamService.DesignCoordinateList(req));
-
-    [HttpGet]
-    public IActionResult SegmentTemplate()
-    {
-        concreteBeamService.EnsureAuthenticated();
-        return File(concreteBeamService.SegmentTemplate(),
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "混凝土梁_梁段信息导入模板.xlsx");
-    }
+    [HttpPost]
+    public async Task<JsonResult> CamberList([FromBody] ConcreteBeamDataQueryDTO req) =>
+        await JsonCall(() => concreteBeamService.CamberList(req));
 
     [HttpGet]
     public IActionResult DesignCoordinateTemplate()
@@ -56,16 +51,23 @@ public class ConcreteBeamController(ConcreteBeamService concreteBeamService) : C
         return File(concreteBeamService.DesignCoordinateTemplate(),
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "混凝土梁_设计坐标导入模板.xlsx");
     }
+    [HttpGet]
+    public IActionResult CamberTemplate()
+    {
+        concreteBeamService.EnsureAuthenticated();
+        return File(concreteBeamService.CamberTemplate(), XlsxContentType, "混凝土梁_预拱度导入模板.xlsx");
+    }
 
     [HttpPost]
     [RequestSizeLimit(ConcreteBeamExcelHelper.MaxFileBytes + 1024 * 1024)]
-    public async Task<IActionResult> ImportSegments(int castingGroupID, bool confirmOverwrite, IFormFile? file) =>
-        await Import(file, bytes => concreteBeamService.ImportSegments(castingGroupID, bytes, confirmOverwrite));
-
+    public async Task<IActionResult> ImportDesignCoordinates(int castingGroupID, bool confirmOverwrite,
+        bool elevationIncludesCamber, IFormFile? file) =>
+        await Import(file, bytes => concreteBeamService.ImportDesignCoordinates(
+            castingGroupID, bytes, confirmOverwrite, elevationIncludesCamber));
     [HttpPost]
     [RequestSizeLimit(ConcreteBeamExcelHelper.MaxFileBytes + 1024 * 1024)]
-    public async Task<IActionResult> ImportDesignCoordinates(int castingGroupID, bool confirmOverwrite, IFormFile? file) =>
-        await Import(file, bytes => concreteBeamService.ImportDesignCoordinates(castingGroupID, bytes, confirmOverwrite));
+    public async Task<IActionResult> ImportCamber(int castingGroupID, bool confirmOverwrite, IFormFile? file) =>
+        await Import(file, bytes => concreteBeamService.ImportCamber(castingGroupID, bytes, confirmOverwrite));
 
     private async Task<IActionResult> Import(IFormFile? file, Func<byte[], Task<ConcreteBeamImportResultDTO>> action)
     {

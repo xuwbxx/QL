@@ -180,8 +180,11 @@ namespace DataFactory.KingBase
         public DbSet<biz_steel_beam_measure_batch> biz_steel_beam_measure_batch { get; set; }
         public DbSet<biz_steel_beam_measured> biz_steel_beam_measured { get; set; }
         public DbSet<biz_concrete_beam_config> biz_concrete_beam_config { get; set; }
+        public DbSet<biz_concrete_beam_camber_source> biz_concrete_beam_camber_source { get; set; }
+        public DbSet<biz_concrete_beam_camber_calculation> biz_concrete_beam_camber_calculation { get; set; }
         public DbSet<biz_concrete_beam_segment> biz_concrete_beam_segment { get; set; }
-        public DbSet<biz_concrete_beam_design_coordinate> biz_concrete_beam_design_coordinate { get; set; }
+        public DbSet<biz_concrete_beam_design_coordinate_source> biz_concrete_beam_design_coordinate_source { get; set; }
+        public DbSet<biz_concrete_beam_design_coordinate_calculation> biz_concrete_beam_design_coordinate_calculation { get; set; }
 
         #endregion
     }
@@ -423,10 +426,8 @@ namespace DataFactory.KingBase
         [MaxLength(500)]
         public string? Remark { set; get; }
 
-        public bool IsDeleted { set; get; }
-
         /// <summary>
-        /// 状态：0-保存，1-提交，-1-删除
+        /// 状态：1-启用，0-停用，-1-逻辑删除
         /// </summary>
         public int Status { set; get; }
 
@@ -1036,6 +1037,8 @@ namespace DataFactory.KingBase
         [Column(TypeName = "numeric(20,4)")] public decimal OffsetC { get; set; }
         /// <summary>浇筑参考高程偏移量H，单位：米。</summary>
         [Column(TypeName = "numeric(20,4)")] public decimal OffsetH { get; set; }
+        /// <summary>导入设计坐标时，页面是否勾选“标高含预拱度”。</summary>
+        public bool ElevationIncludesCamber { get; set; }
         /// <summary>数据状态：0正常，-1逻辑删除。</summary>
         public int Status { get; set; }
         /// <summary>创建人账号。</summary>
@@ -1084,8 +1087,8 @@ namespace DataFactory.KingBase
         public DateTime? UpdatedTime { get; set; }
     }
 
-    /// <summary>混凝土梁设计坐标表，保存节点东侧、中间和西侧控制点坐标。</summary>
-    public class biz_concrete_beam_design_coordinate : IIDTable
+    /// <summary>混凝土梁设计坐标导入源表，原样保存节点东侧、中间和西侧控制点坐标。</summary>
+    public class biz_concrete_beam_design_coordinate_source : IIDTable
     {
         /// <summary>主键ID。</summary>
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity), Column("ID")]
@@ -1126,6 +1129,75 @@ namespace DataFactory.KingBase
         [MaxLength(100)] public string? UpdatedBy { get; set; }
         /// <summary>最后更新时间。</summary>
         public DateTime? UpdatedTime { get; set; }
+    }
+
+    /// <summary>混凝土梁设计坐标计算表，当前同步保存源数据，供后续计算算法使用。</summary>
+    public class biz_concrete_beam_design_coordinate_calculation : IIDTable
+    {
+        /// <summary>主键ID。</summary>
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity), Column("ID")]
+        public int ID { get; set; }
+        /// <summary>所属项目ID。</summary>
+        public int ProjID { get; set; }
+        /// <summary>所属梁ID，对应项目梁表主键。</summary>
+        public int GirderID { get; set; }
+        /// <summary>所属浇筑组ID。</summary>
+        public int CastingGroupID { get; set; }
+        /// <summary>节点名称，同一浇筑组内唯一。</summary>
+        [MaxLength(100)] public string NodeName { get; set; } = string.Empty;
+        /// <summary>东侧控制点X计算坐标，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal XE { get; set; }
+        /// <summary>东侧控制点Y计算坐标，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal YE { get; set; }
+        /// <summary>东侧控制点Z计算坐标，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal ZE { get; set; }
+        /// <summary>中间控制点X计算坐标，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal XC { get; set; }
+        /// <summary>中间控制点Y计算坐标，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal YC { get; set; }
+        /// <summary>中间控制点Z计算坐标，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal ZC { get; set; }
+        /// <summary>西侧控制点X计算坐标，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal XW { get; set; }
+        /// <summary>西侧控制点Y计算坐标，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal YW { get; set; }
+        /// <summary>西侧控制点Z计算坐标，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal ZW { get; set; }
+        /// <summary>数据状态：0正常，-1逻辑删除。</summary>
+        public int Status { get; set; }
+        /// <summary>创建人账号。</summary>
+        [MaxLength(100)] public string? CreatedBy { get; set; }
+        /// <summary>创建时间。</summary>
+        public DateTime? CreatedTime { get; set; }
+        /// <summary>最后更新人账号。</summary>
+        [MaxLength(100)] public string? UpdatedBy { get; set; }
+        /// <summary>最后更新时间。</summary>
+        public DateTime? UpdatedTime { get; set; }
+    }
+
+    /// <summary>混凝土梁预拱度导入源表，保留用户原始数据。</summary>
+    public class biz_concrete_beam_camber_source : IIDTable
+    {
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int ID { get; set; }
+        public int ProjID { get; set; } public int GirderID { get; set; } public int CastingGroupID { get; set; }
+        [MaxLength(100)] public string NodeName { get; set; } = string.Empty;
+        [Column(TypeName = "numeric(20,4)")] public decimal? ZE { get; set; }
+        [Column(TypeName = "numeric(20,4)")] public decimal ZC { get; set; }
+        [Column(TypeName = "numeric(20,4)")] public decimal? ZW { get; set; }
+        public int Status { get; set; } [MaxLength(100)] public string? CreatedBy { get; set; } public DateTime? CreatedTime { get; set; }
+        [MaxLength(100)] public string? UpdatedBy { get; set; } public DateTime? UpdatedTime { get; set; }
+    }
+    /// <summary>混凝土梁预拱度计算表，缺失的ZE或ZW使用ZC补齐。</summary>
+    public class biz_concrete_beam_camber_calculation : IIDTable
+    {
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int ID { get; set; }
+        public int ProjID { get; set; } public int GirderID { get; set; } public int CastingGroupID { get; set; }
+        [MaxLength(100)] public string NodeName { get; set; } = string.Empty;
+        [Column(TypeName = "numeric(20,4)")] public decimal ZE { get; set; }
+        [Column(TypeName = "numeric(20,4)")] public decimal ZC { get; set; }
+        [Column(TypeName = "numeric(20,4)")] public decimal ZW { get; set; }
+        public int Status { get; set; } [MaxLength(100)] public string? CreatedBy { get; set; } public DateTime? CreatedTime { get; set; }
+        [MaxLength(100)] public string? UpdatedBy { get; set; } public DateTime? UpdatedTime { get; set; }
     }
 
     /// <summary>钢梁理论数据。</summary>

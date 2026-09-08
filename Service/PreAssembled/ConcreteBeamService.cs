@@ -59,14 +59,21 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
             CastingGroupID = castingGroupID, ProjectName = context.ProjectName, BridgeName = context.BridgeName,
             CastingGroupName = context.CastingGroupName, ManagerName = context.ManagerName,
             OffsetA = config?.OffsetA, OffsetB = config?.OffsetB, OffsetC = config?.OffsetC,
-            ReferenceElevation = config?.OffsetH, CreatedTime = config?.CreatedTime, UpdatedTime = config?.UpdatedTime
+            ReferenceElevation = config?.OffsetH,
+            IsConfigured = config != null && config.OffsetA > 0 && config.OffsetB > 0 && config.OffsetC > 0,
+            ElevationIncludesCamber = config?.ElevationIncludesCamber ?? false,
+            CreatedTime = config?.CreatedTime, UpdatedTime = config?.UpdatedTime
         };
     }
 
     public async Task<ConcreteBeamConfigDTO> SaveConfig(ConcreteBeamConfigSaveDTO req)
     {
+        if (req.OffsetA <= 0) throw new InvalidOperationException("A必须大于0");
+        if (req.OffsetB <= 0) throw new InvalidOperationException("B必须大于0");
+        if (req.OffsetC <= 0) throw new InvalidOperationException("C必须大于0");
+        if (!req.ReferenceElevation.HasValue) throw new InvalidOperationException("参考高程不能为空且必须是有效数字");
         ValidateFourDecimals(req.OffsetA, "A"); ValidateFourDecimals(req.OffsetB, "B");
-        ValidateFourDecimals(req.OffsetC, "C"); ValidateFourDecimals(req.ReferenceElevation, "浇筑参考高程");
+        ValidateFourDecimals(req.OffsetC, "C"); ValidateFourDecimals(req.ReferenceElevation.Value, "浇筑参考高程");
         var context = await EnsureCastingGroupAccess(req.CastingGroupID);
         var entity = await Db.Query<biz_concrete_beam_config>().Where(a => a.CastingGroupID == req.CastingGroupID && a.Status != -1)
             .OrderByDescending(a => a.ID).FirstOrDefaultAsync();
@@ -79,7 +86,7 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
         }
         else { entity.UpdatedBy = account; entity.UpdatedTime = now; }
         entity.OffsetA = req.OffsetA; entity.OffsetB = req.OffsetB; entity.OffsetC = req.OffsetC;
-        entity.OffsetH = req.ReferenceElevation;
+        entity.OffsetH = req.ReferenceElevation.Value;
         await Db.SaveAsync();
         return await GetConfig(req.CastingGroupID);
     }
@@ -87,77 +94,163 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
     public async Task<ConcreteBeamPagedResultDTO<ConcreteBeamSegmentDTO>> SegmentList(ConcreteBeamDataQueryDTO req)
     {
         await EnsureCastingGroupAccess(req.CastingGroupID);
-        var query = Db.Query<biz_concrete_beam_segment>().Where(a => a.CastingGroupID == req.CastingGroupID && a.Status != -1);
-        var total = await query.CountAsync(); var page = Math.Max(req.PageIndex, 1); var size = NormalizePageSize(req.PageSize);
-        var list = await query.OrderBy(a => a.ID).Skip((page - 1) * size).Take(size).Select(a => new ConcreteBeamSegmentDTO
-        { SegmentName = a.SegmentName, Downstream = a.Downstream, Upstream = a.Upstream, Node1 = a.Node1, Node2 = a.Node2, PouringDate = a.PouringDate }).ToListAsync();
+        var query = Db.Query<biz_concrete_beam_design_coordinate_calculation>()
+            .Where(a => a.CastingGroupID == req.CastingGroupID && a.Status != -1);
+        var nodeCount = await query.CountAsync();
+        var total = Math.Max(nodeCount - 1, 0);
+        var page = Math.Max(req.PageIndex, 1); var size = NormalizePageSize(req.PageSize);
+        var offset = (page - 1) * size;
+        var nodeNames = offset >= total
+            ? []
+            : await query.OrderBy(a => a.ID).Skip(offset).Take(size + 1).Select(a => a.NodeName).ToListAsync();
+        var list = nodeNames.Take(Math.Min(size, nodeNames.Count - 1)).Select((nodeName, index) => new ConcreteBeamSegmentDTO
+        {
+            SegmentName = $"{nodeName}-{nodeNames[index + 1]}",
+            Node1 = (offset + index + 1).ToString(),
+            Node2 = (offset + index + 2).ToString(),
+            Downstream = null,
+            Upstream = null,
+            PouringDate = null
+        }).ToList();
         return new() { List = list, Total = total };
     }
 
     public async Task<ConcreteBeamPagedResultDTO<ConcreteBeamDesignCoordinateDTO>> DesignCoordinateList(ConcreteBeamDataQueryDTO req)
     {
         await EnsureCastingGroupAccess(req.CastingGroupID);
-        var query = Db.Query<biz_concrete_beam_design_coordinate>().Where(a => a.CastingGroupID == req.CastingGroupID && a.Status != -1);
+        await EnsureProjectConfigSubmitted(req.CastingGroupID);
+        var page = Math.Max(req.PageIndex, 1); var size = NormalizePageSize(req.PageSize);
+        if (req.UseCalculation)
+        {
+            var query = Db.Query<biz_concrete_beam_design_coordinate_calculation>()
+                .Where(a => a.CastingGroupID == req.CastingGroupID && a.Status != -1);
+            var total = await query.CountAsync();
+            var list = await query.OrderBy(a => a.ID).Skip((page - 1) * size).Take(size).Select(a => new ConcreteBeamDesignCoordinateDTO
+            { NodeName = a.NodeName, XE = a.XE, YE = a.YE, ZE = a.ZE, XC = a.XC, YC = a.YC, ZC = a.ZC, XW = a.XW, YW = a.YW, ZW = a.ZW }).ToListAsync();
+            return new() { List = list, Total = total };
+        }
+        else
+        {
+            var query = Db.Query<biz_concrete_beam_design_coordinate_source>()
+                .Where(a => a.CastingGroupID == req.CastingGroupID && a.Status != -1);
+            var total = await query.CountAsync();
+            var list = await query.OrderBy(a => a.ID).Skip((page - 1) * size).Take(size).Select(a => new ConcreteBeamDesignCoordinateDTO
+            { NodeName = a.NodeName, XE = a.XE, YE = a.YE, ZE = a.ZE, XC = a.XC, YC = a.YC, ZC = a.ZC, XW = a.XW, YW = a.YW, ZW = a.ZW }).ToListAsync();
+            return new() { List = list, Total = total };
+        }
+    }
+
+    public async Task<ConcreteBeamPagedResultDTO<ConcreteBeamCamberDTO>> CamberList(ConcreteBeamDataQueryDTO req)
+    {
+        await EnsureCastingGroupAccess(req.CastingGroupID);
+        var query = Db.Query<biz_concrete_beam_camber_calculation>().Where(a => a.CastingGroupID == req.CastingGroupID && a.Status != -1);
         var total = await query.CountAsync(); var page = Math.Max(req.PageIndex, 1); var size = NormalizePageSize(req.PageSize);
-        var list = await query.OrderBy(a => a.ID).Skip((page - 1) * size).Take(size).Select(a => new ConcreteBeamDesignCoordinateDTO
-        { NodeName = a.NodeName, XE = a.XE, YE = a.YE, ZE = a.ZE, XC = a.XC, YC = a.YC, ZC = a.ZC, XW = a.XW, YW = a.YW, ZW = a.ZW }).ToListAsync();
+        var list = await query.OrderBy(a => a.ID).Skip((page - 1) * size).Take(size)
+            .Select(a => new ConcreteBeamCamberDTO { NodeName = a.NodeName, ZE = a.ZE, ZC = a.ZC, ZW = a.ZW }).ToListAsync();
         return new() { List = list, Total = total };
     }
 
-    public byte[] SegmentTemplate() => ConcreteBeamExcelHelper.CreateSegmentTemplate();
     public byte[] DesignCoordinateTemplate() => ConcreteBeamExcelHelper.CreateDesignCoordinateTemplate();
+    public byte[] CamberTemplate() => ConcreteBeamExcelHelper.CreateCamberTemplate();
     public void EnsureAuthenticated() => _ = GetCurrentAccount();
 
-    public async Task<ConcreteBeamImportResultDTO> ImportSegments(int castingGroupID, byte[] bytes, bool confirmOverwrite)
+    public async Task<ConcreteBeamImportResultDTO> ImportDesignCoordinates(int castingGroupID, byte[] bytes,
+        bool confirmOverwrite, bool elevationIncludesCamber)
     {
         var context = await EnsureCastingGroupAccess(castingGroupID);
-        ConcreteBeamParseResult<ConcreteBeamSegmentImportRow> parsed;
-        try { using var stream = new MemoryStream(bytes); parsed = ConcreteBeamExcelHelper.ParseSegments(stream); }
-        catch (Exception ex) { return Failure([new(0, "", "文件", "", $"Excel解析失败：{ex.Message}")]); }
-        if (!parsed.Success) return Failure(parsed.Errors);
-        if (await Db.Query<biz_concrete_beam_segment>().AnyAsync(a => a.CastingGroupID == castingGroupID && a.Status != -1) && !confirmOverwrite)
-            return new() { RequiresOverwriteConfirmation = true, Message = "本次导入将整体替换当前浇筑组的梁段信息，请确认后继续" };
-        var now = DateTime.Now; var account = GetCurrentAccount();
-        try
-        {
-            Db.BeginTransaction();
-            var oldRows = await Db.Query<biz_concrete_beam_segment>().Where(a => a.CastingGroupID == castingGroupID && a.Status != -1).ToListAsync();
-            if (oldRows.Count > 0 && !confirmOverwrite) throw new InvalidOperationException("梁段信息已变化，请确认覆盖后重试");
-            foreach (var old in oldRows) { old.Status = -1; old.UpdatedBy = account; old.UpdatedTime = now; }
-            await Db.SaveAsync();
-            var rows = parsed.Rows.Select(a => new biz_concrete_beam_segment
-            { ProjID = context.ProjID, GirderID = context.GirderID, CastingGroupID = castingGroupID, SegmentName = a.SegmentName,
-                Downstream = a.Downstream, Upstream = a.Upstream, Node1 = a.Node1, Node2 = a.Node2, PouringDate = a.PouringDate,
-                Status = 0, CreatedBy = account, CreatedTime = now }).ToList();
-            Db.GetRepository<biz_concrete_beam_segment>().AddList(rows); await Db.SaveAsync(); Db.CommitTransaction();
-            return new() { Success = true, ImportedCount = rows.Count, Message = $"成功导入{rows.Count}条梁段信息" };
-        }
-        catch (Exception ex) { Db.RollbackTransaction(); return Failure([new(0, "", "数据库", "", $"保存失败：{ex.Message}")]); }
-    }
-
-    public async Task<ConcreteBeamImportResultDTO> ImportDesignCoordinates(int castingGroupID, byte[] bytes, bool confirmOverwrite)
-    {
-        var context = await EnsureCastingGroupAccess(castingGroupID);
+        await EnsureProjectConfigSubmitted(castingGroupID);
         ConcreteBeamParseResult<ConcreteBeamDesignCoordinateImportRow> parsed;
         try { using var stream = new MemoryStream(bytes); parsed = ConcreteBeamExcelHelper.ParseDesignCoordinates(stream); }
         catch (Exception ex) { return Failure([new(0, "", "文件", "", $"Excel解析失败：{ex.Message}")]); }
         if (!parsed.Success) return Failure(parsed.Errors);
-        if (await Db.Query<biz_concrete_beam_design_coordinate>().AnyAsync(a => a.CastingGroupID == castingGroupID && a.Status != -1) && !confirmOverwrite)
+        var hasSource = await Db.Query<biz_concrete_beam_design_coordinate_source>()
+            .AnyAsync(a => a.CastingGroupID == castingGroupID && a.Status != -1);
+        var hasCalculation = await Db.Query<biz_concrete_beam_design_coordinate_calculation>()
+            .AnyAsync(a => a.CastingGroupID == castingGroupID && a.Status != -1);
+        if ((hasSource || hasCalculation) && !confirmOverwrite)
             return new() { RequiresOverwriteConfirmation = true, Message = "本次导入将整体替换当前浇筑组的设计坐标，请确认后继续" };
         var now = DateTime.Now; var account = GetCurrentAccount();
         try
         {
             Db.BeginTransaction();
-            var oldRows = await Db.Query<biz_concrete_beam_design_coordinate>().Where(a => a.CastingGroupID == castingGroupID && a.Status != -1).ToListAsync();
-            if (oldRows.Count > 0 && !confirmOverwrite) throw new InvalidOperationException("设计坐标已变化，请确认覆盖后重试");
-            foreach (var old in oldRows) { old.Status = -1; old.UpdatedBy = account; old.UpdatedTime = now; }
+            var oldSources = await Db.Query<biz_concrete_beam_design_coordinate_source>()
+                .Where(a => a.CastingGroupID == castingGroupID && a.Status != -1).ToListAsync();
+            var oldCalculations = await Db.Query<biz_concrete_beam_design_coordinate_calculation>()
+                .Where(a => a.CastingGroupID == castingGroupID && a.Status != -1).ToListAsync();
+            if ((oldSources.Count > 0 || oldCalculations.Count > 0) && !confirmOverwrite)
+                throw new InvalidOperationException("设计坐标已变化，请确认覆盖后重试");
+            foreach (var old in oldSources) { old.Status = -1; old.UpdatedBy = account; old.UpdatedTime = now; }
+            foreach (var old in oldCalculations) { old.Status = -1; old.UpdatedBy = account; old.UpdatedTime = now; }
             await Db.SaveAsync();
-            var rows = parsed.Rows.Select(a => new biz_concrete_beam_design_coordinate
+            var sourceRows = parsed.Rows.Select(a => new biz_concrete_beam_design_coordinate_source
             { ProjID = context.ProjID, GirderID = context.GirderID, CastingGroupID = castingGroupID, NodeName = a.NodeName,
                 XE = a.XE, YE = a.YE, ZE = a.ZE, XC = a.XC, YC = a.YC, ZC = a.ZC, XW = a.XW, YW = a.YW, ZW = a.ZW,
                 Status = 0, CreatedBy = account, CreatedTime = now }).ToList();
-            Db.GetRepository<biz_concrete_beam_design_coordinate>().AddList(rows); await Db.SaveAsync(); Db.CommitTransaction();
-            return new() { Success = true, ImportedCount = rows.Count, Message = $"成功导入{rows.Count}条设计坐标" };
+            var calculationRows = parsed.Rows.Select(a => new biz_concrete_beam_design_coordinate_calculation
+            { ProjID = context.ProjID, GirderID = context.GirderID, CastingGroupID = castingGroupID, NodeName = a.NodeName,
+                XE = a.XE, YE = a.YE, ZE = a.ZE, XC = a.XC, YC = a.YC, ZC = a.ZC, XW = a.XW, YW = a.YW, ZW = a.ZW,
+                Status = 0, CreatedBy = account, CreatedTime = now }).ToList();
+            Db.GetRepository<biz_concrete_beam_design_coordinate_source>().AddList(sourceRows);
+            Db.GetRepository<biz_concrete_beam_design_coordinate_calculation>().AddList(calculationRows);
+
+            var config = await Db.Query<biz_concrete_beam_config>()
+                .Where(a => a.CastingGroupID == castingGroupID && a.Status != -1)
+                .OrderByDescending(a => a.ID).FirstOrDefaultAsync();
+            if (config == null)
+            {
+                config = new biz_concrete_beam_config
+                {
+                    ProjID = context.ProjID, GirderID = context.GirderID, CastingGroupID = castingGroupID,
+                    ElevationIncludesCamber = elevationIncludesCamber,
+                    Status = 0, CreatedBy = account, CreatedTime = now
+                };
+                Db.GetRepository<biz_concrete_beam_config>().Add(config);
+            }
+            else
+            {
+                config.ElevationIncludesCamber = elevationIncludesCamber;
+                config.UpdatedBy = account;
+                config.UpdatedTime = now;
+            }
+            await Db.SaveAsync(); Db.CommitTransaction();
+            return new() { Success = true, ImportedCount = sourceRows.Count, Message = $"成功导入{sourceRows.Count}条设计坐标" };
+        }
+        catch (Exception ex) { Db.RollbackTransaction(); return Failure([new(0, "", "数据库", "", $"保存失败：{ex.Message}")]); }
+    }
+
+    public async Task<ConcreteBeamImportResultDTO> ImportCamber(int castingGroupID, byte[] bytes, bool confirmOverwrite)
+    {
+        var context = await EnsureCastingGroupAccess(castingGroupID);
+        ConcreteBeamParseResult<ConcreteBeamCamberImportRow> parsed;
+        try { using var stream = new MemoryStream(bytes); parsed = ConcreteBeamExcelHelper.ParseCamber(stream); }
+        catch (Exception ex) { return Failure([new(0, "", "文件", "", $"Excel解析失败：{ex.Message}")]); }
+        if (!parsed.Success) return Failure(parsed.Errors);
+        var designNames = await Db.Query<biz_concrete_beam_design_coordinate_calculation>()
+            .Where(a => a.CastingGroupID == castingGroupID && a.Status != -1).Select(a => a.NodeName).ToListAsync();
+        var importedNames = parsed.Rows.Select(a => a.NodeName).ToList();
+        var mismatch = importedNames.Count != designNames.Count || !importedNames.OrderBy(a => a, StringComparer.Ordinal)
+            .SequenceEqual(designNames.OrderBy(a => a, StringComparer.Ordinal), StringComparer.Ordinal);
+        if (mismatch) return Failure([new(0, "", "节点名称", "", "节点名称和数量必须与设计坐标完全一致")]);
+        if (await Db.Query<biz_concrete_beam_camber_source>().AnyAsync(a => a.CastingGroupID == castingGroupID && a.Status != -1) && !confirmOverwrite)
+            return new() { RequiresOverwriteConfirmation = true, Message = "本次导入将整体替换当前浇筑组的预拱度数据，请确认后继续" };
+        var now = DateTime.Now; var account = GetCurrentAccount();
+        try
+        {
+            Db.BeginTransaction();
+            var sources = await Db.Query<biz_concrete_beam_camber_source>().Where(a => a.CastingGroupID == castingGroupID && a.Status != -1).ToListAsync();
+            var calculations = await Db.Query<biz_concrete_beam_camber_calculation>().Where(a => a.CastingGroupID == castingGroupID && a.Status != -1).ToListAsync();
+            if ((sources.Count > 0 || calculations.Count > 0) && !confirmOverwrite) throw new InvalidOperationException("预拱度数据已变化，请确认覆盖后重试");
+            foreach (var row in sources) { row.Status = -1; row.UpdatedBy = account; row.UpdatedTime = now; }
+            foreach (var row in calculations) { row.Status = -1; row.UpdatedBy = account; row.UpdatedTime = now; }
+            await Db.SaveAsync();
+            Db.GetRepository<biz_concrete_beam_camber_source>().AddList(parsed.Rows.Select(a => new biz_concrete_beam_camber_source
+            { ProjID = context.ProjID, GirderID = context.GirderID, CastingGroupID = castingGroupID, NodeName = a.NodeName,
+                ZE = a.ZE, ZC = a.ZC, ZW = a.ZW, Status = 0, CreatedBy = account, CreatedTime = now }).ToList());
+            Db.GetRepository<biz_concrete_beam_camber_calculation>().AddList(parsed.Rows.Select(a => new biz_concrete_beam_camber_calculation
+            { ProjID = context.ProjID, GirderID = context.GirderID, CastingGroupID = castingGroupID, NodeName = a.NodeName,
+                ZE = a.ZE ?? a.ZC, ZC = a.ZC, ZW = a.ZW ?? a.ZC, Status = 0, CreatedBy = account, CreatedTime = now }).ToList());
+            await Db.SaveAsync(); Db.CommitTransaction();
+            return new() { Success = true, ImportedCount = parsed.Rows.Count, Message = $"成功导入{parsed.Rows.Count}条预拱度数据" };
         }
         catch (Exception ex) { Db.RollbackTransaction(); return Failure([new(0, "", "数据库", "", $"保存失败：{ex.Message}")]); }
     }
@@ -175,11 +268,29 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
         };
     }
 
-    private Task<HashSet<int>?> GetAllowedProjectIds()
+    private async Task<HashSet<int>?> GetAllowedProjectIds()
     {
-        // 与钢梁管理保持一致：菜单负责入口授权，当前库尚无项目-用户关系表。
-        GetCurrentAccount();
-        return Task.FromResult<HashSet<int>?>(null);
+        var account = GetCurrentAccount();
+        var userID = await Db.Query<sys_userinfo>()
+            .Where(a => a.Status == 1 && a.Account == account)
+            .Select(a => (int?)a.ID)
+            .FirstOrDefaultAsync()
+            ?? throw new UnauthorizedAccessException("当前登录用户不存在或已停用");
+
+        var adminRoleCodes = new[] { "role_admin", "role_biz_admin" };
+        var isAdmin = await (from userRole in Db.Query<sys_user_role>().Where(a => a.Status == 1 && a.UserID == userID)
+                             join role in Db.Query<sys_role>().Where(a => a.Status == 1)
+                                 on userRole.RoleID equals role.ID
+                             where role.Code != null && adminRoleCodes.Contains(role.Code)
+                             select role.ID).AnyAsync();
+        if (isAdmin) return null;
+
+        var projectIDs = await Db.Query<biz_project_user>()
+            .Where(a => a.Status == 1 && a.UserID == userID)
+            .Select(a => a.ProjID)
+            .Distinct()
+            .ToListAsync();
+        return projectIDs.ToHashSet();
     }
 
     private async Task EnsureProjectAccess(int projID)
@@ -207,6 +318,14 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
 
     private static void ValidateFourDecimals(decimal value, string field)
     { if (!ConcreteBeamExcelHelper.HasScale(value, 4)) throw new InvalidOperationException($"{field}最多保留4位小数"); }
+    private async Task EnsureProjectConfigSubmitted(int castingGroupID)
+    {
+        var configured = await Db.Query<biz_concrete_beam_config>().AnyAsync(a =>
+            a.CastingGroupID == castingGroupID && a.Status != -1 &&
+            a.OffsetA > 0 && a.OffsetB > 0 && a.OffsetC > 0);
+        if (!configured)
+            throw new InvalidOperationException("请先在项目信息页签提交大于0的A、B、C及有效参考高程");
+    }
     private static int NormalizePageSize(int size) => size is 10 or 20 or 50 or 100 ? size : 10;
     private sealed record CastingGroupContext(int ProjID, int GirderID, string ProjectName, string BridgeName, string CastingGroupName, string ManagerName);
 }

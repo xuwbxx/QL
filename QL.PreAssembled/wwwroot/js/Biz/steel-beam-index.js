@@ -86,7 +86,13 @@
 
             function handleLinearControl(row) {
                 var girderID = row.id || row.ID;
-                window.location.href = '/Biz/SteelBeam/LinearControl?girderID=' + girderID;
+                var name = row.bridgeName || row.BridgeName || '线形管控';
+                var url = '/Biz/SteelBeam/LinearControl?girderID=' + girderID;
+                if (window.parent && window.parent.openInNewTab) {
+                    window.parent.openInNewTab(name, url);
+                } else {
+                    window.location.href = url;
+                }
             }
 
             Vue.onMounted(function () {

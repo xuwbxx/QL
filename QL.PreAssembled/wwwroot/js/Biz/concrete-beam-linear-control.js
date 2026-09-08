@@ -12,7 +12,7 @@
 
             var tabs = Vue.reactive([
                 { name: 'projectInfo', label: '项目信息', disabled: false },
-                { name: 'designCoord', label: '设计坐标', disabled: false },
+                { name: 'designCoord', label: '设计坐标', disabled: true },
                 { name: 'preCamber', label: '预拱度', disabled: false },
                 { name: 'stationMeasure', label: '设站及测量', disabled: false },
                 { name: 'pouringCoord', label: '浇筑坐标', disabled: false },
@@ -50,7 +50,8 @@
             var designTotal = Vue.ref(0);
             var designPageIndex = Vue.ref(1);
             var designPageSize = Vue.ref(10);
-            var designNormalize = Vue.ref(true);
+            var designNormalize = Vue.ref(false);
+            var designUseCalculation = Vue.ref(false);
             var designIncludeCamber = Vue.ref(false);
 
             // 预拱度表格
@@ -161,6 +162,19 @@
                 var tab = tabs.find(function (t) { return t.name === tabName; });
                 if (tab && tab.disabled) return;
                 activeTab.value = tabName;
+                if (tabName === 'designCoord') loadDesignData();
+            }
+
+            function setPreCamberDisabled(disabled) {
+                var tab = tabs.find(function (item) { return item.name === 'preCamber'; });
+                if (tab) tab.disabled = !!disabled;
+                if (disabled && activeTab.value === 'preCamber') activeTab.value = 'designCoord';
+            }
+
+            function setDesignCoordinateDisabled(disabled) {
+                var tab = tabs.find(function (item) { return item.name === 'designCoord'; });
+                if (tab) tab.disabled = !!disabled;
+                if (disabled && activeTab.value === 'designCoord') activeTab.value = 'projectInfo';
             }
 
             async function loadGroupInfo() {
@@ -173,10 +187,15 @@
                     projectInfo.offsetB = formatNullableNumber(info.offsetB);
                     projectInfo.offsetC = formatNullableNumber(info.offsetC);
                     projectInfo.referenceElevation = formatNullableNumber(info.referenceElevation);
+                    setDesignCoordinateDisabled(!info.isConfigured);
+                    designIncludeCamber.value = !!info.elevationIncludesCamber;
+                    setPreCamberDisabled(designIncludeCamber.value);
                     projectInfo.createdTime = formatDateTime(info.createdTime);
                     projectInfo.updatedTime = formatDateTime(info.updatedTime);
                     rememberConfig();
+                    if (info.isConfigured) loadDesignData();
                 } catch (e) {
+                    setDesignCoordinateDisabled(true);
                     console.error('loadGroupInfo error', e);
                 }
             }
@@ -217,7 +236,8 @@
                 designLoading.value = true;
                 try {
                     var res = await HttpUtils.post('/Biz/ConcreteBeam/DesignCoordinateList', {
-                        castingGroupID: groupID, pageIndex: designPageIndex.value, pageSize: designPageSize.value
+                        castingGroupID: groupID, pageIndex: designPageIndex.value, pageSize: designPageSize.value,
+                        useCalculation: designUseCalculation.value
                     });
                     designTableData.value = (res.list || []).map(function (row) {
                         ['xe','ye','ze','xc','yc','zc','xw','yw','zw'].forEach(function (key) { row[key] = formatNullableNumber(row[key]); });
@@ -233,34 +253,38 @@
 
             function handleDesignPageChange(val) { designPageIndex.value = val; loadDesignData(); }
             function handleDesignSizeChange(val) { designPageSize.value = val; designPageIndex.value = 1; loadDesignData(); }
-            function onDesignNormalizeChange() { loadDesignData(); }
-            function onDesignCamberChange() { loadDesignData(); }
+            function onDesignNormalizeChange() { }
+            function onDesignCamberChange() { }
             function handleImportDesignCoord() { openImport('design'); }
             function downloadDesignTemplate() { window.location.href = '/Biz/ConcreteBeam/DesignCoordinateTemplate'; }
             function handleDesignPrint() { ElMessage.info('打印功能待开发'); }
             function handleDesignPreview() { ElMessage.info('预览功能待开发'); }
-            function handleDesignConfirm() { ElMessage.info('确定功能待开发'); }
-            function handleDesignCancel() { ElMessage.info('已取消'); }
+            function handleDesignConfirm() {
+                designUseCalculation.value = designNormalize.value;
+                designPageIndex.value = 1;
+                loadDesignData();
+                ElMessage.success('设计坐标数据已刷新');
+            }
+            function handleDesignCancel() {
+                designNormalize.value = designUseCalculation.value;
+                ElMessage.info('已取消');
+            }
 
             function loadCamberData() {
                 camberLoading.value = true;
-                var list = [];
-                for (var i = 0; i < 10; i++) {
-                    list.push({
-                        nodeName: 'KF-P2-1U',
-                        ze: '713038.093088',
-                        zc: '713038.093088',
-                        zw: '713038.093088'
-                    });
-                }
-                camberTableData.value = list;
-                camberTotal.value = 50;
-                camberLoading.value = false;
+                HttpUtils.post('/Biz/ConcreteBeam/CamberList', { castingGroupID: groupID, pageIndex: camberPageIndex.value, pageSize: camberPageSize.value })
+                    .then(function (res) {
+                        camberTableData.value = (res.list || []).map(function (row) {
+                            ['ze','zc','zw'].forEach(function (key) { row[key] = formatNullableNumber(row[key]); }); return row;
+                        }); camberTotal.value = res.total || 0;
+                    }).catch(function (e) { console.error('loadCamberData error', e); })
+                    .finally(function () { camberLoading.value = false; });
             }
 
             function handleCamberPageChange(val) { camberPageIndex.value = val; loadCamberData(); }
             function handleCamberSizeChange(val) { camberPageSize.value = val; camberPageIndex.value = 1; loadCamberData(); }
-            function handleImportCamber() { ElMessage.info('导入预拱度功能待开发'); }
+            function handleImportCamber() { openImport('camber'); }
+            function downloadCamberTemplate() { window.location.href = '/Biz/ConcreteBeam/CamberTemplate'; }
             function handleCamberPrint() { ElMessage.info('打印功能待开发'); }
             function handleCamberPreview() { ElMessage.info('预览功能待开发'); }
             function handleCamberConfirm() { ElMessage.info('确定功能待开发'); }
@@ -289,13 +313,16 @@
             function handleReportCancel() { ElMessage.info('已取消'); }
 
             async function handleConfirm() {
-                if (!projectInfo.offsetA) { ElMessage.warning('请输入A值'); return; }
-                if (!projectInfo.offsetB) { ElMessage.warning('请输入B值'); return; }
-                if (!projectInfo.offsetC) { ElMessage.warning('请输入C值'); return; }
-                if (!projectInfo.referenceElevation) { ElMessage.warning('请输入参考高程'); return; }
+                if (String(projectInfo.offsetA).trim() === '') { ElMessage.warning('请输入A值'); return; }
+                if (String(projectInfo.offsetB).trim() === '') { ElMessage.warning('请输入B值'); return; }
+                if (String(projectInfo.offsetC).trim() === '') { ElMessage.warning('请输入C值'); return; }
+                if (String(projectInfo.referenceElevation).trim() === '') { ElMessage.warning('请输入参考高程'); return; }
                 var fields = [projectInfo.offsetA, projectInfo.offsetB, projectInfo.offsetC, projectInfo.referenceElevation];
                 if (fields.some(function (v) { return !isFourDecimalNumber(v); })) {
                     ElMessage.warning('A、B、C和参考高程必须是最多四位小数的有效数字'); return;
+                }
+                if (Number(projectInfo.offsetA) <= 0 || Number(projectInfo.offsetB) <= 0 || Number(projectInfo.offsetC) <= 0) {
+                    ElMessage.warning('A、B、C必须大于0'); return;
                 }
                 try {
                     var info = await HttpUtils.post('/Biz/ConcreteBeam/SaveConfig', {
@@ -310,6 +337,7 @@
                     projectInfo.createdTime = formatDateTime(info.createdTime);
                     projectInfo.updatedTime = formatDateTime(info.updatedTime);
                     rememberConfig();
+                    setDesignCoordinateDisabled(!info.isConfigured);
                     ElMessage.success('保存成功');
                 } catch (e) { console.error('save config error', e); }
             }
@@ -338,10 +366,13 @@
 
             async function importExcel(type, file, confirmOverwrite) {
                 var form = new FormData(); form.append('file', file);
-                var url = type === 'segments' ? '/Biz/ConcreteBeam/ImportSegments' : '/Biz/ConcreteBeam/ImportDesignCoordinates';
+                var url = type === 'segments' ? '/Biz/ConcreteBeam/ImportSegments' :
+                    (type === 'design' ? '/Biz/ConcreteBeam/ImportDesignCoordinates' : '/Biz/ConcreteBeam/ImportCamber');
                 importLoading.value = true;
                 try {
-                    var response = await axios.post(url + '?castingGroupID=' + groupID + '&confirmOverwrite=' + confirmOverwrite,
+                    var importUrl = url + '?castingGroupID=' + groupID + '&confirmOverwrite=' + confirmOverwrite;
+                    if (type === 'design') importUrl += '&elevationIncludesCamber=' + designIncludeCamber.value;
+                    var response = await axios.post(importUrl,
                         form, { responseType: 'blob', headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 });
                     var contentType = response.headers['content-type'] || '';
                     if (contentType.indexOf('application/json') < 0) {
@@ -361,7 +392,12 @@
                     importDialogVisible.value = false;
                     ElMessage.success(result.message);
                     if (type === 'segments') { segmentPageIndex.value = 1; loadSegmentData(); }
-                    else { designPageIndex.value = 1; loadDesignData(); }
+                    else if (type === 'design') {
+                        setPreCamberDisabled(designIncludeCamber.value);
+                        designPageIndex.value = 1;
+                        loadDesignData();
+                    }
+                    else { camberPageIndex.value = 1; loadCamberData(); }
                 } catch (e) {
                     ElMessage.error(e && e.message ? e.message : '导入失败');
                 } finally { importLoading.value = false; }
@@ -392,7 +428,6 @@
             Vue.onMounted(function () {
                 loadGroupInfo();
                 loadSegmentData();
-                loadDesignData();
                 loadCamberData();
             });
 
@@ -435,6 +470,7 @@
                 handleCamberPageChange: handleCamberPageChange,
                 handleCamberSizeChange: handleCamberSizeChange,
                 handleImportCamber: handleImportCamber,
+                downloadCamberTemplate: downloadCamberTemplate,
                 handleCamberPrint: handleCamberPrint,
                 handleCamberPreview: handleCamberPreview,
                 handleCamberConfirm: handleCamberConfirm,

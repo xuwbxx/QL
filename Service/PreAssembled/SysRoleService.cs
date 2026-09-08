@@ -16,7 +16,7 @@ public class SysRoleService(QlPreAssembled_KingBase_UnitOfWorkFactory factory, I
         if (account.Length == 0) return Task.FromResult(false);
         var roles = from user in Db.Query<sys_userinfo>().Where(x => x.Status == 1 && x.Account.ToLower() == account)
                     join ur in Db.Query<sys_user_role>().Where(x => x.Status == 1) on user.ID equals ur.UserID
-                    join role in Db.Query<sys_role>().Where(x => !x.IsDeleted && x.Status == 1) on ur.RoleID equals role.ID
+                    join role in Db.Query<sys_role>().Where(x => x.Status == 1) on ur.RoleID equals role.ID
                     select role;
         if (roles.Any(x => x.Code != null && x.Code.ToLower() == AdminCode)) return Task.FromResult(true);
         var allowed = from role in roles
@@ -30,7 +30,7 @@ public class SysRoleService(QlPreAssembled_KingBase_UnitOfWorkFactory factory, I
     public Task<SysRolePagedResultDTO> List(SysRoleQueryDTO req)
     {
         var page = Math.Max(1, req.PageIndex); var size = Math.Clamp(req.PageSize, 1, 100);
-        var query = Db.Query<sys_role>().Where(x => !x.IsDeleted);
+        var query = Db.Query<sys_role>().Where(x => x.Status != -1);
         if (!string.IsNullOrWhiteSpace(req.Name)) { var v = req.Name.Trim().ToLower(); query = query.Where(x => x.Name.ToLower().Contains(v)); }
         if (!string.IsNullOrWhiteSpace(req.Code)) { var v = req.Code.Trim().ToLower(); query = query.Where(x => x.Code != null && x.Code.ToLower().Contains(v)); }
         if (req.Status.HasValue) query = query.Where(x => x.Status == req.Status.Value);
@@ -48,14 +48,14 @@ public class SysRoleService(QlPreAssembled_KingBase_UnitOfWorkFactory factory, I
     {
         var name = item.Name?.Trim() ?? ""; var code = Normalize(item.Code);
         if (name.Length == 0 || code.Length == 0) throw new InvalidOperationException("角色名称和角色标识不能为空");
-        if (Db.Query<sys_role>().Any(x => !x.IsDeleted && x.ID != item.ID && x.Name.ToLower() == name.ToLower())) throw new InvalidOperationException("角色名称已存在");
-        if (Db.Query<sys_role>().Any(x => !x.IsDeleted && x.ID != item.ID && x.Code != null && x.Code.ToLower() == code)) throw new InvalidOperationException("角色标识已存在");
+        if (Db.Query<sys_role>().Any(x => x.Status != -1 && x.ID != item.ID && x.Name.ToLower() == name.ToLower())) throw new InvalidOperationException("角色名称已存在");
+        if (Db.Query<sys_role>().Any(x => x.Status != -1 && x.ID != item.ID && x.Code != null && x.Code.ToLower() == code)) throw new InvalidOperationException("角色标识已存在");
         var rep = Db.GetRepository<sys_role>(); sys_role role;
         if (item.ID == 0)
         {
             if (code == AdminCode) throw new InvalidOperationException("role_admin 为系统保留标识");
             role = new sys_role { Name = name, Code = code, RoleType = "custom", Sort = item.Sort, Remark = item.Remark?.Trim(), Status = item.Status == 0 ? 0 : 1,
-                IsDeleted = false, CreatedBy = actor, CreatedTime = DateTime.Now }; rep.Add(role);
+                CreatedBy = actor, CreatedTime = DateTime.Now }; rep.Add(role);
         }
         else
         {
@@ -75,7 +75,7 @@ public class SysRoleService(QlPreAssembled_KingBase_UnitOfWorkFactory factory, I
     public async Task<int> Delete(SysRoleIdDTO item, string actor)
     {
         var role = RequireMutable(item.ID); var affected = Db.Query<sys_user_role>().Count(x => x.RoleID == role.ID && x.Status == 1);
-        role.IsDeleted = true; role.UpdatedBy = actor; role.UpdatedTime = DateTime.Now; await Db.SaveAsync(); return affected;
+        role.Status = -1; role.UpdatedBy = actor; role.UpdatedTime = DateTime.Now; await Db.SaveAsync(); return affected;
     }
 
     public Task<List<SysRoleMenuItemDTO>> Menus(int roleId)
@@ -114,7 +114,7 @@ public class SysRoleService(QlPreAssembled_KingBase_UnitOfWorkFactory factory, I
         await Db.SaveAsync();
     }
 
-    private sys_role RequireRole(int id) => Db.GetRepository<sys_role>().FindFirst(x => x.ID == id && !x.IsDeleted) ?? throw new InvalidOperationException("角色不存在");
+    private sys_role RequireRole(int id) => Db.GetRepository<sys_role>().FindFirst(x => x.ID == id && x.Status != -1) ?? throw new InvalidOperationException("角色不存在");
     private sys_role RequireMutable(int id) { var role = RequireRole(id); if (string.Equals(role.Code, AdminCode, StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("内置超级管理员不可执行此操作"); return role; }
     private static string Normalize(string? value) => value?.Trim().ToLowerInvariant() ?? "";
 }

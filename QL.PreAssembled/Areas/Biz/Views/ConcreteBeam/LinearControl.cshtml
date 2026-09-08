@@ -337,11 +337,7 @@
 
             <!-- 右侧表格 -->
             <div class="pi-main">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                    <div>
-                        <el-button @@click="downloadSegmentTemplate">下载模板</el-button>
-                        <el-button type="primary" @@click="handleImportSegment">导入梁段信息</el-button>
-                    </div>
+                <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 12px;">
                     <div class="pi-meta">
                         创建时间：{{ projectInfo.createdTime || '-' }}<br />
                         更新时间：{{ projectInfo.updatedTime || '-' }}
@@ -451,6 +447,7 @@
     <!-- 3. 预拱度 -->
     <div class="lc-tab-panel" v-show="activeTab === 'preCamber'">
         <div style="margin-bottom: 12px;">
+            <el-button @@click="downloadCamberTemplate">下载模板</el-button>
             <el-button type="primary" @@click="handleImportCamber">导入预拱度</el-button>
         </div>
         <el-table v-loading="camberLoading" :data="camberTableData" border stripe style="width: 100%;">
@@ -822,7 +819,7 @@
         </div>
     </div>
 
-    <el-dialog v-model="importDialogVisible" :title="importType === 'segments' ? '导入梁段信息' : '导入设计坐标'" width="560px"
+    <el-dialog v-model="importDialogVisible" :title="importType === 'segments' ? '导入梁段信息' : (importType === 'design' ? '导入设计坐标' : '导入预拱度')" width="560px"
                :close-on-click-modal="false" :close-on-press-escape="!importLoading" :show-close="!importLoading">
         <el-upload ref="uploadRef" class="lc-upload" drag :auto-upload="false" :limit="1"
                    :on-change="onFileChange" :on-remove="onFileRemove" :on-exceed="onFileExceed"
