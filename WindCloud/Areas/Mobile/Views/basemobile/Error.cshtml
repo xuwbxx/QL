@@ -1,0 +1,15 @@
+﻿
+@{
+    ViewBag.Title = "错误页面";
+    Layout = "~/Views/Shared/MobileLayout.cshtml";
+}
+
+<header>
+    <div class="left_logo"><img src="~/Content/Mobile/img/logo.png"></div>三航海上风电施工云服务平台
+
+</header>
+<div class="height88"></div>
+<div class="error_box">
+    @ViewData["ErrorText"].ToString()
+</div>
+

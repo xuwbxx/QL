@@ -1,6 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-<PropertyGroup>
+  <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -9,6 +9,16 @@
   <ItemGroup>
     <PackageReference Include="System.Text.Encoding" Version="4.3.0" />
     <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
+    <!-- 报告 PDF 生成。选用 PDFsharp-MigraDoc（MIT，Core 构建）：
+         该包自身携带 MigraDoc.DocumentObjectModel / MigraDoc.Rendering，无需再加子包。
+         注意：Core 构建不加载任何系统字体，必须配合 FontResolver.cs 使用随包分发的 TTF。 -->
+    <PackageReference Include="PDFsharp-MigraDoc" Version="6.2.4" />
+  </ItemGroup>
+
+  <!-- 报告字体随包分发：Core 构建从磁盘读取 TTF，不能依赖运行环境的系统字体。
+       SDK 已默认把 .ttf 包含为 None，此处用 Update 补复制行为（用 Include 会重复项） -->
+  <ItemGroup>
+    <None Update="PreAssembled\Reports\Fonts\**\*.ttf" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,6 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Shj\" />
     <Folder Include="Wind\Cloud\" />
   </ItemGroup>
 

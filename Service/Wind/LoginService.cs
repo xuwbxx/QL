@@ -33,5 +33,18 @@ namespace Service.Wind
             return;
         }
 
+        /// <summary>
+        /// 保存管理端登录记录
+        /// </summary>
+        public void AddManageLoginRecord(Manage_LoginRecord data)
+        {
+            using (var uow = _windUowFactory.Create())
+            {
+                var repo = uow.GetRepository<Manage_LoginRecord>();
+                repo.Add(data);
+                repo.Save();
+            }
+        }
+
     }
 }

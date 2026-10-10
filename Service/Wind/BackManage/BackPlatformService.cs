@@ -249,7 +249,7 @@ namespace Service.Wind.BackManage
                         {
                             Company = request.CompanyName,
                             IsDelete = false,
-                            CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified)
+                            CreateTime = DateTime.Now
                         };
                         companyRepo.Add(newCompany);
                         uow.Save();
@@ -265,7 +265,7 @@ namespace Service.Wind.BackManage
                             return "账号出错";
                         }
                         company.Company = request.CompanyName;
-                        company.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                        company.CreateTime = DateTime.Now;
                         companyID = company.ID;
                     }
 
@@ -291,7 +291,7 @@ namespace Service.Wind.BackManage
                             roleUser.UserDepartName = majorUser.UserDepartName;
                             roleUser.UserPhone = majorUser.UserPhone;
                             roleUser.UserJobName = majorUser.UserJobName;
-                            roleUser.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                            roleUser.CreateTime = DateTime.Now;
                         }
                         else
                         {
@@ -304,7 +304,7 @@ namespace Service.Wind.BackManage
                                 UserDepartName = majorUser.UserDepartName,
                                 UserPhone = majorUser.UserPhone,
                                 UserJobName = majorUser.UserJobName,
-                                CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified),
+                                CreateTime = DateTime.Now,
                                 IsDelete = false
                             };
                             roleRepo.Add(newRole);

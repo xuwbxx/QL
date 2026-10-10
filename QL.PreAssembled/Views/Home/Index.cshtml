@@ -1,6 +1,6 @@
 ﻿@{
     Layout = "_LayoutEP";
-    ViewData["Title"] = "节段拼装梁预制安装线性控制平台";
+    ViewData["Title"] = "节段拼装梁预制安装线形控制平台";
 }
 @section Styles {
     <link href="~/css/Home/home-index.css" rel="stylesheet" />
@@ -11,7 +11,7 @@
         <el-aside :class="{ 'aside-collapse': isCollapsed }" :width="isCollapsed ? '64px' : '240px'">
             <div class="sidebar-logo">
                 <div class="logo-line2">节段拼装梁预制<span>安装</span></div>
-                <div class="logo-text">线性控制平台</div>
+                <div class="logo-text">线形控制平台</div>
             </div>
             <div class="sidebar-menu-wrapper">
                 <el-menu ref="elMenuRef"
@@ -143,7 +143,7 @@
                     </div>
                     <!-- iframe动态标签页 -->
                     <div v-for="tab in tabList" v-show="activeTabKey === tab.action" :key="tab.action">
-                        <iframe class="iframe-container" :src="tab.action"></iframe>
+                        <iframe class="iframe-container" :src="tab.action" :data-tab-key="tab.action"></iframe>
                     </div>
                 </div>
             </el-main>

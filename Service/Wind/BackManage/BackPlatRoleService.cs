@@ -98,7 +98,7 @@ namespace Service.Wind.BackManage
                         UserDepartName = user.UserDepartName,
                         UserJobName = user.UserJobName,
                         UserPhone = user.UserPhone,
-                        CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified),
+                        CreateTime = DateTime.Now,
                         IsDelete = false
                     };
 

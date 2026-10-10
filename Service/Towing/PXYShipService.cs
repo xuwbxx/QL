@@ -317,7 +317,7 @@ namespace Service.Towing
                     using (var uow = _towingKingBaseUowFactory.Create())
                     {
                         var satRepo = uow.GetRepository<DataFactory.KingBase.Towing.Data_SATELLITE>();
-                        var satelliteInfo = satRepo.FindAll().OrderByDescending(a => a.CreateTime).FirstOrDefault();
+                        var satelliteInfo = satRepo.Find(a => true).OrderByDescending(a => a.CreateTime).FirstOrDefault();
                         if (satelliteInfo != null)
                         {
                             lon = (satelliteInfo.Lon ?? 0).ToString();

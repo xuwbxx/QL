@@ -8,6 +8,8 @@ using Service.Base;
 using Service.TechCenter;
 // 引入拖航Service
 using Service.Towing;
+// 引入Api Service
+using Service.Api;
 // 引入Wind主模块Service
 using Service.Wind;
 // 引入Wind后台管理Service
@@ -97,6 +99,8 @@ builder.Services.AddScoped<WebValidateService>();
 builder.Services.AddScoped<ProjectService>();
 // 注册任务服务，处理任务管理相关业务
 builder.Services.AddScoped<TaskService>();
+// 注册可作业预报服务
+builder.Services.AddScoped<CloudWindKZYService>();
 // 注册后台项目管理服务
 builder.Services.AddScoped<BackProjectService>();
 // 注册后台管理服务
@@ -134,6 +138,9 @@ builder.Services.AddScoped<DeviceStatusInfoService>();
 builder.Services.AddScoped<ProjectPlanRouteInfoService>();
 builder.Services.AddScoped<MessageInfoService>();
 builder.Services.AddScoped<HikInfoService>();
+builder.Services.AddScoped<MessageHandleService>();
+builder.Services.AddScoped<SHXAService>();
+builder.Services.AddScoped<WindApiService>();
 builder.Services.AddScoped<Service.Towing.Tool.HikHttpUtilLib>();
 builder.Services.AddScoped<FileInfoService>();
 builder.Services.AddScoped<AnchorageInfoService>();
@@ -143,10 +150,13 @@ builder.Services.AddScoped<ShipInfoService>();
 builder.Services.AddScoped<LoginService>();
 // 注册云平台信息服务，处理云平台数据查询
 builder.Services.AddScoped<CloudWindInfoService>();
+// 注册手机端服务，处理手机端业务逻辑
+builder.Services.AddScoped<MobileService>();
 // 注册云中心服务
 builder.Services.AddScoped<CloudCenterService>();
 // 注册WebGIS服务，用于船讯网船舶查询和气象数据
 builder.Services.AddScoped<WebGISService>();
+builder.Services.AddScoped<PlatService>();
 builder.Services.AddScoped<CloudWindTyphoonService>();
 // 注册看板头部服务（接口+实现），用于看板数据展示
 builder.Services.AddScoped<IBoardHeaderService, BoardHeaderService>();

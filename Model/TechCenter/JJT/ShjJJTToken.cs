@@ -137,4 +137,22 @@
 
         public int PageSize { set; get; }
     }
+
+
+    public class SingleSinOnModel
+    {
+        public string usrName { set; get; }
+        public string usrCode { get; set; }
+        public string businessUrl { get; set; }
+    }
+
+    public class ShjTokenModel
+    {
+        public int errcode { set; get; }
+        public string errmsg { get; set; }
+        public string access_token { get; set; }
+        public int expires_in { get; set; }
+    }
+
+    
 }

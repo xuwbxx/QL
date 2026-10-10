@@ -1,11 +1,16 @@
-﻿using DataFactory.Factory;
+﻿using BIM.Business.CCSHJWebApi;
+using DataFactory.Factory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Model.Base;
+using Model.TechCenter.JJT;
 using Service.Base.Data;
 using Service.Struct;
 using Service.TechCenter;
+using Service.Wind;
+using Service.Wind.TimeWorker;
 using System.Data;
+using System.Threading.Tasks;
 using System.Web;
 using Tool;
 
@@ -241,22 +246,43 @@ namespace TestUnit
         }
 
         [TestMethod]
-        public void TestMethod3()
+        public async Task TestMethod3()
         {
             try
             {
                 //var ret = PdfUtils.ExtractPdfTextByPath(@"D:\TestData.pdf");
 
-                string folderPath = @"C:\Users\johny\Desktop\日常工作\Data";
+                //string folderPath = @"C:\Users\johny\Desktop\日常工作\Data";
 
-                FDYF_Service fd = new FDYF_Service();
-                var ret = fd.WeatherPdfToExcel(folderPath);
+                //FDYF_Service fd = new FDYF_Service();
+                //var ret = fd.WeatherPdfToExcel(folderPath);
 
-                DataSet ds = new DataSet();
+                //DataSet ds = new DataSet();
 
-                ds.Tables.Add(ret);
+                //ds.Tables.Add(ret);
 
-                ExcelUtils.WriteExcel(ds, @"D:\test.xlsx");
+                //ExcelUtils.WriteExcel(ds, @"D:\test.xlsx");
+
+
+                string token = CloudCenterService.CreateToken("2018001515", 143);
+
+                string postUrl = @"http://techcloud.ccshj.cn/CCSHJTechApi/CloudCenter/SSOLoginChecking";
+
+                TechCloudApiRequest request = new TechCloudApiRequest();
+                request.Token = token;
+                //@"eExyMFpyVHd4Mlc2dXlQcUtYUjI5OVVZQWtoYUZaU3VXdW1IeEJDOXRZWHVGRXRaaXJzbWNnPT0=";
+
+                //SqlParam p = new SqlParam();
+                //p.Name = "123";
+
+
+                var ret = HttpUtils.PostSync(postUrl, request);
+
+                //var service = serviceProvider.GetRequiredService<WeatherWorkerService>();
+                //await service.SavePXYWeatherByPoint();
+
+
+
             }
             catch (Exception ex)
             {
@@ -271,11 +297,19 @@ namespace TestUnit
         {
             try
             {
+
+                //SingleSinOnModel ssoModel = new SingleSinOnModel();
+                //var service = serviceProvider.GetRequiredService<CloudWindInfoService>();
+
+                //string paramString = @"RC7qU54QOEmGN511yY/K5EP8LW5dVbqwLrlqYBHDt4OfDbd0bNJ0rUu1nkoVOLu2";
+                //string token = HttpUtility.UrlDecode(paramString);
+                //string ssoResult = service.AESSingleSignOn(token, out ssoModel);
+
                 //ReadME.Test();
                 //SpudcanCaculate sc = new SpudcanCaculate();
 
                 var service = serviceProvider.GetRequiredService<KingBase_WindCloud_DataCopyService>();
-                service.CopyWind_TaskReport();
+                service.test();
 
 
             }

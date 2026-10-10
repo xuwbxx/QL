@@ -6,6 +6,7 @@ using Service.TechCenter;
 using Service.Test;
 using Service.Towing;
 using Service.Wind;
+using Service.Wind.TimeWorker;
 
 namespace Service.Struct
 {
@@ -112,8 +113,8 @@ namespace Service.Struct
             services.AddScoped<KingBase_WindCloud_DataCopyService>();
             services.AddScoped<KingBase_Towing_DataCopyService>();
             services.AddScoped<CloudWindInfoService>();
-
-
+            services.AddScoped<TyphoonWorkerService>();
+            services.AddScoped<WeatherWorkerService>();
         }
     }
 }

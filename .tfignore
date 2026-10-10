@@ -1,0 +1,17 @@
+# 解决方案根目录NuGet包目录（核心，解决只读根源）
+packages/
+
+# NuGet相关缓存文件
+.nuget/
+*.nuget.props
+*.nuget.targets
+
+# 全局忽略所有项目编译输出目录
+bin/
+obj/
+
+# VS IDE缓存、用户配置文件
+.vs/
+*.suo
+*.user
+*.pubxml.user

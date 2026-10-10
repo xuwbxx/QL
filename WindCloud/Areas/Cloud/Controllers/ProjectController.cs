@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Model.Base;
 using Model.Tech.Cloud;
+using Model.TechCenter.JJT;
 using Service.Base;
 using Service.Base.Filter;
-using Service.Shj;
 using Service.Wind;
 using System.Reflection;
 using System.Web;
@@ -17,8 +17,8 @@ namespace WindCloud.Areas.Cloud.Controllers
     {
         public LoginService _loginService;
         public CloudWindInfoService _cloudWindInfoService;
-        public ProjectController(CookieService cookieService, LoginService loginService, ProjectService projectService, CloudWindInfoService cloudWindInfoService)
-            : base(cookieService, projectService)
+        public ProjectController(CookieService cookieService, LoginService loginService, ProjectService projectService, CloudWindInfoService cloudWindInfoService, TaskService taskService)
+            : base(cookieService, projectService, taskService)
         {
             _loginService = loginService;
             _cloudWindInfoService = cloudWindInfoService;
@@ -89,7 +89,6 @@ namespace WindCloud.Areas.Cloud.Controllers
                     userinfo.Birthday = ShjUser.Data[0].birthday;
                     userinfo.JobName = ShjUser.Data[0].jobname;
                 }
-
                 else
                 {
                     return RedirectToAction("ErrorPage", "CloudBase", new { ErrorText = "身份错误，请联系管理员。" });

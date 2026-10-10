@@ -109,7 +109,7 @@ namespace Service.Towing
             loginData.RealName = realName;
             loginData.Depart = userName ?? "";
             loginData.Job = "";
-            loginData.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+            loginData.CreateTime = DateTime.Now;
             loginData.IsDelete = false;
             loginLogRepo.Add(loginData);
             uow.Save();
@@ -177,7 +177,7 @@ namespace Service.Towing
                         YaoX = Math.Round(Convert.ToDecimal(r.Next(-1020, 1020)) / 100, 2),
                         YaoY = Math.Round(Convert.ToDecimal(r.Next(-1020, 1020)) / 100, 2),
                         YaoZ = Math.Round(Convert.ToDecimal(r.Next(-1020, 1020)) / 100, 2),
-                        CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified),
+                        CreateTime = DateTime.Now,
                         IsDelete = false
                     });
 
@@ -186,7 +186,7 @@ namespace Service.Towing
                     egyroRepo.Add(new Data_EGYRO
                     {
                         AzAngle = Math.Round(Convert.ToDecimal(r.Next(0, 3600)) / 200, 2),
-                        CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified),
+                        CreateTime = DateTime.Now,
                         IsDelete = false
                     });
 
@@ -197,7 +197,7 @@ namespace Service.Towing
                     {
                         Lon = (lastData?.Lon ?? 0) + Math.Round(Convert.ToDecimal(r.Next(-1000, 1000)) / 100000, 5),
                         Lat = (lastData?.Lat ?? 0) + Math.Round(Convert.ToDecimal(r.Next(-1000, 1000)) / 100000, 5),
-                        CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified),
+                        CreateTime = DateTime.Now,
                         IsDelete = false
                     });
 
@@ -207,7 +207,7 @@ namespace Service.Towing
                     {
                         WindDirection = Math.Round(Convert.ToDecimal(r.Next(0, 3600)) / 200, 2),
                         WindSpeed = Math.Round(Convert.ToDecimal(r.Next(0, 3000)) / 100, 2),
-                        CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified),
+                        CreateTime = DateTime.Now,
                         IsDelete = false
                     });
 
@@ -217,7 +217,7 @@ namespace Service.Towing
                     {
                         RemainEle = Math.Round(Convert.ToDecimal(r.Next(0, 9000)) / 100, 2),
                         RemainEle2 = Math.Round(Convert.ToDecimal(r.Next(0, 9000)) / 100, 2),
-                        CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified),
+                        CreateTime = DateTime.Now,
                         IsDelete = false
                     });
 
@@ -242,7 +242,7 @@ namespace Service.Towing
                         sailRepo.Add(new Data_SailSpeed
                         {
                             SailSpeed = Convert.ToDecimal(sailSpeed),
-                            CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified),
+                            CreateTime = DateTime.Now,
                             IsDelete = false
                         });
                     }
@@ -252,7 +252,7 @@ namespace Service.Towing
                     var devices = deviceRepo.Find(a => !a.IsDelete).ToList();
                     foreach (var item in devices)
                     {
-                        item.LatestUpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                        item.LatestUpdateTime = DateTime.Now;
                     }
 
                     uow.Save();
@@ -362,7 +362,7 @@ namespace Service.Towing
                 ds.Tables.Add(dtWind);
 
                 var bytes = ExcelUtils.SetToBytes(ds, true);
-                var fileName = $"三峡阳江16M瓦-拖航监控数据（{DateTime.UtcNow:yyyyMMddHHmmss}）.xlsx";
+                var fileName = $"三峡阳江16M瓦-拖航监控数据（{DateTime.Now:yyyyMMddHHmmss}）.xlsx";
                 return (bytes, fileName);
             }
             catch (Exception ex)
@@ -386,7 +386,7 @@ namespace Service.Towing
                 var pics = uow.GetRepository<Data_HikLocalPic>().Find(a => !a.IsDelete && a.CreateTime >= start && a.CreateTime <= end)
                     .ToList();
 
-                var zipFileName = $"图片-{DateTime.UtcNow:yyyyMMddHHmmss}.zip";
+                var zipFileName = $"图片-{DateTime.Now:yyyyMMddHHmmss}.zip";
 
                 using var ms = new MemoryStream();
                 using (var zipArchive = new ZipArchive(ms, ZipArchiveMode.Create, true))
@@ -423,7 +423,7 @@ namespace Service.Towing
                 file.FileName = Path.GetFileName(item.FileName);
                 file.FilePath = Path.Combine(fileFolderPath, Guid.NewGuid() + Path.GetExtension(item.FileName));
                 file.Type = 1;
-                file.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                file.CreateTime = DateTime.Now;
                 file.IsDelete = false;
                 list.Add(file);
 

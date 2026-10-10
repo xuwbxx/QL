@@ -192,7 +192,7 @@ namespace Service.Wind.BackManage
                                 DeliverPhone = a.UserPhone,
                                 DeliverJobName = a.UserJobName,
                                 IsDelete = false,
-                                CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified)
+                                CreateTime = DateTime.Now
                             };
                             deliverRepo.Add(deliver);
                         }

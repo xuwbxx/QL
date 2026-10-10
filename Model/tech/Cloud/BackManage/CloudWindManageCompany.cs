@@ -14,7 +14,7 @@
         /// <summary>
         /// 总工
         /// </summary>
-        public CloudWindBackManageUserInfo MajorEng;
+        public CloudWindBackManageUserInfo MajorEng { set; get; }
     }
 
 

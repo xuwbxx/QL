@@ -11,6 +11,34 @@ namespace Tool
             // _logger = ...;
         }
 
+        /// <summary>
+        /// 获取相对文件路径（用于浏览器访问，统一使用 / 分隔符）
+        /// 从完整路径中提取 /File/ 或 \File\ 之后的部分，并转换为 / 格式
+        /// </summary>
+        /// <param name="fullPath">完整文件路径</param>
+        /// <returns>相对路径（如 /File/Project/xxx.xlsx），统一使用 / 分隔符</returns>
+        public static string GetRelativeFilePath(string fullPath)
+        {
+            if (string.IsNullOrEmpty(fullPath))
+                return fullPath;
+
+            // 先查找 Windows 格式 \File\
+            var index = fullPath.IndexOf(@"\File\");
+            if (index == -1)
+            {
+                // 再查找 Linux 格式 /File/
+                index = fullPath.IndexOf("/File/");
+            }
+
+            if (index >= 0)
+            {
+                // 提取相对路径并统一转换为 / 格式（浏览器 URL 必须使用 /）
+                return fullPath.Substring(index).Replace("\\", "/");
+            }
+
+            return fullPath;
+        }
+
         // 文件操作
         #region 文件操作
 

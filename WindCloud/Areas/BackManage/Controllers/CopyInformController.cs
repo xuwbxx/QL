@@ -2,7 +2,9 @@
 using Model.Base;
 using Model.Tech.Cloud.BackManage;
 using Service.Base;
+using Service.Wind;
 using Service.Wind.BackManage;
+using Service.Base.Filter;
 using Tool;
 using WindCloud.Areas.Base.Controllers;
 
@@ -13,12 +15,13 @@ namespace WindCloud.Areas.BackManage.Controllers
     {
         private readonly BackCopyInformService _copyInformService;
 
-        public CopyInformController(CookieService cookieService, Service.Wind.WebValidateService webValidateService, BackCopyInformService copyInformService)
-            : base(cookieService, webValidateService)
+        public CopyInformController(CookieService cookieService, Service.Wind.WebValidateService webValidateService, ProjectService projectService, BackCopyInformService copyInformService)
+            : base(cookieService, projectService, webValidateService)
         {
             _copyInformService = copyInformService;
         }
 
+        [TypeFilter(typeof(WindCloudFilter))]
         public async Task<IActionResult> Index()
         {
             if (!await RightValidate())

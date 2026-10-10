@@ -82,7 +82,7 @@ public class SysRoleService(QlPreAssembled_KingBase_UnitOfWorkFactory factory, I
     {
         RequireRole(roleId); var selected = Db.Query<sys_role_menu>().Where(x => x.RoleID == roleId && x.Status == 1).Select(x => x.MenuID).ToHashSet();
         return Task.FromResult(Db.Query<sys_menu>().Where(x => x.Status == 1).OrderBy(x => x.Sort).ThenBy(x => x.ID)
-            .Select(x => new SysRoleMenuItemDTO { ID = x.ID, ParentID = x.ParentID, Name = x.Name, MenuType = x.MenuType, Sort = x.Sort, Selected = selected.Contains(x.ID) }).ToList());
+            .Select(x => new SysRoleMenuItemDTO { ID = x.ID, ParentID = x.ParentID, Name = x.Name, EnName = x.EnName, MenuType = x.MenuType, Sort = x.Sort, Selected = selected.Contains(x.ID) }).ToList());
     }
 
     public async Task SaveMenus(SysRoleMenuDTO item, string actor)
@@ -118,3 +118,4 @@ public class SysRoleService(QlPreAssembled_KingBase_UnitOfWorkFactory factory, I
     private sys_role RequireMutable(int id) { var role = RequireRole(id); if (string.Equals(role.Code, AdminCode, StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("内置超级管理员不可执行此操作"); return role; }
     private static string Normalize(string? value) => value?.Trim().ToLowerInvariant() ?? "";
 }
+

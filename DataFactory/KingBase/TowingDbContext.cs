@@ -15,20 +15,24 @@ namespace DataFactory.KingBase.Towing
         public TowingDbContext(string connectionString, DatabaseType databaseType)
             : base(connectionString, databaseType) { }
 
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{
-        //    base.OnModelCreating(modelBuilder);
-        //    foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-        //    {
-        //        foreach (var property in entityType.GetProperties())
-        //        {
-        //            if (property.ClrType == typeof(string))
-        //            {
-        //                property.SetColumnType("text");
-        //            }
-        //        }
-        //    }
-        //}
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var property in entityType.GetProperties())
+                {
+                    if (property.ClrType == typeof(string))
+                    {
+                        property.SetColumnType("text");
+                    }
+                    else if (property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
+                    {
+                        property.SetColumnType("timestamp without time zone");
+                    }
+                }
+            }
+        }
 
         public DbSet<Data_Backup> Data_Backup { set; get; }
 
@@ -92,10 +96,6 @@ namespace DataFactory.KingBase.Towing
         /// </summary>
         public DbSet<Data_SailSpeed> Data_SailSpeed { set; get; }
 
-        /// <summary>
-        /// 台风数据表
-        /// </summary>
-        public DbSet<Data_Typhoon> Data_Typhoon { set; get; }
 
         /// <summary>
         /// 风数据表
@@ -790,112 +790,6 @@ namespace DataFactory.KingBase.Towing
         public bool IsDelete { set; get; }
     }
 
-    /// <summary>
-    /// 台风数据实体，映射 public.Data_Typhoon 表
-    /// </summary>
-    [Table("Data_Typhoon")]
-    public class Data_Typhoon
-    {
-        /// <summary>
-        /// 主键ID
-        /// </summary>
-        public int id { set; get; }
-
-        /// <summary>
-        /// 中国编号
-        /// </summary>
-        public string? chnCode { set; get; }
-
-        /// <summary>
-        /// 中国名称
-        /// </summary>
-        public string? chnName { set; get; }
-
-        /// <summary>
-        /// 当前年份
-        /// </summary>
-        public int? currentyear { set; get; }
-
-        /// <summary>
-        /// 序号
-        /// </summary>
-        public string? xuHao { set; get; }
-
-        /// <summary>
-        /// 时间（字符串格式）
-        /// </summary>
-        public string? time { set; get; }
-
-        /// <summary>
-        /// 日期时间
-        /// </summary>
-        public DateTime? dateTime { set; get; }
-
-        /// <summary>
-        /// 预报信息
-        /// </summary>
-        public string? forecast { set; get; }
-
-        /// <summary>
-        /// 预报时效（小时）
-        /// </summary>
-        public decimal? fhour { set; get; }
-
-        /// <summary>
-        /// 纬度
-        /// </summary>
-        public decimal? lat { set; get; }
-
-        /// <summary>
-        /// 经度
-        /// </summary>
-        public decimal? lon { set; get; }
-
-        /// <summary>
-        /// 台风等级
-        /// </summary>
-        public decimal? grade { set; get; }
-
-        /// <summary>
-        /// 最大风速
-        /// </summary>
-        public decimal? mspeed { set; get; }
-
-        /// <summary>
-        /// 气压
-        /// </summary>
-        public decimal? pressure { set; get; }
-
-        /// <summary>
-        /// 移动速度
-        /// </summary>
-        public decimal? kspeed { set; get; }
-
-        /// <summary>
-        /// 移动方向
-        /// </summary>
-        public string? direction { set; get; }
-
-        /// <summary>
-        /// 7级风圈半径
-        /// </summary>
-        public decimal? radius7 { set; get; }
-
-        /// <summary>
-        /// 10级风圈半径
-        /// </summary>
-        public decimal? radius10 { set; get; }
-
-        /// <summary>
-        /// 创建时间
-        /// </summary>
-        public DateTime? CreateTime { set; get; }
-
-        /// <summary>
-        /// 是否删除
-        /// </summary>
-        public bool IsDelete { set; get; }
-    }
 
     /// <summary>
     /// 风数据实体，映射 public.Data_Wind 表

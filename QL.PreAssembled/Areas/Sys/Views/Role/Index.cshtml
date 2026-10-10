@@ -4,40 +4,40 @@
 </style> }
 <div id="app" class="role-page" v-cloak>
   <div class="toolbar"><div class="filters">
-    <el-input v-model="query.name" placeholder="角色名称" clearable style="width:180px"></el-input>
-    <el-input v-model="query.code" placeholder="角色标识" clearable style="width:180px"></el-input>
-    <el-select v-model="query.status" placeholder="状态" clearable style="width:120px"><el-option label="启用" :value="1"></el-option><el-option label="停用" :value="0"></el-option></el-select>
-    <el-button type="primary" @@click="search">搜索</el-button><el-button @@click="reset">重置</el-button>
-  </div><el-button type="primary" @@click="edit()">新增</el-button></div>
+    <el-input v-model="query.name" :placeholder="$t('sys.role.name')" clearable style="width:180px"></el-input>
+    <el-input v-model="query.code" :placeholder="$t('sys.role.code')" clearable style="width:180px"></el-input>
+    <el-select v-model="query.status" :placeholder="$t('sys.role.status')" clearable style="width:120px"><el-option :label="$t('sys.role.enabled')" :value="1"></el-option><el-option :label="$t('sys.role.disabled')" :value="0"></el-option></el-select>
+            <el-button type="primary" @@click="search"><el-icon><Search /></el-icon>{{ $t('common.search') }}</el-button><el-button @@click="reset"><el-icon><Refresh-Left /></el-icon>{{ $t('common.reset') }}</el-button>
+  </div><el-button type="primary" @@click="edit()"><el-icon><Plus /></el-icon> {{ $t('common.add') }}</el-button></div>
 
   <el-table :data="rows" border stripe v-loading="loading">
-    <el-table-column type="index" label="序号" width="70" :index="indexNo"></el-table-column>
-    <el-table-column prop="name" label="角色名称" min-width="140"></el-table-column>
-    <el-table-column label="角色类型" width="100"><template #default="s"><el-tag :type="s.row.code==='role_admin'?'danger':'primary'">{{s.row.code==='role_admin'?'内置':'自定义'}}</el-tag></template></el-table-column>
-    <el-table-column prop="code" label="角色标识" min-width="130"></el-table-column>
-    <el-table-column prop="sort" label="显示顺序" width="90"></el-table-column>
-    <el-table-column prop="remark" label="备注" min-width="160" show-overflow-tooltip></el-table-column>
-    <el-table-column prop="userCount" label="关联用户" width="90"></el-table-column>
-    <el-table-column label="状态" width="90"><template #default="s"><el-switch :model-value="s.row.status===1" :disabled="s.row.code==='role_admin'" @@change="toggle(s.row,$event)"></el-switch></template></el-table-column>
-    <el-table-column prop="createdTime" label="创建时间" width="180"></el-table-column>
-    <el-table-column label="操作" width="270" fixed="right"><template #default="s">
-      <el-button link type="primary" @@click="openMenus(s.row)">菜单权限</el-button>
-      <el-button link type="primary" @@click="openUsers(s.row)">关联用户</el-button>
-      <el-button link type="primary" @@click="edit(s.row)">编辑</el-button>
-      <el-button link type="danger" :disabled="s.row.code==='role_admin'" @@click="remove(s.row)">删除</el-button>
+    <el-table-column type="index" :label="$t('sys.role.tableIndex')" width="70" :index="indexNo"></el-table-column>
+    <el-table-column prop="name" :label="$t('sys.role.name')" min-width="140"></el-table-column>
+        <el-table-column :label="$t('sys.role.roleType')" width="100"><template #default="s"><el-tag :type="s.row.roleType === 'builtin'?'danger':'primary'">{{s.row.roleType === 'builtin'? $t('sys.role.typeBuiltin') : $t('sys.role.typeCustom')}}</el-tag></template></el-table-column>
+    <el-table-column prop="code" :label="$t('sys.role.code')" min-width="130"></el-table-column>
+    <el-table-column prop="sort" :label="$t('sys.role.sort')" width="90"></el-table-column>
+    <el-table-column prop="remark" :label="$t('sys.role.remark')" min-width="160" show-overflow-tooltip></el-table-column>
+    <el-table-column prop="userCount" :label="$t('sys.role.linkedUsers')" width="90"></el-table-column>
+    <el-table-column :label="$t('sys.role.status')" width="90"><template #default="s"><el-switch :model-value="s.row.status===1" :disabled="s.row.code==='role_admin'" @@change="toggle(s.row,$event)"></el-switch></template></el-table-column>
+    <el-table-column prop="createdTime" :label="$t('sys.role.createdTime')" width="180"></el-table-column>
+    <el-table-column :label="$t('sys.role.tableOperate')" width="270" fixed="right"><template #default="s">
+      <el-button link type="primary" @@click="openMenus(s.row)">{{ $t('sys.role.menuPerm') }}</el-button>
+      <el-button link type="primary" @@click="openUsers(s.row)">{{ $t('sys.role.linkedUsers') }}</el-button>
+      <el-button link type="primary" @@click="edit(s.row)">{{ $t('common.edit') }}</el-button>
+      <el-button link type="danger" :disabled="s.row.code==='role_admin'" @@click="remove(s.row)">{{ $t('common.delete') }}</el-button>
     </template></el-table-column>
   </el-table>
-  <div class="pager"><el-pagination background layout="total, sizes, prev, pager, next" :total="total" v-model:current-page="query.pageIndex" v-model:page-size="query.pageSize" :page-sizes="[10,20,50]" @@change="load"></el-pagination></div>
+    <div class="pager"><el-pagination background layout="total, sizes, prev, pager, next" :total="total" v-model:current-page="query.pageIndex" v-model:page-size="query.pageSize" :page-sizes="[10,20,50,100]" @@change="load"></el-pagination></div>
 
-  <el-dialog v-model="formVisible" :title="form.id?'编辑角色':'新增角色'" width="520px"><el-form ref="formRef" :model="form" :rules="rules" label-width="90px">
-    <el-form-item label="角色名称" prop="name"><el-input v-model="form.name" maxlength="100"></el-input></el-form-item>
-    <el-form-item label="角色标识" prop="code"><el-input v-model="form.code" :disabled="form.id>0" maxlength="50"></el-input></el-form-item>
-    <el-form-item label="显示顺序"><el-input-number v-model="form.sort" :min="0" style="width:100%"></el-input-number></el-form-item>
-    <el-form-item label="状态"><el-radio-group v-model="form.status"><el-radio :value="1">启用</el-radio><el-radio :value="0">停用</el-radio></el-radio-group></el-form-item>
-    <el-form-item label="备注"><el-input v-model="form.remark" type="textarea" :rows="3" maxlength="500" show-word-limit></el-input></el-form-item>
-  </el-form><template #footer><el-button @@click="formVisible=false">取消</el-button><el-button type="primary" @@click="save">保存</el-button></template></el-dialog>
+  <el-dialog v-model="formVisible" :title="form.id ? $t('sys.role.dialogEditTitle') : $t('sys.role.dialogAddTitle')" width="520px"><el-form ref="formRef" :model="form" :rules="rules" label-width="90px">
+    <el-form-item :label="$t('sys.role.name')" prop="name"><el-input v-model="form.name" maxlength="100"></el-input></el-form-item>
+    <el-form-item :label="$t('sys.role.code')" prop="code"><el-input v-model="form.code" :disabled="form.id>0" maxlength="50"></el-input></el-form-item>
+    <el-form-item :label="$t('sys.role.sort')"><el-input-number v-model="form.sort" :min="0" style="width:100%"></el-input-number></el-form-item>
+    <el-form-item :label="$t('sys.role.status')"><el-radio-group v-model="form.status"><el-radio :value="1">{{ $t('sys.role.enabled') }}</el-radio><el-radio :value="0">{{ $t('sys.role.disabled') }}</el-radio></el-radio-group></el-form-item>
+    <el-form-item :label="$t('sys.role.remark')"><el-input v-model="form.remark" type="textarea" :rows="3" maxlength="500" show-word-limit></el-input></el-form-item>
+  </el-form><template #footer><el-button @@click="formVisible=false">{{ $t('common.cancel') }}</el-button><el-button type="primary" @@click="save">{{ $t('common.save') }}</el-button></template></el-dialog>
 
-  <el-dialog v-model="menuVisible" :title="'菜单权限 - '+active.name" width="560px"><div class="dialog-list"><el-tree ref="menuTree" :data="menuTreeData" node-key="id" show-checkbox default-expand-all :props="{label:'name',children:'children'}"></el-tree></div><template #footer><el-button @@click="menuVisible=false">取消</el-button><el-button type="primary" @@click="saveMenus">保存</el-button></template></el-dialog>
-  <el-dialog v-model="userVisible" :title="'关联用户 - '+active.name" width="700px"><el-input v-model="userKeyword" placeholder="搜索姓名、账号或员工编号" clearable style="margin-bottom:12px"></el-input><el-table ref="userTable" :data="filteredUsers" row-key="id" max-height="430" @@selection-change="userSelection=$event"><el-table-column type="selection" width="55" :selectable="u=>u.status===1"></el-table-column><el-table-column prop="name" label="姓名"></el-table-column><el-table-column prop="account" label="账号"></el-table-column><el-table-column prop="empNo" label="员工编号"></el-table-column><el-table-column label="状态" width="90"><template #default="s"><el-tag :type="s.row.status===1?'success':'info'">{{s.row.status===1?'启用':'停用'}}</el-tag></template></el-table-column></el-table><template #footer><el-button @@click="userVisible=false">取消</el-button><el-button type="primary" @@click="saveUsers">保存</el-button></template></el-dialog>
+  <el-dialog v-model="menuVisible" :title="$t('sys.role.menuPerm') + ' - ' + active.name" width="560px"><div class="dialog-list"><el-tree ref="menuTree" :data="menuTreeData" node-key="id" show-checkbox default-expand-all :props="{label:'name',children:'children'}"><template #default="{ data }"><span>{{ menuNodeLabel(data) }}</span></template></el-tree></div><template #footer><el-button @@click="menuVisible=false">{{ $t('common.cancel') }}</el-button><el-button type="primary" @@click="saveMenus">{{ $t('common.save') }}</el-button></template></el-dialog>
+  <el-dialog v-model="userVisible" :title="$t('sys.role.linkedUsers') + ' - ' + active.name" width="750px"><el-input v-model="userKeyword" :placeholder="$t('sys.role.searchUserPlaceholder')" clearable style="margin-bottom:12px"></el-input><el-table ref="userTable" :data="filteredUsers" row-key="id" max-height="430" @@selection-change="userSelection=$event"><el-table-column type="selection" width="55" :selectable="u=>u.status===1"></el-table-column><el-table-column prop="name" :label="$t('sys.role.userName')"></el-table-column><el-table-column prop="account" :label="$t('sys.role.account')"></el-table-column><el-table-column prop="empNo" :label="$t('sys.role.empNo')"></el-table-column><el-table-column :label="$t('sys.role.status')" width="100"><template #default="s"><el-tag :type="s.row.status===1?'success':'info'">{{s.row.status===1? $t('sys.role.enabled') : $t('sys.role.disabled')}}</el-tag></template></el-table-column></el-table><template #footer><el-button @@click="userVisible=false">{{ $t('common.cancel') }}</el-button><el-button type="primary" @@click="saveUsers">{{ $t('common.save') }}</el-button></template></el-dialog>
 </div>
-@section Scripts { <script src="~/js/Sys/role-index.js"></script> }
+@section Scripts { <script src="~/js/Sys/role-index.js" asp-append-version="true"></script> }

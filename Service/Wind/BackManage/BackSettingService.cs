@@ -120,7 +120,7 @@ namespace Service.Wind.BackManage
                     string projectDir = Path.Combine(_env.WebRootPath, "File", "Project");
                     string resultOld = FileUtils.RenameDirectory(
                         Path.Combine(projectDir, newCode),
-                        newCode + DateTime.UtcNow.ToString("yyyyMMddHHmmss"));
+                        newCode + DateTime.Now.ToString("yyyyMMddHHmmss"));
 
                     // 文件夹名字修改
                     string result = FileUtils.RenameDirectory(

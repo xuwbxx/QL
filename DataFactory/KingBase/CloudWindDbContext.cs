@@ -12,20 +12,24 @@ namespace DataFactory.KingBase.CloudWind
         public CloudWindDbContext(string connectionString, DatabaseType databaseType)
             : base(connectionString, databaseType) { }
 
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{
-        //    base.OnModelCreating(modelBuilder);
-        //    foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-        //    {
-        //        foreach (var property in entityType.GetProperties())
-        //        {
-        //            if (property.ClrType == typeof(string))
-        //            {
-        //                property.SetColumnType("text");
-        //            }
-        //        }
-        //    }
-        //}
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var property in entityType.GetProperties())
+                {
+                    if (property.ClrType == typeof(string))
+                    {
+                        property.SetColumnType("text");
+                    }
+                    else if (property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
+                    {
+                        property.SetColumnType("timestamp without time zone");
+                    }
+                }
+            }
+        }
 
         // 仅定义CloudWind数据库的表（实体类带CloudWind_前缀）
         public DbSet<WindDbUsers> Users { get; set; } // 映射到CloudWind的Users表
@@ -43,6 +47,7 @@ namespace DataFactory.KingBase.CloudWind
         public DbSet<Manage_Copyer> Manage_Copyer { set; get; }
         public DbSet<Wind_TaskFileDeliver> Wind_TaskFileDeliver { set; get; }
         public DbSet<View_Wind_ProjectFlow> View_Wind_ProjectFlow { set; get; }
+        public DbSet<View_Wind_ProjectInfo> View_Wind_ProjectInfo { set; get; }
 
         public DbSet<Wind_ProjectInfo> Wind_ProjectInfo { set; get; }
         public DbSet<Flow_Node> Flow_Node { set; get; }
@@ -105,6 +110,18 @@ namespace DataFactory.KingBase.CloudWind
         public DbSet<View_Flow_TaskApply> View_Flow_TaskApply { set; get; }
 
         public DbSet<Library_Ship_KZY> Library_Ship_KZY { set; get; }
+
+        public DbSet<Library_FloatShip> Library_FloatShip { set; get; }
+
+        public DbSet<Wind_TaskInfo_ZJCZ> Wind_TaskInfo_ZJCZ { set; get; }
+
+        public DbSet<Wind_TaskInfo_THFX> Wind_TaskInfo_THFX { set; get; }
+
+        public DbSet<Wind_TaskInfo_XCFX> Wind_TaskInfo_XCFX { set; get; }
+
+        public DbSet<Wind_Task_ProjectFile> Wind_Task_ProjectFile { set; get; }
+
+        public DbSet<View_Library_Ship> View_Library_Ship { set; get; }
     }
 
     public class WindDbUsers
@@ -352,6 +369,27 @@ namespace DataFactory.KingBase.CloudWind
         public string? WaterDepthMax { set; get; }
         public DateTime? CreateTime { set; get; }
         public bool? IsDelete { set; get; }
+    }
+
+    /// <summary>
+    /// Wind_Project JOIN Wind_ProjectInfo 视图
+    /// </summary>
+    public class View_Wind_ProjectInfo
+    {
+        public int id { set; get; }
+        public string? ProjectCode { set; get; }
+        public int? ProjectCodeIndex { set; get; }
+        public string? ProjectName { set; get; }
+        public int? CompanyID { set; get; }
+        public string? Lon { set; get; }
+        public string? Lat { set; get; }
+        public int? Status { set; get; }
+        public int? FlowStatus { set; get; }
+        public DateTime? ProjectStartTime { set; get; }
+        public DateTime? ProjectEndTime { set; get; }
+        public string? WaterDepth { set; get; }
+        public string? WaterDepthMin { set; get; }
+        public string? WaterDepthMax { set; get; }
     }
 
     public class Flow_Node
@@ -1159,6 +1197,58 @@ namespace DataFactory.KingBase.CloudWind
 
         // Manage_Software (d)
         public string? SoftwareName { set; get; }
+    }
+
+
+    public class Library_FloatShip
+    {
+        public int id { set; get; }
+        public string? ShipName { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool? IsDelete { set; get; }
+    }
+
+    public class Wind_TaskInfo_ZJCZ
+    {
+        public int id { set; get; }
+        public int? TaskID { set; get; }
+        public string? ProjectIntroduce { set; get; }
+        public string? ProjectPosition { set; get; }
+        public string? zmtd { set; get; }
+        public string? HammerModel { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool? IsDelete { set; get; }
+    }
+
+    public class Wind_TaskInfo_THFX
+    {
+        public int id { set; get; }
+        public int? TaskID { set; get; }
+        public string? Scheme { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool? IsDelete { set; get; }
+    }
+
+    public class Wind_TaskInfo_XCFX
+    {
+        public int id { set; get; }
+        public int? TaskID { set; get; }
+        public string? ShipIDs { set; get; }
+        public string? TaskDesc { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool? IsDelete { set; get; }
+    }
+
+    public class Wind_Task_ProjectFile
+    {
+        public int id { set; get; }
+        public int? ProjectID { set; get; }
+        public int? TaskID { set; get; }
+        public int? FileType { set; get; }
+        public string? FileName { set; get; }
+        public string? FilePath { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool? IsDelete { set; get; }
     }
 
 }

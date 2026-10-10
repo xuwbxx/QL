@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 using Model.tech.QL.DTO.SysUser;
+using SixLabors.ImageSharp.Processing;
 using System.Data;
 using System.Security.Principal;
 using Tool;
@@ -301,7 +302,77 @@ namespace Service.PreAssembled
             }
             return 0L;
         }
+        /// <summary>
+        /// 判断当前用户是否是指定角色
+        /// </summary>
+        /// <param name="roles">多个角色code用逗号分隔</param>
+        /// <returns></returns>
+        public bool IsRole(string roles)
+        {
+            var adminRoles = roles.Split(',');
+            var isAdmin = (from usr in Db.Query<sys_userinfo>().Where(a => a.Account == CurrUser.Account && a.Status != StatusDelete)
+                           from us in Db.Query<sys_user_role>().Where(a => a.UserID == usr.ID && a.Status != StatusDelete)
+                           from rol in Db.Query<sys_role>().Where(a => a.ID == us.RoleID && a.Status != StatusDelete)
+                           where rol.Code != null && adminRoles.Contains(rol.Code.ToLower())
+                           select usr).Any();
+            return isAdmin;
+        }
 
+        /// <summary>
+        /// 当前用户是否是管理员（系统管理员或业务管理员）
+        /// </summary>
+        /// <returns></returns>
+        public bool IsAdmin()
+        {
+            return IsRole("role_admin,role_biz_admin");
+        }
+
+        /// <summary>
+        /// 当前用户是否是系统管理员
+        /// </summary>
+        /// <returns></returns>
+        public bool IsSysAdmin()
+        {
+            return IsRole("role_admin");
+        }
+
+        /// <summary>
+        /// 当前用户是否是业务管理员
+        /// </summary>
+        /// <returns></returns>
+        public bool IsBizAdmin()
+        {
+            return IsRole("role_biz_admin");
+        }
+
+        /// <summary>
+        /// 获取当前登录用户的sys_userinfo数据
+        /// </summary>
+        /// <returns></returns>
+        public sys_userinfo GetUserInfo()
+        {
+            return Db.Query<sys_userinfo>().Where(a => a.Account == CurrUser.Account && a.Status != StatusDelete).FirstOrDefault();
+        }
+        /// <summary>
+        /// 获取当前用户有权限的项目IDs
+        /// </summary>
+        /// <returns></returns>
+        public List<int> GetValidProjectIDs()
+        {
+            List<int> pjList;
+            if (IsAdmin())
+            {
+                pjList = Db.Query<biz_project>().Where(a => a.Status != StatusDelete).Select(a => a.ID).ToList();
+                return pjList;
+            }
+            var usr = GetUserInfo();
+            var query = from pj in Db.Query<biz_project>().Where(a => a.Status != StatusDelete)
+                        from pu in Db.Query<biz_project_user>().Where(a => a.ProjID == pj.ID && a.Status != StatusDelete).DefaultIfEmpty()
+                        where pj.ManagerId == usr.ID || (pu != null && pu.UserID == usr.ID)
+                        select pj.ID;
+            pjList = query.ToList();
+            return pjList;
+        }
 
         public void Dispose()
         {

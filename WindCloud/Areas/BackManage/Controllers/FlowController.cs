@@ -2,6 +2,7 @@
 using Model.Base;
 using Model.Tech.Cloud.BackManage;
 using Service.Base;
+using Service.Wind;
 using Service.Wind.BackManage;
 using Tool;
 using WindCloud.Areas.Base.Controllers;
@@ -13,8 +14,8 @@ namespace WindCloud.Areas.BackManage.Controllers
     {
         private readonly BackFlowService _flowService;
 
-        public FlowController(CookieService cookieService, Service.Wind.WebValidateService webValidateService, BackFlowService flowService)
-            : base(cookieService, webValidateService)
+        public FlowController(CookieService cookieService, Service.Wind.WebValidateService webValidateService, ProjectService projectService, BackFlowService flowService)
+            : base(cookieService, projectService, webValidateService)
         {
             _flowService = flowService;
         }

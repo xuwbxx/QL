@@ -56,7 +56,7 @@ namespace Service.Towing
                     data.MsgLevel = msg.MsgLevel;
                     data.MsgContent = msg.MsgContent;
                     data.Sender = msg.Sender;
-                    data.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                    data.CreateTime = DateTime.Now;
                     data.IsDelete = false;
 
                     repo.Add(data);
@@ -175,7 +175,7 @@ namespace Service.Towing
                     var repo = uow.GetRepository<DataFactory.KingBase.Towing.Message_Body>();
                     if (size == 0) size = LimitValues.MsgSize;
 
-                    lastTime = lastTime ?? DateTime.UtcNow.AddDays(-1);
+                    lastTime = lastTime ?? DateTime.Now.AddDays(-1);
                     var q = repo.Find(a => !a.IsDelete).AsEnumerable();
                     if (!string.IsNullOrEmpty(query))
                     {

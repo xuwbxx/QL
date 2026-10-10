@@ -31,34 +31,34 @@
 <div id="app" class="concrete-beam-container">
     <div class="concrete-beam-header">
         <div class="search-area">
-            <el-select v-model="searchProjID" placeholder="请选择所属项目" clearable style="width: 220px;">
+            <el-select v-model="searchProjID" :placeholder="$t('biz.concreteBeam.indexProjPlaceholder')" clearable style="width: 220px;">
                 <el-option v-for="item in projectOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
             </el-select>
-            <el-input v-model="searchCastingGroupName" placeholder="请输入浇筑组名称" clearable style="width: 220px;" @@keyup.enter="handleSearch"></el-input>
-            <el-button type="primary" @@click="handleSearch">搜索</el-button>
-            <el-button @@click="handleReset">重置</el-button>
+            <el-input v-model="searchCastingGroupName" :placeholder="$t('biz.concreteBeam.indexCastingGroupPlaceholder')" clearable style="width: 220px;" @@keyup.enter="handleSearch"></el-input>
+            <el-button type="primary" @@click="handleSearch"><el-icon><Search/></el-icon>{{$t('common.search')}}</el-button>
+            <el-button @@click="handleReset"><el-icon><Refresh-Left /></el-icon>{{ $t('common.reset') }}</el-button>
         </div>
     </div>
 
     <el-table v-loading="loading" :data="tableData" border stripe style="width: 100%;">
-        <el-table-column label="序号" width="80" align="center">
+        <el-table-column :label="$t('biz.concreteBeam.tableIndex')" width="80" align="center">
             <template #default="scope">{{ indexMethod(scope.$index) }}</template>
         </el-table-column>
-        <el-table-column label="所属项目" min-width="200">
+        <el-table-column :label="$t('biz.concreteBeam.projectName')" min-width="200">
             <template #default="scope">{{ scope.row.projectName || scope.row.ProjectName || '-' }}</template>
         </el-table-column>
-        <el-table-column label="所属桥梁" min-width="200">
+        <el-table-column :label="$t('biz.concreteBeam.bridgeName')" min-width="200">
             <template #default="scope">{{ scope.row.bridgeName || scope.row.BridgeName || '-' }}</template>
         </el-table-column>
-        <el-table-column label="浇筑组名称" min-width="200">
+        <el-table-column :label="$t('biz.concreteBeam.castingGroupName')" min-width="200">
             <template #default="scope">{{ scope.row.castingGroupName || scope.row.CastingGroupName || '-' }}</template>
         </el-table-column>
-        <el-table-column label="项目负责人" min-width="140">
+        <el-table-column :label="$t('biz.concreteBeam.managerName')" min-width="140">
             <template #default="scope">{{ scope.row.managerName || scope.row.ManagerName || '-' }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="150" align="center">
+        <el-table-column :label="$t('biz.concreteBeam.tableOperate')" width="150" align="center">
             <template #default="scope">
-                <el-button type="primary" link @@click="handleLinearControl(scope.row)">线形管理</el-button>
+                <el-button type="primary" link @@click="handleLinearControl(scope.row)">{{ $t('biz.concreteBeam.linearControl') }}</el-button>
             </template>
         </el-table-column>
     </el-table>

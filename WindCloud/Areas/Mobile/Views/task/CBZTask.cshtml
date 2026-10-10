@@ -1,0 +1,442 @@
+﻿
+@{
+    ViewBag.Title = "插拔桩计算";
+    Layout = "~/Views/Shared/MobileLayout.cshtml";
+}
+
+<input type="hidden" id="hid_TaskID" value="@ViewData["TaskID"].ToString()" />
+<input type="hidden" id="hid_ProjectID" value="@ViewData["ProjectID"].ToString()" />
+<input type="hidden" id="hid_PostToken" value="@ViewData["PostToken"].ToString()" />
+
+<header>
+    <div class="left_logo" onclick="DoBack();"><i class="fa fa-chevron-left"></i></div>自升式平台桩腿插拔计算
+    <span class="icon_user">@ViewData["UserName"].ToString()</span>
+</header>
+<div class="height88"></div>
+
+<div class="gzrw_search_box"><input type="text" class="form-control" id="txt_TaskName" readonly></div>
+
+
+<div class="xmxq_box02 clearfix">
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>地勘原始资料
+    </div>
+    <div class="xmxq_table_box col-md-12 col-xs-12 col-sm-12 p0">
+        <table class="table table-striped xmxq_table">
+            <thead>
+                <tr>
+                    <th width="50%">文件名</th>
+                    <th width="25%">上传时间</th>
+                    <th width="25%">操作</th>
+                </tr>
+            </thead>
+            <tbody id="html_dkyszlList">
+                <tr>
+                    <td>(慧海壹号)等3条自升式平台船(GSK01)等6个机位插拔腿计算(20240709165751)_GSK25.Doc</td>
+                    <td>2024-07-09</td>
+                    <td><a class="btn btn-primary">下载</a></td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="xmxq_box02 clearfix">
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>地勘数据表
+    </div>
+    <div class="xmxq_table_box col-md-12 col-xs-12 col-sm-12 p0">
+        <table class="table table-striped xmxq_table">
+            <thead>
+                <tr>
+                    <th width="50%">文件名</th>
+                    <th width="25%">上传时间</th>
+                    <th width="25%">操作</th>
+                </tr>
+            </thead>
+            <tbody id="html_dksjbList">
+                <tr>
+                    <td>(慧海壹号)等3条自升式平台船(GSK01)等6个机位插拔腿计算(20240709165751)_GSK25.Doc</td>
+                    <td>2024-07-09</td>
+                    <td><a class="btn btn-primary">下载</a></td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<div class="xmxq_box02 clearfix">
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>选择计算地勘数据
+    </div>
+
+    <div class="work_task_dksj col-md-12 col-xs-12 col-sm-12">
+        <ul class="dksj_ul clearfix" id="html_DKZL_CBZ">
+            <li><input type="checkbox">选择全部</li>
+            <li><input type="checkbox">ZKA16</li>
+            <li><input type="checkbox">ZKA16</li>
+            <li><input type="checkbox">ZKA16</li>
+            <li><input type="checkbox">ZKA16</li>
+            <li><input type="checkbox">ZKA16</li>
+            <li><input type="checkbox">ZKA16</li>
+            <li><input type="checkbox">ZKA16</li>
+        </ul>
+
+    </div>
+
+    <ul class="SC_file clearfix">
+        <li><a href="" id="DKFile_CBZ">4fdfdgrt434.pdf</a></li>
+        <li><a href="" id="DKFile_CBZ_JSCS">4fdfdgrt434.pdf</a></li>
+    </ul>
+
+</div>
+
+<div class="xmxq_box02 clearfix">
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>平台船选择
+    </div>
+
+    <div class="work_task_chuanbo col-md-12 col-xs-12 col-sm-12">
+        <ul class="chuanbo_ul clearfix" id="html_ShipList">
+            <li><input type="checkbox">港航平9</li>
+            <li><input type="checkbox">海峰1003（风和）</li>
+            <li><input type="checkbox">海峰1005（风行）</li>
+            <li><input type="checkbox">海峰1006（风顺）</li>
+            <li><input type="checkbox">海勘9</li>
+            <li><input type="checkbox">海龙兴业（桁架式桩腿）</li>
+        </ul>
+
+    </div>
+
+    <ul class="SC_file clearfix" id="html_ShipFile_CBZ">
+        <li><a href="" id="">4fdfdgrt434.pdf</a></li>
+        <li><a href="" id="">4fdfdgrt434.pdf</a></li>
+    </ul>
+
+</div>
+<div class="xmxq_box02 clearfix">
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>原始报告文件
+    </div>
+    <div class="xmxq_table_box col-md-12 col-xs-12 col-sm-12 p0">
+        <table class="table table-striped xmxq_table">
+            <thead>
+                <tr>
+                    <th width="50%">文件名</th>
+                    <th width="25%">上传时间</th>
+                    <th width="25%">操作</th>
+                </tr>
+            </thead>
+            <tbody id="html_ReportList">
+                <tr>
+                    <td>(慧海壹号)等3条自升式平台船(GSK01)等6个机位插拔腿计算(20240709165751)_GSK25.Doc</td>
+                    <td>2024-07-09</td>
+                    <td><a class="btn btn-primary">下载</a></td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="xmxq_box02 clearfix">
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>修改报告文件
+    </div>
+    <div class="xmxq_table_box col-md-12 col-xs-12 col-sm-12 p0">
+        <table class="table table-striped xmxq_table">
+            <thead>
+                <tr>
+                    <th width="50%">文件名</th>
+                    <th width="25%">上传时间</th>
+                    <th width="25%">操作</th>
+                </tr>
+            </thead>
+            <tbody id="html_ModifyReportList">
+                <tr>
+                    <td>(慧海壹号)等3条自升式平台船(GSK01)等6个机位插拔腿计算(20240709165751)_GSK25.Doc</td>
+                    <td>2024-07-09</td>
+                    <td><a class="btn btn-primary">下载</a></td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@*<div class="xmxq_box02 clearfix">
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>交付时间
+    </div>
+
+    <div class="work_task_yijian col-md-12 col-xs-12 col-sm-12">
+        <input readonly class="form-control" type="text" id="txt_DeliverTime">
+    </div>
+
+</div>*@
+
+
+<div class="xmxq_box02 clearfix">
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>上一节点意见
+    </div>
+
+    <div class="work_task_yijian col-md-12 col-xs-12 col-sm-12">
+        <textarea class="form-control" id="txt_LastNodeComment"></textarea>
+    </div>
+
+</div>
+
+<div class="xmxq_box02 clearfix">
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>流程节点<div class="jieguosh_box" id="txt_NextNode">审批结审批结审批结束</div>
+    </div>
+    <div class="col-md-12 col-xs-12 col-sm-12 next-jiedian">
+        <ul id="ul_NextNodeUser">
+            @*<li><div>程伟</div><div>（三航局-技术中心-总部-海洋工程研究所-三航局-技术中心-总部-海洋工程研究所）</div></li>
+            <li><div>程伟</div><div>（三航局-技术中心-总部-海洋工程研究所-三航局-技术中心-总部-海洋工程研究所）</div></li>
+            <li><div>程伟</div><div>（三航局-技术中心-总部-海洋工程研究所-三航局-技术中心-总部-海洋工程研究所）</div></li>
+            <li><div>程伟</div><div>（三航局-技术中心-总部-海洋工程研究所-三航局-技术中心-总部-海洋工程研究所）</div></li>*@
+        </ul>
+    </div>
+
+</div>
+
+<script>
+
+    $(document).ready(function () {
+
+        ParamInit();
+        Query();
+        LoadDKFile();
+        LoadDKData();
+        LoadShip();
+    })
+
+    var Param = {};
+    var ParamInit = function () {
+        Param.TaskID = $('#hid_TaskID').val();
+    }
+
+    var ClearTaskForm = function () {
+
+        $('#txt_TaskName').val('');
+        $('#html_dkyszlList').html('');
+        $('#html_dksjbList').html('');
+        $('#html_DKZL_CBZ').html('');
+        $('#html_ShipList').html('');
+        $('#DKFile_CBZ').html('');
+        $('#DKFile_CBZ_JSCS').html('');
+        $('#html_ShipFile_CBZ').html('');
+        $('#html_ReportList').html('');
+        $('#html_ModifyReportList').html('');
+        /*$('#txt_DeliverTime').val('');*/
+        $('#txt_LastNodeComment').val('');
+        $('#txt_NextNode').html('');
+        $('#ul_NextNodeUser').html('');
+    }
+
+    var Query = function () {
+
+        //OpenMaskLayout();
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('TaskQuery_CBZ', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+
+                    if (data.Success) {
+
+                        var Task = data.Data;
+
+                        $('#txt_TaskName').val(Task.TaskName);
+                        //$('#txt_DeliverTime').val(Task.DeliverTime);
+                        
+
+                        var ReportFileHtml = '';
+                        $(Task.Report.ReportFile).each(function (index, dom) {
+                            ReportFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="btn btn-primary" download="' + dom.FileName + '" >下载</a></td></tr>';
+                        })
+                        $('#html_ReportList').html(ReportFileHtml);
+
+                        var ReportModifyFileHtml = '';
+                        $(Task.Report.ReportModifyFile).each(function (index, dom) {
+                            ReportModifyFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="btn btn-primary" download="' + dom.FileName + '" >下载</a></td></tr>';
+                        })
+                        $('#html_ModifyReportList').html(ReportModifyFileHtml);
+
+                        var CommentHtml = '';
+                        $(Task.FlowInfo.LastNode).each(function (index, dom) {
+                            CommentHtml += dom.UserName + ':' + dom.Comment + ';\n'
+                        });
+                        $('#txt_LastNodeComment').val(CommentHtml);
+
+                        if (Task.FlowInfo.NextNodeID == 0) {
+                            $('#txt_NextNode').html('流程结束');
+                            $('#ul_NextNodeUser').html('');
+                        }
+                        else
+                        {
+                            $('#txt_NextNode').html(Task.FlowInfo.NodeName);
+                            var NodeUserHtml = '';
+                            $(Task.FlowInfo.Node).each(function (index, dom) {
+
+                                NodeUserHtml += '<li><div>' + dom.UserName + '</div><div>（' + dom.UserDepart + '）</div></li>'
+
+                            });
+                            $('#ul_NextNodeUser').html(NodeUserHtml);
+                        }
+
+                    }
+
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+                //Pagination();
+            });
+
+    }
+
+    var LoadDKFile = function () {
+
+        var ProjectID = $('#hid_ProjectID').val();
+        //if (ProjectID == null || ProjectID == '' || ProjectID == 0)
+        //    return;
+        var TaskID = $('#hid_TaskID').val();
+
+        Param.ProjectID = ProjectID;
+        Param.TaskID = TaskID;
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        //下一节点人员
+        $.post('LoadDKFile', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+                    if (data.Success) {
+
+                        var GeologyFile_dkyszl_Html = '';
+                        $(data.Data.File_dkyszl).each(function (index, dom) {
+                            GeologyFile_dkyszl_Html += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a></td></tr>';
+                        })
+                        $('#html_dkyszlList').html(GeologyFile_dkyszl_Html);
+
+                        var GeologyFile_dksjb_Html = '';
+                        $(data.Data.File_dksjb).each(function (index, dom) {
+                            GeologyFile_dksjb_Html += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a></td></tr>';
+                        })
+                        $('#html_dksjbList').html(GeologyFile_dksjb_Html);
+
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+            });
+
+    }
+
+    var LoadDKData = function () {
+
+        var ProjectID = $('#hid_ProjectID').val();
+        var TaskID = $('#hid_TaskID').val();
+        if (ProjectID == null || ProjectID == '' || ProjectID == 0) {
+            return;
+        }
+        if (TaskID == null || TaskID == '' || TaskID == 0) {
+            return;
+        }
+
+        Param.ProjectID = ProjectID;
+        Param.FlowHandle = 'view';
+        Param.TaskID = TaskID;
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('LoadDKZL', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+
+                    if (data.Success) {
+
+                        var DKDataHtml = '<li><input type="checkbox" data-id="0" onclick="SoftwareCBZHelper.ChooseAllDKs(this);">选择所有</li>';
+                        $(data.Data.DKs).each(function (index, dom) {
+
+                            DKDataHtml += '<li><input type="checkbox" data-id="' + dom.ID + '" data-name="' + dom.DKName + '">' + dom.DKName + '</li>';
+
+                        })
+
+                        $('#html_DKZL_CBZ').html(DKDataHtml);
+
+                        if (data.Data.File.FileName != null && data.Data.File.FilePath != null && data.Data.File.FileName != '' && data.Data.File.FilePath != '') {
+                            $('#DKFile_CBZ').html(data.Data.File.FileName).attr('href', data.Data.File.FilePath).attr('download', data.Data.File.FileName);
+
+                            $('#DKFile_CBZ_JSCS').html('计算参数.xlsx').attr('href', '\\File\\Task\\计算参数.xlsx').attr('download', '计算参数.xlsx');
+
+                        }
+                        
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+            });
+
+    }
+
+
+    var LoadShip = function () {
+
+        Param.FlowHandle = 'view';
+        Param.TaskID = $('#hid_TaskID').val();
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('LoadShip', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+
+                    if (data.Success) {
+
+                        var ShipHtml = '';
+                        $(data.Data.Ships).each(function (index, dom) {
+
+                            ShipHtml += '<li><input type="checkbox" data-id="' + dom.ID + '" data-name="' + dom.ShipName + '">' + dom.ShipName + '</li>';
+
+                        })
+                        $('#html_ShipList').html(ShipHtml);
+
+                        var FileHtml = '';
+                        $(data.Data.Files).each(function (index, dom) {
+
+                            FileHtml += '<li><a href="' + dom.FilePath + '" download="' + dom.FileName + '">' + dom.FileName + '</a></li>';
+
+                        })
+                        $('#html_ShipFile_CBZ').html(FileHtml);
+
+                        
+
+
+
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+            });
+
+    }
+
+
+    var DoBack = function () {
+
+        window.location.href = "Index";
+
+    }
+
+
+</script>

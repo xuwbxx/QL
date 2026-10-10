@@ -7,17 +7,17 @@
 
     public class CloudWindTaskFileResponse
     {
-        public int ID { set; get; }
+        public int? ID { set; get; }
 
-        public int TypeID { set; get; }
+        public int? TypeID { set; get; }
 
-        public string TypeName { set; get; }
+        public string? TypeName { set; get; }
 
-        public string FileName { set; get; }
+        public string? FileName { set; get; }
 
-        public string FileContent { set; get; }
+        public string? FileContent { set; get; }
 
-        public string FilePath { set; get; }
+        public string? FilePath { set; get; }
     }
 
 

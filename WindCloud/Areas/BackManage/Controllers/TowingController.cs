@@ -21,8 +21,9 @@ namespace WindCloud.Areas.BackManage.Controllers
             CookieService cookieService,
             WebValidateService webValidateService,
             BackTowingManageService backTowingManageService,
-            CloudWindInfoService cloudWindInfoService)
-            : base(cookieService, webValidateService)
+            CloudWindInfoService cloudWindInfoService,
+            ProjectService projectService)
+            : base(cookieService, projectService, webValidateService)
         {
             _backTowingManageService = backTowingManageService;
             _cloudWindInfoService = cloudWindInfoService;

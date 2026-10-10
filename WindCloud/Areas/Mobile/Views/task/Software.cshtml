@@ -1,0 +1,78 @@
+﻿
+@{
+    ViewBag.Title = "工作任务";
+    Layout = "~/Views/Shared/MobileLayout.cshtml";
+}
+
+<input type="hidden" id="hid_PostToken" value="@ViewData["PostToken"].ToString()" />
+
+<header>
+    <div class="left_logo"><img src="~/Content/Mobile/img/logo.png"></div>工作任务
+    <span class="icon_user">@ViewData["UserName"].ToString()</span>
+</header>
+<div class="height88"></div>
+<div class="enter_gzlb"><button type="button" class="btn btn-primary" onclick="OpenProject();"><i class="fa fa-list"></i></button></div>
+
+
+<div class="gzrw_search_box clearfix">
+
+    <select class="form-control pull-left" style="width: 96%;">
+        <option>请关联风场项目</option>
+        <option>华能海南临高海上风电场(CZ1)(OW1023)</option>
+        <option>测试风场</option>
+    </select>
+    <div class="color_red f028 pull-left BX_box">*</div>
+</div>
+<div class="clearfix fa_work_task">
+    <div class="col-md-12 col-xs-12 col-sm-12">
+        <div class="work_task_box">
+            <a class="work_task_name">
+                自升式平台桩腿插拔计算
+            </a>
+        </div>
+    </div>
+    <div class="col-md-12 col-xs-12 col-sm-12">
+        <div class="work_task_box">
+            <a class="work_task_name">
+                起重船基础施工可作业性预报作业预报
+            </a>
+        </div>
+    </div>
+    <div class="col-md-12 col-xs-12 col-sm-12">
+        <div class="work_task_box">
+            <a class="work_task_name">
+                交互式风机整体安装模拟软件
+            </a>
+        </div>
+    </div>
+    <div class="col-md-12 col-xs-12 col-sm-12">
+        <div class="work_task_box">
+            <a class="work_task_name">
+                桩基沉桩可打性分析
+            </a>
+        </div>
+    </div>
+    <div class="col-md-12 col-xs-12 col-sm-12">
+        <div class="work_task_box">
+            <a class="work_task_name">
+                海上风电单桩嵌岩施工孔壁失稳风险评估
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    $(document).ready(function () {
+
+
+
+    })
+
+    var OpenProject = function () {
+
+        window.location.href = "/Mobile/Project/Index";
+
+    }
+
+</script>

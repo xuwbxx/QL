@@ -2,6 +2,7 @@
 using Model.Base;
 using Model.Tech.Cloud.BackManage;
 using Service.Base;
+using Service.Wind;
 using Service.Wind.BackManage;
 using Tool;
 using WindCloud.Areas.Base.Controllers;
@@ -13,8 +14,8 @@ namespace WindCloud.Areas.BackManage.Controllers
     {
         private readonly BackSettingService _backSettingService;
 
-        public SettingController(CookieService cookieService, Service.Wind.WebValidateService webValidateService, BackSettingService backSettingService)
-            : base(cookieService, webValidateService)
+        public SettingController(CookieService cookieService, Service.Wind.WebValidateService webValidateService, ProjectService projectService, BackSettingService backSettingService)
+            : base(cookieService, projectService, webValidateService)
         {
             _backSettingService = backSettingService;
         }

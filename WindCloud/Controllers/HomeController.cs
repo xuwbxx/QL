@@ -2,6 +2,7 @@ using BIM.Business.CCSHJWebApi;
 using Microsoft.AspNetCore.Mvc;
 using Model.Base;
 using Service.Base;
+using Service.Base.Filter;
 using Service.Wind;
 using System.Diagnostics;
 using Tool;
@@ -27,38 +28,44 @@ namespace WindCloud.Controllers
         public IActionResult Index()
         {
 
-            SHJUserInfo userinfo = new SHJUserInfo();
-            userinfo.UserID = 10;
-            userinfo.UserName = "程伟";
-            userinfo.RealName = "程伟";
-            userinfo.DepartName = "三航局-技术中心-BIM中心";
-            userinfo.UserCode = "2018001515";
-            userinfo.Mobile = "13918863121";
-            userinfo.JobName = "技术管理";
-            _cookieService.SetUserCookie(userinfo);
+            //SHJUserInfo userinfo = new SHJUserInfo();
+            //userinfo.UserID = 10;
+            //userinfo.UserName = "程伟";
+            //userinfo.RealName = "程伟";
+            //userinfo.DepartName = "三航局-技术中心-BIM中心";
+            //userinfo.UserCode = "2018001515";
+            //userinfo.Mobile = "13918863121";
+            //userinfo.JobName = "技术管理";
+            //_cookieService.SetUserCookie(userinfo);
 
-            return Redirect("/WindDoor/Main/Index");
+            //return Redirect("/WindDoor/Main/Index");
+
+            return RedirectToAction("ErrorPage", "CloudBase", new { area = "Cloud", ErrorText = "请通过交建通云服务平台登录" });
 
             return View();
         }
 
+        [TypeFilter(typeof(WindCloudFilter))]
         public IActionResult Privacy()
         {
             return View();
         }
 
+        [TypeFilter(typeof(WindCloudFilter))]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
+        [TypeFilter(typeof(WindCloudFilter))]
         public ActionResult LogOut()
         {
             _cookieService.CookieCleanUp();
             return View();
         }
 
+        [TypeFilter(typeof(WindCloudFilter))]
         public IActionResult JJTMessageRedirect()
         {
             if (string.IsNullOrEmpty(HttpContext.Request.Query["CloudToken"]))
@@ -156,6 +163,7 @@ namespace WindCloud.Controllers
         /// <summary>
         /// 起重船基础施工可作业性预报跳转
         /// </summary>
+        [TypeFilter(typeof(WindCloudFilter))]
         public IActionResult JJTMessageKZYReportRedirect()
         {
             if (string.IsNullOrEmpty(HttpContext.Request.Query["CloudToken"]))
@@ -217,6 +225,7 @@ namespace WindCloud.Controllers
             }
         }
 
+        [TypeFilter(typeof(WindCloudFilter))]
         public IActionResult JJTMessageRedirect__PlatRegister()
         {
             if (string.IsNullOrEmpty(HttpContext.Request.Query["CloudToken"]))
@@ -277,6 +286,7 @@ namespace WindCloud.Controllers
             }
         }
 
+        [TypeFilter(typeof(WindCloudFilter))]
         public IActionResult JJTMessageRedirect__Common()
         {
             if (string.IsNullOrEmpty(HttpContext.Request.Query["CloudToken"]))
@@ -330,6 +340,7 @@ namespace WindCloud.Controllers
             return Redirect(Url);
         }
 
+        [TypeFilter(typeof(WindCloudFilter))]
         public IActionResult TechCenterRedirect()
         {
             string Token = HttpContext.Request.Query["Token"].ToString();
@@ -379,6 +390,7 @@ namespace WindCloud.Controllers
             return Redirect("/WindDoor/Main/Index");
         }
 
+        [TypeFilter(typeof(WindCloudFilter))]
         public ActionResult ErrorPage(string ErrorText)
         {
 
@@ -393,6 +405,7 @@ namespace WindCloud.Controllers
 
         }
 
+        [TypeFilter(typeof(WindCloudFilter))]
         public ActionResult KZYRedirect()
         {
             string TaskCode = HttpContext.Request.Query["TaskCode"].ToString();
@@ -402,6 +415,7 @@ namespace WindCloud.Controllers
             return View();
         }
 
+        [TypeFilter(typeof(WindCloudFilter))]
         public ActionResult CloudRedirect()
         {
             string Type = HttpContext.Request.Query["Type"].ToString();

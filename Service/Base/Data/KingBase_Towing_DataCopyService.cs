@@ -51,7 +51,7 @@ namespace Service.Base.Data
                     {
                         id = a.id,
                         DataString = a.DataString == null ? null : a.DataString.Replace("\0", ""),
-                        CreateTime = a.CreateTime == null ? null : DateTime.SpecifyKind(a.CreateTime.Value, DateTimeKind.Unspecified)
+                        CreateTime = a.CreateTime == null ? null : a.CreateTime.Value
                     });
                 });
 
@@ -99,7 +99,7 @@ namespace Service.Base.Data
                     {
                         id = a.id,
                         DataString = a.DataString == null ? null : a.DataString.Replace("\0", ""),
-                        CreateTime = a.CreateTime == null ? null : DateTime.SpecifyKind(a.CreateTime.Value, DateTimeKind.Unspecified)
+                        CreateTime = a.CreateTime == null ? null : a.CreateTime.Value
                     });
                 });
 
@@ -155,7 +155,7 @@ namespace Service.Base.Data
                     oceandir = a.oceandir,
                     oceandirStr = a.oceandirStr,
                     oceanspeed = a.oceanspeed,
-                    CreateTime = a.CreateTime == null ? null : DateTime.SpecifyKind(a.CreateTime.Value, DateTimeKind.Unspecified)
+                    CreateTime = a.CreateTime == null ? null : a.CreateTime.Value
                 });
             });
 
@@ -203,8 +203,8 @@ namespace Service.Base.Data
                         Engine1 = a.Engine1,
                         Engine2 = a.Engine2,
                         Voltage = a.Voltage,
-                        CreateTime = a.CreateTime == null ? null : DateTime.SpecifyKind(a.CreateTime.Value, DateTimeKind.Unspecified),
-                        CreateTime2 = a.CreateTime2 == null ? null : DateTime.SpecifyKind(a.CreateTime2.Value, DateTimeKind.Unspecified),
+                        CreateTime = a.CreateTime == null ? null : a.CreateTime.Value,
+                        CreateTime2 = a.CreateTime2 == null ? null : a.CreateTime2.Value,
                         IsDelete = a.IsDelete
                     });
                 });
@@ -243,8 +243,8 @@ namespace Service.Base.Data
                     ProjectID = a.ProjectID,
                     Type = a.Type,
                     DeviceName = a.DeviceName,
-                    LatestUpdateTime = a.LatestUpdateTime == null ? null : DateTime.SpecifyKind(a.LatestUpdateTime.Value, DateTimeKind.Unspecified),
-                    CreateTime = a.CreateTime == null ? null : DateTime.SpecifyKind(a.CreateTime.Value, DateTimeKind.Unspecified),
+                    LatestUpdateTime = a.LatestUpdateTime == null ? null : a.LatestUpdateTime.Value,
+                    CreateTime = a.CreateTime == null ? null : a.CreateTime.Value,
                     IsDelete = a.IsDelete
                 });
             });
@@ -291,8 +291,8 @@ namespace Service.Base.Data
                         AngleX = a.AngleX,
                         AngleY = a.AngleY,
                         AzAngle = a.AzAngle,
-                        CreateTime = a.CreateTime == null ? null : DateTime.SpecifyKind(a.CreateTime.Value, DateTimeKind.Unspecified),
-                        CreateTime2 = a.CreateTime2 == null ? null : DateTime.SpecifyKind(a.CreateTime2.Value, DateTimeKind.Unspecified),
+                        CreateTime = a.CreateTime == null ? null : a.CreateTime.Value,
+                        CreateTime2 = a.CreateTime2 == null ? null : a.CreateTime2.Value,
                         IsDelete = a.IsDelete
                     });
                 });
@@ -341,7 +341,7 @@ namespace Service.Base.Data
                     {
                         id = a.id,
                         No = a.No,
-                        ForecastTime = a.ForecastTime == null ? null : DateTime.SpecifyKind(a.ForecastTime.Value, DateTimeKind.Unspecified),
+                        ForecastTime = a.ForecastTime == null ? null : a.ForecastTime.Value,
                         Lat = a.Lat,
                         Lon = a.Lon,
                         MaxYaoX = a.MaxYaoX,
@@ -351,7 +351,7 @@ namespace Service.Base.Data
                         WindAlarm = a.WindAlarm,
                         WaveAlarm = a.WaveAlarm,
                         ShakeAlarm = a.ShakeAlarm,
-                        CreateTime = a.CreateTime == null ? null : DateTime.SpecifyKind(a.CreateTime.Value, DateTimeKind.Unspecified),
+                        CreateTime = a.CreateTime == null ? null : a.CreateTime.Value,
                         IsDelete = a.IsDelete
                     });
                 });
@@ -400,9 +400,9 @@ namespace Service.Base.Data
                     {
                         id = a.id,
                         ProjID = a.ProjID,
-                        SnapTime = a.SnapTime == null ? null : DateTime.SpecifyKind(a.SnapTime.Value, DateTimeKind.Unspecified),
+                        SnapTime = a.SnapTime == null ? null : a.SnapTime.Value,
                         SnapPicUrl = a.SnapPicUrl,
-                        CreateTime = a.CreateTime == null ? null : DateTime.SpecifyKind(a.CreateTime.Value, DateTimeKind.Unspecified),
+                        CreateTime = a.CreateTime == null ? null : a.CreateTime.Value,
                         IsDelete = a.IsDelete
                     });
                 });
@@ -522,8 +522,8 @@ namespace Service.Base.Data
                         id = a.id,
                         ProjectID = a.ProjectID,
                         SailSpeed = a.SailSpeed,
-                        CreateTime = a.CreateTime == null ? null : DateTime.SpecifyKind(a.CreateTime.Value, DateTimeKind.Unspecified),
-                        CreateTime2 = a.CreateTime2 == null ? null : DateTime.SpecifyKind(a.CreateTime2.Value, DateTimeKind.Unspecified),
+                        CreateTime = a.CreateTime == null ? null : a.CreateTime.Value,
+                        CreateTime2 = a.CreateTime2 == null ? null : a.CreateTime2.Value,
                         IsDelete = a.IsDelete
                     });
                 });
@@ -578,8 +578,8 @@ namespace Service.Base.Data
                         LatDirection = a.LatDirection,
                         Altitude = a.Altitude,
                         Heading = a.Heading,
-                        CreateTime = a.CreateTime == null ? null : DateTime.SpecifyKind(a.CreateTime.Value, DateTimeKind.Unspecified),
-                        CreateTime2 = a.CreateTime2 == null ? null : DateTime.SpecifyKind(a.CreateTime2.Value, DateTimeKind.Unspecified),
+                        CreateTime = a.CreateTime == null ? null : a.CreateTime.Value,
+                        CreateTime2 = a.CreateTime2 == null ? null : a.CreateTime2.Value,
                         IsDelete = a.IsDelete
                     });
                 });
@@ -630,8 +630,8 @@ namespace Service.Base.Data
                         DeviceID = a.DeviceID,
                         WindSpeed = a.WindSpeed,
                         WindDirection = a.WindDirection,
-                        CreateTime = a.CreateTime == null ? null : DateTime.SpecifyKind(a.CreateTime.Value, DateTimeKind.Unspecified),
-                        CreateTime2 = a.CreateTime2 == null ? null : DateTime.SpecifyKind(a.CreateTime2.Value, DateTimeKind.Unspecified),
+                        CreateTime = a.CreateTime == null ? null : a.CreateTime.Value,
+                        CreateTime2 = a.CreateTime2 == null ? null : a.CreateTime2.Value,
                         IsDelete = a.IsDelete
                     });
                 });
@@ -682,7 +682,7 @@ namespace Service.Base.Data
                         ProjectID = a.ProjectID,
                         Lon = a.Lon,
                         Lat = a.Lat,
-                        CreateTime = a.CreateTime == null ? null : DateTime.SpecifyKind(a.CreateTime.Value, DateTimeKind.Unspecified),
+                        CreateTime = a.CreateTime == null ? null : a.CreateTime.Value,
                         IsDelete = a.IsDelete
                     });
                 });
@@ -731,12 +731,12 @@ namespace Service.Base.Data
                     {
                         id = a.id,
                         ProjectID = a.ProjectID,
-                        ProjectStartTime = a.ProjectStartTime == null ? null : DateTime.SpecifyKind(a.ProjectStartTime.Value, DateTimeKind.Unspecified),
+                        ProjectStartTime = a.ProjectStartTime == null ? null : a.ProjectStartTime.Value,
                         StartLon = a.StartLon,
                         StartLat = a.StartLat,
                         EndLon = a.EndLon,
                         EndLat = a.EndLat,
-                        CreateTime = a.CreateTime == null ? null : DateTime.SpecifyKind(a.CreateTime.Value, DateTimeKind.Unspecified),
+                        CreateTime = a.CreateTime == null ? null : a.CreateTime.Value,
                         IsDelete = a.IsDelete
                     });
                 });
@@ -787,8 +787,8 @@ namespace Service.Base.Data
                         ProjectID = a.ProjectID,
                         Lon = a.Lon,
                         Lat = a.Lat,
-                        RouteTime = a.RouteTime == null ? null : DateTime.SpecifyKind(a.RouteTime.Value, DateTimeKind.Unspecified),
-                        CreateTime = a.CreateTime == null ? null : DateTime.SpecifyKind(a.CreateTime.Value, DateTimeKind.Unspecified),
+                        RouteTime = a.RouteTime == null ? null : a.RouteTime.Value,
+                        CreateTime = a.CreateTime == null ? null : a.CreateTime.Value,
                         IsDelete = a.IsDelete
                     });
                 });
@@ -842,7 +842,7 @@ namespace Service.Base.Data
                         Lon = a.Lon,
                         Lat = a.Lat,
                         Radius = a.Radius,
-                        CreateTime = a.CreateTime == null ? null : DateTime.SpecifyKind(a.CreateTime.Value, DateTimeKind.Unspecified),
+                        CreateTime = a.CreateTime == null ? null : a.CreateTime.Value,
                         IsDelete = a.IsDelete
                     });
                 });
@@ -883,7 +883,7 @@ namespace Service.Base.Data
                     Depart = a.Depart,
                     IsConfirm = a.IsConfirm,
                     Role = a.Role,
-                    CreateTime = a.CreateTime == null ? null : DateTime.SpecifyKind(a.CreateTime.Value, DateTimeKind.Unspecified),
+                    CreateTime = a.CreateTime == null ? null : a.CreateTime.Value,
                     IsDelete = a.IsDelete
                 });
             });
@@ -930,7 +930,7 @@ namespace Service.Base.Data
                         MsgLevel = a.MsgLevel,
                         MsgContent = a.MsgContent,
                         Sender = a.Sender,
-                        CreateTime = a.CreateTime == null ? null : DateTime.SpecifyKind(a.CreateTime.Value, DateTimeKind.Unspecified),
+                        CreateTime = a.CreateTime == null ? null : a.CreateTime.Value,
                         IsDelete = a.IsDelete
                     });
                 });

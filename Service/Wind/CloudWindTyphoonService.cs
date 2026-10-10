@@ -62,7 +62,7 @@ namespace Service.Wind
                         se.radius7 = string.IsNullOrEmpty(item2.radius7) ? default(decimal?) : Convert.ToDecimal(item2.radius7);
                         se.radius10 = string.IsNullOrEmpty(item2.radius10) ? default(decimal?) : Convert.ToDecimal(item2.radius10);
                         se.direction = item2.direction ?? "";
-                        se.CreateTime = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+                        se.CreateTime = DateTime.Now;
                         se.IsDelete = false;
 
                         Typhoons.Add(se);
@@ -124,7 +124,7 @@ namespace Service.Wind
                     data.oceandir = weather.oceandir;
                     data.oceandirStr = weather.oceandirStr;
                     data.oceanspeed = weather.oceanspeed;
-                    data.CreateTime = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+                    data.CreateTime = DateTime.Now;
 
                     var weatherRepo = uow.GetRepository<DataFactory.KingBase.Towing.Data_Backup_Weather>();
                     weatherRepo.Add(data);
@@ -333,8 +333,8 @@ namespace Service.Wind
                         list.Add(new CloudWindCollectPoint_QXSJ()
                         {
                             PointName = pointName,
-                            PointLon = pointLon,
-                            PointLat = pointLat
+                            PointLon = pointLon.ToString(),
+                            PointLat = pointLat.ToString()
                         });
                     }
                     if (list.Count == 0)
@@ -375,7 +375,7 @@ namespace Service.Wind
                             se.windlevel = data.windlevel ?? "";
                             se.windwarninglevel = data.windwarninglevel ?? "";
                             se.windalarm = data.windalarm;
-                            se.time = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+                            se.time = DateTime.Now;
                             addLists.Add(se);
                         }
                     }

@@ -57,6 +57,17 @@ namespace DataFactory.SqlServer.CloudWind
         public DbSet<Wind_Task_JJTResult> Wind_Task_JJTResult { set; get; }
         public DbSet<Flow_TaskApply> Flow_TaskApply { set; get; }
 
+        public DbSet<Wind_Project> Wind_Project { set; get; }
+        public DbSet<Manage_Platform> Manage_Platform { set; get; }
+        public DbSet<Flow_ProjectApply> Flow_ProjectApply { set; get; }
+        public DbSet<Flow_Node> Flow_Node { set; get; }
+        public DbSet<WebGIS_ShipAnchor> WebGIS_ShipAnchor { set; get; }
+        public DbSet<Library_FloatShip> Library_FloatShip { set; get; }
+        public DbSet<Wind_TaskInfo_ZJCZ> Wind_TaskInfo_ZJCZ { set; get; }
+        public DbSet<Wind_TaskInfo_THFX> Wind_TaskInfo_THFX { set; get; }
+        public DbSet<Wind_TaskInfo_XCFX> Wind_TaskInfo_XCFX { set; get; }
+        public DbSet<Wind_Task_ProjectFile> Wind_Task_ProjectFile { set; get; }
+
     }
 
     public class Wind_ProjectRole
@@ -503,8 +514,6 @@ namespace DataFactory.SqlServer.CloudWind
     {
         public int ID { set; get; }
         public int? TaskID { set; get; }
-        public int? FlowStatus { set; get; }
-        public int? SoftwareID { set; get; }
         public string? Points { set; get; }
         public DateTime? CollectStartTime { set; get; }
         public DateTime? CollectEndTime { set; get; }
@@ -614,6 +623,126 @@ namespace DataFactory.SqlServer.CloudWind
         public int? FlowHandle { set; get; }
         public DateTime? ApprovalTime { set; get; }
         public string? Comment { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool? IsDelete { set; get; }
+    }
+
+    public class Wind_Project
+    {
+        public int ID { set; get; }
+        public string? ProjectCode { set; get; }
+        public int? ProjectCodeIndex { set; get; }
+        public string? ProjectName { set; get; }
+        public int? CompanyID { set; get; }
+        public string? Lon { set; get; }
+        public string? Lat { set; get; }
+        public int? Status { set; get; }
+        public int? FlowStatus { set; get; }
+        public DateTime? ProjectStartTime { set; get; }
+        public DateTime? ProjectEndTime { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool IsDelete { set; get; }
+    }
+
+    public class Manage_Platform
+    {
+        public int ID { set; get; }
+        public string? Platform { set; get; }
+        public string? Url { set; get; }
+        public int? DepartID { set; get; }
+        public string? Introduction { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool IsDelete { set; get; }
+    }
+
+    public class Flow_ProjectApply
+    {
+        public int ID { set; get; }
+        public int? ProjectID { set; get; }
+        public int? NodeID { set; get; }
+        public int? FlowOrder { set; get; }
+        public string? NodeUserName { set; get; }
+        public string? NodeUserCode { set; get; }
+        public string? NodeUserDepart { set; get; }
+        public string? NodeUserPhone { set; get; }
+        public string? NodeUserJobName { set; get; }
+        public int? FlowHandle { set; get; }
+        public DateTime? ApprovalTime { set; get; }
+        public string? Comment { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool IsDelete { set; get; }
+    }
+
+    public class Flow_Node
+    {
+        public int ID { set; get; }
+        public int SoftwareID { set; get; }
+        public int NodeNo { set; get; }
+        public bool? NodeApprovalType { set; get; }
+        public bool? DoEdit { set; get; }
+        public string? NodeName { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool IsDelete { set; get; }
+    }
+
+    public class WebGIS_ShipAnchor
+    {
+        public int id { set; get; }
+        public string? AnchorName { set; get; }
+        public string? AnchorGroup { set; get; }
+        public string? Lon { set; get; }
+        public string? Lat { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool? IsDelete { set; get; }
+    }
+
+    public class Library_FloatShip
+    {
+        public int id { set; get; }
+        public string? ShipName { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool? IsDelete { set; get; }
+    }
+
+    public class Wind_TaskInfo_ZJCZ
+    {
+        public int id { set; get; }
+        public int? TaskID { set; get; }
+        public string? ProjectIntroduce { set; get; }
+        public string? ProjectPosition { set; get; }
+        public string? zmtd { set; get; }
+        public string? HammerModel { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool? IsDelete { set; get; }
+    }
+
+    public class Wind_TaskInfo_THFX
+    {
+        public int id { set; get; }
+        public int? TaskID { set; get; }
+        public string? Scheme { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool? IsDelete { set; get; }
+    }
+
+    public class Wind_TaskInfo_XCFX
+    {
+        public int id { set; get; }
+        public int? TaskID { set; get; }
+        public string? ShipIDs { set; get; }
+        public string? TaskDesc { set; get; }
+        public DateTime? CreateTime { set; get; }
+        public bool? IsDelete { set; get; }
+    }
+
+    public class Wind_Task_ProjectFile
+    {
+        public int id { set; get; }
+        public int? ProjectID { set; get; }
+        public int? TaskID { set; get; }
+        public int? FileType { set; get; }
+        public string? FileName { set; get; }
+        public string? FilePath { set; get; }
         public DateTime? CreateTime { set; get; }
         public bool? IsDelete { set; get; }
     }

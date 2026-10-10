@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Model.Base;
+using Model.Tech.Cloud;
 using Service.Base;
 using Service.Wind;
 using Tool;
+using WindCloud.Areas.Cloud.Controllers;
 
 namespace WindCloud.Areas.Base.Controllers
 {
@@ -12,13 +14,15 @@ namespace WindCloud.Areas.Base.Controllers
         private string EnIV = AppSettingUtils.GetSetting("AppSettings:TripleEncrypt:IV").ToString();
 
         public CookieService _cookieService { get; }
+        private readonly ProjectService _projectService;
 
         public WebValidateService _webValidateService { get; }
 
-        public WebEncryptionController(CookieService cookieService, WebValidateService webValidateService)
+        public WebEncryptionController(CookieService cookieService, ProjectService projectService, WebValidateService webValidateService)
         {
             _cookieService = cookieService;
             _webValidateService = webValidateService;
+            _projectService = projectService;
         }
 
         public SHJUserInfo? CurrentUser
@@ -101,5 +105,45 @@ namespace WindCloud.Areas.Base.Controllers
             userCodes = await _webValidateService.GetAdminUserCode();
             return userCodes;
         }
+
+        public async Task<IActionResult> FindShjUser(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (!ValidateWebToken(request.PostToken))
+            {
+                ret.Message = "身份信息失效，请重新登录。";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(request.Name))
+            {
+                return Ok(ret);
+            }
+            try
+            {
+                string msg = "";
+                var list = _projectService.FindShjUser(request.Name, out msg);
+
+                if (string.IsNullOrEmpty(msg))
+                {
+                    ret.Data = list;
+                    ret.Success = true;
+                }
+                else
+                {
+                    ret.Data = list;
+                    ret.Message = msg;
+                    ret.Success = false;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                //记录日志
+                LoggerUtils.Error(ex.ToString(), typeof(ProjectTaskBaseController));
+            }
+            return Ok(ret);
+        }
+
     }
 }

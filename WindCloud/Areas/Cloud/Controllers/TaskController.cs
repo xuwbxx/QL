@@ -152,9 +152,9 @@ namespace WindCloud.Areas.Cloud.Controllers
                 ret.TotalPage = count % request.PageSize == 0 ? (count / request.PageSize) : (count / request.PageSize) + 1;
 
                 var currentQuery = list
-                    .OrderByDescending(a => a.FlowStatus == (int)CloudWindTaskFlowStatus.退回)
+                    .OrderByDescending(a => a.ApplyTime)
+                    .ThenByDescending(a => a.FlowStatus == (int)CloudWindTaskFlowStatus.退回)
                     .ThenByDescending(a => a.FlowStatus == (int)CloudWindTaskFlowStatus.审批中)
-                    .ThenByDescending(a => a.ApplyTime)
                     .Skip(request.GetSkipCount())
                     .Take(request.PageSize)
                     .ToList();
@@ -325,14 +325,22 @@ namespace WindCloud.Areas.Cloud.Controllers
             }
             try
             {
-                string url = await _taskService.TaskSubmit_CBZ(request);
-                ret.Success = true;
-                ret.Data = url;
+                var (url, msg) = await _taskService.TaskSubmit_CBZ(request);
+                if (!string.IsNullOrEmpty(msg))
+                {
+                    ret.Success = false;
+                    ret.Message = msg;
+                }
+                else
+                {
+                    ret.Success = true;
+                    ret.Data = url;
+                }
             }
             catch (Exception ex)
             {
                 ret.Success = false;
-                ret.Message = ex.Message;
+                ret.Message = "发生错误";
                 LoggerUtils.Error(ex.ToString(), typeof(TaskController));
             }
             return Ok(ret);
@@ -458,6 +466,1018 @@ namespace WindCloud.Areas.Cloud.Controllers
             try
             {
                 _taskService.CancelTask(request.TaskID);
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        #endregion
+
+
+
+        #region 可作业预报
+
+        /// <summary>
+        /// 任务提交（可作业预报）
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> TaskSubmit_KZY(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (request.ProjectID == 0)
+            {
+                ret.Message = "需要选择关联的风场项目";
+                return Ok(ret);
+            }
+            if (request.SoftwareID == 0)
+            {
+                ret.Message = "需要选择申请软件";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(request.TaskName))
+            {
+                ret.Message = "任务名不能为空";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(request.KZYForecastStartTime) || string.IsNullOrEmpty(request.KZYForecastEndTime))
+            {
+                ret.Message = "需要输入预报时间";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(request.ShipIDstring))
+            {
+                ret.Message = "没有选择平台船";
+                return Ok(ret);
+            }
+            if (CurrentUser == null || string.IsNullOrEmpty(CurrentUser.UserCode))
+            {
+                ret.Message = "用户信息失效，请从交建通重新登录云平台";
+                return Ok(ret);
+            }
+            try
+            {
+                await _taskService.TaskSubmit_KZY(request);
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 任务查询（可作业预报）
+        /// </summary>
+        [HttpPost]
+        public IActionResult TaskQuery_KZY(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (!ValidateWebToken(request.PostToken))
+            {
+                ret.Message = "身份信息失效，请重新登录。";
+                return Ok(ret);
+            }
+            if (request.TaskID == 0)
+            {
+                ret.Message = "任务数据错误";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(CurrentUser.UserCode))
+            {
+                ret.Message = "用户信息失效，请重新交建通登录";
+                return Ok(ret);
+            }
+            try
+            {
+                CloudWindTaskFlow data = _taskService.TaskQuery_KZY(request);
+                ret.Data = data;
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 审批提交（可作业预报）
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> TaskApprovalSubmit_KZY(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (request.TaskID == 0)
+            {
+                ret.Message = "项目信息出错";
+                return Ok(ret);
+            }
+            if (request.ApprovalType != 0 && request.ApprovalType != 2)
+            {
+                ret.Message = "流程错误";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(CurrentUser.UserCode))
+            {
+                ret.Message = "用户信息失效，请从交建通重新登录云平台";
+                return Ok(ret);
+            }
+            try
+            {
+                await _taskService.TaskApprovalSubmit_KZY(request);
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 作废任务（可作业预报）
+        /// </summary>
+        [HttpPost]
+        public IActionResult TaskCancelSubmit_KZY(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (request.TaskID == 0)
+            {
+                ret.Message = "任务信息出错";
+                return Ok(ret);
+            }
+            try
+            {
+                _taskService.CancelTask(request.TaskID);
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        #endregion
+
+
+        #region 桩基沉桩
+
+        /// <summary>
+        /// 项目位置图片上传（桩基沉桩）
+        /// </summary>
+        [HttpPost]
+        public IActionResult ProjectPositionFileUpload(CloudWindRequest request, List<IFormFile> files)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (request.TaskID == 0)
+            {
+                ret.Message = "任务数据错误";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(request.FlowHandle))
+            {
+                ret.Message = "任务数据错误";
+                return Ok(ret);
+            }
+            if (files == null || files.Count == 0)
+            {
+                ret.Message = "没有选择任何文件";
+                return Ok(ret);
+            }
+            try
+            {
+                List<CloudProjectFile> list = _taskService.TaskPilePositionFileUpload(request, files);
+                ret.Data = list;
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 桩数据上传（桩基沉桩）
+        /// </summary>
+        [HttpPost]
+        public IActionResult TaskPileFileUpload(CloudWindRequest request, List<IFormFile> files)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (request.FileType == 0)
+            {
+                ret.Message = "项目数据错误";
+                return Ok(ret);
+            }
+            if (request.TaskID == 0)
+            {
+                ret.Message = "项目数据错误";
+                return Ok(ret);
+            }
+            if (files == null || files.Count == 0)
+            {
+                ret.Message = "没有选择任何文件";
+                return Ok(ret);
+            }
+            try
+            {
+                List<CloudProjectFile> list = _taskService.TaskPileFileUpload(request, files);
+                ret.Data = list;
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 删除项目位置图片（桩基沉桩）
+        /// </summary>
+        [HttpPost]
+        public IActionResult DeleteProjectPositionFile(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (!ValidateWebToken(request.PostToken))
+            {
+                ret.Message = "身份信息失效，请重新登录。";
+                return Ok(ret);
+            }
+            if (request.ID == 0)
+            {
+                ret.Message = "数据错误";
+                return Ok(ret);
+            }
+            try
+            {
+                List<CloudProjectFile> files = _taskService.DeleteProjectPositionFile(request);
+                ret.Data = files;
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 删除桩文件（桩基沉桩）
+        /// </summary>
+        [HttpPost]
+        public IActionResult DeletePileFile(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (!ValidateWebToken(request.PostToken))
+            {
+                ret.Message = "身份信息失效，请重新登录。";
+                return Ok(ret);
+            }
+            if (request.ID == 0)
+            {
+                ret.Message = "数据错误";
+                return Ok(ret);
+            }
+            try
+            {
+                List<CloudProjectFile> files = _taskService.DeletePileFile(request);
+                ret.Data = files;
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 任务提交（桩基沉桩）
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> TaskSubmit_ZJCZ(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (request.ProjectID == 0)
+            {
+                ret.Message = "需要选择关联的风场项目";
+                return Ok(ret);
+            }
+            if (request.TaskID == 0)
+            {
+                ret.Message = "任务数据错误";
+                return Ok(ret);
+            }
+            if (request.SoftwareID == 0)
+            {
+                ret.Message = "需要选择申请软件";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(request.TaskName))
+            {
+                ret.Message = "任务名不能为空";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(request.ZJCZProjectIntroduce))
+            {
+                ret.Message = "项目介绍不能为空";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(request.HammerModel))
+            {
+                ret.Message = "锤型号不能为空";
+                return Ok(ret);
+            }
+            if (CurrentUser == null || string.IsNullOrEmpty(CurrentUser.UserCode))
+            {
+                ret.Message = "用户信息失效，请从交建通重新登录云平台";
+                return Ok(ret);
+            }
+            try
+            {
+                await _taskService.TaskSubmit_ZJCZ(request);
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 任务查询（桩基沉桩）
+        /// </summary>
+        [HttpPost]
+        public IActionResult TaskQuery_ZJCZ(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (!ValidateWebToken(request.PostToken))
+            {
+                ret.Message = "身份信息失效，请重新登录。";
+                return Ok(ret);
+            }
+            if (request.TaskID == 0)
+            {
+                ret.Message = "任务数据错误";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(CurrentUser.UserCode))
+            {
+                ret.Message = "用户信息失效，请重新交建通登录";
+                return Ok(ret);
+            }
+            try
+            {
+                CloudWindTaskFlow data = _taskService.TaskQuery_ZJCZ(request);
+                ret.Data = data;
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 作废任务（桩基沉桩）
+        /// </summary>
+        [HttpPost]
+        public IActionResult TaskCancelSubmit_ZJCZ(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (request.TaskID == 0)
+            {
+                ret.Message = "任务信息出错";
+                return Ok(ret);
+            }
+            try
+            {
+                _taskService.CancelTask(request.TaskID);
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 审批提交（桩基沉桩）
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> TaskApprovalSubmit_ZJCZ(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (request.TaskID == 0)
+            {
+                ret.Message = "项目信息出错";
+                return Ok(ret);
+            }
+            if (request.ApprovalType != 0 && request.ApprovalType != 2)
+            {
+                ret.Message = "流程错误";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(CurrentUser.UserCode))
+            {
+                ret.Message = "用户信息失效，请从交建通重新登录云平台";
+                return Ok(ret);
+            }
+            try
+            {
+                await _taskService.TaskApprovalSubmit_ZJCZ(request);
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        #endregion
+
+
+        #region 拖航可行性分析
+
+        /// <summary>
+        /// 任务提交（拖航可行性分析）
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> TaskSubmit_THFX(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (request.ProjectID == 0)
+            {
+                ret.Message = "需要选择关联的风场项目";
+                return Ok(ret);
+            }
+            if (request.SoftwareID == 0)
+            {
+                ret.Message = "需要选择申请软件";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(request.TaskName))
+            {
+                ret.Message = "任务名不能为空";
+                return Ok(ret);
+            }
+            if (CurrentUser == null || string.IsNullOrEmpty(CurrentUser.UserCode))
+            {
+                ret.Message = "用户信息失效，请从交建通重新登录云平台";
+                return Ok(ret);
+            }
+            try
+            {
+                await _taskService.TaskSubmit_THFX(request);
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 任务查询（拖航可行性分析）
+        /// </summary>
+        [HttpPost]
+        public IActionResult TaskQuery_THFX(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (!ValidateWebToken(request.PostToken))
+            {
+                ret.Message = "身份信息失效，请重新登录。";
+                return Ok(ret);
+            }
+            if (request.TaskID == 0)
+            {
+                ret.Message = "任务数据错误";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(CurrentUser.UserCode))
+            {
+                ret.Message = "用户信息失效，请重新交建通登录";
+                return Ok(ret);
+            }
+            try
+            {
+                CloudWindTaskFlow data = _taskService.TaskQuery_THFX(request);
+                ret.Data = data;
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 审批提交（拖航可行性分析）
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> TaskApprovalSubmit_THFX(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (request.TaskID == 0)
+            {
+                ret.Message = "项目信息出错";
+                return Ok(ret);
+            }
+            if (request.ApprovalType != 0 && request.ApprovalType != 2)
+            {
+                ret.Message = "流程错误";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(CurrentUser.UserCode))
+            {
+                ret.Message = "用户信息失效，请从交建通重新登录云平台";
+                return Ok(ret);
+            }
+            try
+            {
+                await _taskService.TaskApprovalSubmit_THFX(request);
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 作废任务（拖航可行性分析）
+        /// </summary>
+        [HttpPost]
+        public IActionResult TaskCancelSubmit_THFX(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (request.TaskID == 0)
+            {
+                ret.Message = "任务信息出错";
+                return Ok(ret);
+            }
+            try
+            {
+                _taskService.CancelTask(request.TaskID);
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 拖航航线上传
+        /// </summary>
+        [HttpPost]
+        public IActionResult TowingPlanRouteUpload(CloudWindRequest request, IFormFile file)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (request.ProjectID == 0)
+            {
+                ret.Message = "项目数据错误";
+                return Ok(ret);
+            }
+            if (file == null)
+            {
+                ret.Message = "没有选择任何文件";
+                return Ok(ret);
+            }
+            try
+            {
+                List<TowingPlanRoute> list = _taskService.TowingPlanRouteUpload(request, file);
+                ret.Data = list;
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 拖航文件上传
+        /// </summary>
+        [HttpPost]
+        public IActionResult TowingFileUpload(CloudWindRequest request, List<IFormFile> files)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (request.ProjectID == 0)
+            {
+                ret.Message = "项目数据错误";
+                return Ok(ret);
+            }
+            if (files == null || files.Count == 0)
+            {
+                ret.Message = "没有选择任何文件";
+                return Ok(ret);
+            }
+            try
+            {
+                List<CloudProjectFile> list = _taskService.TowingFileUpload(request, files);
+                ret.Data = list;
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 删除拖航文件
+        /// </summary>
+        [HttpPost]
+        public IActionResult TowingFileDelete(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (!ValidateWebToken(request.PostToken))
+            {
+                ret.Message = "身份信息失效，请重新登录。";
+                return Ok(ret);
+            }
+            if (request.ID == 0)
+            {
+                ret.Message = "数据错误";
+                return Ok(ret);
+            }
+            try
+            {
+                List<CloudProjectFile> files = _taskService.TowingFileDelete(request);
+                ret.Data = files;
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 加载拖航航线
+        /// </summary>
+        [HttpPost]
+        public IActionResult LoadPlanRoute(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (!ValidateWebToken(request.PostToken))
+            {
+                ret.Message = "身份信息失效，请重新登录。";
+                return Ok(ret);
+            }
+            if (request.ProjectID == 0)
+            {
+                ret.Message = "数据错误";
+                return Ok(ret);
+            }
+            try
+            {
+                List<TowingPlanRoute> list = _taskService.LoadPlanRoute(request);
+                ret.Data = list;
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 加载拖航文件
+        /// </summary>
+        [HttpPost]
+        public IActionResult LoadTowingFile(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (!ValidateWebToken(request.PostToken))
+            {
+                ret.Message = "身份信息失效，请重新登录。";
+                return Ok(ret);
+            }
+            if (request.ProjectID == 0)
+            {
+                ret.Message = "数据错误";
+                return Ok(ret);
+            }
+            try
+            {
+                List<CloudProjectFile> files = _taskService.LoadTowingFile(request);
+                ret.Data = files;
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        #endregion
+
+
+        #region 选船分析
+
+        /// <summary>
+        /// 任务提交（选船分析）
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> TaskSubmit_XCFX(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (request.ProjectID == 0)
+            {
+                ret.Message = "需要选择关联的风场项目";
+                return Ok(ret);
+            }
+            if (request.SoftwareID == 0)
+            {
+                ret.Message = "需要选择申请软件";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(request.TaskName))
+            {
+                ret.Message = "任务名不能为空";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(request.ShipIDstring))
+            {
+                ret.Message = "没有选择平台船";
+                return Ok(ret);
+            }
+            if (CurrentUser == null || string.IsNullOrEmpty(CurrentUser.UserCode))
+            {
+                ret.Message = "用户信息失效，请从交建通重新登录云平台";
+                return Ok(ret);
+            }
+            try
+            {
+                await _taskService.TaskSubmit_XCFX(request);
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 任务查询（选船分析）
+        /// </summary>
+        [HttpPost]
+        public IActionResult TaskQuery_XCFX(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (!ValidateWebToken(request.PostToken))
+            {
+                ret.Message = "身份信息失效，请重新登录。";
+                return Ok(ret);
+            }
+            if (request.TaskID == 0)
+            {
+                ret.Message = "任务数据错误";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(CurrentUser.UserCode))
+            {
+                ret.Message = "用户信息失效，请重新交建通登录";
+                return Ok(ret);
+            }
+            try
+            {
+                CloudWindTaskFlow data = _taskService.TaskQuery_XCFX(request);
+                ret.Data = data;
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 审批提交（选船分析）
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> TaskApprovalSubmit_XCFX(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (request.TaskID == 0)
+            {
+                ret.Message = "项目信息出错";
+                return Ok(ret);
+            }
+            if (request.ApprovalType != 0 && request.ApprovalType != 2)
+            {
+                ret.Message = "流程错误";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(CurrentUser.UserCode))
+            {
+                ret.Message = "用户信息失效，请从交建通重新登录云平台";
+                return Ok(ret);
+            }
+            try
+            {
+                await _taskService.TaskApprovalSubmit_XCFX(request);
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        #endregion
+
+
+        #region 气象收集
+
+        /// <summary>
+        /// 任务提交（气象收集）
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> TaskSubmit_QXSJ(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (request.ProjectID == 0)
+            {
+                ret.Message = "需要选择关联的风场项目";
+                return Ok(ret);
+            }
+            if (request.SoftwareID == 0)
+            {
+                ret.Message = "需要选择申请软件";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(request.TaskName))
+            {
+                ret.Message = "任务名不能为空";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(request.QXSJ_StartTime) || string.IsNullOrEmpty(request.QXSJ_EndTime))
+            {
+                ret.Message = "需要输入采集时间";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(request.QXSJ_Points))
+            {
+                ret.Message = "没有数据采集点";
+                return Ok(ret);
+            }
+            if (CurrentUser == null || string.IsNullOrEmpty(CurrentUser.UserCode))
+            {
+                ret.Message = "用户信息失效，请从交建通重新登录云平台";
+                return Ok(ret);
+            }
+            try
+            {
+                await _taskService.TaskSubmit_QXSJ(request);
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 任务查询（气象收集）
+        /// </summary>
+        [HttpPost]
+        public IActionResult TaskQuery_QXSJ(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (!ValidateWebToken(request.PostToken))
+            {
+                ret.Message = "身份信息失效，请重新登录。";
+                return Ok(ret);
+            }
+            if (request.TaskID == 0)
+            {
+                ret.Message = "任务数据错误";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(CurrentUser.UserCode))
+            {
+                ret.Message = "用户信息失效，请重新交建通登录";
+                return Ok(ret);
+            }
+            try
+            {
+                CloudWindTaskFlow data = _taskService.TaskQuery_QXSJ(request);
+                ret.Data = data;
+                ret.Success = true;
+            }
+            catch (Exception ex)
+            {
+                ret.Success = false;
+                ret.Message = ex.Message;
+                LoggerUtils.Error(ex.ToString(), typeof(TaskController));
+            }
+            return Ok(ret);
+        }
+
+        /// <summary>
+        /// 审批提交（气象收集）
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> TaskApprovalSubmit_QXSJ(CloudWindRequest request)
+        {
+            BaseReturn ret = new BaseReturn();
+            if (request.TaskID == 0)
+            {
+                ret.Message = "项目信息出错";
+                return Ok(ret);
+            }
+            if (request.ApprovalType != 0 && request.ApprovalType != 2)
+            {
+                ret.Message = "流程错误";
+                return Ok(ret);
+            }
+            if (string.IsNullOrEmpty(CurrentUser.UserCode))
+            {
+                ret.Message = "用户信息失效，请从交建通重新登录云平台";
+                return Ok(ret);
+            }
+            try
+            {
+                await _taskService.TaskApprovalSubmit_QXSJ(request);
                 ret.Success = true;
             }
             catch (Exception ex)

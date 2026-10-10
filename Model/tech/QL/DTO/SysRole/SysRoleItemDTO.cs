@@ -22,6 +22,7 @@
         public int ID { get; set; }
         public int? ParentID { get; set; }
         public string Name { get; set; } = string.Empty;
+        public string EnName { get; set; } = string.Empty;
         public string? MenuType { get; set; }
         public int Sort { get; set; }
         public bool Selected { get; set; }

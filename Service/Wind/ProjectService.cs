@@ -448,7 +448,7 @@ namespace Service.Wind
                             {
                                 ID = a.ID,
                                 FileName = a.FileName,
-                                FilePath = a.FilePath.Substring(a.FilePath.IndexOf(@"\File\")),
+                                FilePath = FileUtils.GetRelativeFilePath(a.FilePath),
                                 FileTime = Convert.ToDateTime(a.CreateTime).ToString("yyyy-MM-dd")
                             });
                         });
@@ -464,7 +464,7 @@ namespace Service.Wind
                             data.File_dkyszl.Add(new CloudProjectFile()
                             {
                                 FileName = a.FileName,
-                                FilePath = a.FilePath.Substring(a.FilePath.IndexOf(@"\File\")),
+                                FilePath = FileUtils.GetRelativeFilePath(a.FilePath),
                                 FileTime = Convert.ToDateTime(a.CreateTime).ToString("yyyy-MM-dd")
                             });
                         });
@@ -475,7 +475,7 @@ namespace Service.Wind
                             data.File_dksjb.Add(new CloudProjectFile()
                             {
                                 FileName = a.FileName,
-                                FilePath = a.FilePath.Substring(a.FilePath.IndexOf(@"\File\")),
+                                FilePath = FileUtils.GetRelativeFilePath(a.FilePath),
                                 FileTime = Convert.ToDateTime(a.CreateTime).ToString("yyyy-MM-dd")
                             });
                         });
@@ -823,7 +823,7 @@ namespace Service.Wind
                             {
                                 ID = a.ID,
                                 FileName = a.FileName,
-                                FilePath = a.FilePath.Substring(a.FilePath.IndexOf(@"\File\")),
+                                FilePath = FileUtils.GetRelativeFilePath(a.FilePath),
                                 FileTime = Convert.ToDateTime(a.CreateTime).ToString("yyyy-MM-dd")
                             });
                         });
@@ -839,7 +839,7 @@ namespace Service.Wind
                             data.File_dkyszl.Add(new CloudProjectFile()
                             {
                                 FileName = a.FileName,
-                                FilePath = a.FilePath.Substring(a.FilePath.IndexOf(@"\File\")),
+                                FilePath = FileUtils.GetRelativeFilePath(a.FilePath),
                                 FileTime = Convert.ToDateTime(a.CreateTime).ToString("yyyy-MM-dd")
                             });
                         });
@@ -850,7 +850,7 @@ namespace Service.Wind
                             data.File_dksjb.Add(new CloudProjectFile()
                             {
                                 FileName = a.FileName,
-                                FilePath = a.FilePath.Substring(a.FilePath.IndexOf(@"\File\")),
+                                FilePath = FileUtils.GetRelativeFilePath(a.FilePath),
                                 FileTime = Convert.ToDateTime(a.CreateTime).ToString("yyyy-MM-dd")
                             });
                         });
@@ -887,7 +887,7 @@ namespace Service.Wind
                         FileUtils.SaveFile(file, FileName);
 
                         //excel文件
-                        DataSet dt = ExcelUtils.ConvertExcelFileToDataSet(file);
+                        DataSet dt = ExcelUtils.ConvertExcelFileToDataSet(file, true);
 
                         if (dt == null || dt.Tables == null || dt.Tables[0] == null)
                         {
@@ -900,7 +900,7 @@ namespace Service.Wind
                             .ForEach(a =>
                             {
                                 a.IsDelete = true;
-                                a.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                                a.CreateTime = DateTime.Now;
                             });
 
                         //更新项目中心
@@ -913,7 +913,7 @@ namespace Service.Wind
                             area.ProjectID = request.ProjectID;
                             area.AreaLon = dr[0].ToString().Trim();
                             area.AreaLat = dr[1].ToString().Trim();
-                            area.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                            area.CreateTime = DateTime.Now;
                             area.IsDelete = false;
                             list.Add(area);
 
@@ -961,7 +961,7 @@ namespace Service.Wind
                         FileUtils.SaveFile(file, FileName);
 
                         //excel文件
-                        DataSet dt = ExcelUtils.ConvertExcelFileToDataSet(file);
+                        DataSet dt = ExcelUtils.ConvertExcelFileToDataSet(file, true);
 
                         if (dt == null || dt.Tables == null || dt.Tables[0] == null)
                         {
@@ -974,7 +974,7 @@ namespace Service.Wind
                             .ForEach(a =>
                             {
                                 a.IsDelete = true;
-                                a.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                                a.CreateTime = DateTime.Now;
                             });
 
                         foreach (DataRow dr in dt.Tables[0].Rows)
@@ -984,7 +984,7 @@ namespace Service.Wind
                             fan.FanName = dr[0].ToString().Trim();
                             fan.Lon = dr[1].ToString().Trim();
                             fan.Lat = dr[2].ToString().Trim();
-                            fan.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                            fan.CreateTime = DateTime.Now;
                             fan.IsDelete = false;
                             fan.Status = (int)CloudWindFanStatus.在安装;
                             list.Add(fan);
@@ -1030,7 +1030,7 @@ namespace Service.Wind
                         }
                         if (Project.ProjectCode.Equals("未生成"))
                         {
-                            FileFolderPath = Path.Combine(_env.WebRootPath, "File", "Project", $"TempProject\\Project{Project.ID}", "Import");
+                            FileFolderPath = Path.Combine(_env.WebRootPath, "File", "Project", $"TempProject/Project{Project.ID}", "Import");
                         }
                         else
                         {
@@ -1048,7 +1048,7 @@ namespace Service.Wind
                             model.ProjectID = request.ProjectID;
                             model.FileName = File.FileName;
                             model.FilePath = Path.Combine(FileFolderPath, Guid.NewGuid() + Path.GetExtension(File.FileName));
-                            model.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                            model.CreateTime = DateTime.Now;
                             model.IsDelete = false;
                             FileList.Add(model);
 
@@ -1067,8 +1067,8 @@ namespace Service.Wind
                             CloudProjectFile model = new CloudProjectFile();
                             model.ID = a.ID;
                             model.FileName = a.FileName;
-                            model.FilePath = a.FilePath.Substring(a.FilePath.IndexOf(@"\File\"));
-                            model.FileTime = DateTime.UtcNow.ToString("yyyy-MM-dd");
+                            model.FilePath = FileUtils.GetRelativeFilePath(a.FilePath);
+                            model.FileTime = DateTime.Now.ToString("yyyy-MM-dd");
                             list.Add(model);
                         });
                 }
@@ -1110,7 +1110,7 @@ namespace Service.Wind
                         }
                         if (Project.ProjectCode.Equals("未生成"))
                         {
-                            FileFolderPath = Path.Combine(_env.WebRootPath, "File", "Project", $"TempProject\\Project{Project.ID}", "Import");
+                            FileFolderPath = Path.Combine(_env.WebRootPath, "File", "Project", $"TempProject/Project{Project.ID}", "Import");
                         }
                         else
                         {
@@ -1125,14 +1125,14 @@ namespace Service.Wind
                             .ForEach(a =>
                             {
                                 a.IsDelete = true;
-                                a.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                                a.CreateTime = DateTime.Now;
                             });
 
                         Library_Geology_DK_repo.Find(a => !a.IsDelete && a.ProjectID == request.ProjectID).ToList()
                             .ForEach(a =>
                             {
                                 a.IsDelete = true;
-                                a.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                                a.CreateTime = DateTime.Now;
                             });
                     }
 
@@ -1147,7 +1147,7 @@ namespace Service.Wind
                             model.Type = request.FileType;
                             model.FileName = File.FileName;
                             model.FilePath = Path.Combine(FileFolderPath, Guid.NewGuid() + Path.GetExtension(File.FileName));
-                            model.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                            model.CreateTime = DateTime.Now;
                             model.IsDelete = false;
                             GeologyList.Add(model);
 
@@ -1177,7 +1177,7 @@ namespace Service.Wind
                                         dk.DKName = dt.TableName;
                                         dk.FanID = null;
                                         dk.ProjectID = request.ProjectID;
-                                        dk.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                                        dk.CreateTime = DateTime.Now;
                                         dk.IsDelete = false;
                                         Library_Geology_DK_repo.Add(dk);
                                         uow.SaveAsync().Wait();
@@ -1199,7 +1199,7 @@ namespace Service.Wind
                                             data.stmcj = dr[6].ToString();
                                             data.yxzd = dr[7].ToString();
                                             data.bgjs = dr[8].ToString();
-                                            data.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                                            data.CreateTime = DateTime.Now;
                                             data.IsDelete = false;
                                             DataList.Add(data);
                                         }
@@ -1219,8 +1219,8 @@ namespace Service.Wind
                             CloudProjectFile model = new CloudProjectFile();
                             model.ID = a.ID;
                             model.FileName = a.FileName;
-                            model.FileTime = DateTime.UtcNow.ToString("yyyy-MM-dd");
-                            model.FilePath = a.FilePath.Substring(a.FilePath.IndexOf(@"\File\"));
+                            model.FileTime = DateTime.Now.ToString("yyyy-MM-dd");
+                            model.FilePath = FileUtils.GetRelativeFilePath(a.FilePath);
                             list.Add(model);
                         });
                 }
@@ -1260,7 +1260,7 @@ namespace Service.Wind
                         return msg;
                     }
 
-                    DateTime now = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                    DateTime now = DateTime.Now;
 
                     //1.生成风场项目
                     var NewWindProject = new Wind_Project();
@@ -1293,8 +1293,8 @@ namespace Service.Wind
                     Wind_ProjectInfo_repo.Add(NewProjectInfo);
 
                     //创建文件夹(暂存临时文件夹)
-                    string FileImportFolder = Path.Combine(_env.WebRootPath, "File", "Project", $"TempProject\\Project{NewProjectID}", "Import");
-                    string FileExportFolder = Path.Combine(_env.WebRootPath, "File", "Project", $"TempProject\\Project{NewProjectID}", "Export");
+                    string FileImportFolder = Path.Combine(_env.WebRootPath, "File", "Project", $"TempProject/Project{NewProjectID}", "Import");
+                    string FileExportFolder = Path.Combine(_env.WebRootPath, "File", "Project", $"TempProject/Project{NewProjectID}", "Export");
                     Directory.CreateDirectory(FileImportFolder);
                     Directory.CreateDirectory(FileExportFolder);
 
@@ -1451,7 +1451,7 @@ namespace Service.Wind
             string msg = "";
             try
             {
-                DateTime now = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                DateTime now = DateTime.Now;
 
                 using (var uow = _techCenterUowFactory.Create())
                 {
@@ -1465,6 +1465,7 @@ namespace Service.Wind
                     var Manage_Copyer_repo = uow.GetRepository<Manage_Copyer>();
                     var Wind_Project_Copyer_repo = uow.GetRepository<Wind_Project_Copyer>();
                     var Wind_ProjectFile_repo = uow.GetRepository<Wind_ProjectFile>();
+                    var Library_Geology_repo = uow.GetRepository<Library_Geology>();
 
                     var Project = Wind_Project_repo.Find(a => !a.IsDelete && a.ID == request.ProjectID).FirstOrDefault();
                     if (Project == null)
@@ -1861,7 +1862,7 @@ namespace Service.Wind
                             InformRequest.UserCode = userCode;
                             InformRequest.Url = RedirectUrl;
                             InformRequest.Title = InformTitle;
-                            InformRequest.Content = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm") + "\r\n点击查看详情";
+                            InformRequest.Content = DateTime.Now.ToString("yyyy-MM-dd HH:mm") + "\r\n点击查看详情";
                             InformRequests.Add(InformRequest);
                         }
 
@@ -1897,7 +1898,7 @@ namespace Service.Wind
                                     InformRequest.UserCode = a.UserCode;
                                     InformRequest.Url = RedirectUrl;
                                     InformRequest.Title = Project.ProjectName + "(" + Project.ProjectCode + ")-立项成功";
-                                    InformRequest.Content = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm") + "\r\n点击查看详情";
+                                    InformRequest.Content = DateTime.Now.ToString("yyyy-MM-dd HH:mm") + "\r\n点击查看详情";
                                     InformRequests.Add(InformRequest);
                                 }
                             });
@@ -1909,11 +1910,20 @@ namespace Service.Wind
                         var NewProjectFolder = Path.Combine(_env.WebRootPath, "File", "Project", Project.ProjectCode);
                         Directory.CreateDirectory(NewProjectFolder);
                         FileUtils.MoveFolder(OldProjectFolder, NewProjectFolder);
+                        //简道云文件
                         Wind_ProjectFile_repo.Find(a => !a.IsDelete && a.ProjectID == Project.ID).ToList()
                             .ForEach(a =>
                             {
                                 a.FilePath = a.FilePath.Replace(OldProjectFolder, NewProjectFolder);
                             });
+                        //地勘文件
+                        Library_Geology_repo.Find(a => !a.IsDelete && a.ProjectID == Project.ID).ToList()
+                            .ForEach(a =>
+                            {
+                                a.FilePath = a.FilePath.Replace(OldProjectFolder, NewProjectFolder);
+                            });
+
+
                     }
 
                     await uow.SaveAsync();
@@ -2114,7 +2124,7 @@ namespace Service.Wind
 
                     Dks.ForEach(a =>
                     {
-                        a.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                        a.CreateTime = DateTime.Now;
                         a.FanID = null;
                     });
 
@@ -2229,7 +2239,7 @@ namespace Service.Wind
                                 newRole.UserPhone = user.UserPhone;
                                 newRole.UserJobName = user.UserJobName;
                                 newRole.IsDelete = false;
-                                newRole.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                                newRole.CreateTime = DateTime.Now;
                                 Wind_ProjectRole_repo.Add(newRole);
                             }
                         }
@@ -2302,7 +2312,7 @@ namespace Service.Wind
                         {
                             ID = a.ID,
                             FileName = a.FileName,
-                            FilePath = a.FilePath.Substring(a.FilePath.IndexOf(@"\File\")),
+                            FilePath = FileUtils.GetRelativeFilePath(a.FilePath),
                             FileTime = Convert.ToDateTime(a.CreateTime).ToString("yyyy-MM-dd")
                         });
                     });

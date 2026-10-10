@@ -1,6 +1,6 @@
 ﻿@{
     Layout = "_LayoutModelEP";
-    ViewData["Title"] = "线性管控";
+    ViewData["Title"] = "线形管控";
     var groupID = ViewBag.GroupID ?? 0;
 }
 
@@ -238,6 +238,16 @@
             border-bottom: 2px solid #d0d0d0;
         }
 
+        /* 设计坐标「核对与预览」：等宽文本还原原版版式（上下两段） */
+        .lc-mono {
+            margin: 0;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 13px;
+            line-height: 1.35;
+            white-space: pre;
+            color: #303133;
+        }
+
         /* 浇筑坐标页签 */
         .pc-table {
             width: 100%;
@@ -294,43 +304,47 @@
 
     <!-- 1. 项目信息 -->
     <div class="lc-tab-panel" v-show="activeTab === 'projectInfo'">
+        <div v-if="hasSurveyData"
+             style="margin-bottom: 12px; padding: 8px 12px; background: #fdf6ec; border: 1px solid #f5dab1; border-radius: 4px; color: #e6a23c; font-size: 13px;">
+            {{ $t('biz.concreteBeam.surveyLockedProjectTip') }}
+        </div>
         <div class="pi-layout">
             <!-- 左侧表单 -->
             <div class="pi-sidebar">
                 <div class="pi-form-section">
                     <div class="pi-form-row">
-                        <div class="pi-form-label">项目名称</div>
+                        <div class="pi-form-label">{{ $t('biz.concreteBeam.projectName') }}</div>
                         <el-input v-model="projectInfo.projectName" disabled></el-input>
                     </div>
                     <div class="pi-form-row">
-                        <div class="pi-form-label">浇筑组名称</div>
+                        <div class="pi-form-label">{{ $t('biz.concreteBeam.castingGroupName') }}</div>
                         <el-input v-model="projectInfo.castingGroupName" disabled></el-input>
                     </div>
                     <div class="pi-form-row">
-                        <div class="pi-form-label">项目负责人</div>
+                        <div class="pi-form-label">{{ $t('biz.concreteBeam.managerName') }}</div>
                         <el-input v-model="projectInfo.managerName" disabled></el-input>
                     </div>
                 </div>
                 <div class="pi-form-section">
-                    <div class="pi-form-section-title">测点偏位信息</div>
+                    <div class="pi-form-section-title">{{ $t('biz.concreteBeam.offsetDimensions') }}</div>
                     <div class="pi-form-row">
                         <div class="pi-form-label"><span class="pi-required">*</span>A</div>
-                        <el-input v-model="projectInfo.offsetA" placeholder="请输入A值"></el-input>
+                        <el-input v-model="projectInfo.offsetA" :placeholder="$t('biz.concreteBeam.offsetAPlaceholder')" :disabled="hasSurveyData"></el-input>
                     </div>
                     <div class="pi-form-row">
                         <div class="pi-form-label"><span class="pi-required">*</span>B</div>
-                        <el-input v-model="projectInfo.offsetB" placeholder="请输入B值"></el-input>
+                        <el-input v-model="projectInfo.offsetB" :placeholder="$t('biz.concreteBeam.offsetBPlaceholder')" :disabled="hasSurveyData"></el-input>
                     </div>
                     <div class="pi-form-row">
                         <div class="pi-form-label"><span class="pi-required">*</span>C</div>
-                        <el-input v-model="projectInfo.offsetC" placeholder="请输入C值"></el-input>
+                        <el-input v-model="projectInfo.offsetC" :placeholder="$t('biz.concreteBeam.offsetCPlaceholder')" :disabled="hasSurveyData"></el-input>
                     </div>
                 </div>
                 <div class="pi-form-section">
-                    <div class="pi-form-section-title">浇筑参考高程</div>
+                    <div class="pi-form-section-title">{{ $t('biz.concreteBeam.referenceElevationSection') }}</div>
                     <div class="pi-form-row">
-                        <div class="pi-form-label"><span class="pi-required">*</span>参考高程</div>
-                        <el-input v-model="projectInfo.referenceElevation" placeholder="请输入参考高程"></el-input>
+                        <div class="pi-form-label"><span class="pi-required">*</span>{{ $t('biz.concreteBeam.referenceElevation') }}</div>
+                        <el-input v-model="projectInfo.referenceElevation" :placeholder="$t('biz.concreteBeam.referenceElevationPlaceholder')" :disabled="hasSurveyData"></el-input>
                     </div>
                 </div>
             </div>
@@ -339,61 +353,66 @@
             <div class="pi-main">
                 <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 12px;">
                     <div class="pi-meta">
-                        创建时间：{{ projectInfo.createdTime || '-' }}<br />
-                        更新时间：{{ projectInfo.updatedTime || '-' }}
+                        {{ $t('biz.concreteBeam.createdBy') }}：{{ projectInfo.createdBy || '-' }}<br />
+                        {{ $t('biz.concreteBeam.createdTime') }}：{{ projectInfo.createdTime || '-' }}<br />
+                        {{ $t('biz.concreteBeam.updatedTime') }}：{{ projectInfo.updatedTime || '-' }}
                     </div>
                 </div>
                 <el-table v-loading="loading" :data="segmentTableData" border stripe style="width: 100%;">
-                    <el-table-column label="序号" width="70" align="center">
+                    <el-table-column :label="$t('biz.concreteBeam.tableIndex')" width="70" align="center">
                         <template #default="scope">{{ (segmentPageIndex - 1) * segmentPageSize + scope.$index + 1 }}</template>
                     </el-table-column>
-                    <el-table-column label="梁段名称" min-width="150" align="center">
+                    <el-table-column :label="$t('biz.concreteBeam.segmentName')" min-width="150" align="center">
                         <template #default="scope">{{ scope.row.segmentName || '-' }}</template>
                     </el-table-column>
-                    <el-table-column label="下游" min-width="100" align="center">
+                    <el-table-column :label="$t('biz.concreteBeam.downstream')" min-width="100" align="center">
                         <template #default="scope">{{ scope.row.downstream || '-' }}</template>
                     </el-table-column>
-                    <el-table-column label="上游" min-width="100" align="center">
+                    <el-table-column :label="$t('biz.concreteBeam.upstream')" min-width="100" align="center">
                         <template #default="scope">{{ scope.row.upstream || '-' }}</template>
                     </el-table-column>
-                    <el-table-column label="节点1" width="80" align="center">
+                    <el-table-column :label="$t('biz.concreteBeam.joint1')" width="120" align="center">
                         <template #default="scope">{{ scope.row.node1 || '-' }}</template>
                     </el-table-column>
-                    <el-table-column label="节点2" width="80" align="center">
+                    <el-table-column :label="$t('biz.concreteBeam.joint2')" width="120" align="center">
                         <template #default="scope">{{ scope.row.node2 || '-' }}</template>
                     </el-table-column>
-                    <el-table-column label="浇筑日期" width="150" align="center">
+                    <el-table-column :label="$t('biz.concreteBeam.pouringDate')" width="150" align="center">
                         <template #default="scope">{{ scope.row.pouringDate || '-' }}</template>
                     </el-table-column>
                 </el-table>
                 <div class="pi-pagination">
                     <el-pagination background layout="total, sizes, prev, pager, next, jumper"
                                    :total="segmentTotal" :page-size="segmentPageSize" :current-page="segmentPageIndex"
-                                   :page-sizes="[10, 20, 50]" @@size-change="handleSegmentSizeChange" @@current-change="handleSegmentPageChange" />
+                                   :page-sizes="[10, 20, 50, 100]" @@size-change="handleSegmentSizeChange" @@current-change="handleSegmentPageChange" />
                 </div>
             </div>
         </div>
         <div style="text-align: center; padding: 20px 0 0; border-top: 1px solid #e8e8e8; margin-top: 20px;">
-            <el-button type="primary" @@click="handleConfirm">确定</el-button>
-            <el-button @@click="handleCancel">取消</el-button>
-            <el-button @@click="handleReset">重置</el-button>
+            <el-button type="primary" @@click="handleConfirm" :disabled="hasSurveyData">{{ $t('common.ok') }}</el-button>
+            <el-button @@click="handleCancel" :disabled="hasSurveyData">{{ $t('common.cancel') }}</el-button>
+            <el-button @@click="handleReset" :disabled="hasSurveyData">{{ $t('common.reset') }}</el-button>
         </div>
     </div>
 
     <!-- 2. 设计坐标 -->
     <div class="lc-tab-panel" v-show="activeTab === 'designCoord'">
+        <div v-if="hasSurveyData"
+             style="margin-bottom: 12px; padding: 8px 12px; background: #fdf6ec; border: 1px solid #f5dab1; border-radius: 4px; color: #e6a23c; font-size: 13px;">
+            {{ $t('biz.concreteBeam.surveyLockedDesignTip') }}
+        </div>
         <div style="margin-bottom: 12px;">
-            <el-button @@click="downloadDesignTemplate">下载模板</el-button>
-            <el-button type="primary" @@click="handleImportDesignCoord">导入设计坐标</el-button>
+            <el-button @@click="downloadDesignTemplate"><el-icon><Download /></el-icon>{{ $t('biz.concreteBeam.downloadTemplate') }}</el-button>
+            <el-button type="primary" @@click="handleImportDesignCoord" :disabled="hasSurveyData"><el-icon><Upload-Filled /></el-icon>{{ $t('biz.concreteBeam.importDesignCoord') }}</el-button>
         </div>
         <el-table v-loading="designLoading" :data="designTableData" border stripe style="width: 100%;">
-            <el-table-column label="序号" width="70" align="center">
+            <el-table-column :label="$t('biz.concreteBeam.tableIndex')" width="70" align="center">
                 <template #default="scope">{{ (designPageIndex - 1) * designPageSize + scope.$index + 1 }}</template>
             </el-table-column>
-            <el-table-column label="节点名称" min-width="150" align="center">
+            <el-table-column :label="$t('biz.concreteBeam.nodeName')" min-width="150" align="center">
                 <template #default="scope">{{ scope.row.nodeName || '-' }}</template>
             </el-table-column>
-            <el-table-column label="东侧控制点" align="center">
+            <el-table-column :label="$t('biz.concreteBeam.eastControlPoint')" align="center">
                 <el-table-column label="XE" width="150" align="center">
                     <template #default="scope">{{ scope.row.xe || '-' }}</template>
                 </el-table-column>
@@ -404,7 +423,7 @@
                     <template #default="scope">{{ scope.row.ze || '-' }}</template>
                 </el-table-column>
             </el-table-column>
-            <el-table-column label="中间控制点" align="center">
+            <el-table-column :label="$t('biz.concreteBeam.centerControlPoint')" align="center">
                 <el-table-column label="XC" width="150" align="center">
                     <template #default="scope">{{ scope.row.xc || '-' }}</template>
                 </el-table-column>
@@ -415,7 +434,7 @@
                     <template #default="scope">{{ scope.row.zc || '-' }}</template>
                 </el-table-column>
             </el-table-column>
-            <el-table-column label="西侧控制点" align="center">
+            <el-table-column :label="$t('biz.concreteBeam.westControlPoint')" align="center">
                 <el-table-column label="XW" width="150" align="center">
                     <template #default="scope">{{ scope.row.xw || '-' }}</template>
                 </el-table-column>
@@ -429,32 +448,36 @@
         </el-table>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
             <div>
-                <el-checkbox v-model="designNormalize" @@change="onDesignNormalizeChange">归一化坐标</el-checkbox>
-                <el-checkbox v-model="designIncludeCamber" @@change="onDesignCamberChange" style="margin-left: 16px;">标高含预拱度</el-checkbox>
+                <el-checkbox v-model="designNormalize" @@change="onDesignNormalizeChange">{{ $t('biz.concreteBeam.normalize') }}</el-checkbox>
+                <el-checkbox v-model="designIncludeCamber" :disabled="!!designPreviewToken || hasSurveyData" @@change="onDesignCamberChange" style="margin-left: 16px;">{{ $t('biz.concreteBeam.camberIncluded') }}</el-checkbox>
             </div>
             <el-pagination background layout="total, sizes, prev, pager, next, jumper"
                            :total="designTotal" :page-size="designPageSize" :current-page="designPageIndex"
-                           :page-sizes="[10, 20, 50]" @@size-change="handleDesignSizeChange" @@current-change="handleDesignPageChange" />
+                           :page-sizes="[10, 20, 50, 100]" @@size-change="handleDesignSizeChange" @@current-change="handleDesignPageChange" />
         </div>
         <div style="text-align: center; padding: 20px 0 0; border-top: 1px solid #e8e8e8; margin-top: 20px;">
-            <el-button type="primary" @@click="handleDesignPrint">打印</el-button>
-            <el-button type="primary" @@click="handleDesignPreview">预览</el-button>
-            <el-button type="primary" @@click="handleDesignConfirm">确定</el-button>
-            <el-button @@click="handleDesignCancel">取消</el-button>
+            <el-button type="primary" @@click="handleDesignPrint">{{ $t('biz.concreteBeam.print') }}</el-button>
+            <el-button type="primary" @@click="handleDesignPreview">{{ $t('biz.concreteBeam.preview') }}</el-button>
+            <el-button type="primary" @@click="handleDesignConfirm" :disabled="hasSurveyData">{{ $t('common.apply') }}</el-button>
+            <el-button @@click="handleDesignCancel" :disabled="hasSurveyData">{{ $t('common.cancel') }}</el-button>
         </div>
     </div>
 
     <!-- 3. 预拱度 -->
     <div class="lc-tab-panel" v-show="activeTab === 'preCamber'">
+        <div v-if="hasSurveyData"
+             style="margin-bottom: 12px; padding: 8px 12px; background: #fdf6ec; border: 1px solid #f5dab1; border-radius: 4px; color: #e6a23c; font-size: 13px;">
+            {{ $t('biz.concreteBeam.surveyLockedCamberTip') }}
+        </div>
         <div style="margin-bottom: 12px;">
-            <el-button @@click="downloadCamberTemplate">下载模板</el-button>
-            <el-button type="primary" @@click="handleImportCamber">导入预拱度</el-button>
+            <el-button @@click="downloadCamberTemplate"><el-icon><Download /></el-icon>{{ $t('biz.concreteBeam.downloadTemplate') }}</el-button>
+            <el-button type="primary" @@click="handleImportCamber" :disabled="hasSurveyData"><el-icon><Upload-Filled /></el-icon>{{ $t('biz.concreteBeam.importCamberTitle') }}</el-button>
         </div>
         <el-table v-loading="camberLoading" :data="camberTableData" border stripe style="width: 100%;">
-            <el-table-column label="序号" width="70" align="center">
+            <el-table-column :label="$t('biz.concreteBeam.tableIndex')" width="70" align="center">
                 <template #default="scope">{{ (camberPageIndex - 1) * camberPageSize + scope.$index + 1 }}</template>
             </el-table-column>
-            <el-table-column label="节点名称" min-width="150" align="center">
+            <el-table-column :label="$t('biz.concreteBeam.nodeName')" min-width="150" align="center">
                 <template #default="scope">{{ scope.row.nodeName || '-' }}</template>
             </el-table-column>
             <el-table-column label="ZE" min-width="150" align="center">
@@ -470,205 +493,234 @@
         <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 16px;">
             <el-pagination background layout="total, sizes, prev, pager, next, jumper"
                            :total="camberTotal" :page-size="camberPageSize" :current-page="camberPageIndex"
-                           :page-sizes="[10, 20, 50]" @@size-change="handleCamberSizeChange" @@current-change="handleCamberPageChange" />
+                           :page-sizes="[10, 20, 50, 100]" @@size-change="handleCamberSizeChange" @@current-change="handleCamberPageChange" />
         </div>
         <div style="text-align: center; padding: 20px 0 0; border-top: 1px solid #e8e8e8; margin-top: 20px;">
-            <el-button type="primary" @@click="handleCamberPrint">打印</el-button>
-            <el-button type="primary" @@click="handleCamberPreview">预览</el-button>
-            <el-button type="primary" @@click="handleCamberConfirm">确定</el-button>
-            <el-button @@click="handleCamberCancel">取消</el-button>
+            <el-button type="primary" @@click="handleCamberPrint">{{ $t('biz.concreteBeam.print') }}</el-button>
+            <el-button type="primary" @@click="handleCamberPreview">{{ $t('biz.concreteBeam.preview') }}</el-button>
+            <el-button type="primary" @@click="handleCamberConfirm" :disabled="hasSurveyData">{{ $t('common.apply') }}</el-button>
+            <el-button @@click="handleCamberCancel" :disabled="hasSurveyData">{{ $t('common.cancel') }}</el-button>
         </div>
     </div>
 
-    <!-- 4. 设站及测量 -->
-    <div class="lc-tab-panel" v-show="activeTab === 'stationMeasure'">
-        <!-- 筛选行 -->
-        <div style="display: flex; align-items: center; justify-content: center; gap: 24px; margin-bottom: 16px;">
-            <div class="sm-form-item" style="flex: 1; max-width: 360px;">
-                <label>梁段名称</label>
-                <el-select v-model="stationSegmentType" placeholder="请选择" style="flex: 1;" @@change="onStationSegmentChange">
-                    <el-option label="KF-P2-1U(起始段)" value="起始段"></el-option>
-                    <el-option label="KF-P2-1U(标准段)" value="标准段"></el-option>
-                </el-select>
-                <span style="font-size: 14px; color: #303133; white-space: nowrap;">{{ stationSegmentType }}</span>
+    <!-- 设计坐标「核对与预览」：上半为已计算坐标（含预拱度），下半为 PrintReport 几何报告 -->
+    <el-dialog v-model="designPreviewVisible" width="980px" top="4vh"
+               :title="$t('biz.concreteBeam.designPreviewDialogTitle')" :close-on-click-modal="false">
+        <div v-loading="designPreviewLoading" style="max-height: 70vh; overflow: auto; background: #f5f7fa; padding: 12px;">
+            <div v-if="designPreviewError" style="padding: 32px 12px; text-align: center; color: #f56c6c; font-size: 14px;">
+                {{ designPreviewError }}
             </div>
-            <div class="sm-form-item" style="flex: 1; max-width: 360px;">
-                <label>浇筑日期</label>
-                <el-date-picker v-model="stationPouringDate" type="date" placeholder="默认今天" style="flex: 1;"></el-date-picker>
-            </div>
-            <template v-if="stationSegmentType === '标准段'">
-                <div class="sm-form-item" style="flex: 1; max-width: 360px;">
-                    <label>匹配浇筑</label>
-                    <el-input v-model="stationMatchPouring" disabled style="flex: 1;"></el-input>
-                </div>
+            <template v-else>
+                <pre class="lc-mono">{{ designPreviewUpper }}</pre>
+                <pre class="lc-mono" style="margin-top: 20px;">{{ designPreviewLower }}</pre>
             </template>
         </div>
+        <template #footer>
+            <el-button type="primary" :disabled="!!designPreviewError" @@click="handleDesignPreviewPrint">{{ $t('biz.concreteBeam.print') }}</el-button>
+            <el-button @@click="designPreviewVisible = false">{{ $t('common.cancel') }}</el-button>
+        </template>
+    </el-dialog>
 
-        <!-- ===== 起始段布局 ===== -->
-        <template v-if="stationSegmentType === '起始段'">
-            <!-- 上部：活动端模板 + 测点偏位 -->
+    <!-- 4. 设站及测量 -->
+    <div class="lc-tab-panel" v-show="activeTab === 'setupSurvey'">
+        <!-- 筛选行：梁段 / 类型 / 浇筑日期 / 上游梁段（字段名与后端 SetupNSurveyDTO 一致） -->
+        <div style="display: flex; align-items: flex-start; justify-content: left; gap: 24px; margin-bottom: 16px;">
+            <div class="sm-form-item" style="flex: 1; max-width: 360px;">
+                <label>{{ $t('biz.concreteBeam.setupSegmentLabel') }}</label>
+                <el-select v-model="segmentSurvey.segmentName" :placeholder="$t('common.pleaseSelect')" style="flex: 1;" @@change="onSegmentChange">
+                    <el-option v-for="item in segmentList" :key="item.segmentName"
+                               :label="item.segmentName + (item.isFirst ? '(' + $t('biz.concreteBeam.tagStarter') + ')' : '(' + $t('biz.concreteBeam.tagStandard') + ')') + (item.isFilled ? ' · ' + $t('biz.concreteBeam.tagFilled') : '')"
+                               :value="item.segmentName"></el-option>
+                </el-select>
+                <el-tag :type="segmentIsFirst ? 'warning' : 'success'" style="margin-left: 8px; white-space: nowrap;">
+                    {{ segmentIsFirst ? $t('biz.concreteBeam.tagStarter') : $t('biz.concreteBeam.tagStandard') }}
+                </el-tag>
+            </div>
+            <div class="sm-form-item" style="flex: 1; max-width: 360px;">
+                <label>{{ $t('biz.concreteBeam.castOn') }}</label>
+                <el-date-picker v-model="segmentSurvey.pouringDate" type="date" :placeholder="$t('common.pleaseSelect')"
+                                style="flex: 1;" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-date-picker>
+            </div>
+            <template v-if="!segmentIsFirst">
+                <div class="sm-form-item" style="flex: 1; max-width: 360px;">
+                    <label>{{ $t('biz.concreteBeam.matchCast') }}</label>
+                    <el-input v-model="upstreamSegmentName" disabled style="flex: 1;"></el-input>
+                </div>
+            </template>
+            <div class="sm-form-item" v-if="!segmentSurvey.canEdit && segmentSurvey.lockedReason">
+                <label>{{ $t('biz.concreteBeam.status') }}</label>
+                <span style="color: #e6a23c; white-space: nowrap;">{{ segmentSurvey.lockedReason }}</span>
+            </div>
+        </div>
+
+        <!-- ===== 起始段布局（对应原系统 STARTER 页） ===== -->
+        <template v-if="segmentSurvey.isFirst">
+            <!-- 上部：活动端模板（Floating Bulkhead Setup，算法产出的目标值，只读）+ 测点偏位（Bolt Offsets，录入） -->
             <div class="sm-row">
                 <div class="sm-card">
-                    <div class="sm-card-title">活动端模板</div>
+                    <div class="sm-card-title">{{ $t('biz.concreteBeam.floatingBulkheadSetup') }}</div>
                     <div class="sm-form-grid">
-                        <div class="sm-form-item"><label>东侧高程</label><el-input v-model="stationStartTemplate.eastElevation" disabled></el-input></div>
-                        <div class="sm-form-item"><label>东侧长度</label><el-input v-model="stationStartTemplate.eastLength" disabled></el-input></div>
-                        <div class="sm-form-item"><label>西侧高程</label><el-input v-model="stationStartTemplate.westElevation" disabled></el-input></div>
-                        <div class="sm-form-item"><label>西侧长度</label><el-input v-model="stationStartTemplate.westLength" disabled></el-input></div>
-                        <div class="sm-form-item"><label>中心偏移量</label><el-input v-model="stationStartTemplate.centerOffset" disabled></el-input></div>
+                        <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.eastElev') }}</label><el-input v-model="segmentSetup.floatingBulkheadEastElev" disabled></el-input></div>
+                        <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.eastLength') }}</label><el-input v-model="segmentSetup.wetCastEastLength" disabled></el-input></div>
+                        <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.westElev') }}</label><el-input v-model="segmentSetup.floatingBulkheadWestElev" disabled></el-input></div>
+                        <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.westLength') }}</label><el-input v-model="segmentSetup.wetCastWestLength" disabled></el-input></div>
+                        <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.centerOffset') }}</label><el-input v-model="segmentSetup.floatingBulkheadCenterOffset" disabled></el-input></div>
                     </div>
                 </div>
                 <div class="sm-card">
-                    <div class="sm-card-title">测点偏位</div>
+                    <div class="sm-card-title">{{ $t('biz.concreteBeam.boltOffsets') }}</div>
                     <div class="sm-deviation-grid">
                         <div class="sm-deviation-col">
-                            <div class="sm-deviation-header">北侧</div>
-                            <div class="sm-form-item"><label>北侧a</label><el-input v-model="stationDeviation.northA"></el-input></div>
-                            <div class="sm-form-item"><label>北侧c</label><el-input v-model="stationDeviation.northC"></el-input></div>
+                            <div class="sm-deviation-header">{{ $t('biz.concreteBeam.north') }}</div>
+                            <div class="sm-form-item"><label>aN</label><el-input v-model="segmentSurvey.boltOffsetAN" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>cN</label><el-input v-model="segmentSurvey.boltOffsetCN" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
                         </div>
                         <div class="sm-deviation-col">
-                            <div class="sm-deviation-header">南侧</div>
-                            <div class="sm-form-item"><label>南侧a</label><el-input v-model="stationDeviation.southA"></el-input></div>
-                            <div class="sm-form-item"><label>南侧c</label><el-input v-model="stationDeviation.southC"></el-input></div>
+                            <div class="sm-deviation-header">{{ $t('biz.concreteBeam.south') }}</div>
+                            <div class="sm-form-item"><label>aS</label><el-input v-model="segmentSurvey.boltOffsetAS" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>cS</label><el-input v-model="segmentSurvey.boltOffsetCS" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="sm-section-title">实测</div>
+            <div class="sm-section-title">{{ $t('biz.concreteBeam.surveySection') }}</div>
             <!-- 下部：活动端模板(实测) + 固定端模板(实测) | 浇筑梁段(实测) -->
             <div class="sm-row">
                 <div class="sm-col">
                     <div class="sm-card">
-                        <div class="sm-card-title">活动端模板</div>
+                        <div class="sm-card-title">{{ $t('biz.concreteBeam.floatingBulkhead') }}</div>
                         <div class="sm-form-grid">
-                            <div class="sm-form-item"><label>东侧高程</label><el-input v-model="stationStartActiveMeasure.eastElevation"></el-input></div>
-                            <div class="sm-form-item"><label>中心偏移量</label><el-input v-model="stationStartActiveMeasure.centerOffset"></el-input></div>
-                            <div class="sm-form-item"><label>西侧高程</label><el-input v-model="stationStartActiveMeasure.westElevation"></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.eastElev') }}</label><el-input v-model="segmentSurvey.surveyMatchSouthEastElev" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.centerOffset') }}</label><el-input v-model="segmentSurvey.surveyMatchSouthCenterOffset" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.westElev') }}</label><el-input v-model="segmentSurvey.surveyMatchSouthWestElev" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
                         </div>
                     </div>
                     <div class="sm-card">
-                        <div class="sm-card-title">固定端模板</div>
+                        <div class="sm-card-title">{{ $t('biz.concreteBeam.fixedBulkhead') }}</div>
                         <div class="sm-form-grid">
-                            <div class="sm-form-item"><label>东侧高程</label><el-input v-model="stationStartFixedMeasure.eastElevation"></el-input></div>
-                            <div class="sm-form-item"><label>中心偏移量</label><el-input v-model="stationStartFixedMeasure.centerOffset"></el-input></div>
-                            <div class="sm-form-item"><label>西侧高程</label><el-input v-model="stationStartFixedMeasure.westElevation"></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.eastElev') }}</label><el-input v-model="segmentSurvey.surveyBulkheadEastElev" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.centerOffset') }}</label><el-input v-model="segmentSurvey.surveyBulkheadCenterOffset" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.westElev') }}</label><el-input v-model="segmentSurvey.surveyBulkheadWestElev" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
                         </div>
                     </div>
                 </div>
                 <div class="sm-card">
-                    <div class="sm-card-title">浇筑梁段</div>
+                    <div class="sm-card-title">{{ $t('biz.concreteBeam.wetCast') }}</div>
                     <div class="sm-form-grid">
-                        <div class="sm-form-item"><label>东北角高程</label><el-input v-model="stationStartPouringMeasure.neElevation"></el-input></div>
-                        <div class="sm-form-item"><label>北向偏移量</label><el-input v-model="stationStartPouringMeasure.northOffset"></el-input></div>
-                        <div class="sm-form-item"><label>西北角高程</label><el-input v-model="stationStartPouringMeasure.nwElevation"></el-input></div>
-                        <div class="sm-form-item"><label>南向偏移量</label><el-input v-model="stationStartPouringMeasure.southOffset"></el-input></div>
-                        <div class="sm-form-item"><label>东南角高程</label><el-input v-model="stationStartPouringMeasure.seElevation"></el-input></div>
-                        <div class="sm-form-item"><label>东侧长度</label><el-input v-model="stationStartPouringMeasure.eastLength"></el-input></div>
-                        <div class="sm-form-item"><label>西南角高程</label><el-input v-model="stationStartPouringMeasure.swElevation"></el-input></div>
-                        <div class="sm-form-item"><label>西侧长度</label><el-input v-model="stationStartPouringMeasure.westLength"></el-input></div>
+                        <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.northEastElev') }}</label><el-input v-model="segmentSurvey.surveyWetNorthEastElev" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                        <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.northOffset') }}</label><el-input v-model="segmentSurvey.surveyWetNorthCenterOffset" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                        <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.northWestElev') }}</label><el-input v-model="segmentSurvey.surveyWetNorthWestElev" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                        <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.southOffset') }}</label><el-input v-model="segmentSurvey.surveyWetSouthCenterOffset" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                        <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.southEastElev') }}</label><el-input v-model="segmentSurvey.surveyWetSouthEastElev" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                        <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.eastLength') }}</label><el-input v-model="segmentSurvey.surveyWetEastLength" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                        <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.southWestElev') }}</label><el-input v-model="segmentSurvey.surveyWetSouthWestElev" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                        <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.westLength') }}</label><el-input v-model="segmentSurvey.surveyWetWestLength" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
                     </div>
-                    <div style="margin-top: 12px;"><el-checkbox v-model="stationAccuracyOk">精度达标</el-checkbox></div>
+                    <div style="margin-top: 12px;"><el-checkbox v-model="isPerfectCast" @@change="onIsPerfectCastChange">{{ $t('biz.concreteBeam.perfectCast') }}</el-checkbox><span v-if="isPerfectCast" style="margin-left: 8px; color: #909399;">{{ $t('biz.concreteBeam.perfectCastHint') }}</span></div>
                 </div>
             </div>
         </template>
 
         <!-- ===== 标准段布局 ===== -->
-        <template v-if="stationSegmentType === '标准段'">
-            <!-- 上部：匹配梁段设置参数 + 测点偏位 -->
+        <template v-if="!segmentSurvey.isFirst">
+            <!-- 上部：匹配梁段设置参数 + 测点偏位（前者为算法产出的目标值，只读） -->
+            <!-- 注：标准段不再展示「固定端模板 Fixed Bulkhead」只读卡——算法 Standard 分支里
+                 FixedBulkhead* 与 WetCast* 北端取同一表达式（H + theoreticalJointN 的 Z / C.Y），属重复展示。
+                 字段本身仍在 DTO 中，并被「精度达标」回填 surveyBulkhead* 时使用，故仅在前端隐藏。 -->
             <div class="sm-row">
                 <div class="sm-card">
-                    <div class="sm-card-title">匹配梁段设置参数</div>
+                    <div class="sm-card-title">{{ $t('biz.concreteBeam.matchSetupParams') }}</div>
                     <div class="sm-form-cols">
                         <div class="sm-form-col">
-                            <div class="sm-form-item"><label>东北角高程</label><el-input v-model="stationStandardParams.neElevation" disabled></el-input></div>
-                            <div class="sm-form-item"><label>西北角高程</label><el-input v-model="stationStandardParams.nwElevation" disabled></el-input></div>
-                            <div class="sm-form-item"><label>东南角高程</label><el-input v-model="stationStandardParams.seElevation" disabled></el-input></div>
-                            <div class="sm-form-item"><label>西南角高程</label><el-input v-model="stationStandardParams.swElevation" disabled></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.northEastElev') }}</label><el-input v-model="segmentSetup.matchNorthEastElev" disabled></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.northWestElev') }}</label><el-input v-model="segmentSetup.matchNorthWestElev" disabled></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.southEastElev') }}</label><el-input v-model="segmentSetup.matchSouthEastElev" disabled></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.southWestElev') }}</label><el-input v-model="segmentSetup.matchSouthWestElev" disabled></el-input></div>
                         </div>
                         <div class="sm-form-col">
-                            <div class="sm-form-col-title">中心偏移量：</div>
-                            <div class="sm-form-item"><label>北向</label><el-input v-model="stationStandardParams.northOffset" disabled></el-input></div>
-                            <div class="sm-form-item"><label>南向</label><el-input v-model="stationStandardParams.southOffset" disabled></el-input></div>
-                            <div class="sm-form-item"><label>梁段长度</label><el-input v-model="stationStandardParams.segmentLength" disabled></el-input></div>
+                            <div class="sm-form-col-title">{{ $t('biz.concreteBeam.centerOffsetTitle') }}</div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.northDir') }}</label><el-input v-model="segmentSetup.matchNorthCenterOffset" disabled></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.southDir') }}</label><el-input v-model="segmentSetup.matchSouthCenterOffset" disabled></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.length') }}</label><el-input v-model="segmentSetup.matchCenterLength" disabled></el-input></div>
                         </div>
                     </div>
                 </div>
                 <div class="sm-card">
-                    <div class="sm-card-title">测点偏位</div>
+                    <div class="sm-card-title">{{ $t('biz.concreteBeam.boltOffsets') }}</div>
                     <div class="sm-deviation-grid">
                         <div class="sm-deviation-col">
-                            <div class="sm-deviation-header">北侧</div>
-                            <div class="sm-form-item"><label>北侧a</label><el-input v-model="stationDeviation.northA"></el-input></div>
-                            <div class="sm-form-item"><label>北侧c</label><el-input v-model="stationDeviation.northC"></el-input></div>
+                            <div class="sm-deviation-header">{{ $t('biz.concreteBeam.north') }}</div>
+                            <div class="sm-form-item"><label>aN</label><el-input v-model="segmentSurvey.boltOffsetAN" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>cN</label><el-input v-model="segmentSurvey.boltOffsetCN" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
                         </div>
                         <div class="sm-deviation-col">
-                            <div class="sm-deviation-header">南侧</div>
-                            <div class="sm-form-item"><label>南侧a</label><el-input v-model="stationDeviation.southA"></el-input></div>
-                            <div class="sm-form-item"><label>南侧c</label><el-input v-model="stationDeviation.southC"></el-input></div>
+                            <div class="sm-deviation-header">{{ $t('biz.concreteBeam.south') }}</div>
+                            <div class="sm-form-item"><label>aS</label><el-input v-model="segmentSurvey.boltOffsetAS" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>cS</label><el-input v-model="segmentSurvey.boltOffsetCS" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="sm-section-title">实测</div>
+            <div class="sm-section-title">{{ $t('biz.concreteBeam.surveySection') }}</div>
             <!-- 下部 2×2 -->
             <div class="sm-row">
                 <div class="sm-card">
-                    <div class="sm-card-title">匹配梁段</div>
+                    <div class="sm-card-title">{{ $t('biz.concreteBeam.matchSegment') }}</div>
                     <div class="sm-form-cols">
                         <div class="sm-form-col">
-                            <div class="sm-form-item"><label>东北角高程</label><el-input v-model="stationStandardMatchMeasure.neElevation"></el-input></div>
-                            <div class="sm-form-item"><label>西北角高程</label><el-input v-model="stationStandardMatchMeasure.nwElevation"></el-input></div>
-                            <div class="sm-form-item"><label>东南角高程</label><el-input v-model="stationStandardMatchMeasure.seElevation"></el-input></div>
-                            <div class="sm-form-item"><label>西南角高程</label><el-input v-model="stationStandardMatchMeasure.swElevation"></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.northEastElev') }}</label><el-input v-model="segmentSurvey.surveyMatchNorthEastElev" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.northWestElev') }}</label><el-input v-model="segmentSurvey.surveyMatchNorthWestElev" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.southEastElev') }}</label><el-input v-model="segmentSurvey.surveyMatchSouthEastElev" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.southWestElev') }}</label><el-input v-model="segmentSurvey.surveyMatchSouthWestElev" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
                         </div>
                         <div class="sm-form-col">
-                            <div class="sm-form-col-title">中心偏移量：</div>
-                            <div class="sm-form-item"><label>北向</label><el-input v-model="stationStandardMatchMeasure.northOffset"></el-input></div>
-                            <div class="sm-form-item"><label>南向</label><el-input v-model="stationStandardMatchMeasure.southOffset"></el-input></div>
+                            <div class="sm-form-col-title">{{ $t('biz.concreteBeam.centerOffsetTitle') }}</div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.northDir') }}</label><el-input v-model="segmentSurvey.surveyMatchNorthCenterOffset" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.southDir') }}</label><el-input v-model="segmentSurvey.surveyMatchSouthCenterOffset" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
                         </div>
                     </div>
                 </div>
                 <div class="sm-card">
-                    <div class="sm-card-title">浇筑梁段</div>
+                    <div class="sm-card-title">{{ $t('biz.concreteBeam.wetCast') }}</div>
                     <div class="sm-form-cols">
                         <div class="sm-form-col">
-                            <div class="sm-form-item"><label>东北角高程</label><el-input v-model="stationStandardPouringMeasure.neElevation"></el-input></div>
-                            <div class="sm-form-item"><label>西北角高程</label><el-input v-model="stationStandardPouringMeasure.nwElevation"></el-input></div>
-                            <div class="sm-form-item"><label>东南角高程</label><el-input v-model="stationStandardPouringMeasure.seElevation"></el-input></div>
-                            <div class="sm-form-item"><label>西南角高程</label><el-input v-model="stationStandardPouringMeasure.swElevation"></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.northEastElev') }}</label><el-input v-model="segmentSurvey.surveyWetNorthEastElev" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.northWestElev') }}</label><el-input v-model="segmentSurvey.surveyWetNorthWestElev" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.southEastElev') }}</label><el-input v-model="segmentSurvey.surveyWetSouthEastElev" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.southWestElev') }}</label><el-input v-model="segmentSurvey.surveyWetSouthWestElev" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
                         </div>
                         <div class="sm-form-col">
-                            <div class="sm-form-col-title">中心偏移量：</div>
-                            <div class="sm-form-item"><label>北向</label><el-input v-model="stationStandardPouringMeasure.northOffset"></el-input></div>
-                            <div class="sm-form-item"><label>南向</label><el-input v-model="stationStandardPouringMeasure.southOffset"></el-input></div>
-                            <div class="sm-form-item"><label>梁段长度</label><el-input v-model="stationStandardPouringMeasure.segmentLength"></el-input></div>
+                            <div class="sm-form-col-title">{{ $t('biz.concreteBeam.centerOffsetTitle') }}</div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.northDir') }}</label><el-input v-model="segmentSurvey.surveyWetNorthCenterOffset" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.southDir') }}</label><el-input v-model="segmentSurvey.surveyWetSouthCenterOffset" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.length') }}</label><el-input v-model="segmentSurvey.surveyWetCenterLength" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="sm-row">
                 <div class="sm-card">
-                    <div class="sm-card-title">固定端模板</div>
+                    <div class="sm-card-title">{{ $t('biz.concreteBeam.surveyBulkhead') }}</div>
                     <div class="sm-form-grid">
-                        <div class="sm-form-item"><label>东侧高程</label><el-input v-model="stationStandardFixedMeasure.eastElevation"></el-input></div>
-                        <div class="sm-form-item"><label>中心偏移量</label><el-input v-model="stationStandardFixedMeasure.centerOffset"></el-input></div>
-                        <div class="sm-form-item"><label>西侧高程</label><el-input v-model="stationStandardFixedMeasure.westElevation"></el-input></div>
+                        <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.eastElev') }}</label><el-input v-model="segmentSurvey.surveyBulkheadEastElev" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                        <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.centerOffset') }}</label><el-input v-model="segmentSurvey.surveyBulkheadCenterOffset" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                        <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.westElev') }}</label><el-input v-model="segmentSurvey.surveyBulkheadWestElev" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
                     </div>
                 </div>
                 <div class="sm-card" style="display: flex; flex-direction: column;">
                     <div class="sm-form-grid">
-                        <div class="sm-form-item"><label>匹配浇筑扭转</label><el-input v-model="stationMatchTorsion"></el-input></div>
+                        <div class="sm-form-item"><label>{{ $t('biz.concreteBeam.matchCastTwist') }}</label><el-input v-model="segmentSurvey.surveyMatchCastTwist" disabled></el-input></div>
                     </div>
-                    <div style="margin-top: auto;"><el-checkbox v-model="stationAccuracyOk">精度达标</el-checkbox></div>
+                    <div style="margin-top: auto;"><el-checkbox v-model="isPerfectCast" @@change="onIsPerfectCastChange">{{ $t('biz.concreteBeam.perfectCast') }}</el-checkbox><span v-if="isPerfectCast" style="margin-left: 8px; color: #909399;">{{ $t('biz.concreteBeam.perfectCastHint') }}</span></div>
                 </div>
             </div>
         </template>
 
         <!-- 底部按钮 -->
         <div style="text-align: center; padding: 16px 0 0; border-top: 1px solid #e8e8e8; margin-top: 12px;">
-            <el-button type="primary" @@click="handleStationPrint">打印</el-button>
-            <el-button type="primary" @@click="handleStationConfirm">确定</el-button>
-            <el-button @@click="handleStationCancel">取消</el-button>
+            <el-button type="primary" @@click="handleSegmentPrint">{{ $t('biz.concreteBeam.print') }}</el-button>
+            <el-button type="primary" @@click="handleSegmentConfirm" :disabled="isPerfectCast || !segmentSurvey.canEdit">{{ $t('common.apply') }}</el-button>
+            <el-button @@click="handleSegmentCancel">{{ $t('common.cancel') }}</el-button>
         </div>
     </div>
 
@@ -677,160 +729,200 @@
         <!-- 筛选行 -->
         <div style="display: flex; align-items: center; justify-content: center; gap: 24px; margin-bottom: 16px;">
             <div class="sm-form-item" style="flex: 1; max-width: 360px;">
-                <label>梁段名称</label>
-                <el-select v-model="pouringSegmentType" placeholder="请选择" style="flex: 1;" @@change="onPouringSegmentChange">
-                    <el-option label="KF-P2-1U(起始段)" value="起始段"></el-option>
-                    <el-option label="KF-P2-1U(标准段)" value="标准段"></el-option>
+                <label>{{ $t('biz.concreteBeam.pouringSegmentLabel') }}</label>
+                <el-select v-model="pouringView.segmentName" :placeholder="$t('common.pleaseSelect')" style="flex: 1;" @@change="onPouringSegmentChange">
+                    <el-option v-for="item in pouringSegmentList" :key="item.segmentName"
+                               :label="item.segmentName + (item.isFirst ? '(' + $t('biz.concreteBeam.tagStarter') + ')' : '(' + $t('biz.concreteBeam.tagStandard') + ')') + (item.isFilled ? ' · ' + $t('biz.concreteBeam.tagFilled') : '')"
+                               :value="item.segmentName"></el-option>
                 </el-select>
-                <span style="font-size: 14px; color: #303133; white-space: nowrap;">{{ pouringSegmentType }}</span>
+                <el-tag :type="pouringView.isFirst ? 'warning' : 'success'" style="margin-left: 8px; white-space: nowrap;">
+                    {{ pouringView.isFirst ? $t('biz.concreteBeam.tagStarter') : $t('biz.concreteBeam.tagStandard') }}
+                </el-tag>
             </div>
             <div class="sm-form-item" style="flex: 1; max-width: 360px;">
-                <label>浇筑日期</label>
-                <el-date-picker v-model="pouringPouringDate" type="date" placeholder="默认今天" style="flex: 1;"></el-date-picker>
+                <label>{{ $t('biz.concreteBeam.castOn') }}</label>
+                <el-input v-model="pouringView.pouringDate" disabled style="flex: 1;"></el-input>
             </div>
-            <template v-if="pouringSegmentType === '标准段'">
-                <div class="sm-form-item" style="flex: 1; max-width: 360px;">
-                    <label>匹配浇筑</label>
-                    <el-input v-model="pouringMatchPouring" disabled style="flex: 1;"></el-input>
-                </div>
-            </template>
-        </div>
-
-        <!-- 第一行：端部节点理论坐标 + 端部节点浇筑坐标 -->
-        <div class="sm-row">
-            <div class="sm-card">
-                <div class="sm-card-title">端部节点理论坐标</div>
-                <table class="pc-table">
-                    <thead>
-                        <tr><th>字段名称</th><th>X</th><th>Y</th><th>Z</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>西侧控制点</td><td>{{ pouringTheoreticalCoords.west.x }}</td><td>{{ pouringTheoreticalCoords.west.y }}</td><td>{{ pouringTheoreticalCoords.west.z }}</td></tr>
-                        <tr><td>中心线</td><td>{{ pouringTheoreticalCoords.center.x }}</td><td>{{ pouringTheoreticalCoords.center.y }}</td><td>{{ pouringTheoreticalCoords.center.z }}</td></tr>
-                        <tr><td>东侧控制点</td><td>{{ pouringTheoreticalCoords.east.x }}</td><td>{{ pouringTheoreticalCoords.east.y }}</td><td>{{ pouringTheoreticalCoords.east.z }}</td></tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="sm-card">
-                <div class="sm-card-title">端部节点浇筑坐标</div>
-                <table class="pc-table">
-                    <thead>
-                        <tr><th>字段名称</th><th>X</th><th>Y</th><th>Z</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>西侧控制点</td><td>{{ pouringActualCoords.west.x }}</td><td>{{ pouringActualCoords.west.y }}</td><td>{{ pouringActualCoords.west.z }}</td></tr>
-                        <tr><td>中心线</td><td>{{ pouringActualCoords.center.x }}</td><td>{{ pouringActualCoords.center.y }}</td><td>{{ pouringActualCoords.center.z }}</td></tr>
-                        <tr><td>东侧控制点</td><td>{{ pouringActualCoords.east.x }}</td><td>{{ pouringActualCoords.east.y }}</td><td>{{ pouringActualCoords.east.z }}</td></tr>
-                    </tbody>
-                </table>
+            <div class="sm-form-item" v-if="!pouringView.isFirst" style="flex: 1; max-width: 360px;">
+                <label>{{ $t('biz.concreteBeam.matchCast') }}</label>
+                <el-input v-model="pouringView.upstreamSegmentName" disabled style="flex: 1;"></el-input>
             </div>
         </div>
 
-        <!-- 第二行：定位点信息 -->
-        <div class="sm-section-title">定位点信息</div>
-        <div class="sm-row">
-            <!-- 左侧：高程测点 -->
-            <div class="sm-card">
-                <div class="sm-card-title">高程测点</div>
-                <table class="pc-table">
-                    <thead>
-                        <tr><th>字段名称</th><th>X</th><th>Y</th><th>Z</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>东北侧点位</td><td>{{ pouringElevationPoints.ne.x }}</td><td>{{ pouringElevationPoints.ne.y }}</td><td>{{ pouringElevationPoints.ne.z }}</td></tr>
-                        <tr><td>西北侧点位</td><td>{{ pouringElevationPoints.nw.x }}</td><td>{{ pouringElevationPoints.nw.y }}</td><td>{{ pouringElevationPoints.nw.z }}</td></tr>
-                        <tr><td>东南侧点位</td><td>{{ pouringElevationPoints.se.x }}</td><td>{{ pouringElevationPoints.se.y }}</td><td>{{ pouringElevationPoints.se.z }}</td></tr>
-                        <tr><td>西南侧点位</td><td>{{ pouringElevationPoints.sw.x }}</td><td>{{ pouringElevationPoints.sw.y }}</td><td>{{ pouringElevationPoints.sw.z }}</td></tr>
-                    </tbody>
-                </table>
+        <div v-if="!pouringView.segmentName" style="text-align: center; color: #909399; padding: 32px 0;">{{ $t('biz.concreteBeam.selectSegmentPrompt') }}</div>
+
+        <template v-else>
+            <div v-if="!pouringView.isFilled"
+                 style="margin-bottom: 12px; padding: 8px 12px; background: #fdf6ec; border: 1px solid #f5dab1; border-radius: 4px; color: #e6a23c; font-size: 13px;">
+                {{ $t('biz.concreteBeam.notFilledTip') }}
             </div>
-            <!-- 右侧：轴线测点 + 中线长度 -->
-            <div class="sm-col">
+
+            <!-- 端面坐标：起始段两组（活动端 joint0 + 固定端 joint1），标准段一组（固定端 joint m+1） -->
+            <div v-for="face in pouringView.faces" :key="face.nodeName" class="sm-row">
                 <div class="sm-card">
-                    <div class="sm-card-title">轴线测点</div>
+                    <div class="sm-card-title">{{ face.faceKey ? $t('biz.concreteBeam.' + (face.faceKey === 'floatingBulkhead' ? 'floatingBulkheadJointTheoretical' : 'fixedBulkheadJointTheoretical')) : face.faceName + $t('biz.concreteBeam.jointTheoreticalSuffix') }}</div>
                     <table class="pc-table">
                         <thead>
-                            <tr><th>字段名称</th><th>X</th><th>Y</th><th>Z</th></tr>
+                            <tr><th>{{ $t('biz.concreteBeam.fieldNameHeader') }}</th><th>X</th><th>Y</th><th>Z</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>北侧点位</td><td>{{ pouringAxisPoints.north.x }}</td><td>{{ pouringAxisPoints.north.y }}</td><td>{{ pouringAxisPoints.north.z }}</td></tr>
-                            <tr><td>南侧点位</td><td>{{ pouringAxisPoints.south.x }}</td><td>{{ pouringAxisPoints.south.y }}</td><td>{{ pouringAxisPoints.south.z }}</td></tr>
+                            <tr v-for="row in face.theoretical" :key="row.label">
+                                <td>{{ row.labelKey ? $t('biz.concreteBeam.' + row.labelKey) : row.label }}</td><td>{{ row.x }}</td><td>{{ row.y }}</td><td>{{ row.z }}</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="sm-card">
-                    <div class="sm-card-title">中线长度</div>
+                    <div class="sm-card-title">{{ face.faceKey ? $t('biz.concreteBeam.' + (face.faceKey === 'floatingBulkhead' ? 'floatingBulkheadJointAsCast' : 'fixedBulkheadJointAsCast')) : face.faceName + $t('biz.concreteBeam.jointAsCastSuffix') }}</div>
                     <table class="pc-table">
+                        <thead>
+                            <tr><th>{{ $t('biz.concreteBeam.fieldNameHeader') }}</th><th>X</th><th>Y</th><th>Z</th></tr>
+                        </thead>
                         <tbody>
-                            <tr><td>理论值</td><td>{{ pouringCenterLine.theoreticalValue }}</td><td>理论值总长度</td><td>{{ pouringCenterLine.theoreticalTotal }}</td></tr>
-                            <tr><td>实测值</td><td>{{ pouringCenterLine.actualValue }}</td><td>实测值总长度</td><td>{{ pouringCenterLine.actualTotal }}</td></tr>
+                            <tr v-for="row in face.asCast" :key="row.label">
+                                <td>{{ row.labelKey ? $t('biz.concreteBeam.' + row.labelKey) : row.label }}</td><td>{{ row.x }}</td><td>{{ row.y }}</td><td>{{ row.z }}</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
-        </div>
+
+            <!-- 定位点信息 -->
+            <div class="sm-section-title">{{ $t('biz.concreteBeam.boltsHairpins') }}</div>
+            <div class="sm-row">
+                <!-- 左侧：高程测点（南北两侧各两个角点） -->
+                <div class="sm-card">
+                    <div class="sm-card-title">{{ $t('biz.concreteBeam.bolts') }}</div>
+                    <table class="pc-table">
+                        <thead>
+                            <tr><th>{{ $t('biz.concreteBeam.fieldNameHeader') }}</th><th>X</th><th>Y</th><th>Z</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="row in pouringView.elevationPoints" :key="row.label">
+                                <td>{{ row.labelKey ? $t('biz.concreteBeam.' + row.labelKey) : row.label }}</td><td>{{ row.x }}</td><td>{{ row.y }}</td><td>{{ row.z }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- 右侧：轴柱测点 + 中线长度 -->
+                <div class="sm-col">
+                    <div class="sm-card">
+                        <div class="sm-card-title">{{ $t('biz.concreteBeam.hairpins') }}</div>
+                        <table class="pc-table">
+                            <thead>
+                                <tr><th>{{ $t('biz.concreteBeam.fieldNameHeader') }}</th><th>X</th><th>Y</th><th>Z</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="row in pouringView.axisPoints" :key="row.label">
+                                    <td>{{ row.labelKey ? $t('biz.concreteBeam.' + row.labelKey) : row.label }}</td><td>{{ row.x }}</td><td>{{ row.y }}</td><td>{{ row.z }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="sm-card">
+                        <div class="sm-card-title">{{ $t('biz.concreteBeam.lengthOnCenter') }}</div>
+                        <table class="pc-table">
+                            <tbody>
+                                <tr><td>{{ $t('biz.concreteBeam.theoreticalLabel') }}</td><td>{{ pouringView.theoreticalCenterLength }}</td><td>{{ $t('biz.concreteBeam.theoreticalTotalLabel') }}</td><td>{{ pouringView.theoreticalTotalCenterLength }}</td></tr>
+                                <tr><td>{{ $t('biz.concreteBeam.asCastLabel') }}</td><td>{{ pouringView.asCastCenterLength }}</td><td>{{ $t('biz.concreteBeam.asCastTotalLabel') }}</td><td>{{ pouringView.asCastTotalCenterLength }}</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </template>
 
         <!-- 底部按钮 -->
         <div style="text-align: center; padding: 16px 0 0; border-top: 1px solid #e8e8e8; margin-top: 12px;">
-            <el-button type="primary" @@click="handlePouringPrint">打印</el-button>
-            <el-button type="primary" @@click="handlePouringPreview">预览</el-button>
-            <el-button @@click="handlePouringCancel">取消</el-button>
+            <el-button type="primary" @@click="handlePouringPrint">{{ $t('biz.concreteBeam.print') }}</el-button>
+            <el-button type="primary" @@click="handlePouringPreview">{{ $t('biz.concreteBeam.preview') }}</el-button>
+            <el-button @@click="handlePouringCancel">{{ $t('common.cancel') }}</el-button>
         </div>
     </div>
 
     <!-- 6. 报告 -->
     <div class="lc-tab-panel" v-show="activeTab === 'report'">
         <!-- 整体报告 -->
-        <div class="sm-section-title">整体报告</div>
+        <div class="sm-section-title">{{ $t('biz.concreteBeam.overallReports') }}</div>
         <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; max-width: 200px; margin-left: auto; margin-right: auto;">
-            <div style="text-align: left;"><el-radio v-model="reportOverallType" label="项目信息">项目信息</el-radio></div>
-            <div style="text-align: left;"><el-radio v-model="reportOverallType" label="浇筑和理论坐标">浇筑和理论坐标</el-radio></div>
+            <div style="text-align: left;"><el-radio v-model="reportOverallType" label="项目信息" @@change="onReportOverallChange">{{ $t('biz.concreteBeam.reportProject') }}</el-radio></div>
+            <div style="text-align: left;"><el-radio v-model="reportOverallType" label="浇筑和理论坐标" @@change="onReportOverallChange">{{ $t('biz.concreteBeam.reportCastTheory') }}</el-radio></div>
             <div style="display: flex; align-items: center; gap: 24px;">
-                <el-radio v-model="reportOverallType" label="理论坐标">理论坐标</el-radio>
-                <el-checkbox v-model="reportIncludeAll">包含所有</el-checkbox>
+                <el-radio v-model="reportOverallType" label="理论坐标" @@change="onReportOverallChange">{{ $t('biz.concreteBeam.reportTheory') }}</el-radio>
+                <el-checkbox v-model="reportIncludeAll" @@change="onReportOverallChange">{{ $t('biz.concreteBeam.includeAll') }}</el-checkbox>
             </div>
         </div>
 
         <!-- 单梁段报告 -->
-        <div class="sm-section-title">单梁段报告</div>
+        <div class="sm-section-title">{{ $t('biz.concreteBeam.segmentReports') }}</div>
         <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
             <div style="display: flex; align-items: center; justify-content: center; gap: 24px;">
                 <div class="sm-form-item" style="flex: 1; max-width: 360px;">
-                    <label>梁段名称</label>
-                    <el-select v-model="reportSegmentName" placeholder="请选择" style="flex: 1;" @@change="onReportSegmentChange">
-                        <el-option label="KF-P2-1U(起始段)" value="起始段"></el-option>
-                        <el-option label="KF-P2-1U(标准段)" value="标准段"></el-option>
+                    <label>{{ $t('biz.concreteBeam.pouringSegmentLabel') }}</label>
+                    <el-select v-model="reportSegmentName" :placeholder="$t('biz.concreteBeam.selectSegmentPrompt')" style="flex: 1;" @@change="onReportSegmentChange">
+                        <el-option v-for="s in reportSegmentList" :key="s.segmentName" :label="s.label" :value="s.segmentName"></el-option>
                     </el-select>
-
                 </div>
             </div>
             <div style="text-align: center;">
-                <el-radio v-model="reportSegmentType" label="梁段设置">梁段设置</el-radio>
-                <el-radio v-model="reportSegmentType" label="已浇筑梁段" style="margin-left: 24px;">已浇筑梁段</el-radio>
+                <el-radio v-model="reportSegmentType" label="梁段设置" @@change="onReportTypeChange">{{ $t('biz.concreteBeam.reportSegmentSetup') }}</el-radio>
+                <el-radio v-model="reportSegmentType" label="已浇筑梁段" style="margin-left: 24px;" @@change="onReportTypeChange">{{ $t('biz.concreteBeam.reportSegmentAsCast') }}</el-radio>
+            </div>
+            <div v-if="reportUnavailableHint" style="text-align: center; font-size: 13px; color: #e6a23c;">
+                {{ reportUnavailableHint }}
             </div>
         </div>
 
         <!-- 底部按钮 -->
         <div style="text-align: center; padding: 16px 0 0; border-top: 1px solid #e8e8e8; margin-top: 12px;">
-            <el-button type="primary" @@click="handleReportPrint">打印</el-button>
-            <el-button type="primary" @@click="handleReportPreview">预览</el-button>
-            <el-button type="primary" @@click="handleReportExport">导出</el-button>
-            <el-button @@click="handleReportCancel">取消</el-button>
+            <el-button type="primary" :loading="reportLoading" @@click="handleReportPrint">{{ $t('biz.concreteBeam.print') }}</el-button>
+            <el-button type="primary" @@click="handleReportPreview">{{ $t('biz.concreteBeam.preview') }}</el-button>
+            <el-button type="primary" :loading="reportExporting" @@click="handleReportExport">{{ $t('biz.concreteBeam.export') }}</el-button>
+            <el-button @@click="handleReportCancel">{{ $t('common.cancel') }}</el-button>
         </div>
     </div>
 
-    <el-dialog v-model="importDialogVisible" :title="importType === 'segments' ? '导入梁段信息' : (importType === 'design' ? '导入设计坐标' : '导入预拱度')" width="560px"
+    <!-- 报告预览对话框：服务端生成 PDF，前端用 PDF.js 渲染到 canvas -->
+    <el-dialog v-model="reportDialogVisible" :title="reportDialogTitle" width="900px" top="4vh"
+               :close-on-click-modal="false">
+        <div v-loading="reportLoading" :element-loading-text="$t('biz.concreteBeam.generatingReport')" style="min-height: 360px;">
+            <div v-if="reportError" style="padding: 48px 16px; text-align: center; color: #f56c6c; font-size: 14px;">
+                {{ reportError }}
+            </div>
+            <div v-else style="text-align: center; background: #f5f7fa; padding: 12px 0; max-height: 68vh; overflow: auto;">
+                <canvas ref="reportCanvas" style="max-width: 100%; box-shadow: 0 2px 12px rgba(0,0,0,.15); background: #fff;"></canvas>
+            </div>
+        </div>
+        <template #footer>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <el-button size="small" :disabled="reportPageNo <= 1" @@click="reportPrevPage">{{ $t('biz.concreteBeam.prevPage') }}</el-button>
+                    <span style="margin: 0 8px; font-size: 13px;">{{ reportPageCount ? reportPageNo + ' / ' + reportPageCount : '-' }}</span>
+                    <el-button size="small" :disabled="reportPageNo >= reportPageCount" @@click="reportNextPage">{{ $t('biz.concreteBeam.nextPage') }}</el-button>
+                    <el-button size="small" :disabled="reportZoom <= 0.5" @@click="reportZoomOut">{{ $t('biz.concreteBeam.zoomOut') }}</el-button>
+                    <el-button size="small" :disabled="reportZoom >= 3" @@click="reportZoomIn">{{ $t('biz.concreteBeam.zoomIn') }}</el-button>
+                </div>
+                <div>
+                    <el-button type="primary" :disabled="!!reportError" @@click="handleReportPrint">{{ $t('biz.concreteBeam.print') }}</el-button>
+                    <el-button type="primary" :disabled="!!reportError" @@click="handleReportExport">{{ $t('biz.concreteBeam.export') }}</el-button>
+                    <el-button @@click="reportDialogVisible = false">{{ $t('biz.concreteBeam.close') }}</el-button>
+                </div>
+            </div>
+        </template>
+    </el-dialog>
+
+    <el-dialog v-model="importDialogVisible" :title="importType === 'segments' ? $t('biz.concreteBeam.importSegmentTitle') : (importType === 'design' ? $t('biz.concreteBeam.importDesignTitle') : $t('biz.concreteBeam.importCamberTitle'))" width="560px"
                :close-on-click-modal="false" :close-on-press-escape="!importLoading" :show-close="!importLoading">
         <el-upload ref="uploadRef" class="lc-upload" drag :auto-upload="false" :limit="1"
                    :on-change="onFileChange" :on-remove="onFileRemove" :on-exceed="onFileExceed"
                    accept=".xlsx" :disabled="importLoading">
             <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-            <div class="el-upload__text">将文件拖曳到此区域，或<em>点击添加</em></div>
-            <template #tip><div class="el-upload__tip">仅支持 .xlsx，最大 20 MB，第一个工作表最多 50,000 条数据。</div></template>
+            <div class="el-upload__text">{{ $t('biz.concreteBeam.uploadDrag') }}<em>{{ $t('biz.concreteBeam.uploadClick') }}</em></div>
+            <template #tip><div class="el-upload__tip">{{ $t('biz.concreteBeam.uploadTip') }}</div></template>
         </el-upload>
         <template #footer>
-            <el-button :disabled="importLoading" @@click="importDialogVisible=false">取消</el-button>
-            <el-button type="primary" :loading="importLoading" @@click="confirmImport">确定</el-button>
+            <el-button :disabled="importLoading" @@click="importDialogVisible=false">{{ $t('common.cancel') }}</el-button>
+            <el-button type="primary" :loading="importLoading" @@click="confirmImport">{{ $t('common.confirm') }}</el-button>
         </template>
     </el-dialog>
 </div>
@@ -838,6 +930,11 @@
 @section Scripts {
     <script>
         window.__groupID = @groupID;
+        window.__pdfWorkerSrc = '@Url.Content("~/lib/pdfjs/pdf.worker.min.js")';
     </script>
+    <!-- 报告预览用 PDF.js 3.11.174 经典脚本版。
+         注意：pdfjs-dist 自 v4 起只发布 ES Module（pdf.min.mjs），本项目是全局 <script> 体系，
+         故锁定 3.x 的最后一个版本，直接用 window.pdfjsLib。 -->
+    <script src="~/lib/pdfjs/pdf.min.js"></script>
     <script src="~/js/Biz/concrete-beam-linear-control.js" asp-append-version="true"></script>
 }

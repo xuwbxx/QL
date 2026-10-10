@@ -10,12 +10,21 @@
     var ElMessage = ElementPlus.ElMessage;
     var ElMessageBox = ElementPlus.ElMessageBox;
     var axios = window.axios;
+    var appI18n = window.appI18n; // 子页面全局i18n实例，同父页配置 legacy: false
+
+    // 中英文切换（与父页面语言同步，含 ElementPlus 内置文案）
+    initIframeLangSync({
+        ElementPlus: ElementPlus,
+        appI18n: appI18n,
+        localeEn: ElementPlusLocaleEn,
+        localeZh: ElementPlusLocaleZhCn
+    });
 
     var app = Vue.createApp({
         data() {
             var validatePass = (rule, value, callback) => {
                 if (this.formData.password && value !== this.formData.password) {
-                    callback(new Error('两次输入的密码不一致'));
+                    callback(new Error(this.$t('sys.user.pwdMismatch')));
                 } else {
                     callback();
                 }
@@ -31,7 +40,6 @@
                 pageSize: 10,
 
                 dialogVisible: false,
-                dialogTitle: '新增用户',
                 isEditMode: false,
                 submitting: false,
                 formData: {
@@ -49,13 +57,13 @@
                 },
                 formRules: {
                     account: [
-                        { required: true, message: '请输入登录名称', trigger: 'blur' }
+                        { required: true, message: '', trigger: 'blur' }
                     ],
                     password: [
-                        { required: true, message: '请输入登录密码', trigger: 'blur' }
+                        { required: true, message: '', trigger: 'blur' }
                     ],
                     confirmPassword: [
-                        { required: true, message: '请再次输入密码', trigger: 'blur' },
+                        { required: true, message: '', trigger: 'blur' },
                         { validator: validatePass, trigger: 'blur' }
                     ]
                 },
@@ -68,7 +76,16 @@
                 selectedQueryRow: null
             };
         },
+        computed: {
+            dialogTitle() {
+                return this.isEditMode ? this.$t('sys.user.dialogEditTitle') : this.$t('sys.user.dialogAddTitle');
+            }
+        },
         mounted() {
+            // 表单校验提示绑定多语言
+            this.formRules.account[0].message = this.$t('validation.required');
+            this.formRules.password[0].message = this.$t('app.passwordPlaceholder');
+            this.formRules.confirmPassword[0].message = this.$t('sys.user.confirmPasswordPlaceholder');
             this.loadList();
             this.loadRoleOptions();
         },
@@ -127,7 +144,6 @@
             // ========== 新增/编辑 ==========
             openAddDialog() {
                 this.isEditMode = false;
-                this.dialogTitle = '新增用户';
                 this.formData = {
                     id: 0,
                     empNo: '',
@@ -151,7 +167,6 @@
 
             async handleEdit(row) {
                 this.isEditMode = true;
-                this.dialogTitle = '编辑用户';
                 try {
                     var data = await HttpUtils.get('/Sys/User/Detail?id=' + row.id);
                     if (data) {
@@ -171,7 +186,7 @@
                     }
                 } catch (error) {
                     console.error('get user detail error:', error);
-                    ElMessage.error('获取用户信息失败');
+                    ElMessage.error(this.$t('sys.user.loadDetailFailed'));
                     return;
                 }
                 this.dialogVisible = true;
@@ -190,7 +205,7 @@
                     this.submitting = true;
                     try {
                         if (typeof CryptoJS === 'undefined') {
-                            ElMessage.error('CryptoJS库未加载，请重新编译项目后再试');
+                            ElMessage.error(this.$t('sys.user.cryptoNotLoaded'));
                             return;
                         }
                         var pwdHashed = CryptoJS.MD5(this.formData.password).toString();
@@ -208,12 +223,12 @@
                             deptName: this.formData.deptName
                         };
                         await HttpUtils.post('/Sys/User/Save', postData);
-                        ElMessage.success(this.isEditMode ? '编辑成功' : '新增成功');
+                        ElMessage.success(this.$t('message.saveSuccess'));
                         this.dialogVisible = false;
                         this.loadList();
                     } catch (error) {
                         console.error('save user error:', error);
-                        ElMessage.error('保存失败：' + (error.message || error));
+                        ElMessage.error(this.$t('common.failed') + ': ' + (error.message || error));
                     } finally {
                         this.submitting = false;
                     }
@@ -230,7 +245,7 @@
 
             async searchMDUser() {
                 if (!this.queryUserName.trim()) {
-                    ElMessage.warning('请输入用户名');
+                    ElMessage.warning(this.$t('sys.user.namePlaceholder'));
                     return;
                 }
                 this.queryLoading = true;
@@ -245,14 +260,14 @@
                     if (resData.code === 200) {
                         this.queryTableData = resData.data || [];
                         if (this.queryTableData.length === 0) {
-                            ElMessage.info('未查询到用户');
+                            ElMessage.info(this.$t('sys.user.noUserFound'));
                         }
                     } else {
-                        ElMessage.warning(resData.msg || '查询失败');
+                        ElMessage.warning(resData.msg || this.$t('common.failed'));
                     }
                 } catch (error) {
                     console.error('search MD user error:', error);
-                    ElMessage.error('查询用户失败');
+                    ElMessage.error(this.$t('common.failed'));
                 } finally {
                     this.queryLoading = false;
                 }
@@ -264,7 +279,7 @@
 
             confirmQueryUser() {
                 if (!this.selectedQueryRow) {
-                    ElMessage.warning('请选择一行数据');
+                    ElMessage.warning(this.$t('sys.user.selectRowRequired'));
                     return;
                 }
                 this.formData.account = this.selectedQueryRow.userLogin;
@@ -282,34 +297,34 @@
             async handleResetPwd(row) {
                 try {
                     await ElMessageBox.confirm(
-                        '确定要重置用户"' + row.name + '"的密码吗？',
-                        '提示',
-                        { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
+                        this.$t('sys.user.confirmResetPwd', { name: row.name }),
+                        this.$t('sys.user.notice'),
+                        { confirmButtonText: this.$t('common.confirm'), cancelButtonText: this.$t('common.cancel'), type: 'warning' }
                     );
                 } catch (e) { return; }
                 try {
                     await HttpUtils.post('/Sys/User/ResetPassword', { id: row.id });
-                    ElMessage.success('密码已重置为123456');
+                    ElMessage.success(this.$t('sys.user.resetPwdSuccess'));
                 } catch (error) {
                     console.error('reset password error:', error);
                 }
             },
 
             handleAssignRole(row) {
-                ElMessage.info('分配角色：' + row.name + '（功能待开发）');
+                ElMessage.info(this.$t('sys.user.assignRoleTodo', { name: row.name }));
             },
 
             async handleDelete(row) {
                 try {
                     await ElMessageBox.confirm(
-                        '确定要删除用户"' + row.name + '"吗？',
-                        '提示',
-                        { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
+                        this.$t('sys.user.confirmDelete', { name: row.name }),
+                        this.$t('sys.user.notice'),
+                        { confirmButtonText: this.$t('common.confirm'), cancelButtonText: this.$t('common.cancel'), type: 'warning' }
                     );
                 } catch (e) { return; }
                 try {
                     await HttpUtils.post('/Sys/User/Delete', { id: row.id });
-                    ElMessage.success('删除成功');
+                    ElMessage.success(this.$t('message.deleteSuccess'));
                     this.loadList();
                 } catch (error) {
                     console.error('delete user error:', error);
@@ -318,6 +333,16 @@
         }
     });
 
+    // 注册 Vue I18n
+    app.use(appI18n);
+
     app.use(ElementPlus, { locale: ElementPlusLocaleZhCn });
+    if (window.ElementPlusIconsVue) {
+        for (var key in window.ElementPlusIconsVue) {
+            if (window.ElementPlusIconsVue[key]) {
+                app.component(key, window.ElementPlusIconsVue[key]);
+            }
+        }
+    }
     app.mount('#app');
 });

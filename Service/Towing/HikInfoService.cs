@@ -68,8 +68,8 @@ namespace Service.Towing
         public async Task<HikPicInfo> GetPics(DateTime? startTime = null, DateTime? endTime = null, int pageNo = 1, int pageSize = 20, string netProtocol = "http")
         {
             var action = "/api/video/v1/pictureInfos";
-            startTime = startTime ?? DateTime.UtcNow.AddDays(-1);
-            endTime = endTime ?? DateTime.UtcNow;
+            startTime = startTime ?? DateTime.Now.AddDays(-1);
+            endTime = endTime ?? DateTime.Now;
 
             var req = new
             {
@@ -97,11 +97,11 @@ namespace Service.Towing
 
                     var repo = uow.GetRepository<DataFactory.KingBase.Towing.Data_HikLocalPic>();
                     var itm = new DataFactory.KingBase.Towing.Data_HikLocalPic();
-                    itm.CreateTime = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+                    itm.CreateTime = DateTime.Now;
                     itm.IsDelete = false;
                     itm.ProjID = proj == null ? 0 : proj.id;
                     itm.SnapPicUrl = localPath;
-                    itm.SnapTime = DateTime.SpecifyKind(snapTime, DateTimeKind.Unspecified);
+                    itm.SnapTime = snapTime;
 
                     repo.Add(itm);
                     uow.Save();
@@ -123,8 +123,8 @@ namespace Service.Towing
             {
                 using (var uow = _towingKingBaseUowFactory.Create())
                 {
-                    startTime = DateTime.SpecifyKind(startTime ?? DateTime.UtcNow.AddDays(-1), DateTimeKind.Unspecified);
-                    endTime = DateTime.SpecifyKind(endTime ?? DateTime.UtcNow, DateTimeKind.Unspecified);
+                    startTime = startTime ?? DateTime.Now.AddDays(-1);
+                    endTime = endTime ?? DateTime.Now;
 
                     var repo = uow.GetRepository<DataFactory.KingBase.Towing.Data_HikLocalPic>();
                     var query = repo.Find(a => !a.IsDelete && a.SnapTime >= startTime && a.SnapTime <= endTime)

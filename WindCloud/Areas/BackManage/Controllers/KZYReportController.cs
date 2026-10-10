@@ -2,6 +2,7 @@
 using Model.Base;
 using Model.Tech.Cloud.BackManage;
 using Service.Base;
+using Service.Wind;
 using Service.Wind.BackManage;
 using Tool;
 using WindCloud.Areas.Base.Controllers;
@@ -13,8 +14,8 @@ namespace WindCloud.Areas.BackManage.Controllers
     {
         private readonly BackKZYReportService _backKZYReportService;
 
-        public KZYReportController(CookieService cookieService, Service.Wind.WebValidateService webValidateService, BackKZYReportService backKZYReportService)
-            : base(cookieService, webValidateService)
+        public KZYReportController(CookieService cookieService, Service.Wind.WebValidateService webValidateService, ProjectService projectService, BackKZYReportService backKZYReportService)
+            : base(cookieService, projectService, webValidateService)
         {
             _backKZYReportService = backKZYReportService;
         }

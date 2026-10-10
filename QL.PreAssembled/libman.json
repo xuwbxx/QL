@@ -43,6 +43,11 @@
       "provider": "cdnjs",
       "library": "crypto-js@4.2.0",
       "destination": "wwwroot/lib/crypto-js/"
+    },
+    {
+      "provider": "cdnjs",
+      "library": "echarts@6.1.0",
+      "destination": "wwwroot/lib/echarts/"
     }
   ]
 }

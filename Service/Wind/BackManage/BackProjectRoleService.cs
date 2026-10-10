@@ -163,7 +163,7 @@ namespace Service.Wind.BackManage
                                 UserPhone = a.UserPhone,
                                 UserJobName = a.UserJobName,
                                 IsDelete = false,
-                                CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified)
+                                CreateTime = DateTime.Now
                             };
                             projectRoleRepo.Add(newRole);
                         }

@@ -1,0 +1,190 @@
+﻿
+@{
+    ViewBag.Title = "工作任务";
+    Layout = "~/Views/Shared/MobileLayout.cshtml";
+}
+
+<input type="hidden" id="hid_PostToken" value="@ViewData["PostToken"].ToString()" />
+<input type="hidden" id="hid_ProjectID" value="@ViewData["ProjectID"].ToString()" />
+
+<header>
+    <div class="left_logo"><img src="~/Content/Mobile/img/logo.png"></div>@ViewData["ProjectName"].ToString()
+    <span class="icon_user">@ViewData["UserName"].ToString()</span>
+</header>
+<div class="height88"></div>
+<div class="enter_gzlb"><button type="button" class="btn btn-primary" onclick="OpenProject();">项目</button></div>
+
+<div class="gzrw_search_box clearfix gzrw_search_box_fixed">
+
+    <select class="selectpicker search_select" id="query_select_FlowStatus">
+        <option value="100" selected>所有</option>
+        <option value="0">审批中</option>
+        <option value="1">退回</option>
+        <option value="2">完成</option>
+        <option value="3">作废</option>
+    </select>
+
+    <input type="text" class="form-control pull-left" placeholder="请输入任务名称" style="width: 65%;" id="query_txtTaskName">
+    <button class="btn btn-primary" onclick="DoQuery();"><i class="fa fa-search"></i></button>
+</div>
+
+<div class="height150"></div>
+
+@*<div class="gzrw_search_box clearfix">
+    <select class="form-control pull-left" onchange="DoQuery();" id="query_select_FlowStatus">
+        <option value="0">审批中</option>
+        <option value="1">退回</option>
+        <option value="2" selected>完成</option>
+        <option value="3">作废</option>
+    </select>
+</div>*@
+
+<ul class="mt015" id="html_TaskList">
+    <li class="rwlb_box">
+
+        <div class="rwlb_xmtitle">TK00225</div>
+        <div class="rwlb_xmnumber">项目名称：华能海南临高海上风电场(CZ1)(OW1023)</div>
+        <div class="rwlb_xmnumber">任务软件：<span>自升式平台桩腿插拔计算</span></div>
+        <div class="rwlb_zt"><span class="rwlb_zt_spz">审批中</span></div>
+
+    </li>
+
+    <li class="rwlb_box">
+
+        <div class="rwlb_xmtitle">TK00225</div>
+        <div class="rwlb_xmnumber">项目名称：华能海南临高海上风电场(CZ1)(OW1023)</div>
+        <div class="rwlb_xmnumber">任务软件：<span>自升式平台桩腿插拔计算</span></div>
+        <div class="rwlb_zt"><span class="rwlb_zt_zf">作废</span></div>
+
+    </li>
+    <li class="rwlb_box">
+
+        <div class="rwlb_xmtitle">TK00225</div>
+        <div class="rwlb_xmnumber">项目名称：华能海南临高海上风电场(CZ1)(OW1023)</div>
+        <div class="rwlb_xmnumber">任务软件：<span>自升式平台桩腿插拔计算</span></div>
+        <div class="rwlb_zt"><span class="rwlb_zt_th">退回</span></div>
+
+    </li>
+
+    <li class="rwlb_box">
+
+        <div class="rwlb_xmtitle">TK00225</div>
+        <div class="rwlb_xmnumber">项目名称：华能海南临高海上风电场(CZ1)(OW1023)</div>
+        <div class="rwlb_xmnumber">任务软件：<span>自升式平台桩腿插拔计算</span></div>
+        <div class="rwlb_zt"><span class="rwlb_zt_jhz">激活中</span></div>
+
+    </li>
+    <li class="rwlb_box">
+
+        <div class="rwlb_xmtitle">TK00225</div>
+        <div class="rwlb_xmnumber">项目名称：华能海南临高海上风电场(CZ1)(OW1023)</div>
+        <div class="rwlb_xmnumber">任务软件：<span>自升式平台桩腿插拔计算</span></div>
+        <div class="rwlb_zt"><span class="rwlb_zt_spz">审批中</span></div>
+
+    </li>
+
+    <li class="rwlb_box">
+
+        <div class="rwlb_xmtitle">TK00225</div>
+        <div class="rwlb_xmnumber">任务名称：华能海南临高海上风电场(CZ1)(OW1023)</div>
+        <div class="rwlb_xmnumber">任务软件：<span>自升式平台桩腿插拔计算</span></div>
+        <div class="rwlb_zt"><span class="rwlb_zt_spz">审批中</span></div>
+
+    </li>
+
+</ul>
+
+<script>
+    $(document).ready(function () {
+
+        ParamInit();
+        Query();
+    })
+
+    var Param = {};
+    var ParamInit = function () {
+        Param.FlowStatus = $('#query_select_FlowStatus').val();
+        Param.TaskName = $("#query_txtTaskName").val();
+
+        Param.ProjectID = $("#hid_ProjectID").val();
+
+    }
+
+    var OpenProject = function () {
+
+        window.location.href = "/Mobile/Project/Index";
+
+    }
+
+    var Query = function () {
+
+        //OpenMaskLayout();
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('TaskListQuery', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+
+                    if (data.Success) {
+
+                        var TaskListHtml = '';
+
+                        $(data.Data).each(function (index, dom) {
+
+                            var StatusCss = '';
+                            if (dom.FlowStatus == 0) {
+                                StatusCss = 'rwlb_zt_spz';
+                            }
+                            else if (dom.FlowStatus == 1)
+                            {
+                                StatusCss = 'rwlb_zt_th';
+                            }
+                            else if (dom.FlowStatus == 2) {
+                                StatusCss = 'rwlb_zt_jhz';
+                            }
+                            else if (dom.FlowStatus == 3) {
+                                StatusCss = 'rwlb_zt_zf';
+                            }
+
+                            TaskListHtml += '<li class="rwlb_box"><div class="rwlb_xmtitle" >' + dom.TaskCode + '</div><div class="rwlb_xmnumber" onclick=OpenTask(' + dom.ID + ',' + dom.SoftwareID + ')>任务名称：' + dom.TaskName + '</div><div class="rwlb_xmnumber">任务软件：<span>' + dom.SoftwareName + '</span></div><div class="rwlb_zt"><span class="' + StatusCss + '">' + dom.FlowStatusName + '</span></div></li>';
+
+                        })
+                        $('#html_TaskList').html(TaskListHtml);
+                    }
+
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+                //Pagination();
+            });
+
+    }
+
+    var DoQuery = function () {
+
+        Param.TaskName = $("#query_txtTaskName").val();
+        Param.FlowStatus = $('#query_select_FlowStatus').val();
+        Query();
+    }
+
+    var OpenTask = function (TaskID, SoftwareID) {
+
+        if (TaskID == '' || SoftwareID == '' || TaskID == 0 || SoftwareID == 0)
+            return;
+
+        if (SoftwareID == 2) {
+            //插拔桩
+            window.location.href = 'CBZTask?TaskID=' + TaskID;
+        }
+        else if (SoftwareID == 3)
+        {
+            window.location.href = 'KZYTask?TaskID=' + TaskID;
+        }
+
+    }
+
+
+
+</script>

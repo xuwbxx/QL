@@ -1,0 +1,42 @@
+﻿
+@{
+    ViewBag.Title = "Base";
+    Layout = "~/Views/Shared/BlankLayout.cshtml";
+}
+
+<input type="hidden" id="hid_Token" value="@ViewData["Token"].ToString()" />
+
+<h2>跳转中......</h2>
+
+<script>
+    $(document).ready(function () {
+
+        var token = $('#hid_Token').val();
+
+        if (token == '')
+            return;
+
+        const userAgent = window.navigator.userAgent;
+
+        const screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+
+        const isMobile = /Mobile/i.test(userAgent) || screenWidth < 768;
+
+        const isTablet = /Tablet/i.test(userAgent) || (screenWidth >= 768 && screenWidth < 1024);
+
+        const eq = 0;
+
+        if (isMobile) {
+            eq = 2;
+        } else if (isTablet) {
+            eq = 3
+        } else {
+            eq = 1;
+        }
+
+        window.location.href = "/CCSHJ/Center/Redirect?eq=" + eq + "&paramString=" + token;
+
+    })
+
+</script>
+

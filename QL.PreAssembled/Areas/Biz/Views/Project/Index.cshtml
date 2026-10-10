@@ -1,4 +1,4 @@
-﻿@{
+@{
     Layout = "_LayoutModelEP";
     ViewData["Title"] = "项目管理";
 }
@@ -134,14 +134,14 @@
     <!-- 顶部操作栏 -->
     <div class="project-header">
         <div class="search-area">
-            <el-input v-model="searchName" placeholder="请输入项目名称" clearable style="width: 220px;" @@keyup.enter="handleSearch"></el-input>
-            <el-select v-model="searchProgressStatus" placeholder="项目状态" clearable style="width: 140px;">
+            <el-input v-model="searchName" :placeholder="$t('biz.project.namePlaceholder')" clearable style="width: 220px;" @@keyup.enter="handleSearch"></el-input>
+            <el-select v-model="searchProgressStatus" :placeholder="$t('biz.project.progressStatus')" clearable style="width: 140px;">
                 <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
             </el-select>
-            <el-button type="primary" @@click="handleSearch">查询</el-button>
-            <el-button @@click="handleReset">重置</el-button>
+            <el-button type="primary" @@click="handleSearch"><el-icon><Search /></el-icon>{{ $t('common.search') }}</el-button>
+            <el-button @@click="handleReset"><el-icon><Refresh-Left /></el-icon>{{ $t('common.reset') }}</el-button>
         </div>
-        <el-button type="success" @@click="openAddDialog">新增项目</el-button>
+        <el-button type="primary" @@click="openAddDialog"><el-icon><Plus /></el-icon>{{ $t('biz.project.addProject') }}</el-button>
     </div>
 
     <!-- 数据表格（树形） -->
@@ -152,45 +152,45 @@
               border stripe
               style="width: 100%;">
 
-        <el-table-column prop="name" label="项目名称" min-width="200" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="name" :label="$t('biz.project.name')" min-width="200" show-overflow-tooltip></el-table-column>
 
-        <el-table-column label="项目状态" width="100" align="center">
+        <el-table-column :label="$t('biz.project.progressStatus')" width="180" align="center">
             <template #default="scope">
                 <el-tag v-if="scope.row.isProject" :type="getStatusTagType(scope.row.progressStatus)">{{ getStatusLabel(scope.row.progressStatus) }}</el-tag>
             </template>
         </el-table-column>
 
-        <el-table-column label="梁类型" width="100" align="center">
+        <el-table-column :label="$t('biz.project.beamType')" width="160" align="center">
             <template #default="scope">
                 <el-tag v-if="scope.row.isBridge" :type="getBeamTypeTagType(scope.row.beamType)">{{ getBeamTypeLabel(scope.row.beamType) }}</el-tag>
             </template>
         </el-table-column>
 
-        <el-table-column label="项目负责人" width="120" align="center">
+        <el-table-column :label="$t('biz.project.manager')" width="180" align="center">
             <template #default="scope">
                 {{ scope.row.isProject ? scope.row.managerName : '' }}
             </template>
         </el-table-column>
 
-        <el-table-column label="操作" width="360" align="center" fixed="right">
+        <el-table-column :label="$t('sys.menu.tableOperate')" width="360" align="center" fixed="right">
             <template #default="scope">
                 <!-- 项目行操作按钮 -->
                 <template v-if="scope.row.isProject">
-                    <el-button type="success" link @@click="openAddSubDialog(scope.row)">新增子项</el-button>
-                    <el-button type="warning" link @@click="handleAuthorize(scope.row)">授权</el-button>
-                    <el-button type="primary" link @@click="openEditDialog(scope.row)">编辑</el-button>
-                    <el-button type="danger" link @@click="handleDelete(scope.row)">删除</el-button>
+                    <el-button type="success" link @@click="openAddSubDialog(scope.row)">{{ $t('biz.project.addSubItem') }}</el-button>
+                    <el-button type="warning" link @@click="handleAuthorize(scope.row)">{{ $t('biz.project.authorize') }}</el-button>
+                    <el-button type="primary" link @@click="openEditDialog(scope.row)">{{ $t('common.edit') }}</el-button>
+                    <el-button type="danger" link @@click="handleDelete(scope.row)">{{ $t('common.delete') }}</el-button>
                 </template>
                 <!-- 桥梁子项行操作按钮 -->
                 <template v-else-if="scope.row.isBridge">
-                    <el-button v-if="scope.row.beamType === 1" type="success" link @@click="openAddCastDialog(scope.row)">新增子项</el-button>
-                    <el-button type="primary" link @@click="openEditSubDialog(scope.row)">编辑</el-button>
-                    <el-button type="danger" link @@click="handleDeleteSub(scope.row)">删除</el-button>
+                    <el-button v-if="scope.row.beamType === 1" type="success" link @@click="openAddCastDialog(scope.row)">{{ $t('biz.project.addSubItem') }}</el-button>
+                    <el-button type="primary" link @@click="openEditSubDialog(scope.row)">{{ $t('common.edit') }}</el-button>
+                    <el-button type="danger" link @@click="handleDeleteSub(scope.row)">{{ $t('common.delete') }}</el-button>
                 </template>
                 <!-- 浇筑分组行操作按钮 -->
                 <template v-else-if="scope.row.isCastingGroup">
-                    <el-button type="primary" link @@click="openEditCastDialog(scope.row)">编辑</el-button>
-                    <el-button type="danger" link @@click="handleDeleteCast(scope.row)">删除</el-button>
+                    <el-button type="primary" link @@click="openEditCastDialog(scope.row)">{{ $t('common.edit') }}</el-button>
+                    <el-button type="danger" link @@click="handleDeleteCast(scope.row)">{{ $t('common.delete') }}</el-button>
                 </template>
             </template>
         </el-table-column>
@@ -212,24 +212,24 @@
     <!-- 项目 新增/编辑 弹窗 -->
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="520px" :close-on-click-modal="false">
         <el-form :model="formData" label-width="100px" status-icon>
-            <el-form-item label="项目名称" required>
-                <el-input v-model="formData.name" placeholder="请输入项目名称"></el-input>
+            <el-form-item :label="$t('biz.project.name')" required>
+                <el-input v-model="formData.name" :placeholder="$t('biz.project.namePlaceholder')"></el-input>
             </el-form-item>
-            <el-form-item label="项目状态" required>
-                <el-select v-model="formData.progressStatus" placeholder="请选择项目状态" style="width: 100%;">
+            <el-form-item :label="$t('biz.project.progressStatus')" required>
+                <el-select v-model="formData.progressStatus" :placeholder="$t('biz.project.progressStatusPlaceholder')" style="width: 100%;">
                     <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="项目负责人" required>
-                <el-select v-model="formData.managerId" placeholder="请选择项目负责人" style="width: 100%;" filterable @@change="handleManagerChange">
+            <el-form-item :label="$t('biz.project.manager')" required>
+                <el-select v-model="formData.managerId" :placeholder="$t('biz.project.managerPlaceholder')" style="width: 100%;" filterable @@change="handleManagerChange">
                     <el-option v-for="item in managerOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
                 </el-select>
             </el-form-item>
         </el-form>
         <template #footer>
             <span class="dialog-footer">
-                <el-button @@click="dialogVisible = false">取 消</el-button>
-                <el-button type="primary" :loading="submitting" @@click="saveData">确 定</el-button>
+                <el-button @@click="dialogVisible = false">{{ $t('common.cancel') }}</el-button>
+                <el-button type="primary" :loading="submitting" @@click="saveData">{{ $t('common.confirm') }}</el-button>
             </span>
         </template>
     </el-dialog>
@@ -237,22 +237,22 @@
     <!-- 子项（桥梁） 新增/编辑 弹窗 -->
     <el-dialog v-model="subDialogVisible" :title="subDialogTitle" width="520px" :close-on-click-modal="false">
         <el-form :model="subFormData" label-width="100px" status-icon>
-            <el-form-item label="项目名称">
+            <el-form-item :label="$t('biz.project.name')">
                 <el-input v-model="subFormData.projName" disabled></el-input>
             </el-form-item>
-            <el-form-item label="桥梁名称" required>
-                <el-input v-model="subFormData.name" placeholder="请输入桥梁名称"></el-input>
+            <el-form-item :label="$t('biz.project.bridgeName')" required>
+                <el-input v-model="subFormData.name" :placeholder="$t('biz.project.bridgeNamePlaceholder')"></el-input>
             </el-form-item>
-            <el-form-item label="梁类型" required>
-                <el-select v-model="subFormData.beamType" placeholder="请选择梁类型" style="width: 100%;">
+            <el-form-item :label="$t('biz.project.beamType')" required>
+                <el-select v-model="subFormData.beamType" :placeholder="$t('biz.project.beamTypePlaceholder')" style="width: 100%;">
                     <el-option v-for="item in beamTypeOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
                 </el-select>
             </el-form-item>
         </el-form>
         <template #footer>
             <span class="dialog-footer">
-                <el-button @@click="subDialogVisible = false">取 消</el-button>
-                <el-button type="primary" :loading="subSubmitting" @@click="saveSubItem">确 定</el-button>
+                <el-button @@click="subDialogVisible = false">{{ $t('common.cancel') }}</el-button>
+                <el-button type="primary" :loading="subSubmitting" @@click="saveSubItem">{{ $t('common.confirm') }}</el-button>
             </span>
         </template>
     </el-dialog>
@@ -260,37 +260,37 @@
     <!-- 子项（浇筑分组） 新增/编辑 弹窗 -->
     <el-dialog v-model="castDialogVisible" :title="castDialogTitle" width="520px" :close-on-click-modal="false">
         <el-form :model="castFormData" label-width="100px" status-icon>
-            <el-form-item label="项目名称">
+            <el-form-item :label="$t('biz.project.name')">
                 <el-input v-model="castFormData.projName" disabled></el-input>
             </el-form-item>
-            <el-form-item label="桥梁名称">
+            <el-form-item :label="$t('biz.project.bridgeName')">
                 <el-input v-model="castFormData.bridgeName" disabled></el-input>
             </el-form-item>
-            <el-form-item label="浇筑分组" required>
-                <el-input v-model="castFormData.name" placeholder="请输入浇筑分组名称"></el-input>
+            <el-form-item :label="$t('biz.project.castingGroup')" required>
+                <el-input v-model="castFormData.name" :placeholder="$t('biz.project.castingGroupNamePlaceholder')"></el-input>
             </el-form-item>
         </el-form>
         <template #footer>
             <span class="dialog-footer">
-                <el-button @@click="castDialogVisible = false">取 消</el-button>
-                <el-button type="primary" :loading="castSubmitting" @@click="saveCastItem">确 定</el-button>
+                <el-button @@click="castDialogVisible = false">{{ $t('common.cancel') }}</el-button>
+                <el-button type="primary" :loading="castSubmitting" @@click="saveCastItem">{{ $t('common.confirm') }}</el-button>
             </span>
         </template>
     </el-dialog>
 
     <!-- 授权弹窗 -->
-    <el-dialog v-model="authDialogVisible" :title="'候选人员 — ' + (authProjectName || '')" width="900px" :close-on-click-modal="false" @@opened="onAuthDialogOpened">
+    <el-dialog v-model="authDialogVisible" :title="$t('biz.project.candidateTitle', { name: authProjectName || '' })" width="900px" :close-on-click-modal="false" @@opened="onAuthDialogOpened">
         <div class="auth-panel">
             <!-- 左侧：全部用户 -->
             <div class="auth-panel-side">
                 <div class="auth-panel-search">
-                    <el-input v-model="authSearchKey" placeholder="请输入姓名或账号搜索" clearable @@input="onAuthSearchInput" prefix-icon="Search" size="small"></el-input>
+                    <el-input v-model="authSearchKey" :placeholder="$t('biz.project.authSearchPlaceholder')" clearable @@input="onAuthSearchInput" prefix-icon="Search" size="small"></el-input>
                 </div>
                 <div class="auth-panel-header">
-                    <span>全部数据</span>
+                    <span>{{ $t('biz.project.allUsers') }}</span>
                 </div>
                 <div class="auth-panel-body">
-                    <div v-if="authFilteredLeft.length === 0" class="auth-empty">暂无数据</div>
+                    <div v-if="authFilteredLeft.length === 0" class="auth-empty">{{ $t('common.noData') }}</div>
                     <div v-for="item in authLeftPaged" :key="item.id"
                          class="auth-item"
                          :class="{ 'auth-item-selected': isAuthSelected(item.id) }"
@@ -316,11 +316,11 @@
             <!-- 右侧：已选人员 -->
             <div class="auth-panel-side">
                 <div class="auth-panel-header">
-                    <span>已选 ({{ authSelected.length }}人)</span>
-                    <el-button v-if="authSelected.length > 0" type="danger" link size="small" @@click="clearAuthSelected">清空列表</el-button>
+                    <span>{{ $t('biz.project.selectedUsers', { n: authSelected.length }) }}</span>
+                    <el-button v-if="authSelected.length > 0" type="danger" link size="small" @@click="clearAuthSelected">{{ $t('biz.project.clearList') }}</el-button>
                 </div>
                 <div class="auth-panel-body">
-                    <div v-if="authSelected.length === 0" class="auth-empty">暂无已选</div>
+                    <div v-if="authSelected.length === 0" class="auth-empty">{{ $t('biz.project.noSelected') }}</div>
                     <div v-for="item in authRightPaged" :key="item.id" class="auth-item">
                         <div class="auth-avatar">{{ (item.name || '?').charAt(0) }}</div>
                         <div class="auth-info">
@@ -342,8 +342,8 @@
         </div>
         <template #footer>
             <span class="dialog-footer">
-                <el-button @@click="authDialogVisible = false">取 消</el-button>
-                <el-button type="primary" :loading="authSubmitting" @@click="saveAuthorization">确 定</el-button>
+                <el-button @@click="authDialogVisible = false">{{ $t('common.cancel') }}</el-button>
+                <el-button type="primary" :loading="authSubmitting" @@click="saveAuthorization">{{ $t('common.confirm') }}</el-button>
             </span>
         </template>
     </el-dialog>

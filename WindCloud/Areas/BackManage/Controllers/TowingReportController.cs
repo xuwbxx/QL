@@ -2,6 +2,7 @@
 using Model.Base;
 using Model.Tech.Cloud.BackManage;
 using Service.Base;
+using Service.Wind;
 using Service.Wind.BackManage;
 using Tool;
 using WindCloud.Areas.Base.Controllers;
@@ -13,8 +14,8 @@ namespace WindCloud.Areas.BackManage.Controllers
     {
         private readonly BackTowingReportService _backTowingReportService;
 
-        public TowingReportController(CookieService cookieService, Service.Wind.WebValidateService webValidateService, BackTowingReportService backTowingReportService)
-            : base(cookieService, webValidateService)
+        public TowingReportController(CookieService cookieService, Service.Wind.WebValidateService webValidateService, ProjectService projectService, BackTowingReportService backTowingReportService)
+            : base(cookieService, projectService, webValidateService)
         {
             _backTowingReportService = backTowingReportService;
         }

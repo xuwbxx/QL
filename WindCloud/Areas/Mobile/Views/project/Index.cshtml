@@ -1,0 +1,192 @@
+﻿
+@{
+    ViewBag.Title = "项目列表";
+    Layout = "~/Views/Shared/MobileLayout.cshtml";
+}
+
+<input type="hidden" id="hid_PostToken" value="@ViewData["PostToken"].ToString()" />
+
+<header>
+    <div class="left_logo"><img src="~/Content/Mobile/img/logo.png"></div>三航海上风电施工云服务平台
+    <span class="icon_user">@ViewData["UserName"].ToString()</span>
+</header>
+<div class="height88"></div>
+<div class="enter_gzrw"><button type="button" class="btn btn-primary" onclick="OpenTask();">任务</button></div>
+
+<div class="search_box">
+    <input type="text" placeholder="请输入项目名称" class="form-control" id="query_txtProjectName">
+    <span class="glyphicon glyphicon-search icon-search_dw" onclick="DoQuery();"></span>
+</div>
+<div class="title_fdxmlb">风电项目列表</div>
+
+<ul id="html_ul_ProjectList">
+    @*<li class="xmlb_box clearfix">
+            <div class="col-md-3 col-xs-3 col-sm-3 pr0">
+                <div class="xmlb_img"><img src="img/banner.jpg" class="img-responsive img-thumbnail"></div>
+            </div>
+            <div class="col-md-9 col-xs-9 col-sm-9">
+                <div class="xmlb_xmtitle">中广核惠州港口二海上风电场（II标段PB）</div>
+                <div class="xmlb_xmnumber">项目编号：HHHH3956476947</div>
+                <div class="xmlb_xmnumber">负责人：张三</div>
+                <div class="xmlb_zt"><button type="button" class="btn btn-success">激活</button></div>
+            </div>
+        </li>
+
+        <li class="xmlb_box clearfix">
+            <div class="col-md-3 col-xs-3 col-sm-3 pr0">
+                <div class="xmlb_img"><img src="img/banner.jpg" class="img-responsive img-thumbnail"></div>
+            </div>
+            <div class="col-md-9 col-xs-9 col-sm-9">
+                <div class="xmlb_xmtitle">中广核惠州港口二海上风电场（II标段PB）</div>
+                <div class="xmlb_xmnumber">项目编号：HHHH3956476947</div>
+                <div class="xmlb_xmnumber">负责人：张三</div>
+                <div class="xmlb_zt"><button type="button" class="btn btn-warning">审批中</button></div>
+            </div>
+        </li>
+
+        <li class="xmlb_box clearfix">
+            <div class="col-md-3 col-xs-3 col-sm-3 pr0">
+                <div class="xmlb_img"><img src="img/banner.jpg" class="img-responsive img-thumbnail"></div>
+            </div>
+            <div class="col-md-9 col-xs-9 col-sm-9">
+                <div class="xmlb_xmtitle">中广核惠州港口二海上风电场（II标段PB）</div>
+                <div class="xmlb_xmnumber">项目编号：HHHH3956476947</div>
+                <div class="xmlb_xmnumber">负责人：张三</div>
+                <div class="xmlb_zt"><button type="button" class="btn btn-success">激活</button></div>
+            </div>
+        </li>
+
+        <li class="xmlb_box clearfix">
+            <div class="col-md-3 col-xs-3 col-sm-3 pr0">
+                <div class="xmlb_img"><img src="img/banner.jpg" class="img-responsive img-thumbnail"></div>
+            </div>
+            <div class="col-md-9 col-xs-9 col-sm-9">
+                <div class="xmlb_xmtitle">中广核惠州港口二海上风电场（II标段PB）</div>
+                <div class="xmlb_xmnumber">项目编号：HHHH3956476947</div>
+                <div class="xmlb_xmnumber">负责人：张三</div>
+                <div class="xmlb_zt"><button type="button" class="btn btn-success">激活</button></div>
+            </div>
+        </li>
+
+        <li class="xmlb_box clearfix">
+            <div class="col-md-3 col-xs-3 col-sm-3 pr0">
+                <div class="xmlb_img"><img src="img/banner.jpg" class="img-responsive img-thumbnail"></div>
+            </div>
+            <div class="col-md-9 col-xs-9 col-sm-9">
+                <div class="xmlb_xmtitle">中广核惠州港口二海上风电场（II标段PB）</div>
+                <div class="xmlb_xmnumber">项目编号：HHHH3956476947</div>
+                <div class="xmlb_xmnumber">负责人：张三</div>
+                <div class="xmlb_zt"><button type="button" class="btn btn-success">激活</button></div>
+            </div>
+        </li>
+
+        <li class="xmlb_box clearfix">
+            <div class="col-md-3 col-xs-3 col-sm-3 pr0">
+                <div class="xmlb_img"><img src="img/banner.jpg" class="img-responsive img-thumbnail"></div>
+            </div>
+            <div class="col-md-9 col-xs-9 col-sm-9">
+                <div class="xmlb_xmtitle">中广核惠州港口二海上风电场（II标段PB）</div>
+                <div class="xmlb_xmnumber">项目编号：HHHH3956476947</div>
+                <div class="xmlb_xmnumber">负责人：张三</div>
+                <div class="xmlb_zt"><button type="button" class="btn btn-success">激活</button></div>
+            </div>
+        </li>*@
+</ul>
+
+<script>
+    $(document).ready(function () {
+
+        ParamInit();
+        Query();
+
+    });
+
+    var Param = {};
+    var ParamInit = function () {
+        Param.ProjectName = $("#query_txtProjectName").val();
+    }
+
+    //查询
+    var Query = function () {
+
+        //OpenMaskLayout();
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('ProjectListQuery', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+
+                    if (data.Success)
+                    {
+                        var ProjectListHtml = '';
+                        $(data.Data).each(function (index, dom) {
+
+                            var StatusCss = '';
+                            if (dom.FlowStatus == 0) {
+                                StatusCss = 'color_orange';
+                            }
+                            else if (dom.FlowStatus == 1) {
+                                StatusCss = 'color_red';
+                            }
+                            else if (dom.FlowStatus == 2) {
+                                StatusCss = 'color_success';
+                            }
+                            else {
+                                StatusCss = 'color_grey';
+                            }
+
+                            ProjectListHtml += '<li class="xmlb_box clearfix"><div class="col-md-3 col-xs-3 col-sm-3 pr0" ><div class="xmlb_img"><img src="../../Content/Mobile/img/banner.jpg" class="img-responsive img-thumbnail"></div></div>'
+                                + '<div class="col-md-9 col-xs-9 col-sm-9"><div class="xmlb_xmtitle" onclick="OpenProjectInfo(' + dom.ID + ')">' + dom.ProjectName + '</div><div class="xmlb_xmnumber">项目编号：' + dom.ProjectCode + '</div>'
+                                + '<div class="xmlb_xmnumber" >项目负责人：' + dom.Director.DirectorName + '</div><div class="xmlb_xmnumber" onclick="OpenProjectTask(' + dom.ID + ');"><a class="color_success">进入项目任务</a></div><div class="xmlb_zt"><span class="' + StatusCss + '">' + dom.FlowStatusName + '</span></div></div ></li >'
+
+                        })
+
+                        $('#html_ul_ProjectList').html(ProjectListHtml);
+
+                    }
+                    
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+                //Pagination();
+            });
+
+    }
+
+    var DoQuery = function () {
+
+        Param.ProjectName = $("#query_txtProjectName").val();
+        Query();
+    }
+
+    var OpenProjectInfo = function (ProjectID) {
+
+        if (ProjectID == '' || ProjectID == 0)
+        {
+            return;
+        }
+
+        //alert(ProjectID);
+
+        window.location.href = "ProjectInfo?ProjectID=" + ProjectID;
+
+    }
+
+    var OpenTask = function () {
+
+        window.location.href = "/Mobile/Task/Index";
+
+    }
+
+    var OpenProjectTask = function (ID) {
+
+        if (ID == null || ID == '' || ID == 0)
+            return;
+
+        window.location.href = "/Mobile/Task/Index?ProjectID=" + ID;
+
+    }
+
+</script>

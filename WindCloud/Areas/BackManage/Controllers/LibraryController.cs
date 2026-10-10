@@ -2,6 +2,7 @@
 using Model.Base;
 using Model.Tech.Cloud.BackManage;
 using Service.Base;
+using Service.Wind;
 using Service.Wind.BackManage;
 using Tool;
 using WindCloud.Areas.Base.Controllers;
@@ -13,8 +14,8 @@ namespace WindCloud.Areas.BackManage.Controllers
     {
         private readonly BackLibraryService _libraryService;
 
-        public LibraryController(CookieService cookieService, Service.Wind.WebValidateService webValidateService, BackLibraryService libraryService)
-            : base(cookieService, webValidateService)
+        public LibraryController(CookieService cookieService, Service.Wind.WebValidateService webValidateService, ProjectService projectService, BackLibraryService libraryService)
+            : base(cookieService, projectService, webValidateService)
         {
             _libraryService = libraryService;
         }

@@ -62,8 +62,7 @@ namespace Service.Towing
                 {
                     var windRepo = uow.GetRepository<DataFactory.KingBase.Towing.Data_Wind>();
                     // 取最新的一条记录
-                    var data = windRepo.FindAll()
-                        .Where(a => a.IsDelete != true)
+                    var data = windRepo.Find(a => a.IsDelete != true)
                         .OrderByDescending(a => a.CreateTime)
                         .FirstOrDefault();
 
@@ -76,7 +75,7 @@ namespace Service.Towing
                         res.Data.UpdateTime = data.CreateTime ?? DateTime.Now;
 
                         var alarmRepo = uow.GetRepository<DataFactory.KingBase.Towing.Manage_Alarm>();
-                        var alerm = alarmRepo.FindAll().FirstOrDefault(a => a.IsDelete != true && a.Type == "WindSpeed");
+                        var alerm = alarmRepo.Find(a => a.IsDelete != true && a.Type == "WindSpeed").FirstOrDefault();
                         if (alerm != null)
                         {
                             res.Data.WindSpeedLv1 = alerm.AlarmValue1 ?? 99;
@@ -109,8 +108,7 @@ namespace Service.Towing
                 {
                     var windRepo = uow.GetRepository<DataFactory.KingBase.Towing.Data_Wind>();
                     // 取最新的一条记录
-                    var data = windRepo.FindAll()
-                        .Where(a => a.IsDelete != true && a.CreateTime > LimitValues.DeviceOfflineTime)
+                    var data = windRepo.Find(a => a.IsDelete != true && a.CreateTime > LimitValues.DeviceOfflineTime)
                         .OrderByDescending(a => a.CreateTime)
                         .FirstOrDefault();
 
@@ -123,7 +121,7 @@ namespace Service.Towing
                         res.Data.UpdateTime = data.CreateTime ?? DateTime.Now;
 
                         var alarmRepo = uow.GetRepository<DataFactory.KingBase.Towing.Manage_Alarm>();
-                        var alerm = alarmRepo.FindAll().FirstOrDefault(a => a.IsDelete != true && a.Type == "WindSpeed");
+                        var alerm = alarmRepo.Find(a => a.IsDelete != true && a.Type == "WindSpeed").FirstOrDefault();
                         if (alerm != null)
                         {
                             res.Data.WindSpeedLv1 = alerm.AlarmValue1 ?? 99;
@@ -160,9 +158,7 @@ namespace Service.Towing
                     if (size == 0) size = LimitValues.EChartDataSize;
                     if (string.IsNullOrEmpty(legend)) legend = "风向,风速";
 
-                    var query = windRepo.FindAll()
-                        .Where(a => a.IsDelete != true)
-                        .Where(a => a.CreateTime >= startTime && a.CreateTime < endTime)
+                    var query = windRepo.Find(a => a.IsDelete != true && a.CreateTime >= startTime && a.CreateTime < endTime)
                         .OrderByDescending(a => a.CreateTime);
 
                     List<DataFactory.KingBase.Towing.Data_Wind> list;
@@ -224,8 +220,7 @@ namespace Service.Towing
                     var windRepo = uow.GetRepository<DataFactory.KingBase.Towing.Data_Wind>();
                     if (size == 0) size = LimitValues.EChartDataSize;
 
-                    var query = windRepo.FindAll()
-                        .Where(a => a.IsDelete != true)
+                    var query = windRepo.Find(a => a.IsDelete != true)
                         .OrderByDescending(a => a.CreateTime);
 
                     List<DataFactory.KingBase.Towing.Data_Wind> list;
@@ -276,8 +271,7 @@ namespace Service.Towing
                     var windRepo = uow.GetRepository<DataFactory.KingBase.Towing.Data_Wind>();
                     if (size == 0) size = LimitValues.EChartDataSize;
 
-                    var query = windRepo.FindAll()
-                        .Where(a => a.IsDelete != true)
+                    var query = windRepo.Find(a => a.IsDelete != true)
                         .OrderByDescending(a => a.CreateTime);
 
                     List<DataFactory.KingBase.Towing.Data_Wind> list;

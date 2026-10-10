@@ -15,6 +15,12 @@ using static DataFactory.Factory.BaseDbContext;
 
 namespace DataFactory.KingBase
 {
+    public enum SegmentSide
+    {
+        South = 0,
+        North = 1
+    }
+
     /// <summary>
     /// 云平台数据库
     /// </summary>
@@ -179,12 +185,15 @@ namespace DataFactory.KingBase
         public DbSet<biz_steel_beam_theoretical> biz_steel_beam_theoretical { get; set; }
         public DbSet<biz_steel_beam_measure_batch> biz_steel_beam_measure_batch { get; set; }
         public DbSet<biz_steel_beam_measured> biz_steel_beam_measured { get; set; }
+        public DbSet<biz_steel_beam_derived_coordinate> biz_steel_beam_derived_coordinate { get; set; }
         public DbSet<biz_concrete_beam_config> biz_concrete_beam_config { get; set; }
         public DbSet<biz_concrete_beam_camber_source> biz_concrete_beam_camber_source { get; set; }
         public DbSet<biz_concrete_beam_camber_calculation> biz_concrete_beam_camber_calculation { get; set; }
         public DbSet<biz_concrete_beam_segment> biz_concrete_beam_segment { get; set; }
         public DbSet<biz_concrete_beam_design_coordinate_source> biz_concrete_beam_design_coordinate_source { get; set; }
         public DbSet<biz_concrete_beam_design_coordinate_calculation> biz_concrete_beam_design_coordinate_calculation { get; set; }
+        public DbSet<biz_concrete_beam_ascast_coordinate> biz_concrete_beam_ascast_coordinate { get; set; }
+        public DbSet<biz_concrete_beam_ascast_measure> biz_concrete_beam_ascast_measure { get; set; }
 
         #endregion
     }
@@ -1063,6 +1072,11 @@ namespace DataFactory.KingBase
         public int GirderID { get; set; }
         /// <summary>所属浇筑组ID。</summary>
         public int CastingGroupID { get; set; }
+        /// <summary>
+        /// 梁段几何序号（0 起），等于算法入参 M：节 m 跨端面 m..m+1。
+        /// 由端面 NodeName 在设计坐标序列中的位置反推，不依赖写入顺序。
+        /// </summary>
+        public int SegmentIndex { get; set; }
         /// <summary>梁段名称，同一浇筑组内唯一。</summary>
         [MaxLength(100)] public string SegmentName { get; set; } = string.Empty;
         /// <summary>下游梁段名称，可为空。</summary>
@@ -1075,6 +1089,91 @@ namespace DataFactory.KingBase
         [MaxLength(100)] public string Node2 { get; set; } = string.Empty;
         /// <summary>浇筑日期，可为空。</summary>
         public DateTime? PouringDate { get; set; }
+        /// <summary>
+        /// 活动端模板东侧高程
+        /// </summary>
+        [Column(TypeName = "numeric(20,4)")]
+        public decimal MatchNorthEastElev { get; set; }
+        /// <summary>
+        /// 活动端模板西侧高程
+        /// </summary>
+        [Column(TypeName = "numeric(20,4)")]
+        public decimal MatchNorthWestElev { get; set; }
+        /// <summary>
+        /// 活动端模板中心偏移量
+        /// </summary>
+        [Column(TypeName = "numeric(20,4)")]
+        public decimal MatchNorthOffset { get; set; }
+
+        /// <summary>
+        /// 固定端模板东侧高程
+        /// </summary>
+        [Column(TypeName = "numeric(20,4)")]
+        public decimal MatchSouthEastElev { get; set; }
+        /// <summary>
+        /// 固定端模板西侧高程
+        /// </summary>
+        [Column(TypeName = "numeric(20,4)")]
+        public decimal MatchSouthWestElev { get; set; }
+        /// <summary>
+        /// 固定端模板中心偏移量
+        /// </summary>
+        [Column(TypeName = "numeric(20,4)")]
+        public decimal MatchSouthOffset { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal MatchWestLength { get; set; }
+        [Column(TypeName = "numeric(20,4)")] public decimal MatchEastLength { get; set; }
+        [Column(TypeName = "numeric(20,4)")] public decimal MatchCenterLength { get; set; }
+
+        /// <summary>
+        /// 测点偏位北侧a值（Bolt Offsets's aN）
+        /// </summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal BoltOffsetAN { get; set; }
+        /// <summary>
+        /// 测点偏位北侧c值（Bolt Offsets's cN）
+        /// </summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal BoltOffsetCN { get; set; }
+        /// <summary>
+        /// 测点偏位南侧a值（Bolt Offsets's aS）
+        /// </summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal BoltOffsetAS { get; set; }
+        /// <summary>
+        /// 测点偏位南侧c值（Bolt Offsets's cS）
+        /// </summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal BoltOffsetCS { get; set; }
+
+        [Column(TypeName = "numeric(20,4)")] public decimal SurveyMatchNorthEastElev { set; get; }
+        [Column(TypeName = "numeric(20,4)")] public decimal SurveyMatchNorthWestElev { set; get; }
+        [Column(TypeName = "numeric(20,4)")] public decimal SurveyMatchSouthEastElev { set; get; }
+        [Column(TypeName = "numeric(20,4)")] public decimal SurveyMatchSouthWestElev { set; get; }
+        [Column(TypeName = "numeric(20,4)")] public decimal SurveyMatchNorthCenterOffset { set; get; }
+        [Column(TypeName = "numeric(20,4)")] public decimal SurveyMatchSouthCenterOffset { set; get; }
+        [Column(TypeName = "numeric(20,4)")] public decimal MatchCastTwist { get; set; }
+
+        [Column(TypeName = "numeric(20,4)")] public decimal SurveyWetNorthEastElev { set; get; }
+        [Column(TypeName = "numeric(20,4)")] public decimal SurveyWetNorthWestElev { set; get; }
+        [Column(TypeName = "numeric(20,4)")] public decimal SurveyWetSouthEastElev { set; get; }
+        [Column(TypeName = "numeric(20,4)")] public decimal SurveyWetSouthWestElev { set; get; }
+        [Column(TypeName = "numeric(20,4)")] public decimal SurveyWetNorthCenterOffset { set; get; }
+        [Column(TypeName = "numeric(20,4)")] public decimal SurveyWetSouthCenterOffset { set; get; }
+        [Column(TypeName = "numeric(20,4)")] public decimal SurveyWetCenterLength { set; get; }
+        /// <summary>
+        /// 实测浇筑东侧长度，仅 0 号段录入（对应算法首段 E 的 WetCastEastLength）。
+        /// 标准段该值为 0：标准段 E 只有一个中线长度（SurveyWetCenterLength）。
+        /// </summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal SurveyWetEastLength { set; get; }
+        /// <summary>
+        /// 实测浇筑西侧长度，仅 0 号段录入（对应算法首段 E 的 WetCastWestLength）。
+        /// </summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal SurveyWetWestLength { set; get; }
+
+        [Column(TypeName = "numeric(20,4)")] public decimal SurveyBulkheadEastElev { set; get; }
+        [Column(TypeName = "numeric(20,4)")] public decimal SurveyBulkheadWestElev { set; get; }
+        [Column(TypeName = "numeric(20,4)")] public decimal SurveyBulkheadCenterOffset { set; get; }
+
         /// <summary>数据状态：0正常，-1逻辑删除。</summary>
         public int Status { get; set; }
         /// <summary>创建人账号。</summary>
@@ -1131,7 +1230,7 @@ namespace DataFactory.KingBase
         public DateTime? UpdatedTime { get; set; }
     }
 
-    /// <summary>混凝土梁设计坐标计算表，当前同步保存源数据，供后续计算算法使用。</summary>
+    /// <summary>混凝土梁设计坐标计算表，保存叠加预拱度后按B值归一化的最终坐标。</summary>
     public class biz_concrete_beam_design_coordinate_calculation : IIDTable
     {
         /// <summary>主键ID。</summary>
@@ -1175,29 +1274,220 @@ namespace DataFactory.KingBase
         public DateTime? UpdatedTime { get; set; }
     }
 
+    /// <summary>
+    /// 混凝土梁浇筑坐标（基于端面的实际浇筑坐标，大地坐标系）。
+    /// 由算法基于设计坐标（design_coordinate_calculation）、本梁段录入的实测标量
+    /// 及上一梁段的坐标/偏位常数计算得出，对应算法的 KT 数组：一行 = 一个端面。
+    /// 坐标为推算的成桥姿态值，非现场竣工复测值。
+    /// </summary>
+    public class biz_concrete_beam_ascast_coordinate : IIDTable
+    {
+        /// <summary>主键ID。</summary>
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity), Column("ID")]
+        public int ID { get; set; }
+        /// <summary>所属项目ID。</summary>
+        public int ProjID { get; set; }
+        /// <summary>所属梁ID，对应项目梁表主键。</summary>
+        public int GirderID { get; set; }
+        /// <summary>所属浇筑组ID。</summary>
+        public int CastingGroupID { get; set; }
+        /// <summary>
+        /// 对应的设计端面ID
+        /// </summary>
+        public int DesignCoordinateID { get; set; }
+        /// <summary>
+        /// 产出该端面的梁段ID（biz_concrete_beam_segment.ID）。
+        /// 一个端面只由"初次浇筑到它"的那一段产出：0 号段同时产出端面 0 与端面 1，
+        /// 第 m(m≥1) 段只产出端面 m+1（端面 m 属上一段，接缝面不重复产出）。
+        /// </summary>
+        public int SegmentID { get; set; }
+        /// <summary>
+        /// 东部点X坐标
+        /// </summary>
+        public decimal? EastX { get; set; }
+        /// <summary>
+        /// 东部点Y坐标
+        /// </summary>
+        public decimal? EastY { get; set; }
+        /// <summary>
+        /// 东部点Z坐标
+        /// </summary>
+        public decimal? EastZ { get; set; }
+        /// <summary>
+        /// 中央点X坐标
+        /// </summary>
+        public decimal? CenterX { get; set; }
+        /// <summary>
+        /// 中央点Y坐标
+        /// </summary>
+        public decimal? CenterY { get; set; }
+        /// <summary>
+        /// 中央点Z坐标
+        /// </summary>
+        public decimal? CenterZ { get; set; }
+        /// <summary>
+        /// 西部点X坐标
+        /// </summary>
+        public decimal? WestX { get; set; }
+        /// <summary>
+        /// 西部点Y坐标
+        /// </summary>
+        public decimal? WestY { get; set; }
+        /// <summary>
+        /// 西部点Z坐标
+        /// </summary>
+        public decimal? WestZ { get; set; }
+
+        /// <summary>数据状态：0正常，-1逻辑删除。</summary>
+        public int Status { get; set; }
+        /// <summary>创建人账号。</summary>
+        [MaxLength(100)] public string? CreatedBy { get; set; }
+        /// <summary>创建时间。</summary>
+        public DateTime? CreatedTime { get; set; }
+        /// <summary>最后更新人账号。</summary>
+        [MaxLength(100)] public string? UpdatedBy { get; set; }
+        /// <summary>最后更新时间。</summary>
+        public DateTime? UpdatedTime { get; set; }
+    }
+
+    /// <summary>
+    /// 混凝土梁浇筑测点坐标（大地坐标系）。
+    /// 与 ascast_coordinate 同为一次 Run 的并列输出（互不派生），对应算法的 KCT 数组：
+    /// 每节段两行（南端 = 2m，北端 = 2m+1）；同一端面在接缝处会有两条分属相邻梁段的记录，
+    /// 两条之差即该面的局部浇筑误差，不可去重。
+    /// 坐标已烘焙本节 aN/cN 偏位，是测点位置，不是端面角点。
+    /// </summary>
+    public class biz_concrete_beam_ascast_measure : IIDTable
+    {
+        /// <summary>主键ID。</summary>
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity), Column("ID")]
+        public int ID { get; set; }
+        /// <summary>所属项目ID。</summary>
+        public int ProjID { get; set; }
+        /// <summary>所属梁ID，对应项目梁表主键。</summary>
+        public int GirderID { get; set; }
+        /// <summary>所属浇筑组ID。</summary>
+        public int CastingGroupID { get; set; }
+        /// <summary>
+        /// 梁段ID
+        /// </summary>
+        public int SegmentID { get; set; }
+        /// <summary>
+        /// 对应的design coordinate的ID
+        /// </summary>
+        public int DesignCoordinateID { get; set; }
+        /// <summary>
+        /// 0是north，1是south
+        /// </summary>
+        public int Side { get; set; }
+        /// <summary>
+        /// 东部点X坐标
+        /// </summary>
+        public decimal? EastX { get; set; }
+        /// <summary>
+        /// 东部点Y坐标
+        /// </summary>
+        public decimal? EastY { get; set; }
+        /// <summary>
+        /// 东部点Z坐标
+        /// </summary>
+        public decimal? EastZ { get; set; }
+        /// <summary>
+        /// 中央点X坐标
+        /// </summary>
+        public decimal? CenterX { get; set; }
+        /// <summary>
+        /// 中央点Y坐标
+        /// </summary>
+        public decimal? CenterY { get; set; }
+        /// <summary>
+        /// 中央点Z坐标
+        /// </summary>
+        public decimal? CenterZ { get; set; }
+        /// <summary>
+        /// 西部点X坐标
+        /// </summary>
+        public decimal? WestX { get; set; }
+        /// <summary>
+        /// 西部点Y坐标
+        /// </summary>
+        public decimal? WestY { get; set; }
+        /// <summary>
+        /// 西部点Z坐标
+        /// </summary>
+        public decimal? WestZ { get; set; }
+
+        /// <summary>数据状态：0正常，-1逻辑删除。</summary>
+        public int Status { get; set; }
+        /// <summary>创建人账号。</summary>
+        [MaxLength(100)] public string? CreatedBy { get; set; }
+        /// <summary>创建时间。</summary>
+        public DateTime? CreatedTime { get; set; }
+        /// <summary>最后更新人账号。</summary>
+        [MaxLength(100)] public string? UpdatedBy { get; set; }
+        /// <summary>最后更新时间。</summary>
+        public DateTime? UpdatedTime { get; set; }
+    }
+
     /// <summary>混凝土梁预拱度导入源表，保留用户原始数据。</summary>
     public class biz_concrete_beam_camber_source : IIDTable
     {
+        /// <summary>主键ID。</summary>
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int ID { get; set; }
-        public int ProjID { get; set; } public int GirderID { get; set; } public int CastingGroupID { get; set; }
+        /// <summary>所属项目ID。</summary>
+        public int ProjID { get; set; }
+        /// <summary>所属梁ID，对应项目梁表主键。</summary>
+        public int GirderID { get; set; }
+        /// <summary>所属浇筑组ID。</summary>
+        public int CastingGroupID { get; set; }
+        /// <summary>节点名称，数量、顺序和名称必须与设计坐标源表完全一致。</summary>
         [MaxLength(100)] public string NodeName { get; set; } = string.Empty;
+        /// <summary>东侧预拱度原始值，单位：米，允许为空。</summary>
         [Column(TypeName = "numeric(20,4)")] public decimal? ZE { get; set; }
+        /// <summary>中间预拱度原始值，单位：米，不允许为空。</summary>
         [Column(TypeName = "numeric(20,4)")] public decimal ZC { get; set; }
+        /// <summary>西侧预拱度原始值，单位：米，允许为空。</summary>
         [Column(TypeName = "numeric(20,4)")] public decimal? ZW { get; set; }
-        public int Status { get; set; } [MaxLength(100)] public string? CreatedBy { get; set; } public DateTime? CreatedTime { get; set; }
-        [MaxLength(100)] public string? UpdatedBy { get; set; } public DateTime? UpdatedTime { get; set; }
+        /// <summary>数据状态：0正常，-1逻辑删除。</summary>
+        public int Status { get; set; }
+        /// <summary>创建人账号。</summary>
+        [MaxLength(100)] public string? CreatedBy { get; set; }
+        /// <summary>创建时间。</summary>
+        public DateTime? CreatedTime { get; set; }
+        /// <summary>最后更新人账号。</summary>
+        [MaxLength(100)] public string? UpdatedBy { get; set; }
+        /// <summary>最后更新时间。</summary>
+        public DateTime? UpdatedTime { get; set; }
     }
     /// <summary>混凝土梁预拱度计算表，缺失的ZE或ZW使用ZC补齐。</summary>
     public class biz_concrete_beam_camber_calculation : IIDTable
     {
+        /// <summary>主键ID。</summary>
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int ID { get; set; }
-        public int ProjID { get; set; } public int GirderID { get; set; } public int CastingGroupID { get; set; }
+        /// <summary>所属项目ID。</summary>
+        public int ProjID { get; set; }
+        /// <summary>所属梁ID，对应项目梁表主键。</summary>
+        public int GirderID { get; set; }
+        /// <summary>所属浇筑组ID。</summary>
+        public int CastingGroupID { get; set; }
+        /// <summary>节点名称，与预拱度源表及设计坐标源表一致。</summary>
         [MaxLength(100)] public string NodeName { get; set; } = string.Empty;
+        /// <summary>东侧预拱度计算值；源值为空时取同一行ZC，单位：米。</summary>
         [Column(TypeName = "numeric(20,4)")] public decimal ZE { get; set; }
+        /// <summary>中间预拱度计算值，单位：米。</summary>
         [Column(TypeName = "numeric(20,4)")] public decimal ZC { get; set; }
+        /// <summary>西侧预拱度计算值；源值为空时取同一行ZC，单位：米。</summary>
         [Column(TypeName = "numeric(20,4)")] public decimal ZW { get; set; }
-        public int Status { get; set; } [MaxLength(100)] public string? CreatedBy { get; set; } public DateTime? CreatedTime { get; set; }
-        [MaxLength(100)] public string? UpdatedBy { get; set; } public DateTime? UpdatedTime { get; set; }
+        /// <summary>数据状态：0正常，-1逻辑删除。</summary>
+        public int Status { get; set; }
+        /// <summary>创建人账号。</summary>
+        [MaxLength(100)] public string? CreatedBy { get; set; }
+        /// <summary>创建时间。</summary>
+        public DateTime? CreatedTime { get; set; }
+        /// <summary>最后更新人账号。</summary>
+        [MaxLength(100)] public string? UpdatedBy { get; set; }
+        /// <summary>最后更新时间。</summary>
+        public DateTime? UpdatedTime { get; set; }
     }
 
     /// <summary>钢梁理论数据。</summary>
@@ -1300,6 +1590,54 @@ namespace DataFactory.KingBase
         [Column(TypeName = "numeric(20,4)")] public decimal MeasuredZ { get; set; }
         /// <summary>导入时间。</summary>
         public DateTime ImportTime { get; set; }
+        /// <summary>乐观锁版本号。</summary>
+        public int Version { get; set; } = 1;
+        /// <summary>数据状态：0正常，-1逻辑删除。</summary>
+        public int Status { get; set; }
+        /// <summary>创建人。</summary>
+        [MaxLength(100)] public string? CreatedBy { get; set; }
+        /// <summary>创建时间。</summary>
+        public DateTime? CreatedTime { get; set; }
+        /// <summary>最后更新人。</summary>
+        [MaxLength(100)] public string? UpdatedBy { get; set; }
+        /// <summary>最后更新时间。</summary>
+        public DateTime? UpdatedTime { get; set; }
+    }
+
+    /// <summary>
+    /// 钢梁推算坐标。
+    /// 一个顶推批次导入后，已被推出胎架、本批次无法再实测的梁段测点，
+    /// 用「上一批次 → 本批次」的刚体变换推算出的本批次坐标。
+    /// 与 biz_steel_beam_measured 严格分家：本表只存推算值，实测表只存现场实测值。
+    /// 一行 = 一个测点在一个批次下的推算坐标。
+    /// </summary>
+    public class biz_steel_beam_derived_coordinate : IIDTable
+    {
+        /// <summary>主键ID。</summary>
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int ID { get; set; }
+        /// <summary>所属项目ID。</summary>
+        public int ProjID { get; set; }
+        /// <summary>所属梁体ID，关联 biz_project_bridge.ID。</summary>
+        public int GirderID { get; set; }
+        /// <summary>所属实测批次ID，关联 biz_steel_beam_measure_batch.ID。</summary>
+        public int BatchID { get; set; }
+        /// <summary>所属批次的顶推次数，冗余便于按批次查询。</summary>
+        public int PushCount { get; set; }
+        /// <summary>来源批次的顶推次数（= PushCount - 1），用于追溯推算链路。</summary>
+        public int SourcePushCount { get; set; }
+        /// <summary>关联的理论数据ID。</summary>
+        public int TheoreticalID { get; set; }
+        /// <summary>测点编号，冗余。</summary>
+        [Required, MaxLength(50)] public string PointCode { get; set; } = string.Empty;
+        /// <summary>所属梁段号，冗余。</summary>
+        [Required, MaxLength(50)] public string SegmentNo { get; set; } = string.Empty;
+        /// <summary>推算坐标X，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal DerivedX { get; set; }
+        /// <summary>推算坐标Y，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal DerivedY { get; set; }
+        /// <summary>推算坐标Z，单位：米。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal DerivedZ { get; set; }
         /// <summary>乐观锁版本号。</summary>
         public int Version { get; set; } = 1;
         /// <summary>数据状态：0正常，-1逻辑删除。</summary>

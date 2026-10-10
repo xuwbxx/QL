@@ -25,8 +25,10 @@ body {
 /*fix elplus default setting*/
 .el-button--primary.is-link { background-color: transparent !important; color: #1261bd !important; }
 .el-button--primary.is-link:hover { background-color: transparent !important; color: #4094ff !important; }
-.el-button--primary { background-color: #1261bd !important }
-.el-button--primary:hover { background-color: #4094ff !important }
+.el-button--primary,
+.el-button--primary.is_plain { background-color: #1261bd !important; color: #f0f0f0 !important; }
+    .el-button--primary:hover,
+    .el-button--primary.is_plain:hover { background-color: #4094ff !important }
     .el-button :not(.el-button__icon) > .el-icon {
         margin-right: 6px;
     }

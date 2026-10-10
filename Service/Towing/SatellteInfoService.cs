@@ -61,8 +61,7 @@ namespace Service.Towing
                 using (var uow = _towingKingBaseUowFactory.Create())
                 {
                     var satRepo = uow.GetRepository<DataFactory.KingBase.Towing.Data_SATELLITE>();
-                    var data = satRepo.FindAll()
-                        .Where(a => a.IsDelete != true)
+                    var data = satRepo.Find(a => a.IsDelete != true)
                         .OrderByDescending(a => a.CreateTime)
                         .FirstOrDefault();
 
@@ -78,7 +77,7 @@ namespace Service.Towing
                         res.Data.UpdateTime = data.CreateTime ?? DateTime.Now;
 
                         var egyroRepo = uow.GetRepository<DataFactory.KingBase.Towing.Data_EGYRO>();
-                        var egyro = egyroRepo.FindAll().OrderByDescending(a => a.CreateTime).FirstOrDefault();
+                        var egyro = egyroRepo.Find(a => true).OrderByDescending(a => a.CreateTime).FirstOrDefault();
                         if (egyro != null)
                         {
                             res.Data.LatestDirectionAngle = egyro.AzAngle ?? 0;
@@ -109,8 +108,7 @@ namespace Service.Towing
                 using (var uow = _towingKingBaseUowFactory.Create())
                 {
                     var satRepo = uow.GetRepository<DataFactory.KingBase.Towing.Data_SATELLITE>();
-                    var data = satRepo.FindAll()
-                        .Where(a => a.IsDelete != true && a.CreateTime > LimitValues.DeviceOfflineTime)
+                    var data = satRepo.Find(a => a.IsDelete != true && a.CreateTime > LimitValues.DeviceOfflineTime)
                         .OrderByDescending(a => a.CreateTime)
                         .FirstOrDefault();
 
@@ -126,7 +124,7 @@ namespace Service.Towing
                         res.Data.UpdateTime = data.CreateTime ?? DateTime.Now;
 
                         var egyroRepo = uow.GetRepository<DataFactory.KingBase.Towing.Data_EGYRO>();
-                        var egyro = egyroRepo.FindAll().OrderByDescending(a => a.CreateTime).FirstOrDefault();
+                        var egyro = egyroRepo.Find(a => true).OrderByDescending(a => a.CreateTime).FirstOrDefault();
                         if (egyro != null)
                         {
                             res.Data.LatestDirectionAngle = egyro.AzAngle ?? 0;
@@ -161,8 +159,7 @@ namespace Service.Towing
                     startTime = startTime ?? DateTime.MinValue;
                     endTime = endTime ?? DateTime.Now;
 
-                    var list = satRepo.FindAll()
-                        .Where(a => a.IsDelete != true
+                    var list = satRepo.Find(a => a.IsDelete != true
                             && a.CreateTime > startTime
                             && a.CreateTime <= endTime)
                         .OrderBy(a => a.CreateTime)
@@ -172,7 +169,7 @@ namespace Service.Towing
                     {
                         // 若开始时间未设置，则包含项目起点
                         var basicRepo = uow.GetRepository<DataFactory.KingBase.Towing.Manage_Basic>();
-                        var prjInfo = basicRepo.FindAll().FirstOrDefault(a => a.IsDelete != true);
+                        var prjInfo = basicRepo.Find(a => a.IsDelete != true).FirstOrDefault();
                         if (prjInfo != null)
                         {
                             var item = new SatellteInfo()
@@ -223,7 +220,7 @@ namespace Service.Towing
                             else
                             {
                                 var egyroRepo = uow.GetRepository<DataFactory.KingBase.Towing.Data_EGYRO>();
-                                var egyro = egyroRepo.FindAll().OrderByDescending(a => a.CreateTime).FirstOrDefault();
+                                var egyro = egyroRepo.Find(a => true).OrderByDescending(a => a.CreateTime).FirstOrDefault();
                                 if (egyro != null)
                                 {
                                     res.List[res.List.Count - 1].LatestDirectionAngle = egyro.AzAngle == null ? 0 : NavigationalStatusService.AZangleConvert(egyro.AzAngle.Value);
@@ -260,8 +257,7 @@ namespace Service.Towing
                     startTime = startTime ?? DateTime.MinValue;
                     endTime = endTime ?? DateTime.Now;
 
-                    var list = satRepo.FindAll()
-                        .Where(a => a.IsDelete != true
+                    var list = satRepo.Find(a => a.IsDelete != true
                             && a.CreateTime > startTime
                             && a.CreateTime <= endTime)
                         .OrderBy(a => a.CreateTime)
@@ -273,7 +269,7 @@ namespace Service.Towing
                     {
                         // 若开始时间未设置，则包含项目起点
                         var basicRepo = uow.GetRepository<DataFactory.KingBase.Towing.Manage_Basic>();
-                        var prjInfo = basicRepo.FindAll().FirstOrDefault(a => a.IsDelete != true);
+                        var prjInfo = basicRepo.Find(a => a.IsDelete != true).FirstOrDefault();
                         if (prjInfo != null)
                         {
                             var item = new SatellteInfo()
@@ -304,7 +300,7 @@ namespace Service.Towing
                         if (res.List.Count > 0)
                         {
                             var egyroRepo = uow.GetRepository<DataFactory.KingBase.Towing.Data_EGYRO>();
-                            var egyro = egyroRepo.FindAll().OrderByDescending(a => a.CreateTime).FirstOrDefault();
+                            var egyro = egyroRepo.Find(a => true).OrderByDescending(a => a.CreateTime).FirstOrDefault();
                             if (egyro != null)
                             {
                                 res.List[res.List.Count - 1].LatestDirectionAngle = egyro.AzAngle ?? 0;

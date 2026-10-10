@@ -21,21 +21,21 @@
         public double? bowSternSpeedWater { set; get; }
 
 
-        public string bth1DpModel { set; get; }
-        public string bth2DpModel { set; get; }
+        public string? bth1DpModel { set; get; }
+        public string? bth2DpModel { set; get; }
 
 
-        public string callSign { set; get; }
+        public string? callSign { set; get; }
 
         public double? cog { set; get; }
 
         public long? createdAt { set; get; }
 
-        public string destination { set; get; }
+        public string? destination { set; get; }
 
         public double? dte { set; get; }
 
-        public string eta { set; get; }
+        public string? eta { set; get; }
 
         public double? gpsLatitude { set; get; }
 
@@ -43,15 +43,15 @@
 
         public double? heading { set; get; }
 
-        public string headingType { set; get; }
+        public string? headingType { set; get; }
 
         public int? id { set; get; }
 
-        public string imo { set; get; }
+        public string? imo { set; get; }
 
-        public string latitudeDirection { set; get; }
+        public string? latitudeDirection { set; get; }
 
-        public string longitudeDirection { set; get; }
+        public string? longitudeDirection { set; get; }
 
         public double? mainLift1ActualLoad { set; get; }
         public double? mainLift1Height { set; get; }
@@ -61,19 +61,19 @@
         public double? mainLift2RatedLoad { set; get; }
         public double? maxDraught { set; get; }
 
-        public string mp1AutoRudderModel { set; get; }
+        public string? mp1AutoRudderModel { set; get; }
 
-        public string mp1DpModel { set; get; }
+        public string? mp1DpModel { set; get; }
 
-        public string mp2AutoRudderModel { set; get; }
+        public string? mp2AutoRudderModel { set; get; }
 
-        public string mp2DpModel { set; get; }
+        public string? mp2DpModel { set; get; }
 
-        public string mp3AutoRudderModel { set; get; }
+        public string? mp3AutoRudderModel { set; get; }
 
-        public string mp3DpModel { set; get; }
+        public string? mp3DpModel { set; get; }
 
-        public string navigateStatus { set; get; }
+        public string? navigateStatus { set; get; }
 
         public double? pitch { set; get; }
 
@@ -83,31 +83,31 @@
 
         public double? posmruS { set; get; }
 
-        public string reference { set; get; }
+        public string? reference { set; get; }
 
         public double? roll { set; get; }
 
         public double? rot { set; get; }
 
-        public string runStatus { set; get; }
+        public string? runStatus { set; get; }
 
-        public string shipCode { set; get; }
+        public string? shipCode { set; get; }
 
-        public string shipName { set; get; }
+        public string? shipName { set; get; }
 
-        public string shipTypeAndCargoType { set; get; }
+        public string? shipTypeAndCargoType { set; get; }
 
         public double? sog { set; get; }
 
-        public string speedGroundStatus { set; get; }
+        public string? speedGroundStatus { set; get; }
 
-        public string speedWaterStatus { set; get; }
+        public string? speedWaterStatus { set; get; }
 
         public double? sternSpeedGround { set; get; }
 
         public double? sternSpeedWater { set; get; }
 
-        public string sternSpeedWaterStatus { set; get; }
+        public string? sternSpeedWaterStatus { set; get; }
 
         public double? totalDistanceGround { set; get; }
 
@@ -133,7 +133,7 @@
         public double? windAngle { set; get; }
         public double? windSpeed { set; get; }
 
-        public string windSpeedUnit { set; get; }
+        public string? windSpeedUnit { set; get; }
 
         public double? yaw { set; get; }
     }
@@ -562,11 +562,11 @@
 
         }
 
-        public string FileName { set; get; }
+        public string? FileName { set; get; }
 
-        public string FilePath { set; get; }
+        public string? FilePath { set; get; }
 
-        public string FileContent { set; get; }
+        public string? FileContent { set; get; }
 
     }
 }

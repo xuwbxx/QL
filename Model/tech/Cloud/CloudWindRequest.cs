@@ -254,9 +254,9 @@ namespace Model.Tech.Cloud
 
     public class CloudWindCollectPoint_QXSJ
     {
-        public double? PointLon { set; get; }
+        public string? PointLon { set; get; }
 
-        public double? PointLat { set; get; }
+        public string? PointLat { set; get; }
 
         public string PointName { set; get; }
 

@@ -2,7 +2,14 @@
     var Vue = window.Vue;
     var ElementPlus = window.ElementPlus;
     var ElMessage = ElementPlus.ElMessage;
-
+    var appI18n = window.appI18n;
+    // 中英文切换（与父页面语言同步，含 ElementPlus 内置文案）
+    initIframeLangSync({
+        ElementPlus: ElementPlus,
+        appI18n: appI18n,
+        localeEn: ElementPlusLocaleEn,
+        localeZh: ElementPlusLocaleZhCn
+    });
     var app = Vue.createApp({
         setup: function () {
             var loading = Vue.ref(false);
@@ -72,7 +79,7 @@
 
             function handleLinearControl(row) {
                 var id = row.id || row.ID;
-                var name = row.castingGroupName || row.CastingGroupName || '线性管控';
+                var name = row.castingGroupName || row.CastingGroupName || i18nUtils.$t('biz.concreteBeam.linearControl');
                 var url = '/Biz/ConcreteBeam/LinearControl?id=' + id;
                 if (window.parent && window.parent.openInNewTab) {
                     window.parent.openInNewTab(name, url);
@@ -105,8 +112,20 @@
         }
     });
 
+    // 注册 Vue I18n
+    app.use(appI18n);
+    
     app.use(ElementPlus, {
         locale: ElementPlusLocaleZhCn
     });
+
+    if (window.ElementPlusIconsVue) {
+        for (var key in window.ElementPlusIconsVue) {
+            if (window.ElementPlusIconsVue[key]) {
+                app.component(key, window.ElementPlusIconsVue[key]);
+            }
+        }
+    }
+
     app.mount('#app');
 });

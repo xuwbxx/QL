@@ -103,7 +103,7 @@ namespace Service.Towing
                     {
                         proj = new Manage_Project();
                         proj.IsDelete = false;
-                        proj.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                        proj.CreateTime = DateTime.Now;
                         projRepo.Add(proj);
                     }
                     proj.ProjectName = info.ProjectName;
@@ -116,7 +116,7 @@ namespace Service.Towing
                     {
                         projBasic = new Manage_Basic();
                         projBasic.IsDelete = false;
-                        projBasic.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                        projBasic.CreateTime = DateTime.Now;
                         basicRepo.Add(projBasic);
                     }
                     projBasic.ProjectStartTime = info.ProjectStartTime;
@@ -131,7 +131,7 @@ namespace Service.Towing
                     {
                         ship = new Manage_Ship();
                         ship.IsDelete = false;
-                        ship.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                        ship.CreateTime = DateTime.Now;
                         shipRepo.Add(ship);
                     }
                     ship.mmsi = info.MMSI;

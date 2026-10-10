@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Service.Base;
+using Service.Wind;
 using Service.Wind.BackManage;
 using WindCloud.Areas.Base.Controllers;
 
@@ -8,8 +9,8 @@ namespace WindCloud.Areas.BackManage.Controllers
     [Area("BackManage")]
     public class WebGisController : WebEncryptionController
     {
-        public WebGisController(CookieService cookieService, Service.Wind.WebValidateService webValidateService)
-            : base(cookieService, webValidateService)
+        public WebGisController(CookieService cookieService, Service.Wind.WebValidateService webValidateService, ProjectService projectService)
+            : base(cookieService, projectService, webValidateService)
         {
 
         }

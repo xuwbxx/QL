@@ -1,0 +1,401 @@
+﻿
+@{
+    ViewBag.Title = "项目详情";
+    Layout = "~/Views/Shared/MobileLayout.cshtml";
+}
+<input type="hidden" id="hid_ProjectID" value="@ViewData["ProjectID"].ToString()" />
+<input type="hidden" id="hid_PostToken" value="@ViewData["PostToken"].ToString()" />
+
+<header>
+    <div class="left_logo" onclick="DoBack();"><i class="fa fa-chevron-left"></i></div>项目详情
+    <span class="icon_user">@ViewData["UserName"].ToString()</span>
+</header>
+<div class="height88"></div>
+
+
+<div class="xmxq_box clearfix mt015">
+    <div class="col-md-4 col-xs-4 col-sm-4 text-left xmxq_attribute">
+        风场名
+    </div>
+    <div class="col-md-8 col-xs-8 col-sm-8 text-right xmxq_name" id="div_ProjectName">
+        苍南3号海上风电场
+    </div>
+</div>
+<div class="xmxq_box clearfix">
+    <div class="col-md-4 col-xs-4 col-sm-4 text-left xmxq_attribute">
+        风场编号
+    </div>
+    <div class="col-md-8 col-xs-8 col-sm-8 text-right xmxq_name" id="div_ProjectCode">
+        OW1040
+    </div>
+</div>
+<div class="xmxq_box02 clearfix">
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>风场区域坐标
+    </div>
+
+    <div class="xmxq_table_box col-md-12 col-xs-12 col-sm-12 p0">
+        <table class="table table-striped xmxq_table">
+            <thead>
+                <tr>
+                    <th width="20%">区域编号</th>
+                    <th width="40%">经度</th>
+                    <th width="40%">纬度</th>
+                </tr>
+            </thead>
+            <tbody id="html_ProjectAreaList">
+                <tr>
+                    <td>1</td>
+                    <td>121.24345</td>
+                    <td>30.324435</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>121.24345</td>
+                    <td>30.324435</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>121.24345</td>
+                    <td>30.324435</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>121.24345</td>
+                    <td>30.324435</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>121.24345</td>
+                    <td>30.324435</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<div class="xmxq_box02 clearfix">
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>风机坐标
+    </div>
+    <div class="xmxq_table_box col-md-12 col-xs-12 col-sm-12 p0">
+        <table class="table table-striped xmxq_table">
+            <thead>
+                <tr>
+                    <th width="20%">机位号</th>
+                    <th width="40%">经度</th>
+                    <th width="40%">纬度</th>
+                </tr>
+            </thead>
+            <tbody id="html_FanAreaList">
+                <tr>
+                    <td>1#</td>
+                    <td>121.24345</td>
+                    <td>30.324435</td>
+                </tr>
+                <tr>
+                    <td>2#</td>
+                    <td>121.24345</td>
+                    <td>30.324435</td>
+                </tr>
+                <tr>
+                    <td>3#</td>
+                    <td>121.24345</td>
+                    <td>30.324435</td>
+                </tr>
+                <tr>
+                    <td>4#</td>
+                    <td>121.24345</td>
+                    <td>30.324435</td>
+                </tr>
+                <tr>
+                    <td>5#</td>
+                    <td>121.24345</td>
+                    <td>30.324435</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<div class="xmxq_box02 clearfix">
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>项目基本信息
+    </div>
+
+    <div class="xmxq_table_box col-md-12 col-xs-12 col-sm-12 p0">
+
+        <div class="xmxq_box clearfix mt02">
+            <div class="col-md-4 col-xs-4 col-sm-4 text-left xmxq_attribute">
+                所属分公司
+            </div>
+            <div class="col-md-8 col-xs-8 col-sm-8 text-right xmxq_name" id="div_Company">
+                宁波分公司
+            </div>
+        </div>
+        <div class="xmxq_box clearfix mt02">
+            <div class="col-md-4 col-xs-4 col-sm-4 text-left xmxq_attribute">
+                项目状态
+            </div>
+            <div class="col-md-8 col-xs-8 col-sm-8 text-right xmxq_name">
+                <span class="color_orange" id="span_ProjectStatus">在建</span>
+            </div>
+        </div>
+        <div class="xmxq_box clearfix mt02">
+            <div class="col-md-4 col-xs-4 col-sm-4 text-left xmxq_attribute">
+                最小水深（米）
+            </div>
+            <div class="col-md-8 col-xs-8 col-sm-8 text-right xmxq_name" id="div_WaterDepthMin">
+                30
+            </div>
+        </div>
+        <div class="xmxq_box clearfix mt02">
+            <div class="col-md-4 col-xs-4 col-sm-4 text-left xmxq_attribute">
+                最大水深（米）
+            </div>
+            <div class="col-md-8 col-xs-8 col-sm-8 text-right xmxq_name" id="div_WaterDepthMax">
+                30
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="xmxq_box02 clearfix">
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>项目资料
+    </div>
+
+    <div class="xmxq_table_box col-md-12 col-xs-12 col-sm-12 p0">
+        <table class="table table-striped xmxq_table">
+            <thead>
+                <tr>
+                    <th width="50%">文件名</th>
+                    <th width="25%">上传时间</th>
+                    <th width="25%">操作</th>
+                </tr>
+            </thead>
+            <tbody id="html_ProjectFile">
+                <tr>
+                    <td>10932940.pdf</td>
+                    <td>2021-02-22 09:32</td>
+                    <td><button type="button" class="btn btn-primary">下载</button></td>
+                </tr>
+                <tr>
+                    <td>10932940.pdf</td>
+                    <td>2021-02-22 09:32</td>
+                    <td><button type="button" class="btn btn-primary">下载</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<div class="xmxq_box02 clearfix">
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>机孔位地勘原始资料
+    </div>
+
+    <div class="xmxq_table_box col-md-12 col-xs-12 col-sm-12 p0">
+        <table class="table table-striped xmxq_table">
+            <thead>
+                <tr>
+                    <th width="50%">文件名</th>
+                    <th width="25%">上传时间</th>
+                    <th width="25%">操作</th>
+                </tr>
+            </thead>
+            <tbody id="html_dkyszlFile">
+                <tr>
+                    <td>10932940.pdf</td>
+                    <td>2021-02-22 09:32</td>
+                    <td><button type="button" class="btn btn-primary">下载</button></td>
+                </tr>
+                <tr>
+                    <td>10932940.pdf</td>
+                    <td>2021-02-22 09:32</td>
+                    <td><button type="button" class="btn btn-primary">下载</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<div class="xmxq_box02 clearfix">
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>机孔位地勘数据表
+    </div>
+
+    <div class="xmxq_table_box col-md-12 col-xs-12 col-sm-12 p0">
+        <table class="table table-striped xmxq_table">
+            <thead>
+                <tr>
+                    <th width="50%">文件名</th>
+                    <th width="25%">上传时间</th>
+                    <th width="25%">操作</th>
+                </tr>
+            </thead>
+            <tbody id="html_dksjbFile">
+                <tr>
+                    <td>10932940.pdf</td>
+                    <td>2021-02-22 09:32</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>10932940.pdf</td>
+                    <td>2021-02-22 09:32</td>
+                    <td><button type="button" class="btn btn-primary">下载</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<div class="xmxq_box03 clearfix">
+
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>项目经理
+    </div>
+
+    <div class="col-md-12 col-xs-12 col-sm-12 mt015" id="div_ProjectManager">
+        徐锁林（三航局-技术中心-总部-海洋工程研究所-三航局-技术中心-总部-海洋工程研究所）
+    </div>
+</div>
+
+<div class="xmxq_box03 clearfix">
+
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>项目组成员
+    </div>
+
+    <div id="div_ProjectRoles">
+        <div class="col-md-12 col-xs-12 col-sm-12 mt015" id="">
+            徐锁林（三航局-技术中心-总部-海洋工程研究所-三航局-技术中心-总部-海洋工程研究所）
+        </div>
+        <div class="col-md-12 col-xs-12 col-sm-12 mt015" id="">
+            徐锁林（三航局-技术中心-总部-海洋工程研究所-三航局-技术中心-总部-海洋工程研究所）
+        </div>
+        <div class="col-md-12 col-xs-12 col-sm-12 mt015" id="">
+            徐锁林（三航局-技术中心-总部-海洋工程研究所-三航局-技术中心-总部-海洋工程研究所）
+        </div>
+    </div>
+    
+</div>
+
+<div class="xmxq_box clearfix">
+    <div class="col-md-4 col-xs-4 col-sm-4 text-left xmxq_title">
+        <span></span>项目使用期限
+    </div>
+    <div class="col-md-8 col-xs-8 col-sm-8 text-right xmxq_name" id="div_ProjectTimeLimit">
+        2022-06-27至2024-09-27
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+
+        Query();
+
+    })
+
+    var Param = {};
+    var ParamInit = function () {
+
+    }
+
+    var Query = function () {
+
+        //OpenMaskLayout();
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        Param.ProjectID = $('#hid_ProjectID').val();
+        $.post('ProjectInfoQuery', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+
+                    if (data.Success) {
+
+                        $('#div_ProjectName').html(data.Data.ProjectName);
+                        $('#div_ProjectCode').html(data.Data.ProjectCode);
+
+                        var ProjectAreaHtml = '';
+                        var PositionCount = 1;
+                        $(data.Data.ProjectPosition).each(function (index, dom) {
+
+                            ProjectAreaHtml += '<tr><td>' + PositionCount + '</td ><td>' + dom.Lon + '</td><td>' + dom.Lat + '</td></tr>';
+                            PositionCount++;
+                        })
+                        $('#html_ProjectAreaList').html(ProjectAreaHtml);
+
+                        var ProjectFanHtml = '';
+                        $(data.Data.ProjectFan).each(function (index, dom) {
+
+                            ProjectFanHtml += '<tr><td>' + dom.FanName + '</td ><td>' + dom.Lon + '</td><td>' + dom.Lat + '</td></tr>';
+                        })
+                        $('#html_FanAreaList').html(ProjectFanHtml);
+
+                        $('#div_Company').html(data.Data.ProjectInfo.Company);
+                        $('#span_ProjectStatus').html(data.Data.ProjectInfo.ProjectStatus);
+                        //$('#div_WaterDepth').html(data.Data.ProjectInfo.WaterDepth);
+                        $('#div_WaterDepthMin').html(data.Data.ProjectInfo.WaterDepthMin);
+                        $('#div_WaterDepthMax').html(data.Data.ProjectInfo.WaterDepthMax);
+
+                        var ProjectFileHtml = '';
+                        $(data.Data.ProjectFile).each(function (index, dom) {
+
+                            ProjectFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a class="btn btn-primary" download="' + dom.FileName + '" href="' + dom.FilePath + '">下载</a></td></tr>';
+
+                        })
+                        $('#html_ProjectFile').html(ProjectFileHtml);
+
+                        var dkyszlFileHtml = '';
+                        $(data.Data.File_dkyszl).each(function (index, dom) {
+
+                            dkyszlFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a class="btn btn-primary" download="' + dom.FileName + '" href="' + dom.FilePath + '">下载</a></td></tr>';
+
+                        })
+                        $('#html_dkyszlFile').html(dkyszlFileHtml);
+
+                        var dksjbFileHtml = '';
+                        $(data.Data.File_dksjb).each(function (index, dom) {
+
+                            dksjbFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a class="btn btn-primary" download="' + dom.FileName + '" href="' + dom.FilePath + '">下载</a></td></tr>';
+
+                        })
+                        $('#html_dksjbFile').html(dksjbFileHtml);
+
+                        $('#div_ProjectManager').html(data.Data.ProjectManager.UserName + '(' + data.Data.ProjectManager.UserDepart + ')');
+
+                        var ProjectRoleHtml = '';
+                        $(data.Data.ProjectGroupUser).each(function (index, dom) {
+
+                            ProjectRoleHtml += '<div class="col-md-12 col-xs-12 col-sm-12 mt015">' + dom.UserName + '(' + dom.UserDepart + ')</div>';
+
+                        })
+                        $('#div_ProjectRoles').html(ProjectRoleHtml);
+
+
+                        $('#div_ProjectLimitTime').html(data.Data.ProjectStartTime + ' 至 ' + data.Data.ProjectEndTime);
+
+                    }
+
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+                //Pagination();
+            });
+
+    }
+
+    var DoBack = function () {
+
+        window.location.href = "Index";
+
+    }
+
+</script>

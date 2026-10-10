@@ -179,4 +179,58 @@ namespace Tool
         }
         #endregion
     }
+
+    /// <summary>
+    /// AES加解密工具类
+    /// </summary>
+    public class CryptographyExtUtils
+    {
+        private const string FixedKey = "9s7G2pQ5kLzX8cR6aT4bV1mN0dF3hJ7w";
+        private const string FixedIV = "P8s2Kf5zBn7gQr9x";
+
+        private static readonly byte[] _keyBytes = Encoding.UTF8.GetBytes(FixedKey);
+        private static readonly byte[] _ivBytes = Encoding.UTF8.GetBytes(FixedIV);
+
+        public static string Encrypt(string plainText)
+        {
+            if (string.IsNullOrEmpty(plainText)) return string.Empty;
+            using (var aes = Aes.Create())
+            {
+                aes.Key = _keyBytes;
+                aes.IV = _ivBytes;
+                aes.Mode = CipherMode.CBC;
+                aes.Padding = PaddingMode.PKCS7;
+                using (var encryptor = aes.CreateEncryptor())
+                using (var ms = new MemoryStream())
+                using (var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
+                using (var sw = new StreamWriter(cs))
+                {
+                    sw.Write(plainText);
+                    sw.Flush();
+                    cs.FlushFinalBlock();
+                    return Convert.ToBase64String(ms.ToArray());
+                }
+            }
+        }
+
+        public static string Decrypt(string cipherText)
+        {
+            if (string.IsNullOrEmpty(cipherText)) return string.Empty;
+            using (var aes = Aes.Create())
+            {
+                aes.Key = _keyBytes;
+                aes.IV = _ivBytes;
+                aes.Mode = CipherMode.CBC;
+                aes.Padding = PaddingMode.PKCS7;
+                using (var decryptor = aes.CreateDecryptor())
+                using (var ms = new MemoryStream(Convert.FromBase64String(cipherText)))
+                using (var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+                using (var sr = new StreamReader(cs))
+                {
+                    return sr.ReadToEnd();
+                }
+            }
+        }
+    }
+
 }

@@ -11,7 +11,9 @@ namespace Service.PreAssembled
     {
         public async Task<List<BizProjectItemDTO>> List(BizProjectQueryDTO req)
         {
-            var query = Db.Query<biz_project>().Where(a => a.Status != -1);
+            var projIDList = GetValidProjectIDs();
+            var query = Db.Query<biz_project>().Where(a => a.Status != -1)
+                .Where(a => projIDList.Contains(a.ID));
 
             if (!string.IsNullOrEmpty(req?.Name))
                 query = query.Where(a => a.Name.Contains(req.Name));

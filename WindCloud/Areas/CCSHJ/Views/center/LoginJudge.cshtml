@@ -1,0 +1,27 @@
+﻿
+@{
+    ViewBag.Title = "LoginJudge";
+    Layout = "~/Views/Shared/BlankLayout.cshtml";
+}
+
+<h2>跳转中......</h2>
+
+<script>
+    $(document).ready(function () {
+
+        if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+            // 当前设备是移动设备
+
+            window.location.href = "/Mobile/Project/Index";
+
+        }
+        else
+        {
+            //window.location.href = "/Cloud/Project/Index";
+            window.location.href = "/WindDoor/Main/Index";
+        }
+
+    })
+
+</script>
+

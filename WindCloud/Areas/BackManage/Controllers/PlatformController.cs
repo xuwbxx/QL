@@ -2,6 +2,7 @@
 using Model.Base;
 using Model.Tech.Cloud.BackManage;
 using Service.Base;
+using Service.Wind;
 using Service.Wind.BackManage;
 using Tool;
 using WindCloud.Areas.Base.Controllers;
@@ -13,8 +14,8 @@ namespace WindCloud.Areas.BackManage.Controllers
     {
         private readonly BackPlatformService _platformService;
 
-        public PlatformController(CookieService cookieService, Service.Wind.WebValidateService webValidateService, BackPlatformService platformService)
-            : base(cookieService, webValidateService)
+        public PlatformController(CookieService cookieService, Service.Wind.WebValidateService webValidateService, ProjectService projectService, BackPlatformService platformService)
+            : base(cookieService, projectService, webValidateService)
         {
             _platformService = platformService;
         }

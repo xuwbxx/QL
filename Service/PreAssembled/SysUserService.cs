@@ -93,59 +93,35 @@ namespace Service.PreAssembled
                 }
             }
 
-            var rep = Db.GetRepository<sys_userinfo>();
-            sys_userinfo entity;
-
-            if (dto.ID == 0)
+            var entityId = SaveInt<SysUserSaveDTO, sys_userinfo>(dto, (item) =>
             {
-                entity = new sys_userinfo();
-                ObjectUtils.CopyObjectValue(dto, entity);
-                entity.Status = 1;
-                if (!string.IsNullOrEmpty(dto.Password))
+                var data = new sys_userinfo();
+                ObjectUtils.CopyObjectValue(item, data);
+                data.Status = 1;
+                if (!string.IsNullOrEmpty(item.Password))
                 {
-                    entity.PasswordHash = dto.Password;
+                    data.PasswordHash = item.Password;
                 }
-                rep.Add(entity);
-                Db.Save();
-            }
-            else
-            {
-                entity = rep.FindByID(dto.ID);
-                if (entity == null) throw new Exception("用户不存在");
-
-                entity.Account = dto.Account;
-                entity.Name = dto.Name;
-                entity.EmpNo = dto.EmpNo;
-                entity.Mobile = dto.Mobile;
-                entity.Email = dto.Email;
-                entity.DeptOID = dto.DeptOID;
-                entity.DeptName = dto.DeptName;
-                if (!string.IsNullOrEmpty(dto.Password))
+                else if (item.ID != 0)
                 {
-                    entity.PasswordHash = dto.Password;
-                }
-                try
-                {
-                    Db.Save();
-                }
-                catch (Exception ex)
-                {
-                    var fullMsg = ex.Message;
-                    var inner = ex;
-                    while (inner.InnerException != null)
+                    var existing = Db.Query<sys_userinfo>().FirstOrDefault(a => a.ID == item.ID);
+                    if (existing != null)
                     {
-                        inner = inner.InnerException;
-                        fullMsg += " | " + inner.Message;
+                        data.PasswordHash = existing.PasswordHash;
                     }
-                    LoggerUtils.Error($"SaveUser-更新用户失败: {fullMsg}", typeof(SysUserService));
-                    throw new Exception(fullMsg);
                 }
+                return data;
+            });
+
+            if (entityId == 0)
+            {
+                throw new Exception("保存用户失败");
             }
 
             // 保存角色关联 - 物理删除所有旧关联（含软删除记录），避免唯一约束冲突
             var roleRep = Db.GetRepository<sys_user_role>();
             var oldRoles = Db.Query<sys_user_role>()
-                .Where(a => a.UserID == entity.ID).ToList();
+                .Where(a => a.UserID == entityId).ToList();
             foreach (var old in oldRoles)
             {
                 roleRep.Delete(old);
@@ -169,19 +145,23 @@ namespace Service.PreAssembled
 
             if (dto.RoleIds != null && dto.RoleIds.Count > 0)
             {
+                var account = CurrUser?.Account ?? "system";
+                var now = DateTime.UtcNow;
                 foreach (var roleId in dto.RoleIds)
                 {
                     roleRep.Add(new sys_user_role
                     {
-                        UserID = entity.ID,
+                        UserID = entityId,
                         RoleID = roleId,
-                        Status = 1
+                        Status = 1,
+                        CreatedBy = account,
+                        CreatedTime = now
                     });
                 }
                 Db.Save();
             }
 
-            return entity.ID;
+            return entityId;
         }
 
         public int DeleteUser(int userId)
@@ -198,6 +178,8 @@ namespace Service.PreAssembled
                 }
 
                 user.Status = -1;
+                user.UpdatedBy = CurrUser?.Account ?? "system";
+                user.UpdatedTime = DateTime.UtcNow;
                 Db.Save();
                 return userId;
             }
@@ -210,6 +192,8 @@ namespace Service.PreAssembled
             if (user != null)
             {
                 user.PasswordHash = defaultPassword;
+                user.UpdatedBy = CurrUser?.Account ?? "system";
+                user.UpdatedTime = DateTime.UtcNow;
                 Db.Save();
                 return true;
             }
@@ -222,6 +206,8 @@ namespace Service.PreAssembled
             if (user == null) throw new Exception("用户不存在");
             if (user.PasswordHash != oldPasswordHash) throw new Exception("旧密码错误");
             user.PasswordHash = newPasswordHash;
+            user.UpdatedBy = CurrUser?.Account ?? "system";
+            user.UpdatedTime = DateTime.UtcNow;
             Db.Save();
             return true;
         }
@@ -315,7 +301,7 @@ namespace Service.PreAssembled
                             from usr in db.Query<sys_userinfo>().Where(a => a.Status != -1 && a.ID == um.UserID)
                             where usr.Account == usrAccount
                             select menu;
-                List<SysUserMenuDTO> list = GetList(query, (data) =>
+                List<SysUserMenuDTO> list = GetList(query.Distinct(), (data) =>
                 {
                     var item = new SysUserMenuDTO();
                     ObjectUtils.CopyObjectValue(data, item);

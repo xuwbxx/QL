@@ -1,0 +1,189 @@
+﻿
+@{
+    ViewBag.Title = "文件报告获取";
+    Layout = "~/Views/Shared/MobileLayout.cshtml";
+}
+
+<input type="hidden" id="hid_TaskID" value="@ViewData["TaskID"].ToString()" />
+<input type="hidden" id="hid_PostToken" value="@ViewData["PostToken"].ToString()" />
+
+<header>
+    <div class="left_logo" onclick="DoBack();"><i class="fa fa-chevron-left"></i></div>@ViewData["SoftwareName"].ToString()
+    <span class="icon_user">@ViewData["UserName"].ToString()</span>
+</header>
+<div class="height88"></div>
+
+<div class="xmxq_box clearfix mt015">
+    <div class="col-md-4 col-xs-4 col-sm-4 text-left xmxq_attribute">
+        风场名
+    </div>
+    <div class="col-md-8 col-xs-8 col-sm-8 text-right xmxq_name" id="div_ProjectName">
+        @ViewData["ProjectName"].ToString()
+    </div>
+</div>
+<div class="xmxq_box clearfix">
+    <div class="col-md-4 col-xs-4 col-sm-4 text-left xmxq_attribute">
+        任务编号
+    </div>
+    <div class="col-md-8 col-xs-8 col-sm-8 text-right xmxq_name" id="div_TaskCode">
+        @ViewData["TaskCode"].ToString()
+    </div>
+</div>
+<div class="xmxq_box clearfix" style="height:auto;">
+    <div class="col-md-4 col-xs-4 col-sm-4 text-left xmxq_attribute">
+        任务名称
+    </div>
+    <div class="col-md-8 col-xs-8 col-sm-8 text-right xmxq_name" id="div_TaskName">
+        @ViewData["TaskName"].ToString()
+    </div>
+</div>
+<div class="xmxq_box clearfix" style="height:auto;">
+    <div class="col-md-4 col-xs-4 col-sm-4 text-left xmxq_attribute">
+        任务时间
+    </div>
+    <div class="col-md-8 col-xs-8 col-sm-8 text-right xmxq_name" id="div_TaskName">
+        @ViewData["TaskTime"].ToString()
+    </div>
+</div>
+
+
+
+
+<div class="xmxq_box02 clearfix">
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>输出文件
+    </div>
+
+    <div class="xmxq_table_box col-md-12 col-xs-12 col-sm-12 p0" id="div_ExportFile">
+        <table class="table table-striped xmxq_table">
+            <thead>
+                <tr>
+                    <th width="50%">文件名</th>
+                    <th width="25%">上传时间</th>
+                    <th width="25%">操作</th>
+                </tr>
+            </thead>
+            <tbody id="html_ExportFile">
+                <tr>
+                    <td>10932940.pdf</td>
+                    <td>2021-02-22 09:32</td>
+                    <td><button type="button" class="btn btn-primary">下载</button></td>
+                </tr>
+                <tr>
+                    <td>10932940.pdf</td>
+                    <td>2021-02-22 09:32</td>
+                    <td><button type="button" class="btn btn-primary">下载</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+
+<div class="xmxq_box02 clearfix">
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>输入文件
+    </div>
+
+    <div class="xmxq_table_box col-md-12 col-xs-12 col-sm-12 p0">
+        <table class="table table-striped xmxq_table">
+            <thead>
+                <tr>
+                    <th width="50%">文件名</th>
+                    <th width="25%">上传时间</th>
+                    <th width="25%">操作</th>
+                </tr>
+            </thead>
+            <tbody id="html_ImportFile">
+                <tr>
+                    <td>10932940.pdf</td>
+                    <td>2021-02-22 09:32</td>
+                    <td><button type="button" class="btn btn-primary">下载</button></td>
+                </tr>
+                <tr>
+                    <td>10932940.pdf</td>
+                    <td>2021-02-22 09:32</td>
+                    <td><button type="button" class="btn btn-primary">下载</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+
+    $(document).ready(function () {
+
+        ParamInit();
+        LoadFile();
+    })
+
+    var Param = {};
+    var ParamInit = function () {
+        Param.ReportSize = 100;
+        Param.TaskID = $('#hid_TaskID').val();
+    }
+
+    var ClearTaskForm = function () {
+
+        $('#html_ExportFile').html('');
+        $('#html_ImportFile').html('');
+    }
+
+    var LoadFile = function () {
+
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('GetTaskReport', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+
+                    if (data.Success) {
+
+                        //div_ExportFile
+
+                        if (data.Data.TypeID == 3) {
+                            $('#div_ExportFile').removeClass('xmxq_table_box').addClass('xmxq_table_box8');
+                        }
+
+                        var ExportFileHtml = '';
+                        $(data.Data.ExportFiles).each(function (index, dom) {
+
+                            ExportFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a></td></tr>';
+                        })
+
+                        var ImportFileHtml = '';
+                        $(data.Data.ImportFiles).each(function (index, dom) {
+
+                            ImportFileHtml += '<tr><td>' + dom.FileName + '</td><td>' + dom.FileTime + '</td><td><a href="' + dom.FilePath + '" class="xm_zt_green" download="' + dom.FileName + '">下载</a></td></tr>';
+                        })
+
+                        $('#html_ExportFile').html(ExportFileHtml);
+                        $('#html_ImportFile').html(ImportFileHtml);
+
+
+
+
+                    }
+
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+                //Pagination();
+            });
+
+    }
+
+
+    var DoBack = function () {
+
+        window.location.href = "Index";
+
+    }
+
+
+</script>

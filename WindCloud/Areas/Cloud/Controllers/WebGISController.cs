@@ -15,8 +15,8 @@ namespace WindCloud.Areas.Cloud.Controllers
 
         public WebGISService _webGISService;
 
-        public WebGISController(CookieService cookieService, ProjectService projectService, CloudWindInfoService cloudWindInfoService, WebGISService webGISService)
-            : base(cookieService, projectService)
+        public WebGISController(CookieService cookieService, ProjectService projectService, CloudWindInfoService cloudWindInfoService, WebGISService webGISService, TaskService taskService)
+            : base(cookieService, projectService, taskService)
         {
             _cloudWindInfoService = cloudWindInfoService;
             _webGISService = webGISService;
@@ -39,9 +39,9 @@ namespace WindCloud.Areas.Cloud.Controllers
             }
 
             ViewData["ProjectID"] = Project.ID;
-            ViewData["ProjectLon"] = Project.Lon;
-            ViewData["ProjectLat"] = Project.Lat;
-            ViewData["ProjectName"] = Project.ProjectName;
+            ViewData["ProjectLon"] = Project.Lon ?? "";
+            ViewData["ProjectLat"] = Project.Lat ?? "";
+            ViewData["ProjectName"] = Project.ProjectName ?? "";
             ViewData["PXYKey"] = AppSettingUtils.GetSetting("PXY:PXYKey");
             ViewData["PostToken"] = CreateWebToken(CurrentUser.UserCode);
 

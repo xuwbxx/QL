@@ -28,37 +28,37 @@
 <div id="app" class="user-container">
     <div class="user-header">
         <div class="search-area">
-            <el-input v-model="searchName" placeholder="请输入用户名称" clearable style="width: 200px;" @@keyup.enter="handleSearch"></el-input>
-            <el-input v-model="searchMobile" placeholder="请输入手机号码" clearable style="width: 200px;" @@keyup.enter="handleSearch"></el-input>
-            <el-button type="primary" @@click="handleSearch">搜索</el-button>
-            <el-button @@click="handleReset">重置</el-button>
+            <el-input v-model="searchName" :placeholder="$t('sys.user.searchNamePlaceholder')" clearable style="width: 200px;" @@keyup.enter="handleSearch"></el-input>
+            <el-input v-model="searchMobile" :placeholder="$t('sys.user.searchMobilePlaceholder')" clearable style="width: 200px;" @@keyup.enter="handleSearch"></el-input>
+            <el-button type="primary" @@click="handleSearch"><el-icon><Search /></el-icon>{{ $t('common.search') }}</el-button>
+            <el-button @@click="handleReset"><el-icon><Refresh-Left /></el-icon>{{ $t('common.reset') }}</el-button>
         </div>
-        <el-button type="success" @@click="openAddDialog">+ 新增</el-button>
+        <el-button type="primary" @@click="openAddDialog"><el-icon><Plus /></el-icon> {{ $t('common.add') }}</el-button>
     </div>
 
     <el-table v-loading="loading" :data="tableData" border stripe style="width: 100%;">
-        <el-table-column label="序号" width="70" align="center">
+        <el-table-column :label="$t('sys.user.tableIndex')" width="70" align="center">
             <template #default="scope">{{ (currentPage - 1) * pageSize + scope.$index + 1 }}</template>
         </el-table-column>
-        <el-table-column prop="name" label="用户名称" min-width="120" align="center"></el-table-column>
-        <el-table-column prop="deptName" label="部门名称" min-width="200" align="center" show-overflow-tooltip>
+        <el-table-column prop="name" :label="$t('sys.user.userName')" min-width="120" align="center"></el-table-column>
+        <el-table-column prop="deptName" :label="$t('sys.user.deptName')" min-width="200" align="center" show-overflow-tooltip>
             <template #default="scope">{{ scope.row.deptName || '-' }}</template>
         </el-table-column>
-        <el-table-column prop="roleNames" label="角色" min-width="150" align="center">
+        <el-table-column prop="roleNames" :label="$t('sys.user.role')" min-width="150" align="center">
             <template #default="scope">{{ scope.row.roleNames || '-' }}</template>
         </el-table-column>
-        <el-table-column prop="mobile" label="电话" width="140" align="center">
+        <el-table-column prop="mobile" :label="$t('sys.user.mobile')" width="140" align="center">
             <template #default="scope">{{ scope.row.mobile || '-' }}</template>
         </el-table-column>
-        <el-table-column prop="email" label="邮箱" min-width="180" align="center">
+        <el-table-column prop="email" :label="$t('sys.user.email')" min-width="180" align="center">
             <template #default="scope">{{ scope.row.email || '-' }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="320" align="center" fixed="right">
+        <el-table-column :label="$t('sys.user.tableOperate')" width="320" align="center" fixed="right">
             <template #default="scope">
-                <el-button type="primary" link @@click="handleResetPwd(scope.row)">重置密码</el-button>
-                @* <el-button type="primary" link @@click="handleAssignRole(scope.row)">分配角色</el-button> *@
-                <el-button type="primary" link @@click="handleEdit(scope.row)">编辑</el-button>
-                <el-button type="danger" link @@click="handleDelete(scope.row)">删除</el-button>
+                <el-button type="primary" link @@click="handleResetPwd(scope.row)">{{ $t('sys.user.resetPwd') }}</el-button>
+                @* <el-button type="primary" link @@click="handleAssignRole(scope.row)">{{ $t('sys.user.role') }}</el-button> *@
+                <el-button type="primary" link @@click="handleEdit(scope.row)">{{ $t('common.edit') }}</el-button>
+                <el-button type="danger" link @@click="handleDelete(scope.row)">{{ $t('common.delete') }}</el-button>
             </template>
         </el-table-column>
     </el-table>
@@ -77,80 +77,80 @@
 
     <!-- 新增/编辑弹窗 -->
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px" :close-on-click-modal="false">
-        <el-form :model="formData" label-width="100px" ref="userFormRef" :rules="formRules">
+        <el-form :model="formData" label-width="150px" ref="userFormRef" :rules="formRules">
             <!-- 登录名称 + 查询用户按钮 -->
-            <el-form-item label="登录名称" prop="account">
+            <el-form-item :label="$t('sys.user.account')" prop="account">
                 <div style="display: flex; gap: 8px; width: 100%;">
-                    <el-input v-model="formData.account" placeholder="请点击右侧按钮查询" disabled></el-input>
-                    <el-button type="primary" @@click="openQueryUserDialog">查询用户</el-button>
+                    <el-input v-model="formData.account" :placeholder="$t('sys.user.accountPlaceholder')" disabled></el-input>
+                    <el-button type="primary" @@click="openQueryUserDialog"><el-icon><Search /></el-icon>{{ $t('sys.user.queryUser') }}</el-button>
                 </div>
             </el-form-item>
             <!-- 姓名（只读） -->
-            <el-form-item label="姓名" prop="name">
+            <el-form-item :label="$t('sys.user.name')" prop="name">
                 <el-input v-model="formData.name" disabled></el-input>
             </el-form-item>
             <!-- 员工编号（只读） -->
-            <el-form-item label="员工编号" prop="empNo">
+            <el-form-item :label="$t('sys.user.empNo')" prop="empNo">
                 <el-input v-model="formData.empNo" disabled></el-input>
             </el-form-item>
             <!-- 部门名称（只读） -->
-            <el-form-item label="部门名称" prop="deptName">
+            <el-form-item :label="$t('sys.user.deptName')" prop="deptName">
                 <el-input v-model="formData.deptName" disabled></el-input>
             </el-form-item>
             <!-- 登录密码（仅新增时显示） -->
-            <el-form-item label="登录密码" prop="password" v-if="!isEditMode">
-                <el-input v-model="formData.password" type="password" show-password placeholder="请输入登录密码"></el-input>
+            <el-form-item :label="$t('sys.user.password')" prop="password" v-if="!isEditMode">
+                <el-input v-model="formData.password" type="password" show-password :placeholder="$t('app.passwordPlaceholder')"></el-input>
             </el-form-item>
             <!-- 确认密码（仅新增时显示） -->
-            <el-form-item label="确认密码" prop="confirmPassword" v-if="!isEditMode">
-                <el-input v-model="formData.confirmPassword" type="password" show-password placeholder="请再次输入密码"></el-input>
+            <el-form-item :label="$t('sys.user.confirmPassword')" prop="confirmPassword" v-if="!isEditMode">
+                <el-input v-model="formData.confirmPassword" type="password" show-password :placeholder="$t('sys.user.confirmPasswordPlaceholder')"></el-input>
             </el-form-item>
             <!-- 角色 -->
-            <el-form-item label="角色">
-                <el-select v-model="formData.roleIds" multiple placeholder="请选择角色（可多选）" style="width: 100%;">
+            <el-form-item :label="$t('sys.user.role')">
+                <el-select v-model="formData.roleIds" multiple :placeholder="$t('sys.user.rolePlaceholder')" style="width: 100%;">
                     <el-option v-for="item in roleOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
                 </el-select>
             </el-form-item>
             <!-- 电话 -->
-            <el-form-item label="电话" prop="mobile">
-                <el-input v-model="formData.mobile" placeholder="请输入电话"></el-input>
+            <el-form-item :label="$t('sys.user.mobile')" prop="mobile">
+                <el-input v-model="formData.mobile" :placeholder="$t('sys.user.mobilePlaceholder')"></el-input>
             </el-form-item>
             <!-- 邮箱 -->
-            <el-form-item label="邮箱" prop="email">
-                <el-input v-model="formData.email" placeholder="请输入邮箱"></el-input>
+            <el-form-item :label="$t('sys.user.email')" prop="email">
+                <el-input v-model="formData.email" :placeholder="$t('sys.user.emailPlaceholder')"></el-input>
             </el-form-item>
         </el-form>
         <template #footer>
             <span class="dialog-footer">
-                <el-button @@click="dialogVisible = false">取 消</el-button>
-                <el-button type="primary" :loading="submitting" @@click="saveData">确 定</el-button>
+                <el-button @@click="dialogVisible = false">{{ $t('common.cancel') }}</el-button>
+                <el-button type="primary" :loading="submitting" @@click="saveData">{{ $t('common.confirm') }}</el-button>
             </span>
         </template>
     </el-dialog>
 
     <!-- 查询用户弹窗 -->
-    <el-dialog v-model="queryDialogVisible" title="选择用户" width="800px" :close-on-click-modal="false">
+    <el-dialog v-model="queryDialogVisible" :title="$t('sys.user.selectUserTitle')" width="800px" :close-on-click-modal="false">
         <div style="display: flex; gap: 10px; margin-bottom: 16px; align-items: center;">
-            <span style="white-space: nowrap;">姓名：</span>
-            <el-input v-model="queryUserName" placeholder="请输入姓名" @@keyup.enter="searchMDUser" style="flex: 1;"></el-input>
-            <el-button type="primary" @@click="searchMDUser">查询</el-button>
+            <span style="white-space: nowrap;">{{ $t('sys.user.name') }}：</span>
+            <el-input v-model="queryUserName" :placeholder="$t('sys.user.namePlaceholder')" @@keyup.enter="searchMDUser" style="flex: 1;"></el-input>
+            <el-button type="primary" @@click="searchMDUser"><el-icon><Search /></el-icon>{{ $t('common.search') }}</el-button>
         </div>
         <el-table v-loading="queryLoading" :data="queryTableData" border stripe highlight-current-row
             @@current-change="handleQuerySelect" style="width: 100%;">
-            <el-table-column label="选择" width="55" align="center">
+            <el-table-column :label="$t('sys.user.tableSelect')" width="55" align="center">
                 <template #default="scope">
                     <el-radio v-model="selectedQueryRow" :label="scope.row"><span></span></el-radio>
                 </template>
             </el-table-column>
-            <el-table-column prop="dept" label="部门" min-width="300" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="name" label="姓名" width="120"></el-table-column>
-            <el-table-column prop="userLogin" label="用户名" width="180"></el-table-column>
-            <el-table-column prop="empcode" label="员工编号" width="130"></el-table-column>
+            <el-table-column prop="dept" :label="$t('sys.user.dept')" min-width="300" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="name" :label="$t('sys.user.name')" width="120"></el-table-column>
+            <el-table-column prop="userLogin" :label="$t('sys.user.loginName')" width="180"></el-table-column>
+            <el-table-column prop="empcode" :label="$t('sys.user.empNo')" width="130"></el-table-column>
         </el-table>
         <template #footer>
             <span class="dialog-footer">
-                <el-button @@click="queryDialogVisible = false">取 消</el-button>
-                <el-button type="primary" @@click="confirmQueryUser">确 认</el-button>
+                <el-button @@click="queryDialogVisible = false">{{ $t('common.cancel') }}</el-button>
+                <el-button type="primary" @@click="confirmQueryUser">{{ $t('common.confirm') }}</el-button>
             </span>
         </template>
     </el-dialog>

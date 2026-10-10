@@ -13,7 +13,7 @@ namespace WindCloud.Areas.CCSHJ.Controllers
     {
         public TechCenterService _techCenterService;
 
-        public TechCenterController(CookieService cookieService, WebValidateService webValidateService, TechCenterService techCenterService) : base(cookieService, webValidateService)
+        public TechCenterController(CookieService cookieService, WebValidateService webValidateService, ProjectService projectService, TechCenterService techCenterService) : base(cookieService, projectService, webValidateService)
         {
             _techCenterService = techCenterService;
         }

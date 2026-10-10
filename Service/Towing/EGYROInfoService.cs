@@ -62,8 +62,7 @@ namespace Service.Towing
                 {
                     var repo = uow.GetRepository<DataFactory.KingBase.Towing.Data_EGYRO>();
                     // 取最新的一条记录
-                    var egyro = repo.FindAll()
-                        .Where(a => a.IsDelete == false)
+                    var egyro = repo.Find(a => a.IsDelete == false)
                         .OrderByDescending(a => a.CreateTime)
                         .FirstOrDefault();
 
@@ -101,8 +100,7 @@ namespace Service.Towing
                 {
                     var egyroRepo = uow.GetRepository<DataFactory.KingBase.Towing.Data_EGYRO>();
                     // 取最新的一条记录
-                    var egyro = egyroRepo.FindAll()
-                        .Where(a => a.IsDelete == false && a.CreateTime > LimitValues.DeviceOfflineTime)
+                    var egyro = egyroRepo.Find(a => a.IsDelete == false && a.CreateTime > LimitValues.DeviceOfflineTime)
                         .OrderByDescending(a => a.CreateTime)
                         .FirstOrDefault();
 
@@ -121,8 +119,7 @@ namespace Service.Towing
 
                     //计算航速
                     var satRepo = uow.GetRepository<DataFactory.KingBase.Towing.Data_SATELLITE>();
-                    var LastPositions = satRepo.FindAll()
-                        .Where(a => !a.IsDelete)
+                    var LastPositions = satRepo.Find(a => !a.IsDelete)
                         .OrderByDescending(a => a.CreateTime)
                         .Take(2)
                         .ToList();
@@ -168,8 +165,7 @@ namespace Service.Towing
                     startTime = startTime ?? DateTime.MinValue;
                     endTime = endTime ?? DateTime.Now;
 
-                    var list = repo.FindAll()
-                        .Where(a => a.IsDelete == false
+                    var list = repo.Find(a => a.IsDelete == false
                             && a.CreateTime >= startTime
                             && a.CreateTime < endTime)
                         .OrderBy(a => a.CreateTime)
@@ -212,8 +208,7 @@ namespace Service.Towing
                     var repo = uow.GetRepository<DataFactory.KingBase.Towing.Data_EGYRO>();
                     if (size == 0) size = LimitValues.EChartDataSize;
 
-                    var query = repo.FindAll()
-                        .Where(a => a.IsDelete == false)
+                    var query = repo.Find(a => a.IsDelete == false)
                         .OrderByDescending(a => a.CreateTime);
 
                     List<DataFactory.KingBase.Towing.Data_EGYRO> list;
@@ -265,8 +260,7 @@ namespace Service.Towing
                     var repo = uow.GetRepository<DataFactory.KingBase.Towing.Data_EGYRO>();
                     if (size == 0) size = LimitValues.EChartDataSize;
 
-                    var query = repo.FindAll()
-                        .Where(a => a.IsDelete == false)
+                    var query = repo.Find(a => a.IsDelete == false)
                         .OrderByDescending(a => a.CreateTime);
 
                     List<DataFactory.KingBase.Towing.Data_EGYRO> list;
@@ -320,9 +314,7 @@ namespace Service.Towing
 
                     if (size == 0) size = LimitValues.EChartDataSize;
 
-                    var query = repo.FindAll()
-                        .Where(a => a.IsDelete == false)
-                        .Where(a => a.CreateTime >= startTime && a.CreateTime < endTime)
+                    var query = repo.Find(a => a.IsDelete == false && a.CreateTime >= startTime && a.CreateTime < endTime)
                         .OrderByDescending(a => a.CreateTime);
 
                     List<DataFactory.KingBase.Towing.Data_EGYRO> list;

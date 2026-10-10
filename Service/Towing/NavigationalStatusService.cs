@@ -71,27 +71,23 @@ namespace Service.Towing
                     var speedRepo = uow.GetRepository<DataFactory.KingBase.Towing.Data_SailSpeed>();
                     var planRouteRepo = uow.GetRepository<DataFactory.KingBase.Towing.Manage_PlanRoute>();
 
-                    var firstData = satRepo.FindAll()
-                        .Where(a => a.IsDelete != true)
+                    var firstData = satRepo.Find(a => a.IsDelete != true)
                         .OrderBy(a => a.CreateTime)
                         .FirstOrDefault();
 
-                    var SatelliteData = satRepo.FindAll()
-                        .Where(a => a.IsDelete != true && a.CreateTime > LimitValues.DeviceOfflineTime)
+                    var SatelliteData = satRepo.Find(a => a.IsDelete != true && a.CreateTime > LimitValues.DeviceOfflineTime)
                         .OrderBy(a => a.CreateTime)
                         .ToList();
 
                     var lastData = SatelliteData.OrderByDescending(a => a.CreateTime).FirstOrDefault();
 
-                    var lastEGYRO = egyroRepo.FindAll()
-                        .Where(a => a.IsDelete != true && a.CreateTime > LimitValues.DeviceOfflineTime)
+                    var lastEGYRO = egyroRepo.Find(a => a.IsDelete != true && a.CreateTime > LimitValues.DeviceOfflineTime)
                         .OrderByDescending(a => a.CreateTime)
                         .FirstOrDefault();
 
-                    var proj = basicRepo.FindAll().FirstOrDefault(a => a.IsDelete != true);
+                    var proj = basicRepo.Find(a => a.IsDelete != true).FirstOrDefault();
 
-                    var speed = speedRepo.FindAll()
-                        .Where(a => a.IsDelete != true && a.CreateTime > LimitValues.DeviceOfflineTime)
+                    var speed = speedRepo.Find(a => a.IsDelete != true && a.CreateTime > LimitValues.DeviceOfflineTime)
                         .OrderByDescending(a => a.CreateTime)
                         .FirstOrDefault();
 
@@ -127,7 +123,7 @@ namespace Service.Towing
 
                     if (proj != null && firstData != null && lastData != null)
                     {
-                        var PlanRoutes = planRouteRepo.FindAll().Where(a => !a.IsDelete).ToList();
+                        var PlanRoutes = planRouteRepo.Find(a => !a.IsDelete).ToList();
                         List<Location> PlanLocations = new List<Location>();
                         foreach (var item in PlanRoutes)
                         {
@@ -203,8 +199,7 @@ namespace Service.Towing
                     startTime = startTime ?? DateTime.MinValue;
                     endTime = endTime ?? DateTime.Now;
 
-                    var query = speedRepo.FindAll()
-                        .Where(a => a.IsDelete != true
+                    var query = speedRepo.Find(a => a.IsDelete != true
                             && a.CreateTime >= startTime
                             && a.CreateTime < endTime)
                         .OrderByDescending(a => a.CreateTime);

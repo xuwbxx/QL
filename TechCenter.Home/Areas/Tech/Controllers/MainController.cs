@@ -1,6 +1,7 @@
 ﻿using DataFactory.KingBase;
 using Microsoft.AspNetCore.Mvc;
 using Model.Base;
+using Model.TechCenter.JJT;
 using Service.Base;
 using Service.TechCenter;
 using System.Web;

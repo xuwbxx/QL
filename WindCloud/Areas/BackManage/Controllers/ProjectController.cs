@@ -2,6 +2,7 @@
 using Model.Base;
 using Model.Tech.Cloud.BackManage;
 using Service.Base;
+using Service.Wind;
 using Service.Wind.BackManage;
 using Tool;
 using WindCloud.Areas.Base.Controllers;
@@ -13,8 +14,8 @@ namespace WindCloud.Areas.BackManage.Controllers
     {
         private readonly BackProjectService _projectService;
 
-        public ProjectController(CookieService cookieService, Service.Wind.WebValidateService webValidateService, BackProjectService projectService)
-            : base(cookieService, webValidateService)
+        public ProjectController(CookieService cookieService, Service.Wind.WebValidateService webValidateService, ProjectService baseProjectService, BackProjectService projectService)
+            : base(cookieService, baseProjectService, webValidateService)
         {
             _projectService = projectService;
         }

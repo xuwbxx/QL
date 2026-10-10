@@ -47,7 +47,7 @@ namespace Service.Wind.BackManage
                         predicate = PredicateBuilder.And(predicate, a => a.IsConfirm == isConfirm);
                     }
 
-                    var (pageList, count) = repo.FindPage(predicate, a => a.ID, request.PageIndex, request.PageSize);
+                    var (pageList, count) = repo.FindPage(predicate, a => a.CreateTime, request.PageIndex, request.PageSize, true);
 
                     totalCount = count;
 
@@ -300,7 +300,7 @@ namespace Service.Wind.BackManage
                         });
                     }
 
-                    var exportName = project.ProjectName + "-地勘资料(" + DateTime.UtcNow.ToString("yyyyMMddHHmmss") + ").zip";
+                    var exportName = project.ProjectName + "-地勘资料(" + DateTime.Now.ToString("yyyyMMddHHmmss") + ").zip";
                     var exportDir = Path.Combine(_env.WebRootPath, "File", "Project", "DKTempFile");
                     if (!Directory.Exists(exportDir))
                     {

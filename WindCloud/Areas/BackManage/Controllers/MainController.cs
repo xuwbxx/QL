@@ -27,7 +27,7 @@ namespace WindCloud.Areas.BackManage.Controllers
             //限制超级管理员进入
             if (!_backManageService.IsAdminOrProjectDirector(CurrentUser.UserCode))
             {
-                return Redirect("/Cloud/CloudBase/ErrorPage?ErrorText=用户不是超级管理员或项目经理，不能进入后台配置界面。");
+                return RedirectToAction("Error", "Center", new { area = "CCSHJ", ErrorText = "用户不是超级管理员或项目经理，不能进入后台配置界面。" });
             }
 
             return View();

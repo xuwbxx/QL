@@ -2,6 +2,7 @@
 using Model.Base;
 using Model.Tech.Cloud.BackManage;
 using Service.Base;
+using Service.Wind;
 using Service.Wind.BackManage;
 using Tool;
 using WindCloud.Areas.Base.Controllers;
@@ -13,8 +14,8 @@ namespace WindCloud.Areas.BackManage.Controllers
     {
         private readonly BackProjectRoleService _backProjectRoleService;
 
-        public ProjectRoleController(CookieService cookieService, Service.Wind.WebValidateService webValidateService, BackProjectRoleService backProjectRoleService)
-            : base(cookieService, webValidateService)
+        public ProjectRoleController(CookieService cookieService, Service.Wind.WebValidateService webValidateService, ProjectService projectService, BackProjectRoleService backProjectRoleService)
+            : base(cookieService, projectService, webValidateService)
         {
             _backProjectRoleService = backProjectRoleService;
         }

@@ -181,7 +181,7 @@ namespace Service.Wind.BackManage
                                 ManageDepart = a.UserDepartName,
                                 ManagePhone = a.UserPhone,
                                 ManageJobName = a.UserJobName,
-                                CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified),
+                                CreateTime = DateTime.Now,
                                 IsDelete = false
                             };
                             managerRepo.Add(manager);

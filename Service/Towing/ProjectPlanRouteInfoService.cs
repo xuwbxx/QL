@@ -76,7 +76,7 @@ namespace Service.Towing
                     if (projID == 0)
                     {
                         var projRepo = uow.GetRepository<DataFactory.KingBase.Towing.Manage_Project>();
-                        var proj = projRepo.FindAll().FirstOrDefault();
+                        var proj = projRepo.Find(a => true).FirstOrDefault();
                         if (proj != null)
                         {
                             projID = proj.id;
@@ -84,13 +84,12 @@ namespace Service.Towing
                     }
 
                     var planRouteRepo = uow.GetRepository<DataFactory.KingBase.Towing.Manage_PlanRoute>();
-                    var list = planRouteRepo.FindAll()
-                        .Where(a => a.ProjectID == projID && !a.IsDelete)
+                    var list = planRouteRepo.Find(a => a.ProjectID == projID && !a.IsDelete)
                         .OrderBy(a => a.RouteTime)
                         .ToList();
 
                     var basicRepo = uow.GetRepository<DataFactory.KingBase.Towing.Manage_Basic>();
-                    var prjInfo = basicRepo.FindAll().FirstOrDefault(a => a.ProjectID == projID && !a.IsDelete);
+                    var prjInfo = basicRepo.Find(a => a.ProjectID == projID && !a.IsDelete).FirstOrDefault();
 
                     // 设置开始点
                     if (prjInfo != null)
@@ -165,7 +164,7 @@ namespace Service.Towing
                     if (projID == 0)
                     {
                         var projRepo = uow.GetRepository<DataFactory.KingBase.Towing.Manage_Project>();
-                        var proj = projRepo.FindAll().FirstOrDefault(a => !a.IsDelete);
+                        var proj = projRepo.Find(a => !a.IsDelete).FirstOrDefault();
                         if (proj != null)
                         {
                             projID = proj.id;
@@ -174,7 +173,7 @@ namespace Service.Towing
 
                     // set old routes to delete
                     var planRouteRepo = uow.GetRepository<DataFactory.KingBase.Towing.Manage_PlanRoute>();
-                    var toDelList = planRouteRepo.FindAll().Where(a => !a.IsDelete && a.ProjectID == projID).ToList();
+                    var toDelList = planRouteRepo.Find(a => !a.IsDelete && a.ProjectID == projID).ToList();
                     foreach (var itm in toDelList)
                     {
                         itm.IsDelete = true;
@@ -214,15 +213,13 @@ namespace Service.Towing
                 using (var uow = _towingKingBaseUowFactory.Create())
                 {
                     var forecastRepo = uow.GetRepository<DataFactory.KingBase.Towing.Data_Forecast>();
-                    var latestData = forecastRepo.FindAll()
-                        .Where(a => !a.IsDelete)
+                    var latestData = forecastRepo.Find(a => !a.IsDelete)
                         .OrderByDescending(a => a.No)
                         .FirstOrDefault();
 
                     if (latestData != null)
                     {
-                        forecastRepo.FindAll()
-                            .Where(a => !a.IsDelete && a.No == latestData.No)
+                        forecastRepo.Find(a => !a.IsDelete && a.No == latestData.No)
                             .OrderBy(a => a.ForecastTime)
                             .ToList()
                             .ForEach(a =>

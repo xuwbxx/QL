@@ -1,4 +1,5 @@
 ﻿using Model.TechCenter.JJT;
+//using Service.Shj;
 using System.Security.Cryptography;
 using System.Text;
 using Tool;
@@ -294,10 +295,10 @@ namespace Service.TechCenter
     }
 
 
-    public class SingleSinOnModel
-    {
-        public string? usrName { set; get; }
-        public string? usrCode { get; set; }
-        public string? businessUrl { get; set; }
-    }
+    //public class SingleSinOnModel
+    //{
+    //    public string? usrName { set; get; }
+    //    public string? usrCode { get; set; }
+    //    public string? businessUrl { get; set; }
+    //}
 }

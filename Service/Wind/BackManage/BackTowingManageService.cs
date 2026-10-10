@@ -124,7 +124,7 @@ namespace Service.Wind.BackManage
                         user.Depart = request.Depart;
                         user.IsConfirm = request.IsConfirm;
                         user.Role = request.Role;
-                        user.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                        user.CreateTime = DateTime.Now;
                         user.IsDelete = false;
 
                         repo.Add(user);
@@ -147,7 +147,7 @@ namespace Service.Wind.BackManage
 
                         user.IsConfirm = request.IsConfirm;
                         user.Role = request.Role;
-                        user.CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+                        user.CreateTime = DateTime.Now;
 
                         userCode = user.UserName ?? "";
                         uow.Save();

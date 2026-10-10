@@ -60,17 +60,16 @@ namespace Service.Towing
                 using (var uow = _towingKingBaseUowFactory.Create())
                 {
                     var deviceRepo = uow.GetRepository<DataFactory.KingBase.Towing.Data_Device>();
-                    var list = deviceRepo.FindAll()
-                        .Where(a => a.IsDelete != true)
+                    var list = deviceRepo.Find(a => a.IsDelete != true)
                         .OrderBy(a => a.Type).ThenBy(a => a.DeviceName)
                         .ToList();
 
                     res.List = new List<DeviceStatusInfo>();
 
                     var batteryRepo = uow.GetRepository<DataFactory.KingBase.Towing.Data_Battery>();
-                    var power = batteryRepo.FindAll()
+                    var power = batteryRepo.Find(a => a.IsDelete == false)
                         .OrderByDescending(a => a.CreateTime)
-                        .FirstOrDefault(a => a.IsDelete == false);
+                        .FirstOrDefault();
 
                     if (power != null)
                     {
@@ -113,18 +112,17 @@ namespace Service.Towing
                 using (var uow = _towingKingBaseUowFactory.Create())
                 {
                     var deviceRepo = uow.GetRepository<DataFactory.KingBase.Towing.Data_Device>();
-                    var list = deviceRepo.FindAll()
-                        .Where(a => a.IsDelete != true)
+                    var list = deviceRepo.Find(a => a.IsDelete != true)
                         .OrderBy(a => a.Type).ThenBy(a => a.DeviceName)
                         .ToList();
 
                     res.List = new List<DeviceStatusInfo>();
 
                     var batteryRepo = uow.GetRepository<DataFactory.KingBase.Towing.Data_Battery>();
-                    var power = batteryRepo.FindAll()
+                    var power = batteryRepo.Find(a => a.IsDelete == false
+                            && a.CreateTime > LimitValues.DeviceOfflineTime)
                         .OrderBy(a => a.CreateTime)
-                        .FirstOrDefault(a => a.IsDelete == false
-                            && a.CreateTime > LimitValues.DeviceOfflineTime);
+                        .FirstOrDefault();
 
                     if (power != null)
                     {

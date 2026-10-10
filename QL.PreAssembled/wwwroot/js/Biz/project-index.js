@@ -7,6 +7,16 @@ document.addEventListener('DOMContentLoaded', function () {
     var Vue = window.Vue;
     var ElementPlus = window.ElementPlus;
     var ElementPlusIconsVue = window.ElementPlusIconsVue;
+    // 全局 vue-i18n 实例（由 _LayoutModelEP 先加载语言包与 index.js）
+    var appI18n = window.appI18n;
+
+    // 初始化语言（与父页面同步，含 ElementPlus 内置组件文案）
+    initIframeLangSync({
+        ElementPlus: ElementPlus,
+        appI18n: appI18n,
+        localeEn: ElementPlusLocaleEn,
+        localeZh: ElementPlusLocaleZhCn
+    });
 
     var app = Vue.createApp({
         data() {
@@ -25,19 +35,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // 弹窗 - 项目
                 dialogVisible: false,
-                dialogTitle: '新增项目',
                 isEditMode: false,
                 submitting: false,
 
                 // 弹窗 - 子项（桥梁）
                 subDialogVisible: false,
-                subDialogTitle: '新增子项',
                 subEditMode: false,
                 subSubmitting: false,
 
                 // 弹窗 - 子项（浇筑分组）
                 castDialogVisible: false,
-                castDialogTitle: '新增子项',
                 castEditMode: false,
                 castSubmitting: false,
 
@@ -73,16 +80,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     status: 1
                 },
 
-                statusOptions: [
-                    { label: '在建', value: 0 },
-                    { label: '完工', value: 1 }
-                ],
-
-                beamTypeOptions: [
-                    { label: '钢梁', value: 0 },
-                    { label: '混凝土梁', value: 1 }
-                ],
-
                 managerOptions: [],
 
                 // 授权弹窗
@@ -101,6 +98,34 @@ document.addEventListener('DOMContentLoaded', function () {
         },
 
         computed: {
+            // 弹窗标题（随语言切换自动更新）
+            dialogTitle() {
+                return this.isEditMode ? this.$t('biz.project.editProject') : this.$t('biz.project.addProject');
+            },
+
+            subDialogTitle() {
+                return this.subEditMode ? this.$t('biz.project.editSubItem') : this.$t('biz.project.addSubItem');
+            },
+
+            castDialogTitle() {
+                return this.castEditMode ? this.$t('biz.project.editSubItem') : this.$t('biz.project.addSubItem');
+            },
+
+            // 项目状态 / 梁类型下拉选项（随语言切换自动更新）
+            statusOptions() {
+                return [
+                    { label: this.$t('biz.project.underConstruction'), value: 0 },
+                    { label: this.$t('biz.project.completed'), value: 1 }
+                ];
+            },
+
+            beamTypeOptions() {
+                return [
+                    { label: this.$t('biz.project.steelBeam'), value: 0 },
+                    { label: this.$t('biz.project.concreteBeam'), value: 1 }
+                ];
+            },
+
             authFilteredLeft() {
                 var self = this;
                 var key = (this.authSearchKey || '').trim().toLowerCase();
@@ -257,7 +282,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             openAddDialog() {
                 this.isEditMode = false;
-                this.dialogTitle = '新增项目';
                 this.formData = {
                     id: 0,
                     projectId: 0,
@@ -273,7 +297,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             openEditDialog(row) {
                 this.isEditMode = true;
-                this.dialogTitle = '编辑项目';
                 var pure = Object.assign({}, row);
                 delete pure.children;
                 delete pure.rowKey;
@@ -286,17 +309,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
             async saveData() {
                 if (!this.formData.name) {
-                    ElementPlus.ElMessage.warning('请输入项目名称');
+                    ElementPlus.ElMessage.warning(this.$t('biz.project.namePlaceholder'));
                     return;
                 }
                 if (!this.formData.managerId) {
-                    ElementPlus.ElMessage.warning('请选择项目负责人');
+                    ElementPlus.ElMessage.warning(this.$t('biz.project.managerPlaceholder'));
                     return;
                 }
                 this.submitting = true;
                 try {
                     await HttpUtils.post('/Biz/Project/Save', this.formData);
-                    ElementPlus.ElMessage.success(this.isEditMode ? '编辑成功' : '新增成功');
+                    ElementPlus.ElMessage.success(this.$t('message.saveSuccess'));
                     this.dialogVisible = false;
                     this.loadList();
                 } catch (error) {
@@ -309,16 +332,16 @@ document.addEventListener('DOMContentLoaded', function () {
             async handleDelete(row) {
                 try {
                     await ElementPlus.ElMessageBox.confirm(
-                        '确定要删除项目"' + row.name + '"吗？',
-                        '提示',
-                        { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
+                        this.$t('biz.project.confirmDeleteProject', { name: row.name }),
+                        this.$t('biz.project.confirmTitle'),
+                        { confirmButtonText: this.$t('common.confirm'), cancelButtonText: this.$t('common.cancel'), type: 'warning' }
                     );
                 } catch (e) {
                     return;
                 }
                 try {
                     await HttpUtils.post('/Biz/Project/Delete', { id: row.id });
-                    ElementPlus.ElMessage.success('删除成功');
+                    ElementPlus.ElMessage.success(this.$t('message.deleteSuccess'));
                     this.loadList();
                 } catch (error) {
                     console.error('delete error:', error);
@@ -329,7 +352,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             openAddSubDialog(row) {
                 this.subEditMode = false;
-                this.subDialogTitle = '新增子项';
                 this.subFormData = {
                     id: 0,
                     projID: row.id,
@@ -343,7 +365,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             openEditSubDialog(row) {
                 this.subEditMode = true;
-                this.subDialogTitle = '编辑子项';
                 var proj = this.allData.find(function (p) { return p.id === row.projID; });
                 this.subFormData = {
                     id: row.id,
@@ -358,7 +379,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             async saveSubItem() {
                 if (!this.subFormData.name) {
-                    ElementPlus.ElMessage.warning('请输入桥梁名称');
+                    ElementPlus.ElMessage.warning(this.$t('biz.project.bridgeNamePlaceholder'));
                     return;
                 }
                 this.subSubmitting = true;
@@ -371,7 +392,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         status: this.subFormData.status
                     };
                     await HttpUtils.post('/Biz/Project/BridgeSave', postData);
-                    ElementPlus.ElMessage.success(this.subEditMode ? '编辑成功' : '新增成功');
+                    ElementPlus.ElMessage.success(this.$t('message.saveSuccess'));
                     this.subDialogVisible = false;
                     this.loadList();
                 } catch (error) {
@@ -384,16 +405,16 @@ document.addEventListener('DOMContentLoaded', function () {
             async handleDeleteSub(row) {
                 try {
                     await ElementPlus.ElMessageBox.confirm(
-                        '确定要删除桥梁"' + row.name + '"吗？',
-                        '提示',
-                        { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
+                        this.$t('biz.project.confirmDeleteBridge', { name: row.name }),
+                        this.$t('biz.project.confirmTitle'),
+                        { confirmButtonText: this.$t('common.confirm'), cancelButtonText: this.$t('common.cancel'), type: 'warning' }
                     );
                 } catch (e) {
                     return;
                 }
                 try {
                     await HttpUtils.post('/Biz/Project/BridgeDelete', { id: row.id });
-                    ElementPlus.ElMessage.success('删除成功');
+                    ElementPlus.ElMessage.success(this.$t('message.deleteSuccess'));
                     this.loadList();
                 } catch (error) {
                     console.error('delete sub error:', error);
@@ -404,7 +425,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             openAddCastDialog(row) {
                 this.castEditMode = false;
-                this.castDialogTitle = '新增子项';
                 var proj = this.allData.find(function (p) { return p.id === row.projID; });
                 this.castFormData = {
                     id: 0,
@@ -419,7 +439,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             openEditCastDialog(row) {
                 this.castEditMode = true;
-                this.castDialogTitle = '编辑子项';
                 var self = this;
                 var bridge = this.allBridges.find(function (b) { return b.id === row.bridgeID; });
                 var proj = bridge ? self.allData.find(function (p) { return p.id === bridge.projID; }) : null;
@@ -436,7 +455,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             async saveCastItem() {
                 if (!this.castFormData.name) {
-                    ElementPlus.ElMessage.warning('请输入浇筑分组名称');
+                    ElementPlus.ElMessage.warning(this.$t('biz.project.castingGroupNamePlaceholder'));
                     return;
                 }
                 this.castSubmitting = true;
@@ -448,7 +467,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         status: this.castFormData.status
                     };
                     await HttpUtils.post('/Biz/Project/CastingGroupSave', postData);
-                    ElementPlus.ElMessage.success(this.castEditMode ? '编辑成功' : '新增成功');
+                    ElementPlus.ElMessage.success(this.$t('message.saveSuccess'));
                     this.castDialogVisible = false;
                     this.loadList();
                 } catch (error) {
@@ -461,16 +480,16 @@ document.addEventListener('DOMContentLoaded', function () {
             async handleDeleteCast(row) {
                 try {
                     await ElementPlus.ElMessageBox.confirm(
-                        '确定要删除浇筑分组"' + row.name + '"吗？',
-                        '提示',
-                        { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
+                        this.$t('biz.project.confirmDeleteCastingGroup', { name: row.name }),
+                        this.$t('biz.project.confirmTitle'),
+                        { confirmButtonText: this.$t('common.confirm'), cancelButtonText: this.$t('common.cancel'), type: 'warning' }
                     );
                 } catch (e) {
                     return;
                 }
                 try {
                     await HttpUtils.post('/Biz/Project/CastingGroupDelete', { id: row.id });
-                    ElementPlus.ElMessage.success('删除成功');
+                    ElementPlus.ElMessage.success(this.$t('message.deleteSuccess'));
                     this.loadList();
                 } catch (error) {
                     console.error('delete cast error:', error);
@@ -509,7 +528,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     this.authSelected = this.authAllUsers.filter(function (u) { return idSet[u.id]; });
                 } catch (error) {
                     console.error('load auth data error:', error);
-                    ElementPlus.ElMessage.error('加载授权数据失败');
+                    ElementPlus.ElMessage.error(this.$t('biz.project.loadAuthDataFailed'));
                 }
             },
 
@@ -555,20 +574,20 @@ document.addEventListener('DOMContentLoaded', function () {
                         projId: this.authProjectId,
                         userIds: userIds
                     });
-                    ElementPlus.ElMessage.success('授权成功');
+                    ElementPlus.ElMessage.success(this.$t('biz.project.authorizeSuccess'));
                     this.authDialogVisible = false;
                 } catch (error) {
                     console.error('save authorization error:', error);
-                    ElementPlus.ElMessage.error('授权保存失败');
+                    ElementPlus.ElMessage.error(this.$t('biz.project.authorizeSaveFailed'));
                 } finally {
                     this.authSubmitting = false;
                 }
             },
 
             getStatusLabel(val) {
-                if (val === 0 || val === '0') return '在建';
-                if (val === 1 || val === '1') return '完工';
-                return '未知';
+                if (val === 0 || val === '0') return this.$t('biz.project.underConstruction');
+                if (val === 1 || val === '1') return this.$t('biz.project.completed');
+                return this.$t('biz.project.unknown');
             },
 
             getStatusTagType(val) {
@@ -578,9 +597,9 @@ document.addEventListener('DOMContentLoaded', function () {
             },
 
             getBeamTypeLabel(val) {
-                if (val === 0 || val === '0') return '钢梁';
-                if (val === 1 || val === '1') return '混凝土梁';
-                return '混凝土梁';
+                if (val === 0 || val === '0') return this.$t('biz.project.steelBeam');
+                if (val === 1 || val === '1') return this.$t('biz.project.concreteBeam');
+                return this.$t('biz.project.concreteBeam');
             },
 
             getBeamTypeTagType(val) {
@@ -591,6 +610,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    app.use(appI18n);
+
     app.use(ElementPlus, {
         locale: ElementPlusLocaleZhCn
     });
@@ -599,6 +620,12 @@ document.addEventListener('DOMContentLoaded', function () {
         app.component('Check', ElementPlusIconsVue.Check);
         app.component('Delete', ElementPlusIconsVue.Delete);
     }
-
+    if (window.ElementPlusIconsVue) {
+        for (var key in window.ElementPlusIconsVue) {
+            if (window.ElementPlusIconsVue[key]) {
+                app.component(key, window.ElementPlusIconsVue[key]);
+            }
+        }
+    }
     app.mount('#app');
 });

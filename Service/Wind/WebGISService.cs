@@ -1228,7 +1228,7 @@ namespace Service.Wind
                             {
                                 ID = a.ID,
                                 FileName = a.FileName,
-                                FilePath = a.FilePath.Substring(a.FilePath.IndexOf(@"\File\")),
+                                FilePath = FileUtils.GetRelativeFilePath(a.FilePath),
                                 FileTime = Convert.ToDateTime(a.CreateTime).ToString("yyyy-MM-dd"),
                                 FileExtension = FileUtils.GetFileExtension(a.FileName),
                                 FileType = "项目资料文件"
@@ -1242,7 +1242,7 @@ namespace Service.Wind
                             {
                                 ID = a.ID,
                                 FileName = a.FileName,
-                                FilePath = a.FilePath.Substring(a.FilePath.IndexOf(@"\File\")),
+                                FilePath = FileUtils.GetRelativeFilePath(a.FilePath),
                                 FileTime = Convert.ToDateTime(a.CreateTime).ToString("yyyy-MM-dd"),
                                 FileExtension = FileUtils.GetFileExtension(a.FileName),
                                 FileType = a.Type == 1 ? "地勘原始资料文件" : a.Type == 2 ? "地勘数据表" : ""
@@ -1260,7 +1260,7 @@ namespace Service.Wind
                             {
                                 ID = a.id,
                                 FileName = a.ReportName,
-                                FilePath = a.ReportPath.Substring(a.ReportPath.IndexOf(@"\File\")),
+                                FilePath = FileUtils.GetRelativeFilePath(a.ReportPath),
                                 FileTime = a.CreateTime.Value.ToString("yyyy-MM-dd"),
                                 FileExtension = FileUtils.GetFileExtension(a.ReportName)
                             });
@@ -1277,7 +1277,7 @@ namespace Service.Wind
                             {
                                 ID = a.ID,
                                 FileName = a.FileName,
-                                FilePath = a.FilePath.Substring(a.FilePath.IndexOf(@"\File\")),
+                                FilePath = FileUtils.GetRelativeFilePath(a.FilePath),
                                 FileTime = a.CreateTime.Value.ToString("yyyy-MM-dd"),
                                 FileExtension = FileUtils.GetFileExtension(a.FileName)
                             });
@@ -1301,7 +1301,7 @@ namespace Service.Wind
                         {
                             ID = a.id,
                             FileName = a.FileName,
-                            FilePath = a.FilePath.Substring(a.FilePath.IndexOf(@"\File\")),
+                            FilePath = FileUtils.GetRelativeFilePath(a.FilePath),
                             FileTime = a.CreateTime.Value.ToString("yyyy-MM-dd"),
                             FileExtension = FileUtils.GetFileExtension(a.FileName)
                         });
@@ -1318,7 +1318,7 @@ namespace Service.Wind
                             {
                                 ID = a.id,
                                 FileName = a.ReportName,
-                                FilePath = a.ReportPath.Substring(a.ReportPath.IndexOf(@"\File\")),
+                                FilePath = FileUtils.GetRelativeFilePath(a.ReportPath),
                                 FileTime = a.CreateTime.Value.ToString("yyyy-MM-dd"),
                                 FileExtension = FileUtils.GetFileExtension(a.ReportName)
                             });
@@ -1340,7 +1340,7 @@ namespace Service.Wind
                         {
                             ID = a.id,
                             FileName = a.FileName,
-                            FilePath = a.FilePath.Substring(a.FilePath.IndexOf(@"\File\")),
+                            FilePath = FileUtils.GetRelativeFilePath(a.FilePath),
                             FileTime = a.CreateTime.Value.ToString("yyyy-MM-dd"),
                             FileExtension = FileUtils.GetFileExtension(a.FileName)
                         });

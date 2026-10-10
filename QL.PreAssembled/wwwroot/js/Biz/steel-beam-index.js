@@ -2,6 +2,15 @@
     var Vue = window.Vue;
     var ElementPlus = window.ElementPlus;
     var ElMessage = ElementPlus.ElMessage;
+    var appI18n = window.appI18n; // 子页面全局i18n实例，同父页配置 legacy: false
+
+    // 中英文切换（与父页面语言同步，含 ElementPlus 内置文案）
+    initIframeLangSync({
+        ElementPlus: ElementPlus,
+        appI18n: appI18n,
+        localeEn: ElementPlusLocaleEn,
+        localeZh: ElementPlusLocaleZhCn
+    });
 
     var app = Vue.createApp({
         setup: function () {
@@ -86,7 +95,7 @@
 
             function handleLinearControl(row) {
                 var girderID = row.id || row.ID;
-                var name = row.bridgeName || row.BridgeName || '线形管控';
+                var name = row.bridgeName || row.BridgeName || i18nUtils.$t('biz.steelBeam.linearControl');
                 var url = '/Biz/SteelBeam/LinearControl?girderID=' + girderID;
                 if (window.parent && window.parent.openInNewTab) {
                     window.parent.openInNewTab(name, url);
@@ -121,8 +130,19 @@
         }
     });
 
+    // 注册 Vue I18n
+    app.use(appI18n);
+
     app.use(ElementPlus, {
         locale: ElementPlusLocaleZhCn
     });
+
+    if (window.ElementPlusIconsVue) {
+        for (var key in window.ElementPlusIconsVue) {
+            if (window.ElementPlusIconsVue[key]) {
+                app.component(key, window.ElementPlusIconsVue[key]);
+            }
+        }
+    }
     app.mount('#app');
 });

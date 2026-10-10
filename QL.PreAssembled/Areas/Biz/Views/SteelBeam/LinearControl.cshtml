@@ -16,6 +16,7 @@
         .lc-panel { background: #fff; padding: 18px 24px; min-height: 520px; }
         .lc-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 16px; }
         .lc-toolbar-left, .lc-toolbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .lc-lock-tip { margin: -6px 0 14px; padding: 8px 12px; background: #fffbe6; border: 1px solid #ffe58f; border-radius: 4px; color: #ad6800; font-size: 13px; line-height: 1.6; }
         .lc-pagination { display: flex; justify-content: flex-end; margin-top: 16px; }
         .lc-import-tip { padding: 12px 16px; margin-bottom: 16px; background: #f5f8fc; border-radius: 4px; color: #606266; line-height: 1.8; }
         .lc-import-fields { display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px; margin-bottom: 16px; }
@@ -23,6 +24,124 @@
         .lc-upload .el-upload, .lc-upload .el-upload-dragger { width: 100%; }
         .lc-empty-panel { min-height: 480px; }
         .lc-coordinate-input { width: 120px; }
+
+        .monitoring-top {
+            padding: 24px;
+            margin: 0 auto;
+            min-width: 160mm;
+            max-width: 160mm;
+            text-align: center;
+        }
+        .monitoring-body {
+            background: #fff;
+            padding: 24px;
+            min-width: 160mm;
+            max-width: 160mm;
+            margin: 0 auto;
+            font-family: "SimSun", "Microsoft Yahei", sans‑serif;
+            font-size: 14px;
+        }
+
+            .monitoring-body h1 {
+                text-align: center;
+                font-size: 20px;
+                font-weight: bold;
+                margin: 0 0 16px 0;
+            }
+        /* 顶部无表格边框，标签+下划线输入栏布局 */
+        .header‑wrap {
+            display: grid;
+            grid-template-columns: auto 1fr auto 1fr;
+            gap: 8px 12px;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .header‑label {
+            white-space: nowrap;
+        }
+
+        .header‑underline {
+            border-bottom: 1px solid #333;
+            min-height: 24px;
+            text-align: center;
+        }
+
+        .calc-result-table {
+            border: 1px solid;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .calc-result-table > tbody > tr {
+        }
+        .calc-result-table .label {
+            font-weight: bolder;
+            vertical-align: middle;
+            text-align: center;
+        }
+        .calc-result-table > tbody > tr > th {
+            width: 16.66%;
+            border: 1px solid;
+        }
+        .calc-result-table > tbody > tr > td {
+            width: 16.66%;
+            border: 1px solid;
+            min-height: 16px;
+        }
+        .calc-result-table .center {
+            text-align: center;
+        }
+        .calc-result-table .noborder {
+            /* border-top-color: transparent;
+            border-bottom-color: transparent; */
+            border-color: transparent;
+        }
+        .calc-result-table td.noborder:first-child {
+            border-left-color: #000;
+        }
+        .calc-result-table td.noborder:last-child {
+            border-right-color: #000;
+        }
+        .calc-result-table .noborder.noborder-top {
+            border-top-color: #000;
+        }
+        .calc-result-table .noborder.noborder-bottom {
+            border-bottom-color: #000;
+        }
+
+        .calc-result-table-rows th,
+        .calc-result-table-rows td {
+            text-align: center !important;
+            font-size: 12px;
+        }
+        
+        .chart-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 12px;
+            box-sizing: border-box;
+        }
+
+        .chart-item {
+            width: calc((100% - 2 * 16px) / 3);
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            box-sizing: border-box; /* 关键：边框不会额外增加宽度 */
+        }
+
+        .chart-title {
+            text-align: center;
+            padding: 8px;
+            font-weight: bold;
+            box-sizing: border-box;
+        }
+
+        .chart-box {
+            height: 320px;
+            width: 100%;
+            box-sizing: border-box;
+        }
     </style>
 }
 
@@ -38,25 +157,25 @@
     <div class="lc-panel" v-show="activeTab === 'theoretical'">
         <div class="lc-toolbar">
             <div class="lc-toolbar-left">
-                <el-select v-model="theoryQuery.pointCode" filterable clearable placeholder="请选择测点编号" style="width:220px">
+                <el-select v-model="theoryQuery.pointCode" filterable clearable :placeholder="$t('biz.steelBeam.pointPlaceholder')" style="width:220px">
                     <el-option v-for="item in pointOptions" :key="item" :label="item" :value="item"></el-option>
                 </el-select>
-                <el-select v-model="theoryQuery.segmentNo" filterable clearable placeholder="请选择梁段号" style="width:200px">
+                <el-select v-model="theoryQuery.segmentNo" filterable clearable :placeholder="$t('biz.steelBeam.segmentPlaceholder')" style="width:200px">
                     <el-option v-for="item in segmentOptions" :key="item" :label="item" :value="item"></el-option>
                 </el-select>
-                <el-button type="primary" @@click="searchTheory">搜索</el-button>
-                <el-button @@click="resetTheory">重置</el-button>
+                <el-button type="primary" @@click="searchTheory"><el-icon><Search /></el-icon> {{ $t('common.search') }}</el-button>
+                <el-button @@click="resetTheory"><el-icon><Refresh-Left /></el-icon> {{ $t('common.reset') }}</el-button>
             </div>
             <div class="lc-toolbar-right">
-                <el-button plain type="primary" @@click="downloadTemplate('theoretical')">下载理论数据模板</el-button>
-                <el-tooltip :disabled="!state.hasMeasured" content="已存在实测数据，理论数据不可修改">
-                    <span><el-button type="primary" :disabled="state.hasMeasured" @@click="openImport('theoretical')">导入理论数据</el-button></span>
-                </el-tooltip>
+                <el-button plain type="default" @@click="downloadTemplate('theoretical')"><el-icon><Download/></el-icon>{{ $t('biz.steelBeam.downloadTheoryTemplate') }}</el-button>
+                <el-button type="primary" :disabled="state.hasMeasured" @@click="openImport('theoretical')"><el-icon><Upload-Filled /></el-icon>{{ $t('biz.steelBeam.importTheoretical') }}</el-button>
             </div>
         </div>
+        <!-- 禁用原因常驻显示：不用 el-tooltip 包裹按钮（包裹层会打断 flex 间距与按钮垂直对齐） -->
+        <div class="lc-lock-tip" v-if="state.hasMeasured">{{ $t('biz.steelBeam.theoryEditDisabledTip') }}</div>
         <el-table v-loading="loading" :data="rows" border stripe>
-            <el-table-column prop="pointCode" label="测点编号" min-width="140" align="center"></el-table-column>
-            <el-table-column label="设计坐标(m)" align="center">
+            <el-table-column prop="pointCode" :label="$t('biz.steelBeam.pointCode')" min-width="140" align="center"></el-table-column>
+            <el-table-column :label="$t('biz.steelBeam.designCoord')" align="center">
                 <el-table-column label="X" width="150" align="center">
                     <template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.x" class="lc-coordinate-input"></el-input> <span v-else>{{ formatDecimal(scope.row.designX) }}</span></template>
                 </el-table-column>
@@ -67,78 +186,156 @@
                     <template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.z" class="lc-coordinate-input"></el-input> <span v-else>{{ formatDecimal(scope.row.designZ) }}</span></template>
                 </el-table-column>
             </el-table-column>
-            <el-table-column prop="preCamber" label="预拱度(m)" width="120" align="center"></el-table-column>
-            <el-table-column prop="weight" label="权值" width="90" align="center"></el-table-column>
-            <el-table-column prop="segmentNo" label="所属梁段号" width="130" align="center"></el-table-column>
-            <el-table-column prop="positionName" label="测位名称" min-width="130" align="center"></el-table-column>
-            <el-table-column label="操作" width="130" align="center">
+            <el-table-column prop="preCamber" :label="$t('biz.steelBeam.preCamber')" width="120" align="center"></el-table-column>
+            <el-table-column prop="weight" :label="$t('biz.steelBeam.weight')" width="90" align="center"></el-table-column>
+            <el-table-column prop="segmentNo" :label="$t('biz.steelBeam.segmentNo')" width="130" align="center"></el-table-column>
+            <el-table-column prop="positionName" :label="$t('biz.steelBeam.positionName')" min-width="130" align="center"></el-table-column>
+            <el-table-column :label="$t('biz.steelBeam.tableOperate')" width="130" align="center">
                 <template #default="scope">
-                    <template v-if="editingId === scope.row.id"><el-button link type="primary" @@click="saveEdit(scope.row)">保存</el-button><el-button link @@click="cancelEdit">取消</el-button></template>
-                    <el-button v-else-if="scope.row.canEdit" link type="primary" @@click="startEdit(scope.row)">编辑</el-button>
+                    <template v-if="editingId === scope.row.id"><el-button link type="primary" @@click="saveEdit(scope.row)">{{ $t('common.save') }}</el-button><el-button link @@click="cancelEdit">{{ $t('common.cancel') }}</el-button></template>
+                    <el-button v-else-if="scope.row.canEdit" link type="primary" @@click="startEdit(scope.row)">{{ $t('common.edit') }}</el-button>
                 </template>
             </el-table-column>
         </el-table>
-        <div class="lc-pagination"><el-pagination background layout="total, sizes, prev, pager, next, jumper" :total="total" v-model:current-page="theoryQuery.pageIndex" v-model:page-size="theoryQuery.pageSize" :page-sizes="[20,50,100]" @@current-change="loadTheory" @@size-change="onTheorySize"></el-pagination></div>
+        <div class="lc-pagination"><el-pagination background layout="total, sizes, prev, pager, next, jumper" :total="total" v-model:current-page="theoryQuery.pageIndex" v-model:page-size="theoryQuery.pageSize" :page-sizes="[10,20,50,100]" @@current-change="loadTheory" @@size-change="onTheorySize"></el-pagination></div>
     </div>
 
     <div class="lc-panel" v-show="activeTab === 'measured'">
         <div class="lc-toolbar">
             <div class="lc-toolbar-left">
-                <el-select v-model="measuredQuery.pushCount" placeholder="请选择顶推次数" clearable style="width:190px" @@change="onPushChange">
-                    <el-option label="请选择" :value="null"></el-option>
+                <el-select v-model="measuredQuery.pushCount" :placeholder="$t('biz.steelBeam.pushCountPlaceholder')" style="width:190px" @@change="onPushChange">
                     <el-option v-for="item in state.queryPushCounts" :key="item" :label="item" :value="item"></el-option>
                 </el-select>
-                <el-select v-model="measureTimeValue" placeholder="全部时间" style="width:220px">
-                    <el-option label="全部时间" value=""></el-option>
+                <el-select v-model="measureTimeValue" :placeholder="$t('biz.steelBeam.allTime')" style="width:220px">
                     <el-option v-for="item in measureTimeOptions" :key="item" :label="formatMeasureTime(item)" :value="item"></el-option>
                 </el-select>
-                <el-button type="primary" @@click="searchMeasured">搜索</el-button>
-                <el-button @@click="resetMeasured">重置</el-button>
+                <el-button type="primary" @@click="searchMeasured"><el-icon><Search /></el-icon> {{ $t('common.search') }}</el-button>
+                <el-button @@click="resetMeasured"><el-icon><Refresh-Left /></el-icon> {{ $t('common.reset') }}</el-button>
             </div>
             <div class="lc-toolbar-right">
-                <el-button type="primary" :disabled="!state.hasTheoretical" @@click="openImport('measured')">导入实测数据</el-button>
-                <el-button plain type="primary" :disabled="!state.hasMeasured" @@click="downloadMeasured">下载实测数据</el-button>
-                <el-button plain type="primary" @@click="downloadTemplate('measured')">下载模板</el-button>
+                <el-button type="primary" :disabled="!state.hasTheoretical" @@click="openImport('measured')"><el-icon><Upload-Filled /></el-icon>{{ $t('biz.steelBeam.importMeasured') }}</el-button>
+                <el-button plain type="primary" :disabled="!state.hasMeasured" @@click="downloadMeasured"><el-icon><Download /></el-icon>{{ $t('biz.steelBeam.downloadMeasured') }}</el-button>
+                <el-button plain type="default" :disabled="!state.hasMeasured" :loading="rebuildLoading" @@click="rebuildDerived"><el-icon><Refresh /></el-icon>{{ $t('biz.steelBeam.rebuildDerived') }}</el-button>
+                <el-button plain type="default" @@click="downloadTemplate('measured')"><el-icon><Download /></el-icon>{{ $t('biz.steelBeam.downloadTemplate') }}</el-button>
             </div>
         </div>
         <el-table v-loading="loading" :data="rows" border stripe :span-method="measuredSpanMethod">
-            <el-table-column prop="pointCode" label="测点编号" min-width="150" align="center"></el-table-column>
-            <el-table-column label="实测坐标(m)" align="center">
+            <el-table-column prop="pointCode" :label="$t('biz.steelBeam.pointCode')" min-width="150" align="center"></el-table-column>
+            <el-table-column :label="$t('biz.steelBeam.measuredCoord')" align="center">
                 <el-table-column label="X" width="150" align="center"><template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.x" class="lc-coordinate-input"></el-input><span v-else>{{ formatDecimal(scope.row.measuredX) }}</span></template></el-table-column>
                 <el-table-column label="Y" width="150" align="center"><template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.y" class="lc-coordinate-input"></el-input><span v-else>{{ formatDecimal(scope.row.measuredY) }}</span></template></el-table-column>
                 <el-table-column label="Z" width="150" align="center"><template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.z" class="lc-coordinate-input"></el-input><span v-else>{{ formatDecimal(scope.row.measuredZ) }}</span></template></el-table-column>
             </el-table-column>
-            <el-table-column prop="pushCount" label="顶推次数" width="100" align="center"></el-table-column>
-            <el-table-column label="测量时间" width="180" align="center"><template #default="scope">{{ formatMeasureTime(scope.row.measureTime) }}</template></el-table-column>
-            <el-table-column label="操作" width="130" align="center">
+            <el-table-column prop="pushCount" :label="$t('biz.steelBeam.pushCount')" width="100" align="center"></el-table-column>
+            <el-table-column :label="$t('biz.steelBeam.measureTime')" width="180" align="center"><template #default="scope">{{ formatMeasureTime(scope.row.measureTime) }}</template></el-table-column>
+            <el-table-column :label="$t('biz.steelBeam.tableOperate')" width="130" align="center">
                 <template #default="scope">
-                    <template v-if="editingId === scope.row.id"><el-button link type="primary" @@click="saveEdit(scope.row)">保存</el-button><el-button link @@click="cancelEdit">取消</el-button></template>
-                    <el-button v-else-if="scope.row.canEdit" link type="primary" @@click="startEdit(scope.row)">编辑</el-button>
+                    <template v-if="editingId === scope.row.id"><el-button link type="primary" @@click="saveEdit(scope.row)">{{ $t('common.save') }}</el-button><el-button link @@click="cancelEdit"><el-icon><RefreshRight /></el-icon> {{ $t('common.cancel') }}</el-button></template>
+                    <el-button v-else-if="scope.row.canEdit" link type="primary" @@click="startEdit(scope.row)">{{ $t('common.edit') }}</el-button>
                 </template>
             </el-table-column>
         </el-table>
-        <div class="lc-pagination"><el-pagination background layout="total, sizes, prev, pager, next, jumper" :total="total" v-model:current-page="measuredQuery.pageIndex" v-model:page-size="measuredQuery.pageSize" :page-sizes="[20,50,100]" @@current-change="loadMeasured" @@size-change="onMeasuredSize"></el-pagination></div>
+        <div class="lc-pagination"><el-pagination background layout="total, sizes, prev, pager, next, jumper" :total="total" v-model:current-page="measuredQuery.pageIndex" v-model:page-size="measuredQuery.pageSize" :page-sizes="[10,20,50,100]" @@current-change="loadMeasured" @@size-change="onMeasuredSize"></el-pagination></div>
     </div>
 
-    <div class="lc-panel lc-empty-panel" v-show="activeTab === 'monitoring'"></div>
-    <div class="lc-panel lc-empty-panel" v-show="activeTab === 'analysis'"></div>
+    <div class="lc-panel lc-empty-panel" v-show="activeTab === 'monitoring'">
+        <div class="monitoring-top lc-toolbar-left">
+            <span>&nbsp;</span>
+            <span>{{$t('biz.steelBeam.segmentNo')}}</span>
+            <el-select v-model="calcTheoryReq.segmentNos"
+                @@change="calcTheoryReqChange"
+                filterable multiple clearable :placeholder="$t('biz.steelBeam.segmentPlaceholder')" style="width:200px">
+                <el-option v-for="item in segmentMonitorOptions" :key="item" :label="item" :value="item"></el-option>
+            </el-select>
+            <br />
+            <br />
+            <el-button type="primary" @@click="calcTheory"><el-icon><Search /></el-icon> {{ $t('biz.steelBeam.btnCalc') }}</el-button>
+            <el-button :disabled="!(calcTheoryDownloadFlag==1)" @@click="calcTheoryDownload"><el-icon><Download /></el-icon> {{ $t('biz.steelBeam.btnDownloadCalc') }}</el-button>
+        </div>
+        <div class="monitoring-body">
+            <h1>中交三航局技术中心施工监控联系单</h1>
 
-    <el-dialog v-model="importDialogVisible" :title="importType === 'theoretical' ? '导入理论数据' : '导入实测数据'" width="560px" :close-on-click-modal="false" :close-on-press-escape="!importLoading" :show-close="!importLoading">
-        <div class="lc-import-tip" v-if="importType === 'theoretical'">测点编号、设计坐标、预拱度、权值、所属梁段号和测位名称均为必填；坐标及预拱度单位为 m，权值范围为 0～1。</div>
-        <div class="lc-import-tip" v-else>只录入未发生变形的测点；若测点所在梁段已离开支架并发生变形，则不录入。</div>
+            <div class="header‑wrap">
+                <div class="header‑label">项目名称：</div>
+                <div class="header‑underline">{{calcResult.projName}}</div>
+                <div class="header‑label">编号：</div>
+                <div class="header‑underline">{{calcResult.sheetNo}}</div>
+            </div>
+            <table class="calc-result-table">
+                <tr><th class="label">事由</th><th colspan="5"></th></tr>
+                <tr><td class="label">前提资料</td><td colspan="5"></td></tr>
+                <tr><td colspan="6" class="center">联系单内容</td></tr>
+                <tr><td colspan="6" class="noborder">根据{{calcResult.measuredSegments}}节段现场测量结果，{{calcResult.pendingSegments}}节段的定位标高见下表：</td></tr>
+                <tr><td colspan="6" class="noborder">&nbsp;</td></tr>
+                <tr>
+                    <td class="noborder border-top"></td>
+                    <td class="noborder" colspan="4">
+                        <el-table :data="calcResult?.rows" border class="calc-result-table-rows">
+                            <el-table-column prop="pointCode" label="测点编号"></el-table-column>
+                            <el-table-column label="待拼装钢箱梁定位高程">
+                                <el-table-column prop="designX" label="x"></el-table-column>
+                                <el-table-column prop="designY" label="y"></el-table-column>
+                                <el-table-column prop="designZ" label="z"></el-table-column>
+                            </el-table-column>
+                        </el-table>
+                    </td>
+                    <td class="noborder"></td>
+                </tr>
+                <tr>
+                    <td class="noborder center" colspan="6">图1 测点位置示意图</td>
+                </tr>
+                <tr>
+                    <td class="noborder noborder-bottom" colspan="6">
+                        <div class="note‑text">
+                            <p>备注：{{calcResult.remark}}</p>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">编制</td>
+                    <td></td>
+                    <td class="label">签发</td>
+                    <td></td>
+                    <td class="label">日期</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="label">签收</td>
+                    <td></td>
+                    <td class="label">日期</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="lc-panel lc-empty-panel" v-show="activeTab === 'analysis'">
+        <div class="chart-container">
+            <div class="chart-item" v-for="pos in posNameList" :key="pos">
+                <div class="chart-title">{{ pos }}</div>
+                <div ref="chartRefs" class="chart-box" :data-pos="pos"></div>
+            </div>
+        </div>
+    </div>
+
+    <el-dialog v-model="importDialogVisible" :title="importType === 'theoretical' ? $t('biz.steelBeam.importTheoretical') : $t('biz.steelBeam.importMeasured')" width="560px" :close-on-click-modal="false" :close-on-press-escape="!importLoading" :show-close="!importLoading">
+        <div class="lc-import-tip" v-if="importType === 'theoretical'">{{ $t('biz.steelBeam.theoryImportTip') }}</div>
+        <div class="lc-import-tip" v-else>{{ $t('biz.steelBeam.measuredImportTip') }}</div>
         <div class="lc-import-fields" v-if="importType === 'measured'">
-            <div><div class="lc-field-label">顶推次数</div><el-select v-model="importPushCount" style="width:100%"><el-option v-for="item in state.importPushCounts" :key="item" :label="item" :value="item"></el-option></el-select></div>
-            <div><div class="lc-field-label">测量时间</div><el-date-picker v-model="importMeasureTime" type="datetime" format="YYYY-MM-DD HH:00" value-format="YYYY-MM-DD HH:00" placeholder="请选择年月日和小时" :disabled-date="disableFutureDate" style="width:100%"></el-date-picker></div>
+            <div><div class="lc-field-label">{{ $t('biz.steelBeam.pushCount') }}</div><el-select v-model="importPushCount" style="width:100%"><el-option v-for="item in state.importPushCounts" :key="item" :label="item" :value="item"></el-option></el-select></div>
+            <div><div class="lc-field-label">{{ $t('biz.steelBeam.measureTime') }}</div><el-date-picker v-model="importMeasureTime" type="datetime" format="YYYY-MM-DD HH:00" value-format="YYYY-MM-DD HH:00" :placeholder="$t('biz.steelBeam.timePlaceholder')" :disabled-date="disableFutureDate" style="width:100%"></el-date-picker></div>
         </div>
         <el-upload ref="uploadRef" class="lc-upload" drag :auto-upload="false" :limit="1" :on-change="onFileChange" :on-remove="onFileRemove" :on-exceed="onFileExceed" accept=".xlsx" :disabled="importLoading">
-            <el-icon class="el-icon--upload"><UploadFilled /></el-icon><div class="el-upload__text">将文件拖曳到此区域，或<em>点击添加</em></div>
-            <template #tip><div class="el-upload__tip">仅支持 .xlsx，最大 20 MB，第一个工作表最多 50,000 条数据。</div></template>
+            <el-icon class="el-icon--upload"><UploadFilled /></el-icon><div class="el-upload__text">{{ $t('biz.steelBeam.uploadDrag') }}<em>{{ $t('biz.steelBeam.uploadClick') }}</em></div>
+            <template #tip><div class="el-upload__tip">{{ $t('biz.steelBeam.uploadTip') }}</div></template>
         </el-upload>
-        <template #footer><el-button :disabled="importLoading" @@click="importDialogVisible=false">取消</el-button><el-button type="primary" :loading="importLoading" @@click="confirmImport">确定</el-button></template>
+        <template #footer><el-button :disabled="importLoading" @@click="importDialogVisible=false">{{ $t('common.cancel') }}</el-button><el-button type="primary" :loading="importLoading" @@click="confirmImport">{{ $t('common.confirm') }}</el-button></template>
     </el-dialog>
 </div>
 
 @section Scripts {
     <script>window.__girderID = @girderID;</script>
+    <script src="~/lib/echarts/echarts.min.js"></script>
     <script src="~/js/Biz/steel-beam-linear-control.js" asp-append-version="true"></script>
 }

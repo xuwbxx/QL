@@ -1,6 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-<PropertyGroup>
+  <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -17,6 +17,11 @@
     <Folder Include="Areas\CCSHJ\Models\" />
     <Folder Include="Areas\Cloud\Data\" />
     <Folder Include="Areas\Cloud\Models\" />
+    <Folder Include="Areas\Mobile\Data\" />
+    <Folder Include="Areas\Mobile\Models\" />
+    <Folder Include="Areas\TechApi\Data\" />
+    <Folder Include="Areas\TechApi\Models\" />
+    <Folder Include="Areas\TechApi\Views\" />
     <Folder Include="Areas\Towing\Data\" />
     <Folder Include="Areas\Towing\Models\" />
     <Folder Include="Areas\WindDoor\Data\" />
@@ -26,6 +31,14 @@
     <Folder Include="wwwroot\Content\Towing\lib\lib\leaflet\dist\" />
     <Folder Include="wwwroot\Content\Towing\lib\lib\leaflet\examples\" />
     <Folder Include="wwwroot\Content\Towing\lib\lib\leaflet\src\layer\" />
+    <Folder Include="wwwroot\File\CloudFile\" />
+    <Folder Include="wwwroot\File\Project\CommonFile\" />
+    <Folder Include="wwwroot\File\Project\ProjectImport\" />
+    <Folder Include="wwwroot\File\Project\ZJCZTempFile\" />
+    <Folder Include="wwwroot\File\ShipWorkReport\" />
+    <Folder Include="wwwroot\File\TowingReport\" />
+    <Folder Include="wwwroot\File\Ship\" />
+    <Folder Include="wwwroot\File\起重船水动力计算数据库\" />
   </ItemGroup>
 
   <ItemGroup>

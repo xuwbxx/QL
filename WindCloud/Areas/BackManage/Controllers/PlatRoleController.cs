@@ -2,6 +2,7 @@
 using Model.Base;
 using Model.Tech.Cloud.BackManage;
 using Service.Base;
+using Service.Wind;
 using Service.Wind.BackManage;
 using Tool;
 using WindCloud.Areas.Base.Controllers;
@@ -13,8 +14,8 @@ namespace WindCloud.Areas.BackManage.Controllers
     {
         private readonly BackPlatRoleService _platRoleService;
 
-        public PlatRoleController(CookieService cookieService, Service.Wind.WebValidateService webValidateService, BackPlatRoleService platRoleService)
-            : base(cookieService, webValidateService)
+        public PlatRoleController(CookieService cookieService, Service.Wind.WebValidateService webValidateService, ProjectService projectService, BackPlatRoleService platRoleService)
+            : base(cookieService, projectService, webValidateService)
         {
             _platRoleService = platRoleService;
         }

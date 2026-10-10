@@ -15,14 +15,27 @@ namespace TestWin
             try
             {
 
-                BaseApiRequest request = new BaseApiRequest();
-                request.Token = "dilnamXTCvEz2R8NP+y7T480iwJRBdTsy0ONGt6yvizRazusFKdrAohsH6nzvwqPmLtKhXzK09yTE2Cfy6+wGsYMucm+ISAtDg5BI/2y/GvvEPLbQqcg9k9PdssmoIw0THKwqB6sduVddehQEFzN0rCyv5W93DT64bR4MEYD2mhzNL+ZrS/KnC4znUTW06pNs9HItpz+5Dubst3V0sjoWRwpBMub/OAcn+U+sVOES7pCw/s0uh4aksUDW9VAIYwGaQHWrSQBC08kozUVtgEwOu+doBLgitSRmr41iFHgKg+WbyZWk135yZhGMQTJc4VEaT8Ha1cnFaUel5PfS0Y7wCsCFMUAWBDGv64220SuDLUBd8VQJz7NivkoPzRlGLQAygpJz3VmWyXOr50fWfOGHQofMJ14E2V/mS17YDQolS19xHUei9wMObIXC3E38vdih4Dck00Ibp77gXmAn5Kn3b3VEWecgS1voA2vdiRNdGHj9tvxusGSL9e0irQjE6k63FBSqscZYtN5IhPIMf3YRQ==";
-                string PostUrl = "http://10.6.74.208:8061/CCSHJ/DataPort/VerifyToken";
+                // 测试1: 无参数
+                //var ret0 = HttpUtils.PostSync("http://localhost:5005/CCSHJTechApi/CloudCenter/ApiTest2", "");
 
-                var ret1 = await HttpUtils.PostAsync(PostUrl, request);
+                // 测试2: [FromBody] string
+                //var ret1 = HttpUtils.PostSync("http://localhost:5005/CCSHJTechApi/CloudCenter/FromBodyTestString", "hello");
 
-                var ret = JsonUtils.Deserialize<BaseApiReturn<SSOUserInfo>>(ret1);
+                // 测试3: [FromBody] TechCloudApiRequest
+                //TechCloudApiRequest request = new TechCloudApiRequest();
+                //request.Token = "123";
+                //var ret2 = HttpUtils.PostSync("http://localhost:5005/CCSHJTechApi/CloudCenter/FromBodyTestObject", request);
 
+                // 测试4: [FromBody] 本地 SimpleTestDto
+                //var ret3 = HttpUtils.PostSync("http://localhost:5005/CCSHJTechApi/CloudCenter/FromBodyTestLocal", new { Name = "test" });
+
+                string postUrl = @"http://localhost:5005/CCSHJTechApi/CloudCenter/SSOLoginChecking";
+
+                TechCloudApiRequest request = new TechCloudApiRequest();
+                request.Token = @"eExyMFpyVHd4Mlc2dXlQcUtYUjI5OVVZQWtoYUZaU3VXdW1IeEJDOXRZWHVGRXRaaXJzbWNnPT0=";
+
+
+                var ret = HttpUtils.PostSync(postUrl, request);
 
             }
             catch (Exception ex)

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Data;
+using System.Data.Common;
 using System.Linq.Expressions;
 
 namespace DataFactory.Factory
@@ -19,8 +20,8 @@ namespace DataFactory.Factory
         IQueryable<TEntity> FindQueryable(Expression<Func<TEntity, bool>> predicate);
 
         // 7. 分页查询（返回数据列表和总数）
-        (IEnumerable<TEntity> list, int totalCount) FindPage(Expression<Func<TEntity, bool>>? predicate, Expression<Func<TEntity, object>>? orderBy, int pageIndex, int pageSize);
-        Task<(IEnumerable<TEntity> list, int totalCount)> FindPageAsync(Expression<Func<TEntity, bool>>? predicate, Expression<Func<TEntity, object>>? orderBy, int pageIndex, int pageSize);
+        (IEnumerable<TEntity> list, int totalCount) FindPage(Expression<Func<TEntity, bool>>? predicate, Expression<Func<TEntity, object>>? orderBy, int pageIndex, int pageSize, bool isDescending = false);
+        Task<(IEnumerable<TEntity> list, int totalCount)> FindPageAsync(Expression<Func<TEntity, bool>>? predicate, Expression<Func<TEntity, object>>? orderBy, int pageIndex, int pageSize, bool isDescending = false);
 
         // 8. 新增：数据操作方法（同步+异步）
         TEntity? FindFirst(Expression<Func<TEntity, bool>> predicate); // 同步
@@ -78,6 +79,10 @@ namespace DataFactory.Factory
         // 3. 执行查询SQL，返回DataTable
         DataTable QueryDataTable(string sql);
         Task<DataTable> QueryDataTableAsync(string sql);
+
+        // 4. 带参数的SQL执行方法
+        int ExecuteSql(string sql, DbParameter[] parameters);
+        DataTable QueryDataTable(string sql, DbParameter[] parameters);
         #endregion
 
 
@@ -128,7 +133,7 @@ namespace DataFactory.Factory
         #endregion
 
         #region 7. 分页查询
-        public (IEnumerable<TEntity> list, int totalCount) FindPage(Expression<Func<TEntity, bool>>? predicate, Expression<Func<TEntity, object>>? orderBy, int pageIndex, int pageSize)
+        public (IEnumerable<TEntity> list, int totalCount) FindPage(Expression<Func<TEntity, bool>>? predicate, Expression<Func<TEntity, object>>? orderBy, int pageIndex, int pageSize, bool isDescending = false)
         {
             IQueryable<TEntity> query = _dbSet;
 
@@ -138,14 +143,14 @@ namespace DataFactory.Factory
             int totalCount = query.Count();
 
             if (orderBy != null)
-                query = query.OrderBy(orderBy);
+                query = isDescending ? query.OrderByDescending(orderBy) : query.OrderBy(orderBy);
 
             var list = query.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
 
             return (list, totalCount);
         }
 
-        public async Task<(IEnumerable<TEntity> list, int totalCount)> FindPageAsync(Expression<Func<TEntity, bool>>? predicate, Expression<Func<TEntity, object>>? orderBy, int pageIndex, int pageSize)
+        public async Task<(IEnumerable<TEntity> list, int totalCount)> FindPageAsync(Expression<Func<TEntity, bool>>? predicate, Expression<Func<TEntity, object>>? orderBy, int pageIndex, int pageSize, bool isDescending = false)
         {
             IQueryable<TEntity> query = _dbSet;
 
@@ -155,7 +160,7 @@ namespace DataFactory.Factory
             int totalCount = await query.CountAsync();
 
             if (orderBy != null)
-                query = query.OrderBy(orderBy);
+                query = isDescending ? query.OrderByDescending(orderBy) : query.OrderBy(orderBy);
 
             var list = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
 
@@ -455,6 +460,59 @@ namespace DataFactory.Factory
             try
             {
                 using var reader = await command.ExecuteReaderAsync();
+                var dt = new DataTable();
+                dt.Load(reader);
+                return dt;
+            }
+            finally
+            {
+                if (wasClosed) connection.Close();
+            }
+        }
+
+        /// <summary>
+        /// 执行增删改SQL（带参数），返回受影响的行数
+        /// </summary>
+        public int ExecuteSql(string sql, DbParameter[] parameters)
+        {
+            ValidateSql(sql);
+            var connection = _dbContext.Database.GetDbConnection();
+            using var command = connection.CreateCommand();
+            command.CommandText = sql;
+            if (parameters != null)
+            {
+                foreach (var p in parameters) command.Parameters.Add(p);
+            }
+            var wasClosed = connection.State == ConnectionState.Closed;
+            if (wasClosed) connection.Open();
+            try
+            {
+                return command.ExecuteNonQuery();
+            }
+            finally
+            {
+                if (wasClosed) connection.Close();
+            }
+        }
+
+        /// <summary>
+        /// 执行查询SQL（带参数），返回DataTable
+        /// </summary>
+        public DataTable QueryDataTable(string sql, DbParameter[] parameters)
+        {
+            ValidateSql(sql);
+            var connection = _dbContext.Database.GetDbConnection();
+            using var command = connection.CreateCommand();
+            command.CommandText = sql;
+            if (parameters != null)
+            {
+                foreach (var p in parameters) command.Parameters.Add(p);
+            }
+            var wasClosed = connection.State == ConnectionState.Closed;
+            if (wasClosed) connection.Open();
+            try
+            {
+                using var reader = command.ExecuteReader();
                 var dt = new DataTable();
                 dt.Load(reader);
                 return dt;

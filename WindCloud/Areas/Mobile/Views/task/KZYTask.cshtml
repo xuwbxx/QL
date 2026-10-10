@@ -1,0 +1,293 @@
+﻿
+@{
+    ViewBag.Title = "可作业预报";
+    Layout = "~/Views/Shared/MobileLayout.cshtml";
+}
+@{
+    var ShipList = Model as List<DataFactory.KingBase.CloudWind.Library_Ship_KZY>;
+}
+
+<input type="hidden" id="hid_TaskID" value="@ViewData["TaskID"].ToString()" />
+<input type="hidden" id="hid_ProjectID" value="@ViewData["ProjectID"].ToString()" />
+<input type="hidden" id="hid_PostToken" value="@ViewData["PostToken"].ToString()" />
+
+<header>
+    <div class="left_logo" onclick="DoBack();"><i class="fa fa-chevron-left"></i></div>起重船基础施工可作业性预报
+    <span class="icon_user">@ViewData["UserName"].ToString()</span>
+</header>
+<div class="height88"></div>
+
+<div class="gzrw_search_box"><input type="text" class="form-control" disabled id="txt_TaskName"></div>
+
+<div class="xmxq_box02 clearfix">
+    <div class="lg_title"><i class="fa fa-edit"></i>项目部</div>
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>浮式船舶选择
+    </div>
+
+    <div class="work_task_chuanbo col-md-12 col-xs-12 col-sm-12">
+        <ul class="chuanbo_ul clearfix" id="ul_ShipList">
+            @{
+                foreach (var item in ShipList)
+                {
+                    <li><input data-id="@item.ID" data-name="@item.ShipName" type="checkbox">@item.ShipName</li>
+                }
+            }
+
+        </ul>
+        @*<ul class="SC_file clearfix">
+                <li><a href="">4fdfdgrt434.pdf</a></li>
+                <li><a href="">4fdfdgrt434.pdf</a></li>
+            </ul>*@
+    </div>
+</div>
+
+<div class="xmxq_box02 clearfix">
+    <div class="lg_title"><i class="fa fa-edit"></i>技术中心</div>
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>可作业预报信息
+    </div>
+
+    <div class="col-md-12 col-xs-12 col-sm-12 p0">
+
+        <div class="xmxq_box clearfix mt02">
+            <div class="col-md-4 col-xs-4 col-sm-4 text-left xmxq_attribute">
+                亿方云TaskNo
+            </div>
+            <div class="col-md-8 col-xs-8 col-sm-8 text-right xmxq_name" id="div_YFYNo">
+                TN00001
+            </div>
+        </div>
+        <div class="xmxq_box clearfix mt02">
+            <div class="col-md-4 col-xs-4 col-sm-4 text-left xmxq_attribute">
+                衡准
+            </div>
+            <div class="col-md-8 col-xs-8 col-sm-8 text-right xmxq_name" id="div_Balance">
+                0.3
+            </div>
+        </div>
+        <div class="xmxq_box clearfix mt02">
+            <div class="col-md-4 col-xs-4 col-sm-4 text-left xmxq_attribute">
+                风场经度
+            </div>
+            <div class="col-md-8 col-xs-8 col-sm-8 text-right xmxq_name" id="div_Lon">
+                120
+            </div>
+        </div>
+        <div class="xmxq_box clearfix mt02">
+            <div class="col-md-4 col-xs-4 col-sm-4 text-left xmxq_attribute">
+                风场纬度
+            </div>
+            <div class="col-md-8 col-xs-8 col-sm-8 text-right xmxq_name" id="div_Lat">
+                30
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="xmxq_box clearfix">
+    <div class="col-md-4 col-xs-4 col-sm-4 text-left xmxq_attribute">
+        推送时间
+    </div>
+    <div class="col-md-8 col-xs-8 col-sm-8 text-right xmxq_name" id="div_ForecastTime">
+        2022-06-27 至 2024-09-27
+    </div>
+</div>
+<div class="xmxq_box02 clearfix">
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>文件报告
+    </div>
+    <div class="xmxq_table_box col-md-12 col-xs-12 col-sm-12 p0">
+        <table class="table table-striped xmxq_table">
+            <thead>
+                <tr>
+                    <th width="50%">文件名</th>
+                    <th width="25%">上传时间</th>
+                    <th width="25%">操作</th>
+                </tr>
+            </thead>
+            <tbody id="html_ReportList">
+                <tr>
+                    <td>OW1002秦航工5000波浪及船舶可作业性预报20240709早间发布.docx</td>
+                    <td>2024-07-09</td>
+                    <td><a class="btn btn-primary">下载</a></td>
+                </tr>
+                <tr>
+                    <td>OW1002秦航工5000波浪及船舶可作业性预报20240709早间发布.docx</td>
+                    <td>2024-07-09</td>
+                    <td><a class="btn btn-primary">下载</a></td>
+                </tr>
+                <tr>
+                    <td>OW1002秦航工5000波浪及船舶可作业性预报20240709早间发布.docx</td>
+                    <td>2024-07-09</td>
+                    <td><a class="btn btn-primary">下载</a></td>
+                </tr>
+                <tr>
+                    <td>OW1002秦航工5000波浪及船舶可作业性预报20240709早间发布.docx</td>
+                    <td>2024-07-09</td>
+                    <td><a class="btn btn-primary">下载</a></td>
+                </tr>
+                <tr>
+                    <td>OW1002秦航工5000波浪及船舶可作业性预报20240709早间发布.docx</td>
+                    <td>2024-07-09</td>
+                    <td><a class="btn btn-primary">下载</a></td>
+                </tr>
+                <tr>
+                    <td>OW1002秦航工5000波浪及船舶可作业性预报20240709早间发布.docx</td>
+                    <td>2024-07-09</td>
+                    <td><a class="btn btn-primary">下载</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<div class="xmxq_box02 clearfix">
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>上一节点意见
+    </div>
+
+    <div class="work_task_yijian col-md-12 col-xs-12 col-sm-12">
+        <textarea class="form-control" id="txt_LastNodeComment"></textarea>
+    </div>
+
+</div>
+
+<div class="xmxq_box02 clearfix">
+    <div class="col-md-12 col-xs-12 col-sm-12 text-left xmxq_title">
+        <span></span>流程节点<div class="jieguosh_box" id="txt_NextNode">审批结审批结审批结束</div>
+    </div>
+    <div class="col-md-12 col-xs-12 col-sm-12 next-jiedian">
+        <ul id="ul_NextNodeUser">
+            @*<li><div>程伟</div><div>（三航局-技术中心-总部-海洋工程研究所-三航局-技术中心-总部-海洋工程研究所）</div></li>
+                <li><div>程伟</div><div>（三航局-技术中心-总部-海洋工程研究所-三航局-技术中心-总部-海洋工程研究所）</div></li>
+                <li><div>程伟</div><div>（三航局-技术中心-总部-海洋工程研究所-三航局-技术中心-总部-海洋工程研究所）</div></li>
+                <li><div>程伟</div><div>（三航局-技术中心-总部-海洋工程研究所-三航局-技术中心-总部-海洋工程研究所）</div></li>*@
+        </ul>
+    </div>
+
+</div>
+
+<script>
+
+    $(document).ready(function () {
+
+        ParamInit();
+        Query();
+
+    })
+
+    var Param = {};
+    var ParamInit = function () {
+        Param.TaskID = $('#hid_TaskID').val();
+    }
+
+    var Query = function () {
+
+        //OpenMaskLayout();
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('TaskQuery_KZY', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+
+                    if (data.Success) {
+
+                        var Task = data.Data;
+
+                        $('#txt_TaskName').val(Task.TaskName);
+
+                        $(Task.TaskInfo_KZY.ShipIDs).each(function (index, dom) {
+                            $('#ul_ShipList input[data-id="' + dom + '"]').prop('checked', true);
+                        });
+
+                        $('#div_YFYNo').html(Task.TaskInfo_KZY.YFYNo);
+                        $('#div_Balance').html(Task.TaskInfo_KZY.Balance);
+                        $('#div_Lon').html(Task.TaskInfo_KZY.Lon);
+                        $('#div_Lat').html(Task.TaskInfo_KZY.Lat);
+
+                        $('#ForecastTime').html(Task.TaskInfo_KZY.ForecastStartTime + ' 至 ' + Task.TaskInfo_KZY.ForecastEndTime)
+
+                        var ReportHtml = '';
+                        $(Task.Report.KZYReportFile).each(function (index, dom) {
+
+                            ReportHtml += '<tr><td>' + dom.FileName + '</td ><td>' + dom.FileTime + '</td><td><a download="' + dom.FileName + '" href="' + dom.FilePath + '" class="btn btn-primary">下载</a></td></tr>';
+
+                        })
+
+                        $('#html_ReportList').html(ReportHtml);
+
+
+                        var CommentHtml = '';
+                        $(Task.FlowInfo.LastNode).each(function (index, dom) {
+                            CommentHtml += dom.UserName + ':' + dom.Comment + ';\n'
+                        });
+                        $('#txt_LastNodeComment').val(CommentHtml);
+
+                        if (Task.FlowInfo.NextNodeID == 0) {
+                            $('#txt_NextNode').html('流程结束');
+                            $('#ul_NextNodeUser').html('');
+                        }
+                        else {
+                            $('#txt_NextNode').html(Task.FlowInfo.NodeName);
+                            var NodeUserHtml = '';
+                            $(Task.FlowInfo.Node).each(function (index, dom) {
+
+                                NodeUserHtml += '<li><div>' + dom.UserName + '</div><div>（' + dom.UserDepart + '）</div></li>'
+
+                            });
+                            $('#ul_NextNodeUser').html(NodeUserHtml);
+                        }
+
+                    }
+
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+                //Pagination();
+            });
+
+    }
+
+    var LoadKZYShip = function () {
+
+        Param.PostToken = $('#hid_PostToken').val() + CreateTimeToken();
+        $.post('LoadKZYShip', Param)
+            .success(function (data, statusText, jqXRH) {
+                if (data) {
+
+                    if (data.Success) {
+
+                        var ShipHtml = '';
+                        $(data.Data).each(function (index, dom) {
+
+                            ShipHtml += '<li><input type="checkbox">' + dom.ShipName + '</li>';
+
+                        })
+                        $('#ul_ShipList').html(ShipHtml);
+
+
+                    }
+                }
+            })
+            .fail(function (jqXHR, statusText, errorMessage) {
+                //console.error(arguments);
+            })
+            .always(function (data) {
+            });
+
+    }
+
+
+    var DoBack = function () {
+
+        window.location.href = "Index";
+
+    }
+
+
+</script>

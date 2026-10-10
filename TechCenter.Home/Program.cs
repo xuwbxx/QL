@@ -165,28 +165,35 @@ app.UseRouting();
 //app.MapControllers();
 
 // 9. 合并所有端点配置到 UseEndpoints 中
-app.UseEndpoints(endpoints =>
-{
+//app.UseEndpoints(endpoints =>
+//{
 
-    // 1. Area 路由（匹配带区域前缀的 URL，如 /Tech/Home/Index）
-    endpoints.MapControllerRoute(
-        name: "areaRoute",
-        pattern: "{area}/{controller}/{action}/{id?}",
-        defaults: new { action = "Index" },
-        constraints: new { area = @"[A-Za-z]+" } // 仅匹配非空 Area
-    );
+//    // 1. Area 路由（匹配带区域前缀的 URL，如 /Tech/Home/Index）
+//    endpoints.MapControllerRoute(
+//        name: "areaRoute",
+//        pattern: "{area}/{controller}/{action}/{id?}",
+//        defaults: new { action = "Index" },
+//        constraints: new { area = @"[A-Za-z]+" } // 仅匹配非空 Area
+//    );
 
-    // 2. 根路径默认路由（访问 / 时，指向 Tech/Home/Index）
-    endpoints.MapControllerRoute(
-        name: "default",
-        pattern: "{controller}/{action}/{id?}",
-        // 默认值：明确指定 area、controller、action
-        defaults: new { area = "Base", controller = "System", action = "Login" }
-        // 移除 area = "" 的约束，避免与默认值冲突
-    );
-});
+//    // 2. 根路径默认路由（访问 / 时，指向 Tech/Home/Index）
+//    endpoints.MapControllerRoute(
+//        name: "default",
+//        pattern: "{controller}/{action}/{id?}",
+//        // 默认值：明确指定 area、controller、action
+//        defaults: new { area = "Base", controller = "System", action = "Login" }
+//        // 移除 area = "" 的约束，避免与默认值冲突
+//    );
+//});
 
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
+// 配置默认路由模板，无Area时走此路由
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 
 

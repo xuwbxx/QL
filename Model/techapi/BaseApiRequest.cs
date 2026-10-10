@@ -4,10 +4,10 @@
     {
         public BaseApiRequest() { }
 
-        public T Data { set; get; }
+        public T? Data { set; get; }
 
-        public string Requester { set; get; }
+        public string? Requester { set; get; }
 
-        public string Token { set; get; }
+        public string? Token { set; get; }
     }
 }

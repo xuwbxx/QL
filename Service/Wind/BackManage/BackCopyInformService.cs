@@ -113,7 +113,7 @@ namespace Service.Wind.BackManage
                         UserDepart = user.UserDepartName ?? "",
                         UserPhone = user.UserPhone ?? "",
                         UserJobName = user.UserJobName ?? "",
-                        CreateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified),
+                        CreateTime = DateTime.Now,
                         IsDelete = false
                     };
 

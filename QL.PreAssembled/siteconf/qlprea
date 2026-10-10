@@ -1,9 +1,9 @@
 ######################
-# Web Site: QL.PreAssembled 
+# Web Site: QL.PreAssembled 48.26 版本，48.25部署的版本请查看本文件历史版本
 ########################################
 
 port=8666
-root=/ /var/www/qlprea
+root=/ /website/qlprea
 hosts=*
 
 # User=www-data
@@ -22,11 +22,12 @@ addr=0.0.0.0
 NoLog=false
 
 AppHost={
- Cmd=/root/.dotnet/dotnet /var/www/qlprea/QL.PreAssembled.dll;
- AppRoot=/var/www/qlprea;
- AppPort=5000;
- OutLog=/tmp/qlprea.out.log;
- ErrLog=/tmp/qlprea.err.log;
+ Cmd=/usr/bin/dotnet /website/qlprea/QL.PreAssembled.dll;
+ AppRoot=/website/qlprea;
+ AppPort=5020;
+ OutLog=/devops/qlprea/logs/qlprea.out.log;
+ ErrLog=/devops/qlprea/logs/qlprea.err.log;
+ Env=(Kestrel__Endpoints__Http__Url=http://127.0.0.1:5020);
 }
 
 # NoFile=/index.aspx
