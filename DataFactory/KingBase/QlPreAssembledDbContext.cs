@@ -1048,6 +1048,10 @@ namespace DataFactory.KingBase
         [Column(TypeName = "numeric(20,4)")] public decimal OffsetH { get; set; }
         /// <summary>导入设计坐标时，页面是否勾选“标高含预拱度”。</summary>
         public bool ElevationIncludesCamber { get; set; }
+        /// <summary>
+        /// 是否已执行归一化，用来确定打开标签页后展示source还是calculate
+        /// </summary>
+        public bool Normalize { get; set; }
         /// <summary>数据状态：0正常，-1逻辑删除。</summary>
         public int Status { get; set; }
         /// <summary>创建人账号。</summary>
@@ -1144,6 +1148,38 @@ namespace DataFactory.KingBase
         /// 测点偏位南侧c值（Bolt Offsets's cS）
         /// </summary>
         [Column(TypeName = "numeric(20,4)")] public decimal BoltOffsetCS { get; set; }
+
+        /// <summary>测点偏位北侧东角 a 值（算法 bo: aNE）。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal BoltOffsetANE { get; set; }
+        /// <summary>测点偏位北侧西角 a 值（算法 bo: aNW）。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal BoltOffsetANW { get; set; }
+        /// <summary>测点偏位南侧东角 a 值（算法 bo: aSE）。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal BoltOffsetASE { get; set; }
+        /// <summary>测点偏位南侧西角 a 值（算法 bo: aSW）。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal BoltOffsetASW { get; set; }
+        /// <summary>测点偏位北侧东角 b 值（算法 bo: bNE，绝对横向坐标，东 +）。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal BoltOffsetBNE { get; set; }
+        /// <summary>测点偏位北侧西角 b 值（算法 bo: bNW，绝对横向坐标，西 -）。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal BoltOffsetBNW { get; set; }
+        /// <summary>测点偏位南侧东角 b 值（算法 bo: bSE，绝对横向坐标，东 +）。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal BoltOffsetBSE { get; set; }
+        /// <summary>测点偏位南侧西角 b 值（算法 bo: bSW，绝对横向坐标，西 -）。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal BoltOffsetBSW { get; set; }
+
+        /// <summary>
+        /// 北侧 a 是否两侧不一致（仅编辑回显与保存归一化，不进算法）。
+        /// 0=未勾选（保存时 aNW=aNE），1=勾选。
+        /// </summary>
+        [Column(TypeName = "smallint")] public short BoltOffsetAUseNorth { get; set; }
+        /// <summary>
+        /// 南侧 a 是否两侧不一致（仅编辑回显与保存归一化，不进算法）。
+        /// 0=未勾选（保存时 aSW=aSE），1=勾选。
+        /// </summary>
+        [Column(TypeName = "smallint")] public short BoltOffsetAUseSouth { get; set; }
+        /// <summary>
+        /// 是否填写实测 b（算法 useB 开关）。0=旧算法，1=新算法。
+        /// </summary>
+        [Column(TypeName = "smallint")] public short BoltOffsetBUseMeasured { get; set; }
 
         [Column(TypeName = "numeric(20,4)")] public decimal SurveyMatchNorthEastElev { set; get; }
         [Column(TypeName = "numeric(20,4)")] public decimal SurveyMatchNorthWestElev { set; get; }
@@ -1608,8 +1644,8 @@ namespace DataFactory.KingBase
     /// 钢梁推算坐标。
     /// 一个顶推批次导入后，已被推出胎架、本批次无法再实测的梁段测点，
     /// 用「上一批次 → 本批次」的刚体变换推算出的本批次坐标。
-    /// 与 biz_steel_beam_measured 严格分家：本表只存推算值，实测表只存现场实测值。
-    /// 一行 = 一个测点在一个批次下的推算坐标。
+    /// 与 biz_steel_beam_measured 严格分家：本表只存推算/滚动快照，实测表只存现场实测值。
+    /// 一行 = 一个测点的最新坐标（按 TheoreticalID 逻辑唯一）；MeasuredID=0 表示段内补全值。
     /// </summary>
     public class biz_steel_beam_derived_coordinate : IIDTable
     {
@@ -1620,8 +1656,13 @@ namespace DataFactory.KingBase
         public int ProjID { get; set; }
         /// <summary>所属梁体ID，关联 biz_project_bridge.ID。</summary>
         public int GirderID { get; set; }
-        /// <summary>所属实测批次ID，关联 biz_steel_beam_measure_batch.ID。</summary>
+        /// <summary>所属实测批次ID，关联 biz_steel_beam_measure_batch.ID；0=纯补全值。</summary>
         public int BatchID { get; set; }
+        /// <summary>
+        /// 来源实测行ID：0=段内补全（不是实测值）；&gt;0=关联 biz_steel_beam_measured.ID。
+        /// 后续同一测点有实测上传时，会由 0 更新为最新实测行ID。
+        /// </summary>
+        public int MeasuredID { get; set; }
         /// <summary>所属批次的顶推次数，冗余便于按批次查询。</summary>
         public int PushCount { get; set; }
         /// <summary>来源批次的顶推次数（= PushCount - 1），用于追溯推算链路。</summary>

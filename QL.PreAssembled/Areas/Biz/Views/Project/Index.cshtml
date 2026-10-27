@@ -130,7 +130,7 @@
     </style>
 }
 
-<div id="app" class="project-container">
+<div v-cloak id="app" class="project-container">
     <!-- 顶部操作栏 -->
     <div class="project-header">
         <div class="search-area">
@@ -183,7 +183,7 @@
                 </template>
                 <!-- 桥梁子项行操作按钮 -->
                 <template v-else-if="scope.row.isBridge">
-                    <el-button v-if="scope.row.beamType === 1" type="success" link @@click="openAddCastDialog(scope.row)">{{ $t('biz.project.addSubItem') }}</el-button>
+                    <el-button v-if="scope.row.beamType === 1" type="success" link @@click="openAddCastDialog(scope.row)">{{ $t('biz.project.addCastGroup') }}</el-button>
                     <el-button type="primary" link @@click="openEditSubDialog(scope.row)">{{ $t('common.edit') }}</el-button>
                     <el-button type="danger" link @@click="handleDeleteSub(scope.row)">{{ $t('common.delete') }}</el-button>
                 </template>

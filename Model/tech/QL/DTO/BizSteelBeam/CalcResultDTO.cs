@@ -95,4 +95,13 @@ namespace Model.tech.QL.DTO.BizSteelBeam
         /// </summary>
         public string PositionName { get; set; } = string.Empty;
     }
+
+    /// <summary>计算页签梁段下拉项：段号 + 是否已拼装。</summary>
+    public class SteelBeamCalcSegmentOptionDTO
+    {
+        /// <summary>梁段号。</summary>
+        public string SegmentNo { get; set; } = string.Empty;
+        /// <summary>是否已拼装（该段至少有一个实测来源的点）。</summary>
+        public bool IsAssembled { get; set; }
+    }
 }

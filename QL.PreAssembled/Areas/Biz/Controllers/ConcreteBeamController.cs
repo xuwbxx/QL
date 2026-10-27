@@ -49,6 +49,24 @@ public class ConcreteBeamController(ConcreteBeamService concreteBeamService) : C
     [HttpGet]
     public async Task<JsonResult> DesignOrientationPreview(int castingGroupID) =>
         await JsonCall(() => concreteBeamService.DesignOrientationPreview(castingGroupID));
+
+    /// <summary>
+    /// 设计坐标「核对与预览」PDF：上半 General Coordinates，下半 ORIENTATION REPORT。
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> DesignOrientationPreviewPdf(int castingGroupID, int? timezoneOffsetMinutes = null)
+    {
+        concreteBeamService.EnsureAuthenticated();
+        try
+        {
+            var bytes = await concreteBeamService.BuildDesignOrientationPreviewPdf(castingGroupID, timezoneOffsetMinutes);
+            return File(bytes, "application/pdf", "orientation-preview.pdf");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
     [HttpPost]
     public async Task<JsonResult> DesignImportPreviewList([FromBody] ConcreteBeamImportPreviewQueryDTO req) =>
         await JsonCall(() => concreteBeamService.DesignImportPreviewList(req));
@@ -58,6 +76,12 @@ public class ConcreteBeamController(ConcreteBeamService concreteBeamService) : C
     [HttpPost]
     public async Task<JsonResult> ConfirmDesignImport([FromBody] ConcreteBeamImportConfirmDTO req) =>
         await JsonCall(() => concreteBeamService.ConfirmDesignImport(req));
+    /// <summary>
+    /// 仅切换【包含预拱度】并重算设计坐标（设计源已存在，不走上传预览）。
+    /// </summary>
+    [HttpPost]
+    public async Task<JsonResult> ConfirmDesignCamberSetting([FromBody] ConcreteBeamDesignCamberSettingDTO req) =>
+        await JsonCall(() => concreteBeamService.ConfirmDesignCamberSetting(req));
     [HttpPost]
     public async Task<JsonResult> ConfirmCamberImport([FromBody] ConcreteBeamImportConfirmDTO req) =>
         await JsonCall(() => concreteBeamService.ConfirmCamberImport(req));
@@ -99,6 +123,13 @@ public class ConcreteBeamController(ConcreteBeamService concreteBeamService) : C
         await JsonCall(() => concreteBeamService.SaveSurvey(req));
 
     /// <summary>
+    /// 仅更新梁段浇筑日期：往期已锁定段也允许修改，且只允许改这一个字段。
+    /// </summary>
+    [HttpPost]
+    public async Task<JsonResult> UpdatePouringDate([FromBody] ConcreteBeamPouringDateDTO req) =>
+        await JsonCall(() => concreteBeamService.UpdatePouringDate(req));
+
+    /// <summary>
     /// 立模参数计算（PerfectCast）：以 St=0 计算"浇筑时测量应该是什么"的理论目标值，
     /// 用于页面只读区（起始段=活动端/固定端模板，标准段=匹配梁段设置参数）。
     /// 基于上一梁段已落库实测数据 + 当前梁段设计数据，不含本段实测修正。
@@ -134,13 +165,14 @@ public class ConcreteBeamController(ConcreteBeamService concreteBeamService) : C
     /// 否则 PDF.js 对着一段 HTML 只会抛一句无法理解的解析失败。
     /// </remarks>
     [HttpGet]
-    public async Task<IActionResult> SegmentReportPdf(int castingGroupID, string segmentName, string reportType)
+    public async Task<IActionResult> SegmentReportPdf(int castingGroupID, string segmentName, string reportType,
+        int? timezoneOffsetMinutes = null)
     {
         concreteBeamService.EnsureAuthenticated();
         try
         {
             var bytes = await concreteBeamService.BuildSegmentReportPdf(
-                castingGroupID, segmentName ?? string.Empty, reportType ?? string.Empty);
+                castingGroupID, segmentName ?? string.Empty, reportType ?? string.Empty, timezoneOffsetMinutes);
             var suffix = string.Equals(reportType, ConcreteBeamService.ReportTypeAsCast, StringComparison.OrdinalIgnoreCase)
                 ? ConcreteBeamService.ReportTypeAsCast
                 : ConcreteBeamService.ReportTypeSetup;
@@ -162,13 +194,14 @@ public class ConcreteBeamController(ConcreteBeamService concreteBeamService) : C
     /// 出错时返回 400 + JSON（而不是 HTML 错误页），前端据此把 message 直接弹出来。
     /// </remarks>
     [HttpGet]
-    public async Task<IActionResult> OverallReportPdf(int castingGroupID, string reportType, bool includeAll)
+    public async Task<IActionResult> OverallReportPdf(int castingGroupID, string reportType, bool includeAll,
+        int? timezoneOffsetMinutes = null)
     {
         concreteBeamService.EnsureAuthenticated();
         try
         {
             var bytes = await concreteBeamService.BuildOverallReportPdf(
-                castingGroupID, reportType ?? string.Empty, includeAll);
+                castingGroupID, reportType ?? string.Empty, includeAll, timezoneOffsetMinutes);
             var suffix = reportType switch
             {
                 ConcreteBeamService.ReportTypeProject => ConcreteBeamService.ReportTypeProject,

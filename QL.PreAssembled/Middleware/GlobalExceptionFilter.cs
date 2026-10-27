@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Model.tech.QL;
 using System.Diagnostics;
 using System.Net;
 using Tool;
@@ -48,12 +49,12 @@ namespace QL.PreAssembled.Middleware
             // 构建前端返回的 JSON
             var result = new
             {
-                code = "500",
+                code = exception is BizException ? 501 : 500,
                 success = false,
                 message = exception.Message
             };
 
-            context.HttpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            context.HttpContext.Response.StatusCode = result.code; // (int)HttpStatusCode.InternalServerError;
             context.ExceptionHandled = true;
             context.Result = new JsonResult(result);
         }

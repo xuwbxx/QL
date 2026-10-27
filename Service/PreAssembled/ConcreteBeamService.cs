@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Model.tech.QL.DTO.BizProject;
 using Service.PreAssembled.BridgeSegmentAlignment;
 using Service.PreAssembled.Reports;
+using System.Collections;
 using System.Globalization;
 using System.Security.Claims;
 using Tool;
@@ -96,6 +97,7 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
             HasCalculatedDesignCoordinates = hasCalculatedDesignCoordinates,
             HasSurveyData = hasSurveyData,
             ElevationIncludesCamber = config?.ElevationIncludesCamber ?? false,
+            Normalize = config?.Normalize ?? false,
             CreatedBy = context.CreatedBy,
             CreatedTime = context.CreatedTime,
             UpdatedTime = config?.UpdatedTime
@@ -170,23 +172,28 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
                 SoftDelete(oldCalculations, account, now);
                 if (sourceRows.Count > 0)
                 {
-                    var camberRows = entity.ElevationIncludesCamber
-                        ? null
-                        : await LoadCamberCalculationRows(req.CastingGroupID);
-                    var canCalculate = entity.ElevationIncludesCamber ||
-                        (camberRows!.Count > 0 &&
-                         ConcreteBeamDesignCalculator.ValidateNodeSequence(sourceRows, camberRows).Count == 0);
-                    if (canCalculate)
+                    var include = entity.ElevationIncludesCamber;
+                    var camberRows = include ? null : await LoadCamberCalculationRows(req.CastingGroupID);
+                    var canReuse = !include && camberRows != null && camberRows.Count > 0 &&
+                        ConcreteBeamDesignCalculator.ValidateNodeSequence(sourceRows, camberRows).Count == 0;
+                    List<ConcreteBeamDesignCoordinateImportRow> designCalculationRows;
+                    if (entity.Normalize)
                     {
-                        var calculation = ConcreteBeamDesignCalculator.Calculate(sourceRows, req.OffsetB,
-                            camberRows, entity.ElevationIncludesCamber);
+                        var camberForCalc = include ? null : (canReuse ? camberRows : ZeroCamberRows(sourceRows));
+                        var calculation = ConcreteBeamDesignCalculator.Calculate(sourceRows, req.OffsetB, camberForCalc, include);
                         if (calculation.Errors.Count > 0)
                             throw new InvalidOperationException(calculation.Errors[0].Reason);
-                        Db.GetRepository<biz_concrete_beam_design_coordinate_calculation>().AddList(
-                            calculation.Rows.Select(a => ToDesignCalculationEntity(a, context,
-                                req.CastingGroupID, account, now)).ToList());
+                        designCalculationRows = calculation.Rows;
                     }
-                    else messages.Add(BizMessages.CamberRequired(Lang));
+                    else
+                    {
+                        designCalculationRows = !include && canReuse
+                            ? ConcreteBeamDesignCalculator.ApplyCamberToSource(sourceRows, camberRows!)
+                            : sourceRows.ToList();
+                    }
+                    Db.GetRepository<biz_concrete_beam_design_coordinate_calculation>().AddList(
+                        designCalculationRows.Select(a => ToDesignCalculationEntity(a, context,
+                            req.CastingGroupID, account, now)).ToList());
                 }
             }
             await Db.SaveAsync();
@@ -240,8 +247,29 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
     public async Task<ConcreteBeamPagedResultDTO<ConcreteBeamDesignCoordinateDTO>> DesignCoordinateList(ConcreteBeamDataQueryDTO req)
     {
         await EnsureCastingGroupAccess(req.CastingGroupID);
-        _ = await GetSubmittedProjectConfig(req.CastingGroupID);
+        var config = await GetSubmittedProjectConfig(req.CastingGroupID);
         var page = Math.Max(req.PageIndex, 1); var size = NormalizePageSize(req.PageSize);
+
+        // 归一化展示：只用 source 做 K 归一化，不叠加 camber，结果不落库
+        if (req.Normalized)
+        {
+            var query = Db.Query<biz_concrete_beam_design_coordinate_source>()
+                .Where(a => a.CastingGroupID == req.CastingGroupID && a.Status != -1);
+            var total = await query.CountAsync();
+            var sourceEntities = await query.OrderBy(a => a.ID)
+                .Skip((page - 1) * size).Take(size).ToListAsync();
+            var sourceRows = sourceEntities.Select((a, i) => new ConcreteBeamDesignCoordinateImportRow(
+                i + 2, a.NodeName, a.XE, a.YE, a.ZE, a.XC, a.YC, a.ZC, a.XW, a.YW, a.ZW)).ToList();
+            var calculation = ConcreteBeamDesignCalculator.Calculate(sourceRows, config.OffsetB, null, true);
+            if (calculation.Errors.Count > 0)
+                throw new InvalidOperationException(calculation.Errors[0].Reason);
+            return new()
+            {
+                Total = total,
+                List = calculation.Rows.Select(ToDesignDto).ToList()
+            };
+        }
+
         if (req.UseCalculation)
         {
             var query = Db.Query<biz_concrete_beam_design_coordinate_calculation>()
@@ -294,11 +322,113 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
         }).ToArray();
         var report = new ConstructionGirderAlignment().PrintReport(k);
 
-        // double.NaN 无法走默认 JSON 序列化（会抛异常），统一替换为 "NaN"，与原版界面口径一致
-        var sanitized = report.Cast<List<object>>()
-            .Select(row => row.Select(v => v is double d && double.IsNaN(d) ? (object)"NaN" : v).ToList())
+        // double.NaN 无法走默认 JSON 序列化（会抛异常），统一替换为 "NaN"，与原版界面口径一致。
+        // 注意：PrintReport 返回 List<object>，其中表头是 List<string>、数据行是 List<object>；
+        // 直接 Cast<List<object>>() 会因泛型不变性抛 InvalidCastException，故按非泛型 IEnumerable 逐元素转换。
+        var sanitized = report
+            .Select(row => (row is IEnumerable items ? items.Cast<object>() : new[] { row })
+                .Select(v => v is double d && double.IsNaN(d) ? (object)"NaN" : v)
+                .ToList())
             .ToList();
         return new ConcreteBeamOrientationPreviewDTO { Joints = rows, Report = sanitized };
+    }
+
+    /// <summary>
+    /// 设计坐标「核对与预览」PDF：
+    /// 上半 General Coordinates（已计算坐标，含预拱度），下半 ORIENTATION REPORT（PrintReport 几何报告）。
+    /// </summary>
+    public async Task<byte[]> BuildDesignOrientationPreviewPdf(int castingGroupID, int? timezoneOffsetMinutes = null)
+    {
+        var context = await EnsureCastingGroupAccess(castingGroupID);
+        var config = await GetSubmittedProjectConfig(castingGroupID);
+
+        var rows = await Db.Query<biz_concrete_beam_design_coordinate_calculation>()
+            .Where(a => a.CastingGroupID == castingGroupID && a.Status != -1)
+            .OrderBy(a => a.ID)
+            .Select(a => new ConcreteBeamDesignCoordinateDTO
+            {
+                NodeName = a.NodeName,
+                XE = a.XE, YE = a.YE, ZE = a.ZE,
+                XC = a.XC, YC = a.YC, ZC = a.ZC,
+                XW = a.XW, YW = a.YW, ZW = a.ZW
+            }).ToListAsync();
+        if (rows.Count == 0)
+            throw new InvalidOperationException(BizMessages.NoCalculatedDesign(Lang));
+
+        var k = rows.Select(a => new double[9]
+        {
+            (double)a.XE, (double)a.YE, (double)a.ZE,
+            (double)a.XC, (double)a.YC, (double)a.ZC,
+            (double)a.XW, (double)a.YW, (double)a.ZW
+        }).ToArray();
+        var report = new ConstructionGirderAlignment().PrintReport(k);
+
+        var model = new OrientationReportModel
+        {
+            ProjectTitle = context.ProjectName,
+            CastingSet = context.CastingGroupName,
+            ReportDate = NowForClient(timezoneOffsetMinutes),
+            TimezoneOffsetMinutes = timezoneOffsetMinutes,
+            JointHeaders = new List<string>
+            {
+                "Joint#", "East X", "East Y", "East Z",
+                "Center X", "Center Y", "Center Z",
+                "West X", "West Y", "West Z"
+            },
+            JointRows = rows.Select((a, i) => new List<string>
+            {
+                (i + 1).ToString(CultureInfo.InvariantCulture),
+                Fmt4(a.XE), Fmt4(a.YE), Fmt4(a.ZE),
+                Fmt4(a.XC), Fmt4(a.YC), Fmt4(a.ZC),
+                Fmt4(a.XW), Fmt4(a.YW), Fmt4(a.ZW)
+            }).ToList(),
+            ReportHeaders = ReportRow.GetHeader(),
+            ReportRows = report.Skip(1)
+                .Select(row =>
+                {
+                    var cells = (row is IEnumerable items ? items.Cast<object>() : new[] { row }).ToList();
+                    var result = new List<string>(cells.Count);
+                    for (var i = 0; i < cells.Count; i++)
+                    {
+                        // 列序与 ReportRow.GetHeader() 一致：
+                        // 1=B_East, 2=B_West → 偏差对项目 B；3=Bulkhead Angle(East), 4=(West) → 偏差对 90°
+                        if (i == 1 || i == 2)
+                            result.Add(CellTextWithDeviation(cells[i], (double)config.OffsetB));
+                        else if (i == 3 || i == 4)
+                            result.Add(CellTextWithDeviation(cells[i], 90d));
+                        else
+                            result.Add(CellText(cells[i]));
+                    }
+                    return result;
+                })
+                .ToList()
+        };
+        return ConcreteBeamOrientationReportBuilder.Build(model);
+    }
+
+    /// <summary>decimal → 4 位小数字符串（不变文化）。</summary>
+    private static string Fmt4(decimal v) => v.ToString("0.0000", CultureInfo.InvariantCulture);
+
+    /// <summary>PrintReport 单元格：double/NaN/decimal/字符串统一转可打印文本。</summary>
+    private static string CellText(object v)
+    {
+        if (v == null) return "NaN";
+        if (v is double d) return double.IsNaN(d) ? "NaN" : d.ToString("0.0000", CultureInfo.InvariantCulture);
+        if (v is decimal m) return m.ToString("0.0000", CultureInfo.InvariantCulture);
+        return Convert.ToString(v, CultureInfo.InvariantCulture) ?? string.Empty;
+    }
+
+    /// <summary>
+    /// 带偏差的单元格：数值与偏差分两行（value 换行 (value - baseline)），如
+    /// 2.9000
+    /// (0.0000)
+    /// 非数值（null / "NaN"）不加偏差。
+    /// </summary>
+    private static string CellTextWithDeviation(object v, double baseline)
+    {
+        if (v is double d && !double.IsNaN(d) && !double.IsInfinity(d))
+            return $"{d.ToString("0.0000", CultureInfo.InvariantCulture)}\n({(d - baseline).ToString("0.0000", CultureInfo.InvariantCulture)})";
+        return CellText(v);
     }
 
     public async Task<ConcreteBeamPagedResultDTO<ConcreteBeamCamberDTO>> CamberList(ConcreteBeamDataQueryDTO req)
@@ -415,6 +545,15 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
         var preview = _previewStore.GetPage<ConcreteBeamDesignCoordinateImportRow>(req.PreviewToken,
             GetCurrentAccount(), req.CastingGroupID, ConcreteBeamImportKind.Design,
             req.PageIndex, NormalizePageSize(req.PageSize));
+        // 归一化展示：用内存预览行现算，不叠加 camber，不落库
+        if (req.Normalized)
+        {
+            var config = await GetSubmittedProjectConfig(req.CastingGroupID);
+            var calculation = ConcreteBeamDesignCalculator.Calculate(preview.List, config.OffsetB, null, true);
+            if (calculation.Errors.Count > 0)
+                throw new InvalidOperationException(calculation.Errors[0].Reason);
+            return new() { Total = preview.Total, List = calculation.Rows.Select(ToDesignDto).ToList() };
+        }
         return new()
         {
             Total = preview.Total,
@@ -437,6 +576,18 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
         };
     }
 
+    /// <summary>构造与 source 节点同名、Z 全 0 的 camber 行，用于“无 camber 时按 0 计算”。</summary>
+    private static List<ConcreteBeamCamberImportRow> ZeroCamberRows(
+        IReadOnlyList<ConcreteBeamDesignCoordinateImportRow> rows) =>
+        rows.Select((r, i) => new ConcreteBeamCamberImportRow(i + 2, r.NodeName, 0m, 0m, 0m)).ToList();
+
+    /// <summary>
+    /// 确认设计坐标导入：写 source 与 calculation（不再清空已有预拱度数据）。
+    /// <para>calculation 规则：
+    /// normalize=true：K 归一化；include=false 时叠加 camber，缺 camber 按 0 行补齐，不报错。
+    /// normalize=false：不归一化；include=true 复制 source，include=false 为 source 的 Z 加 camber 的 Z（缺 +0）。</para>
+    /// <para>缺 camber 只置 RequiresCamber，保存后提示，不阻断、不跳页签。</para>
+    /// </summary>
     public async Task<ConcreteBeamImportResultDTO> ConfirmDesignImport(ConcreteBeamImportConfirmDTO req)
     {
         var context = await EnsureCastingGroupAccess(req.CastingGroupID);
@@ -448,7 +599,6 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
             .Where(a => a.CastingGroupID == req.CastingGroupID && a.Status != -1).ToListAsync();
         var oldCalculations = await Db.Query<biz_concrete_beam_design_coordinate_calculation>()
             .Where(a => a.CastingGroupID == req.CastingGroupID && a.Status != -1).ToListAsync();
-        // 重导入设计坐标 = 端到面重新定义，下游（梁段填报/浇筑坐标/浇筑测点）必须整体作废重做
         var hasAsCastData = await HasAsCastData(req.CastingGroupID);
         if ((oldSources.Count > 0 || oldCalculations.Count > 0) && !req.ConfirmOverwrite)
             return new()
@@ -458,22 +608,35 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
                 Message = ConcreteBeamWorkflowRules.DesignOverwriteMessage(hasAsCastData, Lang)
             };
 
-        var camberSources = await Db.Query<biz_concrete_beam_camber_source>()
-            .Where(a => a.CastingGroupID == req.CastingGroupID && a.Status != -1).ToListAsync();
         var camberCalculations = await Db.Query<biz_concrete_beam_camber_calculation>()
             .Where(a => a.CastingGroupID == req.CastingGroupID && a.Status != -1).OrderBy(a => a.ID).ToListAsync();
         var camberRows = camberCalculations.Select((a, index) =>
             new ConcreteBeamCamberImportRow(index + 2, a.NodeName, a.ZE, a.ZC, a.ZW)).ToList();
-        var canReuseCamber = !preview.ElevationIncludesCamber && camberRows.Count > 0 &&
+        var elevationIncludesCamber = req.ElevationIncludesCamber ?? preview.ElevationIncludesCamber;
+        var canReuseCamber = !elevationIncludesCamber && camberRows.Count > 0 &&
             ConcreteBeamDesignCalculator.ValidateNodeSequence(preview.Rows, camberRows).Count == 0;
-        ConcreteBeamDesignCalculationResult? calculation = null;
-        if (preview.ElevationIncludesCamber || canReuseCamber)
+        var normalize = req.Normalize;
+        config.Normalize = normalize;
+
+        List<ConcreteBeamDesignCoordinateImportRow> designCalculationRows;
+        if (normalize)
         {
-            calculation = ConcreteBeamDesignCalculator.Calculate(preview.Rows, config.OffsetB,
-                canReuseCamber ? camberRows : null, preview.ElevationIncludesCamber);
+            var camberForCalc = elevationIncludesCamber
+                ? null
+                : (canReuseCamber ? camberRows : ZeroCamberRows(preview.Rows));
+            var calculation = ConcreteBeamDesignCalculator.Calculate(preview.Rows, config.OffsetB,
+                camberForCalc, elevationIncludesCamber);
             if (calculation.Errors.Count > 0)
                 throw new InvalidOperationException(calculation.Errors[0].Reason);
+            designCalculationRows = calculation.Rows;
         }
+        else
+        {
+            designCalculationRows = !elevationIncludesCamber && canReuseCamber
+                ? ConcreteBeamDesignCalculator.ApplyCamberToSource(preview.Rows, camberRows)
+                : preview.Rows.ToList();
+        }
+        var requiresCamber = !elevationIncludesCamber && !canReuseCamber;
 
         var now = DateTime.Now;
         var account = GetCurrentAccount();
@@ -483,21 +646,14 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
             Db.BeginTransaction();
             SoftDelete(oldSources, account, now);
             SoftDelete(oldCalculations, account, now);
-            // 与设计坐标在同一事务内整体作废，避免留下指向已删端面的孤儿数据
             invalidatedCount = await InvalidateAsCastData(req.CastingGroupID, account, now);
-            if (ConcreteBeamWorkflowRules.ShouldClearCamberAfterDesignConfirmation(
-                preview.ElevationIncludesCamber, canReuseCamber))
-            {
-                SoftDelete(camberSources, account, now);
-                SoftDelete(camberCalculations, account, now);
-            }
+            // 重新上传设计坐标时保留已有 camber，供后续复用
             Db.GetRepository<biz_concrete_beam_design_coordinate_source>().AddList(
                 preview.Rows.Select(a => ToDesignSourceEntity(a, context, req.CastingGroupID, account, now)).ToList());
-            if (calculation != null)
-                Db.GetRepository<biz_concrete_beam_design_coordinate_calculation>().AddList(
-                    calculation.Rows.Select(a => ToDesignCalculationEntity(a, context,
-                        req.CastingGroupID, account, now)).ToList());
-            config.ElevationIncludesCamber = preview.ElevationIncludesCamber;
+            Db.GetRepository<biz_concrete_beam_design_coordinate_calculation>().AddList(
+                designCalculationRows.Select(a => ToDesignCalculationEntity(a, context,
+                    req.CastingGroupID, account, now)).ToList());
+            config.ElevationIncludesCamber = elevationIncludesCamber;
             config.UpdatedBy = account;
             config.UpdatedTime = now;
             await Db.SaveAsync();
@@ -509,13 +665,111 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
             throw new InvalidOperationException(BizMessages.SaveFailed(Lang, ex.Message), ex);
         }
         _previewStore.RemoveConfirmed(req.PreviewToken);
-        var designMessages = new List<string> { calculation == null ? BizMessages.CamberRequired(Lang) : BizMessages.DesignSaveSuccess(Lang, preview.Rows.Count) };
+        var designMessages = new List<string> { BizMessages.DesignSaveSuccess(Lang, preview.Rows.Count) };
+        if (requiresCamber) designMessages.Add(BizMessages.CamberZeroApplied(Lang));
         if (invalidatedCount > 0) designMessages.Add(ConcreteBeamWorkflowRules.AsCastInvalidatedMessage(invalidatedCount, Lang));
         return new()
         {
             Success = true,
             ImportedCount = preview.Rows.Count,
+            RequiresCamber = requiresCamber,
             Message = string.Join("；", designMessages)
+        };
+    }
+
+    /// <summary>
+    /// 确认后修改【归一化坐标】/【包含预拱度】：基于已保存 source 重新生成 calculation。
+    /// <para>规则同 ConfirmDesignImport：normalize=true 走 K；normalize=false 走 source(+camber/0)。
+    /// 缺 camber 按 0 补齐，不报错；只提示 RequiresCamber，不跳页签。</para>
+    /// <para>不清空已有 camber；有设站数据时由 EnsureSurveyEditable 拒绝。</para>
+    /// </summary>
+    public async Task<ConcreteBeamImportResultDTO> ConfirmDesignCamberSetting(ConcreteBeamDesignCamberSettingDTO req)
+    {
+        if (req == null) throw new InvalidOperationException(BizMessages.ParameterRequired(Lang));
+        var context = await EnsureCastingGroupAccess(req.CastingGroupID);
+        await EnsureSurveyEditable(req.CastingGroupID, ConcreteBeamWorkflowRules.SurveyLockedDesignMessage(Lang));
+        var config = await GetSubmittedProjectConfig(req.CastingGroupID);
+
+        var designRows = await LoadDesignSourceRows(req.CastingGroupID);
+        if (designRows.Count == 0)
+            return new() { Success = true, Message = BizMessages.DesignCamberNoDesignData(Lang) };
+
+        var camberCalculations = await Db.Query<biz_concrete_beam_camber_calculation>()
+            .Where(a => a.CastingGroupID == req.CastingGroupID && a.Status != -1).OrderBy(a => a.ID).ToListAsync();
+        var camberRows = camberCalculations.Select((a, index) =>
+            new ConcreteBeamCamberImportRow(index + 2, a.NodeName, a.ZE, a.ZC, a.ZW)).ToList();
+        var canReuseCamber = !req.ElevationIncludesCamber && camberRows.Count > 0 &&
+            ConcreteBeamDesignCalculator.ValidateNodeSequence(designRows, camberRows).Count == 0;
+        var normalize = req.Normalize;
+        config.Normalize = normalize;
+
+        List<ConcreteBeamDesignCoordinateImportRow> designCalculationRows;
+        if (normalize)
+        {
+            var camberForCalc = req.ElevationIncludesCamber
+                ? null
+                : (canReuseCamber ? camberRows : ZeroCamberRows(designRows));
+            var calculation = ConcreteBeamDesignCalculator.Calculate(designRows, config.OffsetB,
+                camberForCalc, req.ElevationIncludesCamber);
+            if (calculation.Errors.Count > 0)
+                throw new InvalidOperationException(calculation.Errors[0].Reason);
+            designCalculationRows = calculation.Rows;
+        }
+        else
+        {
+            designCalculationRows = !req.ElevationIncludesCamber && canReuseCamber
+                ? ConcreteBeamDesignCalculator.ApplyCamberToSource(designRows, camberRows)
+                : designRows.ToList();
+        }
+        var requiresCamber = !req.ElevationIncludesCamber && !canReuseCamber;
+
+        var hasAsCastData = await HasAsCastData(req.CastingGroupID);
+        if (!req.ConfirmOverwrite)
+            return new()
+            {
+                RequiresOverwriteConfirmation = true,
+                Message = BizMessages.DesignCamberSettingConfirm(Lang, normalize, hasAsCastData, requiresCamber)
+            };
+
+        var oldCalculations = await Db.Query<biz_concrete_beam_design_coordinate_calculation>()
+            .Where(a => a.CastingGroupID == req.CastingGroupID && a.Status != -1).ToListAsync();
+        var now = DateTime.Now;
+        var account = GetCurrentAccount();
+        var invalidatedCount = 0;
+        try
+        {
+            Db.BeginTransaction();
+            SoftDelete(oldCalculations, account, now);
+            invalidatedCount = await InvalidateAsCastData(req.CastingGroupID, account, now);
+            Db.GetRepository<biz_concrete_beam_design_coordinate_calculation>().AddList(
+                designCalculationRows.Select(a => ToDesignCalculationEntity(a, context,
+                    req.CastingGroupID, account, now)).ToList());
+            config.ElevationIncludesCamber = req.ElevationIncludesCamber;
+            config.UpdatedBy = account;
+            config.UpdatedTime = now;
+            await Db.SaveAsync();
+            Db.CommitTransaction();
+        }
+        catch (Exception ex)
+        {
+            Db.RollbackTransaction();
+            throw new InvalidOperationException(BizMessages.SaveFailed(Lang, ex.Message), ex);
+        }
+
+        var messages = new List<string>
+        {
+            normalize
+                ? BizMessages.DesignCamberSettingUpdated(Lang)
+                : BizMessages.DesignCamberSettingUpdatedNoNormalize(Lang)
+        };
+        if (requiresCamber) messages.Add(BizMessages.CamberZeroApplied(Lang));
+        if (invalidatedCount > 0) messages.Add(ConcreteBeamWorkflowRules.AsCastInvalidatedMessage(invalidatedCount, Lang));
+        return new()
+        {
+            Success = true,
+            ImportedCount = designRows.Count,
+            RequiresCamber = requiresCamber,
+            Message = string.Join("；", messages)
         };
     }
 
@@ -532,8 +786,20 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
         var nodeErrors = ConcreteBeamDesignCalculator.ValidateNodeSequence(designRows, preview.Rows);
         if (nodeErrors.Count > 0) throw new InvalidOperationException(BizMessages.DesignChangedReimportCamber(Lang));
         var filledCamber = ConcreteBeamDesignCalculator.FillCamberRows(preview.Rows);
-        var calculation = ConcreteBeamDesignCalculator.Calculate(designRows, config.OffsetB, filledCamber, false);
-        if (calculation.Errors.Count > 0) throw new InvalidOperationException(calculation.Errors[0].Reason);
+        var normalize = req.Normalize;
+        config.Normalize = normalize;
+
+        List<ConcreteBeamDesignCoordinateImportRow> designCalculationRows;
+        if (normalize)
+        {
+            var calculation = ConcreteBeamDesignCalculator.Calculate(designRows, config.OffsetB, filledCamber, false);
+            if (calculation.Errors.Count > 0) throw new InvalidOperationException(calculation.Errors[0].Reason);
+            designCalculationRows = calculation.Rows;
+        }
+        else
+        {
+            designCalculationRows = ConcreteBeamDesignCalculator.ApplyCamberToSource(designRows, filledCamber);
+        }
 
         var oldCamberSources = await Db.Query<biz_concrete_beam_camber_source>()
             .Where(a => a.CastingGroupID == req.CastingGroupID && a.Status != -1).ToListAsync();
@@ -590,7 +856,7 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
                     CreatedTime = now
                 }).ToList());
             Db.GetRepository<biz_concrete_beam_design_coordinate_calculation>().AddList(
-                calculation.Rows.Select(a => ToDesignCalculationEntity(a, context,
+                designCalculationRows.Select(a => ToDesignCalculationEntity(a, context,
                     req.CastingGroupID, account, now)).ToList());
             await Db.SaveAsync();
             Db.CommitTransaction();
@@ -979,6 +1245,39 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
     }
 
     /// <summary>
+    /// 仅更新梁段浇筑日期（往期已锁定段也允许）。
+    /// <para>只写 PouringDate，不触碰实测值、立模参数、浇筑坐标，避免绕过逐段填报规则。</para>
+    /// </summary>
+    public async Task<ConcreteBeamSurveySaveResultDTO> UpdatePouringDate(ConcreteBeamPouringDateDTO req)
+    {
+        if (req == null) throw new InvalidOperationException(BizMessages.ParameterRequired(Lang));
+        if (string.IsNullOrWhiteSpace(req.SegmentName))
+            throw new InvalidOperationException(BizMessages.SegmentNameRequiredForSurvey(Lang));
+
+        var context = await EnsureCastingGroupAccess(req.CastingGroupID);
+        var entity = await Db.Query<biz_concrete_beam_segment>().FirstOrDefaultAsync(a =>
+            a.CastingGroupID == req.CastingGroupID
+            && a.SegmentName == req.SegmentName
+            && a.Status != StatusDelete);
+        if (entity == null)
+            throw new InvalidOperationException(BizMessages.SegmentSurveyNotFound(Lang, req.SegmentName));
+
+        entity.PouringDate = req.PouringDate;
+        entity.UpdatedBy = GetCurrentAccount();
+        entity.UpdatedTime = DateTime.Now;
+        await Db.SaveAsync();
+
+        var dto = ToSurveyDto(entity);
+        dto.CastingGroupID = req.CastingGroupID;
+        dto.GriderID = context.GirderID;
+        return new ConcreteBeamSurveySaveResultDTO
+        {
+            Survey = dto,
+            Message = BizMessages.PouringDateUpdated(Lang, req.SegmentName)
+        };
+    }
+
+    /// <summary>
     /// Survey点击Apply（确认）：保存本梁段录入的实测数据，跑线形算法（St=1）并把
     /// 浇筑端面坐标（ascast_coordinate）与浇筑测点坐标（ascast_measure）落库。
     /// </summary>
@@ -1053,11 +1352,21 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
             if (idx >= 0 && idx < kctArray.Length) kctArray[idx] = ToDoubleArray(row);
         }
 
-        // 4. 偏位常数 Bo：首段 4 项（本段），标准段 6 项（上节 AN/CN + 本节 AN/AS/CN/CS）
+        // 4. 测点偏位 Bo（固定 10/13 项，不随 UseB 变化）：
+        //    0 号段 10 项 [aNE,aNW,aSE,aSW,cN,cS,bNE,bNW,bSE,bSW]；
+        //    标准段 13 项 [aNE1,aNW1,cN1,aNE2,aNW2,aSE2,aSW2,cN2,cS2,bNE2,bNW2,bSE2,bSW2]。
+        //    a 始终取落库值；b 是否参与计算由 UseB 决定（false 时算法走旧表达式，b 值可填 0）。
         double[] bo;
         if (m == 0)
         {
-            bo = new[] { (double)req.BoltOffsetAN, (double)req.BoltOffsetAS, (double)req.BoltOffsetCN, (double)req.BoltOffsetCS };
+            bo = new[]
+            {
+                (double)req.BoltOffsetANE, (double)req.BoltOffsetANW,
+                (double)req.BoltOffsetASE, (double)req.BoltOffsetASW,
+                (double)req.BoltOffsetCN, (double)req.BoltOffsetCS,
+                (double)req.BoltOffsetBNE, (double)req.BoltOffsetBNW,
+                (double)req.BoltOffsetBSE, (double)req.BoltOffsetBSW
+            };
         }
         else
         {
@@ -1065,10 +1374,22 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
                 ?? throw new InvalidOperationException(BizMessages.PreviousSegmentNotFilled(Lang, allSegments[m - 1].SegmentName));
             bo = new[]
             {
-                (double)prev.BoltOffsetAN, (double)prev.BoltOffsetCN,
-                (double)req.BoltOffsetAN, (double)req.BoltOffsetAS,
-                (double)req.BoltOffsetCN, (double)req.BoltOffsetCS
+                (double)prev.BoltOffsetANE, (double)prev.BoltOffsetANW, (double)prev.BoltOffsetCN,
+                (double)req.BoltOffsetANE, (double)req.BoltOffsetANW,
+                (double)req.BoltOffsetASE, (double)req.BoltOffsetASW,
+                (double)req.BoltOffsetCN, (double)req.BoltOffsetCS,
+                (double)req.BoltOffsetBNE, (double)req.BoltOffsetBNW,
+                (double)req.BoltOffsetBSE, (double)req.BoltOffsetBSW
             };
+        }
+
+        // 4.1 UseB=true 时四个 b 值必须全部填写。DTO 为 decimal，无法区分“空”和 0，
+        //     故以“四个 b 全为 0”作为兜底校验；正常 b 为横向半宽/坐标，不应全为 0。
+        if (req.BoltOffsetBUseMeasured
+            && req.BoltOffsetBNE == 0m && req.BoltOffsetBNW == 0m
+            && req.BoltOffsetBSE == 0m && req.BoltOffsetBSW == 0m)
+        {
+            throw new InvalidOperationException(BizMessages.BoltOffsetBRequired(Lang));
         }
 
         // 5. 实测数据 E：0 号段 14 项 / 标准段 16 项，统一由 SetupNSurveyDTO 转换而来
@@ -1083,7 +1404,8 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
             K = kArray,
             KT = ktArray,
             KCT = kctArray,
-            Bo = bo
+            Bo = bo,
+            UseB = req.BoltOffsetBUseMeasured
         };
         if (m == 0) input.ZerothMeasuredE = ToZerothMeasuredE(req);
         else input.StandardMeasuredE = ToStandardMeasuredE(req);
@@ -1248,17 +1570,22 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
             if (idx >= 0 && idx < kctArray.Length) kctArray[idx] = ToDoubleArray(row);
         }
 
-        // Bo：本段实测尚未录入，本段偏位常数一律 0；标准段带上一段的 AN/CN（上一节段测点烘焙所需）
+        // Bo：本段实测尚未录入，本段 a/b/c 一律 0；标准段带上一段的北侧 a（aNE1/aNW1）与 cN1，
+        // 供上一节段测点烘焙。aNE1/aNW1 直接取上一段落库值（保存时已按“两侧不一致”归一化）。
         double[] bo;
         if (m == 0)
         {
-            bo = new double[4];
+            bo = new double[10];
         }
         else
         {
             var prev = segments.FirstOrDefault(a => string.Equals(a.SegmentName, allSegments[m - 1].SegmentName, StringComparison.Ordinal))
                 ?? throw new InvalidOperationException(BizMessages.PreviousSegmentNotFilledForSetup(Lang, allSegments[m - 1].SegmentName));
-            bo = new[] { (double)prev.BoltOffsetAN, (double)prev.BoltOffsetCN, 0d, 0d, 0d, 0d };
+            bo = new[]
+            {
+                (double)prev.BoltOffsetANE, (double)prev.BoltOffsetANW, (double)prev.BoltOffsetCN,
+                0d, 0d, 0d, 0d, 0d, 0d, 0d, 0d, 0d, 0d
+            };
         }
 
         var input = new ComputeInput
@@ -1272,7 +1599,8 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
             K = kArray,
             KT = ktArray,
             KCT = kctArray,
-            Bo = bo
+            Bo = bo,
+            UseB = false                // St=0 不走 ZeroErr/OneErr，b 不参与
         };
 
         var output = new ConstructionGirderAlignment().Run(input);
@@ -1458,12 +1786,13 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
     /// <param name="castingGroupID">浇筑组ID。</param>
     /// <param name="segmentName">梁段名称，格式 {节点1}-{节点2}。</param>
     /// <param name="reportType"><see cref="ReportTypeSetup"/> / <see cref="ReportTypeAsCast"/>；其余值一律按梁段设置处理。</param>
-    public async Task<byte[]> BuildSegmentReportPdf(int castingGroupID, string segmentName, string reportType)
+    public async Task<byte[]> BuildSegmentReportPdf(int castingGroupID, string segmentName, string reportType,
+        int? timezoneOffsetMinutes = null)
     {
         var kind = string.Equals(reportType, ReportTypeAsCast, StringComparison.OrdinalIgnoreCase)
             ? SegmentReportKind.AsCast
             : SegmentReportKind.Setup;
-        var model = await GetSegmentReportModel(castingGroupID, segmentName, kind);
+        var model = await GetSegmentReportModel(castingGroupID, segmentName, kind, timezoneOffsetMinutes);
         return ConcreteBeamSegmentReportBuilder.Build(model);
     }
 
@@ -1482,7 +1811,8 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
     /// </list>
     /// 「已浇筑梁段」报告要求本段已填报；「梁段设置」报告不要求（它描述的是浇筑目标）。
     /// </remarks>
-    public async Task<SegmentReportModel> GetSegmentReportModel(int castingGroupID, string segmentName, SegmentReportKind kind)
+    public async Task<SegmentReportModel> GetSegmentReportModel(int castingGroupID, string segmentName, SegmentReportKind kind,
+        int? timezoneOffsetMinutes = null)
     {
         if (string.IsNullOrWhiteSpace(segmentName)) throw new InvalidOperationException(BizMessages.SegmentNameRequired(Lang));
 
@@ -1515,13 +1845,15 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
         var model = new SegmentReportModel
         {
             Kind = kind,
+            IsFirstSegment = isFirst,
             ProjectTitle = context.ProjectName,
             CastingSet = context.CastingGroupName,
-            ReportDate = DateTime.Now,
+            ReportDate = NowForClient(timezoneOffsetMinutes),
+            TimezoneOffsetMinutes = timezoneOffsetMinutes,
             WetCastSegmentName = target.SegmentName,
-            WetCastCastOn = thisRecord?.PouringDate,
+            WetCastCastOn = ToClientLocal(thisRecord?.PouringDate, timezoneOffsetMinutes),
             MatchCastSegmentName = matchName,
-            MatchCastCastOn = matchCastOn
+            MatchCastCastOn = ToClientLocal(matchCastOn, timezoneOffsetMinutes)
         };
 
         // Setup 章：现算 St=0 的立模参数（与本段是否已填报无关）
@@ -1601,7 +1933,7 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
         lines.Add(ReportLine.Blank());
         lines.Add(ReportLine.Title(8, "SURVEY ================================"));
         lines.Add(ReportLine.Title(8,
-            $"Segment was Cast on : {FormatLongDate(r.PouringDate ?? SegmentReportModel.NotCastSentinel)}", false));
+            $"Segment was Cast on : {ReportTime.WithOffset(FormatLongDate(model.WetCastCastOn ?? SegmentReportModel.NotCastSentinel), model.TimezoneOffsetMinutes)}", false));
         lines.Add(ReportLine.Blank());
 
         // 固定端模板位移（南北两段都有）
@@ -1785,6 +2117,24 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
     /// <summary>报告数值格式：固定 4 位小数、不变文化。</summary>
     private static string Num(double v) => ((decimal)v).ToString("0.0000", CultureInfo.InvariantCulture);
 
+    /// <summary>
+    /// 把 DB 里的 UTC 墙钟按客户端时区偏移还原成本地墙钟。
+    /// <para>DB 约定为 timestamp without time zone，时区由前端决定；PDF 由服务端渲染，
+    /// 因此前端把浏览器偏移（分钟，东八区=480）传进来，这里只做偏移换算，不依赖服务器时区。</para>
+    /// </summary>
+    private static DateTime? ToClientLocal(DateTime? value, int? timezoneOffsetMinutes)
+    {
+        if (!value.HasValue) return null;
+        if (!timezoneOffsetMinutes.HasValue) return value;
+        return DateTime.SpecifyKind(value.Value, DateTimeKind.Utc).AddMinutes(timezoneOffsetMinutes.Value);
+    }
+
+    /// <summary>报告生成时间：有客户端偏移时按客户端本地时间，否则用服务器当前时间。</summary>
+    private static DateTime NowForClient(int? timezoneOffsetMinutes) =>
+        timezoneOffsetMinutes.HasValue
+            ? DateTime.UtcNow.AddMinutes(timezoneOffsetMinutes.Value)
+            : DateTime.Now;
+
     /// <summary>英文长日期（Friday, October 06, 2023），与原报告一致。</summary>
     private static string FormatLongDate(DateTime date)
         => date.ToString("dddd, MMMM dd, yyyy", CultureInfo.InvariantCulture);
@@ -1811,10 +2161,11 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
     /// 其余值一律按理论坐标处理。
     /// </param>
     /// <param name="includeAll">仅对理论坐标生效：true = 列出全部 joint，false = 只列到已浇筑梁段的最大 joint。</param>
-    public async Task<byte[]> BuildOverallReportPdf(int castingGroupID, string reportType, bool includeAll)
+    public async Task<byte[]> BuildOverallReportPdf(int castingGroupID, string reportType, bool includeAll,
+        int? timezoneOffsetMinutes = null)
     {
         var kind = ParseOverallReportKind(reportType);
-        var model = await GetOverallReportModel(castingGroupID, kind, includeAll);
+        var model = await GetOverallReportModel(castingGroupID, kind, includeAll, timezoneOffsetMinutes);
         return ConcreteBeamOverallReportBuilder.Build(model);
     }
 
@@ -1840,7 +2191,8 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
     /// 坐标全部读表不重算：理论值 ← design_coordinate_calculation，浇筑值 ← ascast_coordinate
     /// （定位键 DesignCoordinateID → source.ID → joint 下标，与 GetPouringCoords / SaveSurvey 同源）。
     /// </remarks>
-    public async Task<OverallReportModel> GetOverallReportModel(int castingGroupID, OverallReportKind kind, bool includeAll)
+    public async Task<OverallReportModel> GetOverallReportModel(int castingGroupID, OverallReportKind kind, bool includeAll,
+        int? timezoneOffsetMinutes = null)
     {
         var context = await EnsureCastingGroupAccess(castingGroupID);
         var model = new OverallReportModel
@@ -1848,7 +2200,8 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
             Kind = kind,
             ProjectTitle = context.ProjectName,
             CastingSet = context.CastingGroupName,
-            ReportDate = DateTime.Now,
+            ReportDate = NowForClient(timezoneOffsetMinutes),
+            TimezoneOffsetMinutes = timezoneOffsetMinutes,
             IncludeAll = includeAll
         };
 
@@ -1861,7 +2214,7 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
                 await AppendProjectChapter(model, castingGroupID, context, calculation, allSegments);
                 break;
             case OverallReportKind.CastAndTheory:
-                AppendCastAndTheoryChapter(model, calculation, ktByJoint, allSegments);
+                AppendCastAndTheoryChapter(model, calculation, ktByJoint, allSegments, timezoneOffsetMinutes);
                 break;
             default:
                 AppendTheoryChapter(model, calculation, allSegments, includeAll);
@@ -1943,7 +2296,8 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
         lines.Add(ReportLine.Pair(14, "Cast Segments:", castCount.ToString(CultureInfo.InvariantCulture)));
         lines.Add(ReportLine.Blank());
         lines.Add(ReportLine.Pair(14, "Report Generated:",
-            model.ReportDate.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)));
+            ReportTime.WithOffset(model.ReportDate.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
+                model.TimezoneOffsetMinutes)));
     }
 
     /// <summary>
@@ -1953,7 +2307,8 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
     /// </summary>
     private static void AppendCastAndTheoryChapter(OverallReportModel model,
         List<biz_concrete_beam_design_coordinate_calculation> calculation,
-        Dictionary<int, double[]> ktByJoint, List<ConcreteBeamSegmentDTO> allSegments)
+        Dictionary<int, double[]> ktByJoint, List<ConcreteBeamSegmentDTO> allSegments,
+        int? timezoneOffsetMinutes = null)
     {
         var align = new ConstructionGirderAlignment();
         var lines = model.Lines;
@@ -1966,7 +2321,7 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
             lines.Add(ReportLine.Blank());
             lines.Add(ReportLine.Title(8, $"Segment {m + 1} : {seg.SegmentName}", false));
             lines.Add(ReportLine.Title(8, "  Cast on : " + (seg.PouringDate.HasValue
-                ? FormatLongDate(seg.PouringDate.Value)
+                ? ReportTime.WithOffset(FormatLongDate(ToClientLocal(seg.PouringDate, timezoneOffsetMinutes)!.Value), timezoneOffsetMinutes)
                 : "Not Cast"), false));
 
             ktByJoint.TryGetValue(m + 1, out var ktNorth);
@@ -2251,10 +2606,33 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
         entity.Downstream = target.Downstream;
         entity.PouringDate = req.PouringDate;
 
-        entity.BoltOffsetAN = req.BoltOffsetAN;
+        // 测点偏位：a 四角 + b 四角 + 三个标志。
+        // 归一化只发生在保存业务：未勾选“两侧不一致”时，西角复制东角；
+        // 算法始终直接读取四角落库值，不做归一化分支。
+        var aNE = req.BoltOffsetANE;
+        var aNW = req.BoltOffsetAUseNorth ? req.BoltOffsetANW : aNE;
+        var aSE = req.BoltOffsetASE;
+        var aSW = req.BoltOffsetAUseSouth ? req.BoltOffsetASW : aSE;
+
+        entity.BoltOffsetANE = aNE;
+        entity.BoltOffsetANW = aNW;
+        entity.BoltOffsetASE = aSE;
+        entity.BoltOffsetASW = aSW;
+        entity.BoltOffsetBNE = req.BoltOffsetBNE;
+        entity.BoltOffsetBNW = req.BoltOffsetBNW;
+        entity.BoltOffsetBSE = req.BoltOffsetBSE;
+        entity.BoltOffsetBSW = req.BoltOffsetBSW;
+
+        // 旧列同步（兼容历史报表/旧查询）
+        entity.BoltOffsetAN = aNE;
+        entity.BoltOffsetAS = aSE;
         entity.BoltOffsetCN = req.BoltOffsetCN;
-        entity.BoltOffsetAS = req.BoltOffsetAS;
         entity.BoltOffsetCS = req.BoltOffsetCS;
+
+        // 标志列：useAN/useAS 仅用于回显与保存归一化；useB 进入算法分支
+        entity.BoltOffsetAUseNorth = req.BoltOffsetAUseNorth ? (short)1 : (short)0;
+        entity.BoltOffsetAUseSouth = req.BoltOffsetAUseSouth ? (short)1 : (short)0;
+        entity.BoltOffsetBUseMeasured = req.BoltOffsetBUseMeasured ? (short)1 : (short)0;
 
         entity.SurveyMatchNorthEastElev = req.SurveyMatchNorthEastElev;
         entity.SurveyMatchNorthWestElev = req.SurveyMatchNorthWestElev;
@@ -2363,6 +2741,18 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
         MatchWestLength = e.MatchWestLength,
         MatchEastLength = e.MatchEastLength,
         MatchCenterLength = e.MatchCenterLength,
+        BoltOffsetANE = e.BoltOffsetANE,
+        BoltOffsetANW = e.BoltOffsetANW,
+        BoltOffsetASE = e.BoltOffsetASE,
+        BoltOffsetASW = e.BoltOffsetASW,
+        BoltOffsetBNE = e.BoltOffsetBNE,
+        BoltOffsetBNW = e.BoltOffsetBNW,
+        BoltOffsetBSE = e.BoltOffsetBSE,
+        BoltOffsetBSW = e.BoltOffsetBSW,
+        BoltOffsetAUseNorth = e.BoltOffsetAUseNorth != 0,
+        BoltOffsetAUseSouth = e.BoltOffsetAUseSouth != 0,
+        BoltOffsetBUseMeasured = e.BoltOffsetBUseMeasured != 0,
+        // 旧字段（兼容）
         BoltOffsetAN = e.BoltOffsetAN,
         BoltOffsetCN = e.BoltOffsetCN,
         BoltOffsetAS = e.BoltOffsetAS,

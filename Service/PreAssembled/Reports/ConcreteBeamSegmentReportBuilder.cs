@@ -109,7 +109,9 @@ namespace Service.PreAssembled.Reports
 
             var timeLine = footer.AddParagraph();
             timeLine.Format.Alignment = ParagraphAlignment.Right;
-            timeLine.AddText(model.ReportDate.ToString(FooterTimeFormat, CultureInfo.InvariantCulture));
+            timeLine.AddText(ReportTime.WithOffset(
+                model.ReportDate.ToString(FooterTimeFormat, CultureInfo.InvariantCulture),
+                model.TimezoneOffsetMinutes));
         }
 
         private static void RenderBody(Section section, SegmentReportModel model)
@@ -117,10 +119,10 @@ namespace Service.PreAssembled.Reports
             // 头部：Project Title / Casting Set / Date，以及 Wet Cast、Match Cast 两行
             AddLine(section, $"    Project Title : {model.ProjectTitle}");
             AddLine(section, $"    Casting Set : {model.CastingSet}");
-            AddLine(section, $"    Date: {FormatLongDate(model.ReportDate)}");
+            AddLine(section, $"    Date: {ReportTime.WithOffset(FormatLongDate(model.ReportDate), model.TimezoneOffsetMinutes)}");
             AddLine(section, string.Empty);
-            AddLine(section, BuildSegmentHeader("Wet   Cast Segment", model.WetCastSegmentName, model.WetCastCastOn));
-            AddLine(section, BuildSegmentHeader("Match Cast Segment", model.MatchCastSegmentName, model.MatchCastCastOn));
+            AddLine(section, BuildSegmentHeader("Wet   Cast Segment", model.WetCastSegmentName, model.WetCastCastOn, model.TimezoneOffsetMinutes));
+            AddLine(section, BuildSegmentHeader("Match Cast Segment", model.MatchCastSegmentName, model.MatchCastCastOn, model.TimezoneOffsetMinutes, model.IsFirstSegment));
             AddLine(section, string.Empty);
 
             foreach (var line in model.Lines)
@@ -138,10 +140,13 @@ namespace Service.PreAssembled.Reports
         /// <summary>
         /// 头部那两行的对齐方式：名称列固定宽度，Cast on 再对齐一列，与原件观感一致。
         /// </summary>
-        private static string BuildSegmentHeader(string label, string segmentName, DateTime? castOn)
+        private static string BuildSegmentHeader(string label, string segmentName, DateTime? castOn, int? timezoneOffsetMinutes, bool suppressCastOn = false)
         {
             var name = string.IsNullOrWhiteSpace(segmentName) ? SegmentPlaceholder : segmentName;
-            var date = FormatLongDate(castOn ?? SegmentReportModel.NotCastSentinel);
+            // 起始段没有匹配段：不输出 Cast on，避免显示 1970 哨兵时间
+            if (suppressCastOn)
+                return $"        {label} : {name.PadRight(20)}";
+            var date = ReportTime.WithOffset(FormatLongDate(castOn ?? SegmentReportModel.NotCastSentinel), timezoneOffsetMinutes);
             return $"        {label} : {name.PadRight(20)} Cast on: {date}";
         }
 

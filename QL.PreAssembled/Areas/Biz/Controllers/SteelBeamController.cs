@@ -63,6 +63,9 @@ public class SteelBeamController : Controller
     public Task<JsonResult> UpdateMeasured([FromBody] SteelBeamCoordinateUpdateDTO req) => JsonCall(() => _service.UpdateMeasured(req));
 
     [HttpPost]
+    public Task<JsonResult> DeleteMeasured([FromBody] SteelBeamCoordinateUpdateDTO req) => JsonCall(() => _service.DeleteMeasured(req));
+
+    [HttpPost]
     [RequestSizeLimit(ExcelUtils.MaxFileBytes + 1024 * 1024)]
     public async Task<IActionResult> ImportTheoretical(int girderID, bool confirmOverwrite, IFormFile file)
     {
@@ -140,6 +143,21 @@ public class SteelBeamController : Controller
         {
             var message = await _service.RebuildDerived(girderId);
             return Ok(EPApiResult.Success(message));
+        }
+        catch (Exception ex) { return Json(EPApiResult.Fail(ex.Message)); }
+    }
+
+    /// <summary>
+    /// 批量重建推算坐标：按项目或指定梁列表逐根 replay。
+    /// 每根梁独立事务，某根失败不影响其它梁；返回逐根结果。
+    /// </summary>
+    [HttpPost]
+    public async Task<IActionResult> RebuildDerivedBatch([FromBody] SteelBeamRebuildBatchDTO req)
+    {
+        try
+        {
+            var result = await _service.RebuildDerivedBatch(req);
+            return Ok(EPApiResult.Success(result));
         }
         catch (Exception ex) { return Json(EPApiResult.Fail(ex.Message)); }
     }

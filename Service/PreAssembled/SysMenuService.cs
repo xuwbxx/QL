@@ -1,6 +1,7 @@
 ﻿using DataFactory.Factory;
 using DataFactory.KingBase;
 using Microsoft.AspNetCore.Http;
+using Model.tech.QL;
 using Model.tech.QL.DTO.SysMenu;
 using Tool;
 
@@ -29,22 +30,33 @@ namespace Service.PreAssembled
 
         public async Task<SysMenuItemDTO> Save(SysMenuItemDTO item)
         {
-
-            item.ID = base.Save(item, (entity) =>
+            try
             {
-                if (entity.ParentID != null)
+                item.ID = base.Save(item, (entity) =>
                 {
-                    var parent = dbSet.FindByID(entity.ParentID ?? 0);
-                    if (parent != null)
+                    if (entity.ParentID != null)
                     {
-                        entity.FullName = parent.FullName + " / " + entity.Name;
-                        entity.EnFullName = (parent.EnFullName ?? "-") + " / " + (entity.EnName ?? "-");
+                        var parent = dbSet.FindByID(entity.ParentID ?? 0);
+                        if (parent != null)
+                        {
+                            entity.FullName = parent.FullName + " / " + entity.Name;
+                            entity.EnFullName = (parent.EnFullName ?? "-") + " / " + (entity.EnName ?? "-");
+                        }
                     }
+                    var data = new sys_menu();
+                    ObjectUtils.CopyObjectValue(entity, data);
+                    return data;
+                });
+            }
+            catch (Exception ex)
+            {
+                // "uidx_sys_menu_permissionflag";
+                if (ex.InnerException != null && ex.InnerException.Message != null 
+                    && ex.InnerException.Message.Contains("uidx_sys_menu_permissionflag"))
+                {
+                    throw new BizException("权限标识不可重复。");
                 }
-                var data = new sys_menu();
-                ObjectUtils.CopyObjectValue(entity, data);
-                return data;
-            });
+            }
             return item;
         }
 

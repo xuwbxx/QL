@@ -82,14 +82,14 @@ namespace Service.PreAssembled
 
         public int SaveUser(SysUserSaveDTO dto)
         {
-            // 校验：登录名称不能重复
+            // 校验：登录账号不能重复
             if (!string.IsNullOrEmpty(dto.Account))
             {
                 var accountExists = Db.Query<sys_userinfo>()
                     .Any(a => a.Status != -1 && a.Account == dto.Account && a.ID != dto.ID);
                 if (accountExists)
                 {
-                    throw new Exception("登录名称已存在，请更换");
+                    throw new Exception("登录账号已存在，请更换");
                 }
             }
 

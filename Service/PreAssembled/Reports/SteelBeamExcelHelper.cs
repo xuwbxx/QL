@@ -87,6 +87,8 @@ namespace Service.PreAssembled.Reports
         public List<T> Rows { get; } = new();
         public List<(int ExcelRow, string PointCode)> SourcePoints { get; } = new();
         public List<SteelBeamImportError> Errors { get; } = new();
+        // 因 X/Y/Z 坐标不完整而被「视为未上传」的点位（跳过、不阻断导入，成功后提醒）
+        public List<(int ExcelRow, string PointCode)> IncompleteSkipped { get; } = new();
         public bool Success => Errors.Count == 0 && Rows.Count > 0;
     }
 
@@ -188,9 +190,19 @@ namespace Service.PreAssembled.Reports
                 ValidatePointCode(rowNumber, point, result.Errors, lang);
                 if (!string.IsNullOrEmpty(point) && !seen.Add(point))
                     result.Errors.Add(new(rowNumber, point, BizMessages.FieldPointCode(lang), point, BizMessages.DuplicatePointCode(lang, "测点编号")));
-                var x = ExcelUtils.ReadDecimal(sheet.Cell(rowNumber, columns["实测坐标X(m)"]), rowNumber, point, "实测坐标X(m)", 4, null, null, lang, addError);
-                var y = ExcelUtils.ReadDecimal(sheet.Cell(rowNumber, columns["实测坐标Y(m)"]), rowNumber, point, "实测坐标Y(m)", 4, null, null, lang, addError);
-                var z = ExcelUtils.ReadDecimal(sheet.Cell(rowNumber, columns["实测坐标Z(m)"]), rowNumber, point, "实测坐标Z(m)", 4, null, null, lang, addError);
+                // 需求3：X/Y/Z 任一为空 → 坐标不完整，视为该点位未上传：跳过并提醒，不作为阻断性必填错误
+                var xCell = sheet.Cell(rowNumber, columns["实测坐标X(m)"]);
+                var yCell = sheet.Cell(rowNumber, columns["实测坐标Y(m)"]);
+                var zCell = sheet.Cell(rowNumber, columns["实测坐标Z(m)"]);
+                if (xCell.IsEmpty() || yCell.IsEmpty() || zCell.IsEmpty())
+                {
+                    result.IncompleteSkipped.Add((rowNumber, point));
+                    continue;
+                }
+                // 三个坐标均非空：非数字/越界等仍作为阻断性错误
+                var x = ExcelUtils.ReadDecimal(xCell, rowNumber, point, "实测坐标X(m)", 4, null, null, lang, addError);
+                var y = ExcelUtils.ReadDecimal(yCell, rowNumber, point, "实测坐标Y(m)", 4, null, null, lang, addError);
+                var z = ExcelUtils.ReadDecimal(zCell, rowNumber, point, "实测坐标Z(m)", 4, null, null, lang, addError);
                 if (!result.Errors.Any(e => e.ExcelRow == rowNumber))
                     result.Rows.Add(new(rowNumber, point, x!.Value, y!.Value, z!.Value, ""));
             }
@@ -232,33 +244,38 @@ namespace Service.PreAssembled.Reports
             !string.IsNullOrEmpty(value) && value.Length <= 50 &&
             value[0] is not ('=' or '+' or '-' or '@') && Regex.IsMatch(value, "^[\\x21-\\x7E]+$");
 
-        public static List<SteelBeamImportError> ValidateMeasuredSegmentCompleteness(
+        public static List<SteelBeamImportError> ValidateMeasuredSegmentMinPoints(
             IEnumerable<SteelBeamTheoreticalPoint> theoreticalPoints,
             IEnumerable<string> uploadedPointCodes,
             string? lang)
         {
+            const int minPointsPerSegment = 3;
             var theory = theoreticalPoints.ToList();
             var uploaded = new HashSet<string>(
                 uploadedPointCodes.Where(a => !string.IsNullOrEmpty(a)),
                 StringComparer.OrdinalIgnoreCase);
-            var uploadedTheory = new HashSet<string>(
-                theory.Where(a => uploaded.Contains(a.PointCode)).Select(a => a.PointCode),
-                StringComparer.OrdinalIgnoreCase);
-            var touchedSegments = new HashSet<string>(
-                theory.Where(a => uploadedTheory.Contains(a.PointCode)).Select(a => a.SegmentNo),
-                StringComparer.OrdinalIgnoreCase);
 
-            return theory
-                .Where(a => touchedSegments.Contains(a.SegmentNo) && !uploadedTheory.Contains(a.PointCode))
-                .OrderBy(a => a.SegmentNo, StringComparer.OrdinalIgnoreCase)
-                .ThenBy(a => a.PointCode, StringComparer.OrdinalIgnoreCase)
-                .Select(a => new SteelBeamImportError(
-                    0,
-                    a.PointCode,
-                    BizMessages.FieldSegmentNo(lang),
-                    a.SegmentNo,
-                    BizMessages.SegmentIncomplete(lang)))
-                .ToList();
+            // 需求1：本次涉及的梁段（有≥3个有效上传点位）——有效点位需已扣除坐标不完整被跳过的点
+            var touchedSegments = theory
+                .Where(a => uploaded.Contains(a.PointCode))
+                .GroupBy(a => a.SegmentNo, StringComparer.OrdinalIgnoreCase);
+
+            var errors = new List<SteelBeamImportError>();
+            foreach (var segment in touchedSegments)
+            {
+                var validCount = segment
+                    .Select(a => a.PointCode)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .Count();
+                if (validCount < minPointsPerSegment)
+                    errors.Add(new SteelBeamImportError(
+                        0,
+                        string.Empty,
+                        BizMessages.FieldSegmentNo(lang),
+                        segment.Key,
+                        BizMessages.SegmentMinPoints(lang, segment.Key, validCount)));
+            }
+            return errors;
         }
 
         private static void ValidatePointCode(int row, string point, List<SteelBeamImportError> errors, string? lang)

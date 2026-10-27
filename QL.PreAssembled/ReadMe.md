@@ -1,119 +1,35 @@
-﻿# 部署架构总结（Jexus + Systemd托管 ASP.NET Core）
-> 环境：麒麟系统，.NET8，dotnet应用由systemd托管，Jexus作为反向代理网关
+﻿# 部署架构总结（Jexus托管 ASP.NET Core）
+> 环境：麒麟系统，.NET8，dotnet应用由Jexus托管
 
-## 整体架构
-- **qlprea.service**：.NET业务站点，仅监听本机回环 `127.0.0.1:5001`，不对外暴露
-- **jws.service(Jexus)**：对外监听 `0.0.0.0:8666`，使用 `reproxy` 将全部流量反向代理到 `http://127.0.0.1:5001/`
-- 用户访问：`8666` → Jexus → 转发至本机5001端口的dotnet程序
+## 环境
 
-> ⚠️注意：Jexus反向代理关键字为 `reproxy`，**不是 Nginx 的 proxy_pass**。
+### 服务器
+10.6.48.26
 
-## 1、dotnet systemd服务配置
-文件路径：`/etc/systemd/system/qlprea.service`
-```ini
-[Unit]
-Description=QL PreAssembled API
-After=network.target
+### 站点目录
+/website/qlprea
 
-[Service]
-WorkingDirectory=/var/www/qlprea
-ExecStart=/root/.dotnet/dotnet QL.PreAssembled.dll --urls="http://127.0.0.1:5001"
-Restart=always
-RestartSec=3
-Environment=DOTNET_ROOT=/root/.dotnet
-Environment=ASPNETCORE_ENVIRONMENT=Production
-User=root
-Group=root
+### Jexus 站点
+qlprea
 
-[Install]
-WantedBy=multi-user.target
-```
-
-生效命令
-```bash
-systemctl daemon-reload
-systemctl enable qlprea
-systemctl start qlprea
-systemctl status qlprea
-```
-
-## 2、Jexus站点配置
-文件路径：`/usr/jexus/siteconf/qlprea`
-```ini
-port=8666
-root=/ /var/www/qlprea
-hosts=*
-addr=0.0.0.0
-
-reproxy=/ http://127.0.0.1:5001/
-
-NoLog=false
-ResponseHandler.Add=X-Frame-Options:SAMEORIGIN
-```
-> 文件内**不能保留任何 AppHost 相关配置**，全部删除，不要仅依靠注释。
-
-单站点重载（无需重启整个jexus主进程）
-```bash
+### Jexus 命令
 /usr/jexus/jws stop qlprea
 /usr/jexus/jws start qlprea
-```
 
-完整jexus服务操作
-```bash
-systemctl restart jws
-systemctl status jws
-```
+## 发布步骤
 
-## 3、日常运维命令
-### 业务站点 qlprea
-```bash
-# 启停重启
-systemctl start qlprea
-systemctl stop qlprea
-systemctl restart qlprea
+### 打包上传方案步骤
+- VS设置发布时，设置本地文件夹，比如../publish/qlprea
+- 执行发布后，将../publish/qlprea中有变化的文件，打包成qlprea_yyyyMMdd_001.tar文件，注意，尽量保持文件夹树形结构
+- 通过堡垒机，通过[H5运维]方式，登录10.6.48.26
+- 展开右侧，打开【文件传输】，将打包好的qlprea_yyyyMMdd_001.tar文件，上传至/devops/qlprea
+- 执行命令，脚本将自动解压缩文件，发布到站点，并执行站点重启加载本次更新：
+    - cd /devops/qlprea
+    - ./deploy.sh qlprea_yyyyMMdd_001.tar
 
-# 实时查看dotnet控制台日志
-journalctl -u qlprea -f
-
-# 查看最近200行日志
-journalctl -u qlprea -n 200
-```
-
-### Jexus网关
-```bash
-# jexus日志
-tail -f /usr/jexus/log/jws.log
-
-# 查看端口监听状态
-ss -tulnp | grep 5001
-ss -tulnp | grep 8666
-```
-
-### 功能验证
-```bash
-# 直接访问后端dotnet
-curl 127.0.0.1:5001
-
-# 通过jexus代理访问
-curl 127.0.0.1:8666
-```
-
-## 4、备选方案（可移除Jexus，仅维护单个systemd服务）
-> 内网场景可用，不需要网关时使用。
-修改qlprea.service，将监听地址改为对外网卡：
-```ini
-ExecStart=/root/.dotnet/dotnet QL.PreAssembled.dll --urls="http://0.0.0.0:8666"
-```
-执行生效：
-```bash
-systemctl daemon-reload
-systemctl restart qlprea
-```
-> 此时直接访问8666，不再依赖Jexus。
-
-## 5、关键踩坑备忘
-1. Jexus反代指令：`reproxy=/ http://127.0.0.1:5001/`，**末尾斜杠不可省略**。
-2. 配置文件残留`AppHost`相关字符串会触发jws‑aspd模块，产生unix socket报错。(存疑)
-3. systemd的环境独立于交互式shell，必须显式注入`DOTNET_ROOT`。
-4. SELinux如果开启，需要放行http出站权限：`setsebool -P httpd_can_network_connect 1`；本环境SELinux为Disabled。
-5. jexus出现卡死无响应时，可使用强制杀死：`systemctl kill --signal=SIGKILL jws`。
+### 直接ftp发布步骤
+- VS设置发布时，指定ftp，发布到10.6.48.26的/website/qlprea目录
+- 通过堡垒机，登录10.6.48.26
+- 执行命令，重启站点，加载更新：
+    - /usr/jexus/jws stop qlprea
+    - /usr/jexus/jws start qlprea

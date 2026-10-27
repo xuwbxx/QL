@@ -52,7 +52,7 @@ namespace Service.PreAssembled.Reports
             var document = CreateDocument(model);
             var section = document.AddSection();
             ApplyPageSetup(section);
-            RenderFooter(section, model.ReportDate);
+            RenderFooter(section, model.ReportDate, model.TimezoneOffsetMinutes);
             RenderBody(section, model);
 
             var renderer = new PdfDocumentRenderer { Document = document };
@@ -93,7 +93,7 @@ namespace Service.PreAssembled.Reports
         }
 
         /// <summary>页脚：左「Page x of y」，右生成时间戳（与原件一致）。</summary>
-        private static void RenderFooter(Section section, DateTime reportDate)
+        private static void RenderFooter(Section section, DateTime reportDate, int? timezoneOffsetMinutes)
         {
             var footer = section.Footers.Primary;
 
@@ -106,7 +106,9 @@ namespace Service.PreAssembled.Reports
 
             var timeLine = footer.AddParagraph();
             timeLine.Format.Alignment = ParagraphAlignment.Right;
-            timeLine.AddText(reportDate.ToString(FooterTimeFormat, CultureInfo.InvariantCulture));
+            timeLine.AddText(ReportTime.WithOffset(
+                reportDate.ToString(FooterTimeFormat, CultureInfo.InvariantCulture),
+                timezoneOffsetMinutes));
         }
 
         private static void RenderBody(Section section, OverallReportModel model)
@@ -114,7 +116,7 @@ namespace Service.PreAssembled.Reports
             // 头部三行与单梁段报告一致；其后直接进入正文（整体报告没有 Wet Cast / Match Cast 行）
             AddLine(section, $"    Project Title : {model.ProjectTitle}");
             AddLine(section, $"    Casting Set : {model.CastingSet}");
-            AddLine(section, $"    Date: {FormatLongDate(model.ReportDate)}");
+            AddLine(section, $"    Date: {ReportTime.WithOffset(FormatLongDate(model.ReportDate), model.TimezoneOffsetMinutes)}");
 
             foreach (var line in model.Lines)
             {

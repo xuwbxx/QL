@@ -20,6 +20,30 @@ public static class ConcreteBeamDesignCalculator
         }).ToList();
 
     /// <summary>
+    /// 不归一化模式：source 的 Z 加上 camber 的 Z（ZE/ZC/ZW），X/Y 不变。
+    /// camber 缺项按 0；调用方应先保证节点序列匹配（不匹配时用 0 行补齐，不报错）。
+    /// </summary>
+    public static List<ConcreteBeamDesignCoordinateImportRow> ApplyCamberToSource(
+        IReadOnlyList<ConcreteBeamDesignCoordinateImportRow> sourceRows,
+        IReadOnlyList<ConcreteBeamCamberImportRow> camberRows)
+    {
+        var filled = FillCamberRows(camberRows);
+        var result = new List<ConcreteBeamDesignCoordinateImportRow>(sourceRows.Count);
+        for (var i = 0; i < sourceRows.Count; i++)
+        {
+            var source = sourceRows[i];
+            var camber = i < filled.Count ? filled[i] : null;
+            result.Add(source with
+            {
+                ZE = Round(source.ZE + (camber?.ZE ?? 0m)),
+                ZC = Round(source.ZC + (camber?.ZC ?? 0m)),
+                ZW = Round(source.ZW + (camber?.ZW ?? 0m))
+            });
+        }
+        return result;
+    }
+
+    /// <summary>
     /// 验证节点名称是否重复
     /// </summary>
     /// <param name="rows"></param>

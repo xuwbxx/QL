@@ -84,6 +84,11 @@ namespace Service.PreAssembled.Reports
         /// <summary>报告类型。</summary>
         public SegmentReportKind Kind { get; set; }
 
+        /// <summary>
+        /// 是否起始段（m=0）。起始段没有匹配段，报告里不显示“上一梁段浇筑时间”（避免 1970 哨兵）。
+        /// </summary>
+        public bool IsFirstSegment { get; set; }
+
         /// <summary>项目名称，对应原报告的 Project Title。</summary>
         public string ProjectTitle { get; set; } = string.Empty;
 
@@ -92,6 +97,12 @@ namespace Service.PreAssembled.Reports
 
         /// <summary>报告生成日期，对应原报告的 Date。</summary>
         public DateTime ReportDate { get; set; } = DateTime.Now;
+
+        /// <summary>
+        /// 客户端时区偏移（分钟，东八区=480）。
+        /// 报告里的日期/时间按此时区还原，并在格式化时附加 UTC±HH:mm 标识。
+        /// </summary>
+        public int? TimezoneOffsetMinutes { get; set; }
 
         /// <summary>本段（浇筑段）名称。</summary>
         public string WetCastSegmentName { get; set; } = string.Empty;

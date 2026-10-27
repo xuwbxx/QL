@@ -27,24 +27,28 @@
             var hasSurveyData = Vue.ref(false);
             var confirmedDesignIncludesCamber = Vue.ref(false);
             var designPreviewToken = Vue.ref('');
+            // 项目信息（偏位 A/B/C）是否已配置。未配置时，「项目信息」以外的后续页签一律禁用跳转。
+            var isProjectConfigured = Vue.ref(false);
 
             // 页签 label 用 computed 绑定多语言，语言切换时自动刷新（与 SteelBeam 页签写法一致）。
             // 注意：改 computed 后，JS 内部访问要写 tabs.value；模板里会自动解包，仍写 tabs。
             var tabs = Vue.computed(function () {
+                var configured = isProjectConfigured.value; // 项目信息未配置 → 除「项目信息」外全部禁用
                 return [
                     { name: 'projectInfo', label: i18nUtils.$t('biz.concreteBeam.tabProjectInfo'), disabled: false },
-                    { name: 'designCoord', label: i18nUtils.$t('biz.concreteBeam.tabDesignCoord'), disabled: true },
+                    { name: 'designCoord', label: i18nUtils.$t('biz.concreteBeam.tabDesignCoord'), disabled: !configured },
                     {
                         name: 'preCamber', label: i18nUtils.$t('biz.concreteBeam.tabPreCamber'),
                         get disabled() {
-                            return !hasConfirmedDesignCoordinates.value ||
+                            return !configured ||
+                                !hasConfirmedDesignCoordinates.value ||
                                 confirmedDesignIncludesCamber.value ||
                                 !!designPreviewToken.value;
                         }
                     },
-                    { name: 'setupSurvey', label: i18nUtils.$t('biz.concreteBeam.tabSetupSurvey'), disabled: false },
-                    { name: 'pouringCoord', label: i18nUtils.$t('biz.concreteBeam.tabPouringCoord'), disabled: false },
-                    { name: 'report', label: i18nUtils.$t('biz.concreteBeam.tabReport'), disabled: false }
+                    { name: 'setupSurvey', label: i18nUtils.$t('biz.concreteBeam.tabSetupSurvey'), disabled: !configured },
+                    { name: 'pouringCoord', label: i18nUtils.$t('biz.concreteBeam.tabPouringCoord'), disabled: !configured },
+                    { name: 'report', label: i18nUtils.$t('biz.concreteBeam.tabReport'), disabled: !configured }
                 ];
             });
 
@@ -114,7 +118,9 @@
             // SetupNSurveyDTO 的数值录入字段（驼峰名）。首段与标准段字段集不同，故分两个清单；
             // 清单同时驱动"回填"与"提交"，字段增删只需改这里，不再有手工搬运。
             var SURVEY_FIELDS_FIRST = [
-                'boltOffsetAN', 'boltOffsetCN', 'boltOffsetAS', 'boltOffsetCS',
+                'boltOffsetANE', 'boltOffsetANW', 'boltOffsetASE', 'boltOffsetASW',
+                'boltOffsetBNE', 'boltOffsetBNW', 'boltOffsetBSE', 'boltOffsetBSW',
+                'boltOffsetCN', 'boltOffsetCS',
                 'surveyBulkheadEastElev', 'surveyBulkheadWestElev', 'surveyBulkheadCenterOffset',
                 // 首段的活动端（匹配端）= 活动端模板 Floating Bulkhead
                 'surveyMatchSouthEastElev', 'surveyMatchSouthWestElev', 'surveyMatchSouthCenterOffset',
@@ -125,7 +131,9 @@
                 'surveyWetEastLength', 'surveyWetWestLength'
             ];
             var SURVEY_FIELDS_STANDARD = [
-                'boltOffsetAN', 'boltOffsetCN', 'boltOffsetAS', 'boltOffsetCS',
+                'boltOffsetANE', 'boltOffsetANW', 'boltOffsetASE', 'boltOffsetASW',
+                'boltOffsetBNE', 'boltOffsetBNW', 'boltOffsetBSE', 'boltOffsetBSW',
+                'boltOffsetCN', 'boltOffsetCS',
                 'surveyBulkheadEastElev', 'surveyBulkheadWestElev', 'surveyBulkheadCenterOffset',
                 'surveyMatchNorthEastElev', 'surveyMatchNorthWestElev',
                 'surveyMatchSouthEastElev', 'surveyMatchSouthWestElev',
@@ -139,6 +147,9 @@
             var SURVEY_FIELDS_ALL = SURVEY_FIELDS_FIRST.concat(SURVEY_FIELDS_STANDARD.filter(function (k) {
                 return SURVEY_FIELDS_FIRST.indexOf(k) < 0;
             }));
+
+            // 测点偏位复选框标志（布尔，不参与数值清空/数字化）
+            var BOLT_OFFSET_FLAGS = ['boltOffsetAUseNorth', 'boltOffsetAUseSouth', 'boltOffsetBUseMeasured'];
 
             // ConcreteBeamPerfectCastDTO 的数值字段（与算法 CalcResult 同名，按归属端面分组）
             var SETUP_FIELDS = [
@@ -205,10 +216,25 @@
             // 只读区表单（字段名 = ConcreteBeamPerfectCastDTO 字段名）
             var segmentSetup = Vue.reactive(newSetupForm());
 
+            // 两侧一致时，西角始终跟随东角；勾选“两侧不一致”后才允许独立输入。
+            Vue.watch(function () { return segmentSurvey.boltOffsetAUseNorth; }, function (v) {
+                if (!v) segmentSurvey.boltOffsetANW = segmentSurvey.boltOffsetANE;
+            });
+            Vue.watch(function () { return segmentSurvey.boltOffsetANE; }, function (v) {
+                if (!segmentSurvey.boltOffsetAUseNorth) segmentSurvey.boltOffsetANW = v;
+            });
+            Vue.watch(function () { return segmentSurvey.boltOffsetAUseSouth; }, function (v) {
+                if (!v) segmentSurvey.boltOffsetASW = segmentSurvey.boltOffsetASE;
+            });
+            Vue.watch(function () { return segmentSurvey.boltOffsetASE; }, function (v) {
+                if (!segmentSurvey.boltOffsetAUseSouth) segmentSurvey.boltOffsetASW = v;
+            });
+
             // 按字段清单构造空表单：所有数值字段初始为空串，避免任何预设值混入
             function newSurveyForm() {
                 var form = { castingGroupID: groupID };
                 SURVEY_FIELDS_ALL.forEach(function (k) { form[k] = ''; });
+                BOLT_OFFSET_FLAGS.forEach(function (k) { form[k] = false; });
                 form.segmentID = 0;
                 form.segmentName = '';
                 form.segmentIndex = 0;
@@ -276,7 +302,7 @@
                 pouringView.isFirst = !!d.isFirst;
                 pouringView.isFilled = filled;
                 pouringView.upstreamSegmentName = d.upstreamSegmentName || '';
-                pouringView.pouringDate = d.pouringDate ? String(d.pouringDate).substring(0, 10) : '';
+                pouringView.pouringDate = formatLocalDate(d.pouringDate);
                 // 面组：起始段两组（活动端 joint0 + 固定端 joint1），标准段一组（固定端 joint m+1）
                 pouringView.faces = (d.faces || []).map(function (f) {
                     return {
@@ -306,12 +332,16 @@
             }
 
             function hasUnsavedChanges() {
-                return isConfigDirty() || !!designPreviewToken.value || !!camberPreviewToken.value;
+                return isConfigDirty() || !!designPreviewToken.value || !!camberPreviewToken.value
+                    || designIncludeCamber.value !== confirmedDesignIncludesCamber.value
+                    || designNormalize.value !== designUseCalculation.value;
             }
 
             async function confirmLeaveCurrentTab() {
+                var designDirty = designIncludeCamber.value !== confirmedDesignIncludesCamber.value
+                    || designNormalize.value !== designUseCalculation.value;
                 var dirty = (activeTab.value === 'projectInfo' && isConfigDirty()) ||
-                    (activeTab.value === 'designCoord' && !!designPreviewToken.value) ||
+                    (activeTab.value === 'designCoord' && (!!designPreviewToken.value || designDirty)) ||
                     (activeTab.value === 'preCamber' && !!camberPreviewToken.value);
                 if (!dirty) return true;
                 try {
@@ -320,7 +350,11 @@
                     });
                 } catch (e) { return false; }
                 if (activeTab.value === 'projectInfo') restoreConfig();
-                if (activeTab.value === 'designCoord') await cancelPreview('design', true);
+                if (activeTab.value === 'designCoord') {
+                    designIncludeCamber.value = confirmedDesignIncludesCamber.value;
+                    designNormalize.value = designUseCalculation.value;
+                    await cancelPreview('design', true);
+                }
                 if (activeTab.value === 'preCamber') await cancelPreview('camber', true);
                 return true;
             }
@@ -338,10 +372,10 @@
                 if (tabName === 'report') loadReportSheet();
             }
 
-            function setDesignCoordinateDisabled(disabled) {
-                var tab = tabs.value.find(function (item) { return item.name === 'designCoord'; });
-                if (tab) tab.disabled = !!disabled;
-                if (disabled && activeTab.value === 'designCoord') activeTab.value = 'projectInfo';
+            // 设置「项目信息已配置」状态：未配置时除「项目信息」外后续页签一律禁用，并退回「项目信息」页签。
+            function applyProjectConfigured(configured) {
+                isProjectConfigured.value = !!configured;
+                if (!configured && activeTab.value !== 'projectInfo') activeTab.value = 'projectInfo';
             }
 
             async function loadGroupInfo() {
@@ -356,20 +390,25 @@
                     projectInfo.offsetC = formatNullableNumber(info.offsetC);
                     projectInfo.referenceElevation = formatNullableNumber(info.referenceElevation);
                     projectInfo.createdBy = info.createdBy || '';
-                    setDesignCoordinateDisabled(!info.isConfigured);
+                    applyProjectConfigured(!!info.isConfigured);
                     designIncludeCamber.value = !!info.elevationIncludesCamber;
                     confirmedDesignIncludesCamber.value = !!info.elevationIncludesCamber;
+                    designNormalize.value = !!info.normalize;
+                    designUseCalculation.value = !!info.normalize;
                     hasConfirmedDesignCoordinates.value = !!info.hasConfirmedDesignCoordinates;
                     hasCalculatedDesignCoordinates.value = !!info.hasCalculatedDesignCoordinates;
                     hasSurveyData.value = !!info.hasSurveyData;
                     if (tabs.value.find(function (item) { return item.name === 'preCamber'; }).disabled &&
-                        activeTab.value === 'preCamber') activeTab.value = 'designCoord';
+                        activeTab.value === 'preCamber') {
+                        var dcTab = tabs.value.find(function (item) { return item.name === 'designCoord'; });
+                        activeTab.value = (dcTab && !dcTab.disabled) ? 'designCoord' : 'projectInfo';
+                    }
                     projectInfo.createdTime = formatDateTime(info.createdTime);
                     projectInfo.updatedTime = formatDateTime(info.updatedTime);
                     rememberConfig();
                     if (info.isConfigured) loadDesignData();
                 } catch (e) {
-                    setDesignCoordinateDisabled(true);
+                    applyProjectConfigured(false);
                     console.error('loadGroupInfo error', e);
                 }
             }
@@ -381,7 +420,7 @@
                         castingGroupID: groupID, pageIndex: segmentPageIndex.value, pageSize: segmentPageSize.value
                     });
                     segmentTableData.value = (res.list || []).map(function (row) {
-                        row.pouringDate = row.pouringDate ? row.pouringDate.substring(0, 10) : '';
+                        row.pouringDate = formatLocalDate(row.pouringDate);
                         return row;
                     });
                     segmentTotal.value = res.total || 0;
@@ -410,15 +449,16 @@
                 designLoading.value = true;
                 try {
                     var previewing = !!designPreviewToken.value;
+                    // 设计坐标页签始终显示 source；calculation 只供下游/报告使用
                     var res = await HttpUtils.post(previewing
                         ? '/Biz/ConcreteBeam/DesignImportPreviewList'
                         : '/Biz/ConcreteBeam/DesignCoordinateList', previewing ? {
                             castingGroupID: groupID, previewToken: designPreviewToken.value,
-                            pageIndex: designPageIndex.value, pageSize: designPageSize.value
+                            pageIndex: designPageIndex.value, pageSize: designPageSize.value,
+                            normalized: designNormalize.value
                         } : {
                             castingGroupID: groupID, pageIndex: designPageIndex.value, pageSize: designPageSize.value,
-                            useCalculation: designUseCalculation.value,
-                            displayIncludesCamber: designIncludeCamber.value
+                            normalized: designNormalize.value
                         });
                     designTableData.value = (res.list || []).map(function (row) {
                         ['xe','ye','ze','xc','yc','zc','xw','yw','zw'].forEach(function (key) { row[key] = formatNullableNumber(row[key]); });
@@ -435,21 +475,12 @@
             function handleDesignPageChange(val) { designPageIndex.value = val; loadDesignData(); }
             function handleDesignSizeChange(val) { designPageSize.value = val; designPageIndex.value = 1; loadDesignData(); }
             async function onDesignNormalizeChange() {
-                if (designNormalize.value && hasConfirmedDesignCoordinates.value &&
-                    !confirmedDesignIncludesCamber.value && !hasCalculatedDesignCoordinates.value) {
-                    designNormalize.value = false;
-                    ElMessage.warning('还未上传预拱度信息，请先上传预拱度信息');
-                    return;
-                }
-                if (designPreviewToken.value) return;
-                designUseCalculation.value = designNormalize.value;
+                // 切归一化只切展示：勾选显示 source 的归一化结果（不叠加 camber），未勾选显示 source
                 designPageIndex.value = 1;
                 await loadDesignData();
             }
             async function onDesignCamberChange() {
-                if (designPreviewToken.value || !designUseCalculation.value) return;
-                designPageIndex.value = 1;
-                await loadDesignData();
+                // 切换包含预拱度不做任何操作；确认时才生效
             }
             function handleImportDesignCoord() { openImport('design'); }
             function downloadDesignTemplate() { window.location.href = '/Biz/ConcreteBeam/DesignCoordinateTemplate'; }
@@ -604,45 +635,57 @@
                 win.print();
             }
 
-            /** 预览：弹窗展示（两个页签的「预览」都走这里）。 */
+            /** 设计坐标/预拱度「核对与预览」PDF 地址（带浏览器时区偏移）。 */
+            function buildOrientationPdfUrl()
+            {
+                return '/Biz/ConcreteBeam/DesignOrientationPreviewPdf'
+                    + '?castingGroupID=' + encodeURIComponent(groupID)
+                    + '&timezoneOffsetMinutes=' + getClientTimezoneOffsetMinutes();
+            }
+
+            /** 预览：直接走报告弹窗的 PDF 预览（不再用文本弹窗）。 */
             async function showOrientationPreview()
             {
                 if (!guardOrientationPreview()) return;
-                designPreviewVisible.value = true;
-                designPreviewLoading.value = true;
-                designPreviewError.value = '';
-                designPreviewUpper.value = '';
-                designPreviewLower.value = '';
-                try
-                {
-                    var content = await fetchOrientationPreview();
-                    designPreviewUpper.value = content.upper;
-                    designPreviewLower.value = content.lower;
-                }
-                catch (e)
-                {
-                    designPreviewError.value = (e && e.message) || i18nUtils.$t('biz.concreteBeam.reportGenFailed');
-                }
-                finally { designPreviewLoading.value = false; }
+                invalidateReportCache();
+                reportUrlOverride.value = buildOrientationPdfUrl();
+                reportDownloadName.value = 'orientation-preview';
+                setReportDialogTitle(function () { return i18nUtils.$t('biz.concreteBeam.designPreviewDialogTitle'); });
+                reportDialogVisible.value = true;
+                await renderReportPage(1);
             }
 
-            /** 打印：跳过弹窗，直接取数出纸（两个页签的「打印」都走这里）。 */
+            /** 打印：先打开 PDF 预览，再调用报告弹窗的打印。 */
             async function printOrientationPreview()
             {
                 if (!guardOrientationPreview()) return;
-                try
-                {
-                    var content = await fetchOrientationPreview();
-                    printOrientationText(content.upper, content.lower);
-                }
-                catch (e)
-                {
-                    ElMessage.error((e && e.message) || i18nUtils.$t('biz.concreteBeam.reportGenFailed'));
-                }
+                invalidateReportCache();
+                reportUrlOverride.value = buildOrientationPdfUrl();
+                reportDownloadName.value = 'orientation-preview';
+                setReportDialogTitle(function () { return i18nUtils.$t('biz.concreteBeam.designPreviewDialogTitle'); });
+                reportDialogVisible.value = true;
+                await renderReportPage(1);
+                await handleReportPrint();
             }
 
-            async function handleDesignPreview() { await showOrientationPreview(); }
-            async function handleDesignPrint() { await printOrientationPreview(); }
+            /** 设计坐标的打印/预览只读已落库 calculation：有预览/草稿时禁止，避免看到旧值。 */
+            function ensureDesignConfirmedForPreview() {
+                if (designPreviewToken.value ||
+                    designNormalize.value !== designUseCalculation.value ||
+                    designIncludeCamber.value !== confirmedDesignIncludesCamber.value) {
+                    ElMessage.warning(i18nUtils.$t('biz.concreteBeam.designConfirmBeforePreview'));
+                    return false;
+                }
+                return true;
+            }
+            async function handleDesignPreview() {
+                if (!ensureDesignConfirmedForPreview()) return;
+                await showOrientationPreview();
+            }
+            async function handleDesignPrint() {
+                if (!ensureDesignConfirmedForPreview()) return;
+                await printOrientationPreview();
+            }
 
             /** 弹窗内的 Print：已有内容就直接打，不重新取数。 */
             function handleDesignPreviewPrint()
@@ -656,15 +699,78 @@
                     await confirmPreview('design', false);
                     return;
                 }
-                designUseCalculation.value = designNormalize.value;
+                // 已确认设计数据后，任一勾选变化：点 Apply 才重算 calculation / 开关预拱度页签
+                if (designIncludeCamber.value !== confirmedDesignIncludesCamber.value ||
+                    designNormalize.value !== designUseCalculation.value) {
+                    await confirmDesignCamberSetting(false);
+                    return;
+                }
                 designPageIndex.value = 1;
                 await loadDesignData();
-                ElMessage.success(i18nUtils.$t('biz.concreteBeam.designRefreshed'));
+                ElMessage.info(i18nUtils.$t('biz.concreteBeam.designNoChanges'));
             }
-            async function handleDesignCancel() {
-                if (designPreviewToken.value) await cancelPreview('design', false);
-                else {
+
+            /**
+             * 确认【归一化坐标】/【包含预拱度】：设计源已存在，不走上传预览。
+             * 后端按当前项目 B 重算 calculation、复用/补 0 预拱度、作废下游 as-cast；
+             * 无设计数据时不落库，直接提示。
+             */
+            async function confirmDesignCamberSetting(confirmOverwrite) {
+                try {
+                    var result = await HttpUtils.post('/Biz/ConcreteBeam/ConfirmDesignCamberSetting', {
+                        castingGroupID: groupID,
+                        elevationIncludesCamber: designIncludeCamber.value,
+                        normalize: !!designNormalize.value,
+                        confirmOverwrite: !!confirmOverwrite
+                    });
+                    if (result && result.requiresOverwriteConfirmation) {
+                        try {
+                            await ElMessageBox.confirm(result.message, i18nUtils.$t('biz.concreteBeam.notice'), {
+                                type: 'warning',
+                                confirmButtonText: i18nUtils.$t('common.apply'),
+                                cancelButtonText: i18nUtils.$t('common.cancel')
+                            });
+                            await confirmDesignCamberSetting(true);
+                        } catch (e) {
+                            // 用户取消：两个勾选都回滚到已应用状态
+                            designIncludeCamber.value = confirmedDesignIncludesCamber.value;
+                            designNormalize.value = designUseCalculation.value;
+                            await loadDesignData();
+                        }
+                        return;
+                    }
+                    designPageIndex.value = 1;
+                    await loadGroupInfo();
+                    // 展示口径跟随【归一化坐标】勾选：未勾选时不显示设计 K
+                    designUseCalculation.value = designNormalize.value;
+                    await loadDesignData();
+                    await loadCamberData();
+                    await loadSegmentData();
+                    if (result && result.requiresCamber) {
+                        // 缺 camber 只提示，不跳转预拱度页签
+                        ElMessage.warning(i18nUtils.$t('biz.concreteBeam.designSavedUploadCamber'));
+                    } else {
+                        ElMessage.success((result && result.message) || i18nUtils.$t('biz.concreteBeam.designRefreshed'));
+                    }
+                } catch (e) {
+                    // 请求失败/取消：两个勾选都回滚到已应用状态
+                    designIncludeCamber.value = confirmedDesignIncludesCamber.value;
                     designNormalize.value = designUseCalculation.value;
+                    await loadDesignData();
+                    console.error('confirm design camber setting error', e);
+                }
+            }
+
+            async function handleDesignCancel() {
+                if (designPreviewToken.value) {
+                    designIncludeCamber.value = confirmedDesignIncludesCamber.value;
+                    designNormalize.value = designUseCalculation.value;
+                    await cancelPreview('design', false);
+                } else {
+                    designNormalize.value = designUseCalculation.value;
+                    designIncludeCamber.value = confirmedDesignIncludesCamber.value;
+                    designPageIndex.value = 1;
+                    await loadDesignData();
                     ElMessage.info(i18nUtils.$t('biz.concreteBeam.cancelled'));
                 }
             }
@@ -763,10 +869,28 @@
             // 预览对话框：服务端出 PDF，PDF.js 渲染到 canvas
             var reportDialogVisible = Vue.ref(false);
             var reportDialogTitle = Vue.ref(i18nUtils.$t('biz.concreteBeam.reportPreviewTitle'));
+            // 标题按当前语言重算：打开时记下 setter，切换语言时重新执行，避免标题停留在旧语言
+            var reportTitleSetter = null;
+            function setReportDialogTitle(setter) {
+                reportTitleSetter = setter;
+                reportDialogTitle.value = setter();
+            }
+            var reportLocaleRef = window.appI18n && window.appI18n.global ? window.appI18n.global.locale : null;
+            if (reportLocaleRef) {
+                Vue.watch(function () {
+                    return (reportLocaleRef && typeof reportLocaleRef === 'object' && 'value' in reportLocaleRef)
+                        ? reportLocaleRef.value
+                        : reportLocaleRef;
+                }, function () {
+                    if (reportTitleSetter) reportDialogTitle.value = reportTitleSetter();
+                });
+            }
             var reportError = Vue.ref('');
             var reportPageNo = Vue.ref(1);
             var reportPageCount = Vue.ref(0);
             var reportZoom = Vue.ref(1.2);
+            // 当前页面的最大有效缩放（按容器宽度算）；到顶后禁用“放大”，避免只重绘不放大
+            var reportZoomMax = Vue.ref(3);
             var reportCanvas = Vue.ref(null);
             // 当前已取回的报告：缓存后供翻页/缩放/打印/导出复用，切换梁段或报告类型时作废
             var reportPdfDoc = null;
@@ -806,18 +930,25 @@
              * 外部（如设站及测量的「打印」）可临时指定 reportUrlOverride，
              * 弹窗共用同一套 PDF 预览/翻页/缩放/导出/打印能力，不另建一套。
              */
+            // 浏览器相对 UTC 的偏移（分钟，东八区=480）。PDF 由服务端渲染，需把时区传给后端。
+            function getClientTimezoneOffsetMinutes() {
+                return -new Date().getTimezoneOffset();
+            }
+
             function buildReportUrl() {
                 if (reportUrlOverride.value) return reportUrlOverride.value;
                 if (reportScope.value === 'overall') {
                     return '/Biz/ConcreteBeam/OverallReportPdf'
                         + '?castingGroupID=' + encodeURIComponent(groupID)
                         + '&reportType=' + encodeURIComponent(currentOverallReportType())
-                        + '&includeAll=' + (reportIncludeAll.value ? 'true' : 'false');
+                        + '&includeAll=' + (reportIncludeAll.value ? 'true' : 'false')
+                        + '&timezoneOffsetMinutes=' + getClientTimezoneOffsetMinutes();
                 }
                 return '/Biz/ConcreteBeam/SegmentReportPdf'
                     + '?castingGroupID=' + encodeURIComponent(groupID)
                     + '&segmentName=' + encodeURIComponent(reportSegmentName.value || '')
-                    + '&reportType=' + encodeURIComponent(currentReportType());
+                    + '&reportType=' + encodeURIComponent(currentReportType())
+                    + '&timezoneOffsetMinutes=' + getClientTimezoneOffsetMinutes();
             }
 
             /** 当前选中的梁段对象（未找到时返回 null）。 */
@@ -928,14 +1059,16 @@
                 // 页签内的预览走自己的单选项，清掉外部指定的地址
                 reportUrlOverride.value = '';
                 reportDownloadName.value = '';
-                var overallLabel = reportOverallType.value === '项目信息' ? i18nUtils.$t('biz.concreteBeam.reportProject')
-                    : (reportOverallType.value === '浇筑和理论坐标' ? i18nUtils.$t('biz.concreteBeam.reportCastTheory')
-                        : i18nUtils.$t('biz.concreteBeam.reportTheory'));
-                reportDialogTitle.value = reportScope.value === 'overall'
-                    ? (i18nUtils.$t('biz.concreteBeam.overallReports') + ' · ' + overallLabel
-                       + (reportOverallType.value === '理论坐标' && reportIncludeAll.value ? i18nUtils.$t('biz.concreteBeam.includeAllSuffix') : ''))
-                    : (reportSegmentName.value + ' · '
-                       + i18nUtils.$t('biz.concreteBeam.' + (reportSegmentType.value === '已浇筑梁段' ? 'reportSegmentAsCastReport' : 'reportSegmentSetupReport')));
+                setReportDialogTitle(function () {
+                    var overallLabel = reportOverallType.value === '项目信息' ? i18nUtils.$t('biz.concreteBeam.reportProject')
+                        : (reportOverallType.value === '浇筑和理论坐标' ? i18nUtils.$t('biz.concreteBeam.reportCastTheory')
+                            : i18nUtils.$t('biz.concreteBeam.reportTheory'));
+                    return reportScope.value === 'overall'
+                        ? (i18nUtils.$t('biz.concreteBeam.overallReports') + ' · ' + overallLabel
+                           + (reportOverallType.value === '理论坐标' && reportIncludeAll.value ? i18nUtils.$t('biz.concreteBeam.includeAllSuffix') : ''))
+                        : (reportSegmentName.value + ' · '
+                           + i18nUtils.$t('biz.concreteBeam.' + (reportSegmentType.value === '已浇筑梁段' ? 'reportSegmentAsCastReport' : 'reportSegmentSetupReport')));
+                });
                 reportDialogVisible.value = true;
                 await renderReportPage(1);
             }
@@ -957,9 +1090,18 @@
                     }
                     reportPageNo.value = Math.min(Math.max(pageNo, 1), reportPageCount.value || 1);
                     var page = await reportPdfDoc.getPage(reportPageNo.value);
-                    var viewport = page.getViewport({ scale: reportZoom.value });
                     var canvas = reportCanvas.value;
                     if (!canvas) return;
+                    // 容器宽度决定最大有效缩放：超过后 canvas 的 max-width:100% 会夹住视觉宽度，
+                    // 继续放大只会重绘、不会变大，所以到顶就禁用“放大”。
+                    var baseViewport = page.getViewport({ scale: 1 });
+                    var availableWidth = canvas.parentElement ? canvas.parentElement.clientWidth : 0;
+                    if (availableWidth > 0 && baseViewport.width > 0) {
+                        var maxByWidth = availableWidth / baseViewport.width;
+                        reportZoomMax.value = Math.max(0.5, Math.min(3, Number(maxByWidth.toFixed(2))));
+                    }
+                    if (reportZoom.value > reportZoomMax.value) reportZoom.value = reportZoomMax.value;
+                    var viewport = page.getViewport({ scale: reportZoom.value });
                     var ctx = canvas.getContext('2d');
                     canvas.width = Math.floor(viewport.width);
                     canvas.height = Math.floor(viewport.height);
@@ -976,7 +1118,11 @@
 
             async function reportPrevPage() { if (reportPageNo.value > 1) await renderReportPage(reportPageNo.value - 1); }
             async function reportNextPage() { if (reportPageNo.value < reportPageCount.value) await renderReportPage(reportPageNo.value + 1); }
-            async function reportZoomIn() { reportZoom.value = Math.min(3, Number((reportZoom.value + 0.2).toFixed(2))); await renderReportPage(reportPageNo.value); }
+            async function reportZoomIn() {
+                if (reportZoom.value >= reportZoomMax.value) return;
+                reportZoom.value = Math.min(reportZoomMax.value, Number((reportZoom.value + 0.2).toFixed(2)));
+                await renderReportPage(reportPageNo.value);
+            }
             async function reportZoomOut() { reportZoom.value = Math.max(0.5, Number((reportZoom.value - 0.2).toFixed(2))); await renderReportPage(reportPageNo.value); }
 
             /** 打印：隐藏 iframe 载入同一份 PDF 后调浏览器打印（与预览共用已取回的字节）。 */
@@ -1074,7 +1220,7 @@
                     projectInfo.createdTime = formatDateTime(info.createdTime);
                     projectInfo.updatedTime = formatDateTime(info.updatedTime);
                     rememberConfig();
-                    setDesignCoordinateDisabled(!info.isConfigured);
+                    applyProjectConfigured(!!info.isConfigured);
                     ElMessage.success(i18nUtils.$t('biz.concreteBeam.saveSuccess'));
                     if (info.calculationMessage) ElMessage.warning(info.calculationMessage);
                 } catch (e) { console.error('save config error', e); }
@@ -1160,7 +1306,10 @@
                 var url = type === 'design' ? '/Biz/ConcreteBeam/ConfirmDesignImport' : '/Biz/ConcreteBeam/ConfirmCamberImport';
                 try {
                     var result = await HttpUtils.post(url, {
-                        castingGroupID: groupID, previewToken: token, confirmOverwrite: !!confirmOverwrite
+                        castingGroupID: groupID, previewToken: token, confirmOverwrite: !!confirmOverwrite,
+                        // 以当前勾选值为准；后端覆盖 preview 里的上传时值
+                        elevationIncludesCamber: type === 'design' ? designIncludeCamber.value : undefined,
+                        normalize: !!designNormalize.value
                     });
                     if (result.requiresOverwriteConfirmation) {
                         try {
@@ -1187,9 +1336,12 @@
                         await loadCamberData();
                         await loadDesignData();
                     }
-                    if (result.message === '请先导入预拱度')
+                    if (result.requiresCamber) {
+                        // 缺 camber 只提示，不跳转预拱度页签
                         ElMessage.warning(i18nUtils.$t('biz.concreteBeam.designSavedUploadCamber'));
-                    else ElMessage.success(result.message || '保存成功');
+                    } else {
+                        ElMessage.success(result.message || '保存成功');
+                    }
                 } catch (e) { console.error('confirm import preview error', e); }
             }
 
@@ -1236,7 +1388,26 @@
                 projectInfo.offsetC = savedConfig.offsetC; projectInfo.referenceElevation = savedConfig.referenceElevation;
             }
             function formatNullableNumber(value) { return value === null || value === undefined || value === '' ? '' : Number(value).toFixed(4); }
-            function formatDateTime(value) { return value ? String(value).replace('T', ' ').substring(0, 19) : ''; }
+            function formatDateTime(value) {
+                if (!value) return '';
+                var d = new Date(value);
+                if (isNaN(d.getTime())) return String(value).replace('T', ' ').substring(0, 19);
+                var pad = function (n) { return String(n).padStart(2, '0'); };
+                return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
+                    + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+            }
+
+            // 后端 DateTime 以 UTC（带 Z）序列化；日期展示统一按浏览器本地时区取 yyyy-MM-dd。
+            // 不在后端做 +8h / .Date 归一化：DB 是 timestamp without time zone，时区由前端决定。
+            function formatLocalDate(value) {
+                if (!value) return '';
+                var d = new Date(value);
+                if (isNaN(d.getTime())) return String(value).substring(0, 10);
+                var y = d.getFullYear();
+                var m = String(d.getMonth() + 1).padStart(2, '0');
+                var day = String(d.getDate()).padStart(2, '0');
+                return y + '-' + m + '-' + day;
+            }
             function isFourDecimalNumber(value) { return /^[-+]?\d+(\.\d{1,4})?$/.test(String(value).trim()); }
 
             function handleBeforeUnload(event) {
@@ -1307,6 +1478,7 @@
                     });
                     // 先清空全部录入字段，避免切换梁段时残留上一段的值（首段/标准段字段集不同）
                     SURVEY_FIELDS_ALL.forEach(function (k) { segmentSurvey[k] = ''; });
+                    BOLT_OFFSET_FLAGS.forEach(function (k) { segmentSurvey[k] = false; });
 
                     // 标识与状态：字段名与 SetupNSurveyDTO 一致，直接回填
                     segmentSurvey.segmentID = d.segmentID || 0;
@@ -1333,6 +1505,7 @@
                     // 未填报段显式清空为空串，避免把后端的 0 当成真实实测值展示。
                     var fields = segmentIsFirst.value ? SURVEY_FIELDS_FIRST : SURVEY_FIELDS_STANDARD;
                     fields.forEach(function (k) { segmentSurvey[k] = filled ? num4(d[k]) : ''; });
+                    BOLT_OFFSET_FLAGS.forEach(function (k) { segmentSurvey[k] = filled ? !!d[k] : false; });
 
                     // 只读区的立模参数始终由 St=0 现算，不读本段保存过的实测修正值
                     await loadSegmentSetup(segmentName);
@@ -1377,6 +1550,7 @@
             function snapshotSurveyValues() {
                 var snap = {};
                 SURVEY_FIELDS_ALL.forEach(function (k) { snap[k] = segmentSurvey[k]; });
+                BOLT_OFFSET_FLAGS.forEach(function (k) { snap[k] = segmentSurvey[k]; });
                 return snap;
             }
             function restoreSurveyValues(snap) {
@@ -1402,7 +1576,34 @@
 
             // 组装 SaveSurvey 请求：字段名与后端 SetupNSurveyDTO 一致，按本段字段清单数字化后直传
             function buildSurveyRequest() {
+                // a 归一化：未勾选“两侧不一致”时，西角复制东角（与后端保存逻辑一致）
+                if (!segmentSurvey.boltOffsetAUseNorth) segmentSurvey.boltOffsetANW = segmentSurvey.boltOffsetANE;
+                if (!segmentSurvey.boltOffsetAUseSouth) segmentSurvey.boltOffsetASW = segmentSurvey.boltOffsetASE;
+
                 var fields = segmentIsFirst.value ? SURVEY_FIELDS_FIRST : SURVEY_FIELDS_STANDARD;
+
+                // 【设站及测量】所有「当前可编辑」的字段必填；checkbox 只是开关，不参与校验。
+                // 条件禁用的字段（aNW/aSW 未勾选“两侧不一致”、b 四值未勾选“已有实测b值”）不算可编辑，跳过。
+                var requiredFields = fields.filter(function (k) {
+                    if (k === 'boltOffsetANW' && !segmentSurvey.boltOffsetAUseNorth) return false;
+                    if (k === 'boltOffsetASW' && !segmentSurvey.boltOffsetAUseSouth) return false;
+                    if ((k === 'boltOffsetBNE' || k === 'boltOffsetBNW' || k === 'boltOffsetBSE' || k === 'boltOffsetBSW')
+                        && !segmentSurvey.boltOffsetBUseMeasured) return false;
+                    return true;
+                });
+
+                var missing = requiredFields.filter(function (k) {
+                    var v = segmentSurvey[k];
+                    return v === '' || v === null || v === undefined;
+                });
+                if (!segmentSurvey.pouringDate) missing.push('pouringDate');
+
+                if (missing.length > 0) {
+                    console.warn('setup survey missing required fields:', missing);
+                    ElMessage.warning(i18nUtils.$t('biz.concreteBeam.surveyRequiredFields'));
+                    return null;
+                }
+
                 var req = {
                     castingGroupID: groupID,
                     segmentID: segmentSurvey.segmentID || 0,
@@ -1410,6 +1611,7 @@
                     pouringDate: segmentSurvey.pouringDate || null
                 };
                 fields.forEach(function (k) { req[k] = Number(segmentSurvey[k] || 0); });
+                BOLT_OFFSET_FLAGS.forEach(function (k) { req[k] = !!segmentSurvey[k]; });
                 return req;
             }
 
@@ -1424,10 +1626,13 @@
                 reportUrlOverride.value = '/Biz/ConcreteBeam/SegmentReportPdf'
                     + '?castingGroupID=' + encodeURIComponent(groupID)
                     + '&segmentName=' + encodeURIComponent(segmentName || '')
-                    + '&reportType=' + (isFilled ? 'baogao' : 'setting');
+                    + '&reportType=' + (isFilled ? 'baogao' : 'setting')
+                    + '&timezoneOffsetMinutes=' + getClientTimezoneOffsetMinutes();
                 reportDownloadName.value = (segmentName || 'segment') + '-' + (isFilled ? 'baogao' : 'setting');
-                reportDialogTitle.value = (segmentName || '') + ' · '
-                    + i18nUtils.$t('biz.concreteBeam.' + (isFilled ? 'reportSegmentAsCastReport' : 'reportSegmentSetupReport'));
+                setReportDialogTitle(function () {
+                    return (segmentName || '') + ' · '
+                        + i18nUtils.$t('biz.concreteBeam.' + (isFilled ? 'reportSegmentAsCastReport' : 'reportSegmentSetupReport'));
+                });
                 reportDialogVisible.value = true;
                 await renderReportPage(1);
             }
@@ -1443,10 +1648,31 @@
 
             async function handleSegmentConfirm() {
                 if (!segmentSurvey.segmentName) { ElMessage.warning(i18nUtils.$t('biz.concreteBeam.selectSegmentFirst')); return; }
-                if (!segmentSurvey.canEdit) { ElMessage.warning(segmentSurvey.lockedReason || i18nUtils.$t('biz.concreteBeam.segmentNotEditable')); return; }
                 if (isPerfectCast.value) { ElMessage.warning(i18nUtils.$t('biz.concreteBeam.perfectCastLockSubmit')); return; }
+
+                // 往期已锁定段：只允许改浇筑日期，走独立接口，不触碰实测/坐标
+                if (!segmentSurvey.canEdit) {
+                    if (!segmentSurvey.pouringDate) {
+                        ElMessage.warning(i18nUtils.$t('biz.concreteBeam.pouringDateRequired'));
+                        return;
+                    }
+                    try {
+                        var dateRes = await HttpUtils.post('/Biz/ConcreteBeam/UpdatePouringDate', {
+                            castingGroupID: groupID,
+                            segmentName: segmentSurvey.segmentName,
+                            pouringDate: segmentSurvey.pouringDate
+                        });
+                        ElMessage.success((dateRes && dateRes.message) ? dateRes.message : i18nUtils.$t('biz.concreteBeam.pouringDateUpdated'));
+                        await loadSetupSurveySheet();
+                        await loadSegmentSurvey(segmentSurvey.segmentName);
+                    } catch (e) { console.error('update pouring date error', e); }
+                    return;
+                }
+
                 try {
-                    var res = await HttpUtils.post('/Biz/ConcreteBeam/SaveSurvey', buildSurveyRequest());
+                    var payload = buildSurveyRequest();
+                    if (!payload) return;
+                    var res = await HttpUtils.post('/Biz/ConcreteBeam/SaveSurvey', payload);
                     var d = (res && res.survey) ? res.survey : null;
                     if (d) segmentSurvey.surveyMatchCastTwist = num4(d.surveyMatchCastTwist);
                     ElMessage.success((res && res.message) ? res.message : i18nUtils.$t('biz.concreteBeam.saveSuccess'));
@@ -1560,6 +1786,7 @@
                 reportPageNo: reportPageNo,
                 reportPageCount: reportPageCount,
                 reportZoom: reportZoom,
+                reportZoomMax: reportZoomMax,
                 reportCanvas: reportCanvas,
                 onReportSegmentChange: onReportSegmentChange,
                 onReportTypeChange: onReportTypeChange,

@@ -23,7 +23,11 @@ var zhCnMessages = {
         failed: '操作失败',
         noData: '暂无数据',
         pleaseSelect: '请选择',
-        pleaseInput: '请输入'
+        pleaseInput: '请输入',
+        titleInfo: '信息',
+        titleSucces: '成功',
+        titleError: '错误',
+        titleWarning: '警告'
     },
     // 应用级文本
     app: {
@@ -81,8 +85,10 @@ var zhCnMessages = {
             // ---- 顶部操作栏 ----
             addProject: '新增项目',
             editProject: '编辑项目',
-            addSubItem: '新增子项',
-            editSubItem: '编辑子项',
+            addSubItem: '新增桥梁',
+            addCastGroup: '新增浇筑分组',
+            editSubItem: '编辑桥梁',
+            editCastGroup: '编辑浇筑分组',
             authorize: '授权',
             // ---- 搜索/表格/表单（字段名称） ----
             name: '项目名称',
@@ -137,6 +143,8 @@ var zhCnMessages = {
             // ---- 搜索栏 ----
             pointPlaceholder: '请选择测点编号',
             segmentPlaceholder: '请选择梁段号',
+            segmentAssembled: '(已拼装)',
+            segmentPending: '(待拼装)',
             pushCountPlaceholder: '请选择顶推次数',
             allTime: '全部时间',
             // ---- 工具栏按钮 ----
@@ -146,6 +154,7 @@ var zhCnMessages = {
             importMeasured: '导入实测数据',
             downloadMeasured: '下载实测数据',
             downloadTemplate: '下载模板',
+            downloadMeasuredTemplate: '下载实测数据模板',
             rebuildDerived: '重算推算坐标',
             rebuildDerivedConfirm: '将按顶推次数从1到最大依次重算已推出梁段的推算坐标（覆盖现有值），是否继续？',
             rebuildDerivedSuccess: '推算坐标已重算',
@@ -184,7 +193,18 @@ var zhCnMessages = {
             importFailedDetail: '导入失败，请查看错误明细文件',
             errorDetailFile: '错误明细.xlsx',
             noDownloadData: '当前筛选条件下无可下载数据',
-            measuredFileName: '钢梁实测数据.xlsx'
+            measuredFileName: '钢梁实测数据.xlsx',
+            // ---- 误差分析（卡片 + 卡内 echarts）----
+            analysisMaxPositive: '最大正误差',
+            analysisMaxNegative: '最大负误差',
+            analysisAsc: '升序',
+            analysisDesc: '降序',
+            analysisXAxis: '点位距离(m)',
+            analysisYAxis: 'Z误差(m)',
+            analysisModeDist: '测位分布',
+            analysisModeMerge: '测位合并',
+            analysisZoom: '放大',
+            analysisSaveImage: '下载图片'
         },
         // 业务模块：混凝土梁管理（Biz/ConcreteBeam）
         concreteBeam: {
@@ -243,7 +263,7 @@ var zhCnMessages = {
             print: '打印',
             preview: '预览',
             // ---- 预拱度页签 ----
-            surveyLockedCamberTip: '已有梁段完成实测填报：预拱度参与设计坐标的归一化计算，已锁定不允许再修改或重新导入。',
+            surveyLockedCamberTip: '已有梁段完成实测填报：预拱度参与设计坐标计算，已锁定不允许再修改或重新导入。',
             camberPreviewDialogTitle: '预拱度打印预览',
             camberNoPreviewData: '暂无可预览的预拱度数据',
             camberNoPrintData: '暂无可打印的预拱度数据',
@@ -273,11 +293,16 @@ var zhCnMessages = {
             importFailedDetail: '导入失败，请查看错误明细文件',
             errorDetailFile: '混凝土梁_导入错误明细.xlsx',
             designRefreshed: '设计坐标数据已刷新',
-            designSavedUploadCamber: '设计坐标已保存，请尽快上传预拱度信息，完成归一化计算',
+            designNoChanges: '没有需要保存的变更',
+            designConfirmBeforePreview: '请先点击【确认】保存设计坐标后再打印/预览',
+            designSavedUploadCamber: '设计坐标已保存，请尽快上传预拱度信息，完成设计坐标计算',
             // ---- 设站及测量页签 ----
             // 筛选行
             setupSegmentLabel: '梁段名称',
             castOn: '浇筑日期',
+            surveyRequiredFields: '请填写【设站及测量】中所有可编辑字段（含浇筑日期）',
+            pouringDateRequired: '请先选择浇筑日期',
+            pouringDateUpdated: '浇筑日期已更新',
             matchCast: '匹配浇筑',
             status: '状态',
             tagStarter: '起始段',
@@ -292,6 +317,12 @@ var zhCnMessages = {
             wetCast: '浇筑梁段',
             matchSegment: '匹配梁段',
             boltOffsets: '测点偏位',
+            twoSidesInconsistent: '两侧不一致',
+            hasMeasuredB: '已有实测 b 值',
+            aNorthTip: '勾选“两侧不一致”后 aNW 可输入；不勾选时 aNW 自动等于 aNE。',
+            aSouthTip: '勾选“两侧不一致”后 aSW 可输入；不勾选时 aSW 自动等于 aSE。',
+            bTip: '勾选“已有实测 b 值”后，四个 b 值（bNE/bNW/bSE/bSW）必须全部填写；不勾选时按原算法计算。',
+            boltBRequired: '请填写完整的四个 b 值（bNE、bNW、bSE、bSW）',
             surveySection: '实测',
             // 字段
             eastElev: '东侧高程',
@@ -404,7 +435,7 @@ var zhCnMessages = {
             dialogAddTitle: '新增用户',
             dialogEditTitle: '编辑用户',
             // 弹窗表单label
-            account: '登录名称',
+            account: '登录账号',
             name: '姓名',
             empNo: '员工编号',
             password: '登录密码',

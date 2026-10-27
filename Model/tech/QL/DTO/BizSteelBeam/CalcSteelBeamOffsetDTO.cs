@@ -61,6 +61,6 @@ namespace Model.tech.QL.DTO.BizSteelBeam
         public decimal Z { set; get; }
 
         public decimal PredictZ { set; get; }
-        public decimal ZError { set; get; }
+        public decimal? ZError { set; get; }
     }
 }

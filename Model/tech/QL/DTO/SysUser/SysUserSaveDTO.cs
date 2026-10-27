@@ -14,7 +14,7 @@ namespace Model.tech.QL.DTO.SysUser
         public int ID { get; set; }
 
         /// <summary>
-        /// 登录名称（即交建通userLogin，作为登录账号）
+        /// 登录账号（即交建通userLogin，作为登录账号）
         /// </summary>
         public string Account { get; set; }
 

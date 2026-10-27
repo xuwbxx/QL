@@ -25,7 +25,7 @@
     </style>
 }
 
-<div id="app" class="user-container">
+<div v-cloak id="app" class="user-container">
     <div class="user-header">
         <div class="search-area">
             <el-input v-model="searchName" :placeholder="$t('sys.user.searchNamePlaceholder')" clearable style="width: 200px;" @@keyup.enter="handleSearch"></el-input>
@@ -40,6 +40,7 @@
         <el-table-column :label="$t('sys.user.tableIndex')" width="70" align="center">
             <template #default="scope">{{ (currentPage - 1) * pageSize + scope.$index + 1 }}</template>
         </el-table-column>
+        <el-table-column prop="account" :label="$t('sys.user.account')" min-width="120" align="center"></el-table-column>
         <el-table-column prop="name" :label="$t('sys.user.userName')" min-width="120" align="center"></el-table-column>
         <el-table-column prop="deptName" :label="$t('sys.user.deptName')" min-width="200" align="center" show-overflow-tooltip>
             <template #default="scope">{{ scope.row.deptName || '-' }}</template>
@@ -78,7 +79,7 @@
     <!-- 新增/编辑弹窗 -->
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px" :close-on-click-modal="false">
         <el-form :model="formData" label-width="150px" ref="userFormRef" :rules="formRules">
-            <!-- 登录名称 + 查询用户按钮 -->
+            <!-- 登录账号 + 查询用户按钮 -->
             <el-form-item :label="$t('sys.user.account')" prop="account">
                 <div style="display: flex; gap: 8px; width: 100%;">
                     <el-input v-model="formData.account" :placeholder="$t('sys.user.accountPlaceholder')" disabled></el-input>

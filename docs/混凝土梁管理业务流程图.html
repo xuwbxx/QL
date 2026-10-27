@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>混凝土梁管理 - 完整业务流程</title>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#e8f1fb',
+      primaryBorderColor: '#3b82c4',
+      primaryTextColor: '#1a3a5c',
+      lineColor: '#5b7a99',
+      fontSize: '14px'
+    },
+    flowchart: { curve: 'basis', htmlLabels: true },
+    er: { fontSize: 13 }
+  });
+</script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    margin: 0; background: #f4f6f9; color: #2c3e50;
+  }
+  header {
+    background: linear-gradient(135deg, #1e5799 0%, #2989d8 60%, #7db9e8 100%);
+    color: #fff; padding: 28px 40px;
+  }
+  header h1 { margin: 0 0 6px; font-size: 26px; }
+  header p { margin: 0; opacity: .85; font-size: 13px; }
+  main { max-width: 1280px; margin: 0 auto; padding: 24px 40px 60px; }
+  section {
+    background: #fff; border-radius: 10px; padding: 24px 28px;
+    margin-bottom: 24px; box-shadow: 0 2px 8px rgba(30,60,90,.08);
+  }
+  h2 {
+    font-size: 19px; margin: 0 0 16px; padding-left: 12px;
+    border-left: 4px solid #2989d8; color: #1e5799;
+  }
+  .diagram { overflow-x: auto; }
+  .rules li { margin: 6px 0; line-height: 1.7; }
+  .rules code {
+    background: #eef3f8; border-radius: 4px; padding: 1px 6px;
+    font-size: 13px; color: #b3452c; font-family: Consolas, monospace;
+  }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { border: 1px solid #d7e0ea; padding: 7px 10px; text-align: left; }
+  th { background: #eef3f8; color: #1e5799; }
+  footer { text-align: center; color: #8a9bab; font-size: 12px; padding: 16px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>混凝土梁管理 · 完整业务流程</h1>
+  <p>QL.PreAssembled / Areas/Biz/ConcreteBeam · 短线匹配法浇筑工况 · 生成日期：2026-10-10</p>
+</header>
+<main>
+
+<section>
+  <h2>一、端到端业务流程</h2>
+  <div class="diagram">
+<pre class="mermaid">
+flowchart TD
+    A["项目 / 浇筑组<br/>(biz_project → biz_project_bridge(BeamType=1) → castingGroup)"] --> B["① 保存配置 A/B/C/H<br/>SaveConfig"]
+    B --> R1{"WorkflowRules:<br/>参数是否变更?"}
+    R1 -- "变更" --> R2["作废既往浇筑态数据<br/>(首次保存除外)"]
+    R1 -- "无变化" --> C
+    R2 --> C["② Excel 导入设计坐标 + 预拱度<br/>(上传 → 预览 → 确认 三步式)"]
+    C --> D{"ExcelHelper 校验<br/>XC 单调性 / 节点数一致性"}
+    D -- "失败" --> E["返回错误标注 Excel"]
+    D -- "通过" --> F["ConcreteBeamDesignCalculator.Calculate<br/>补齐 ZE/ZW → 叠加预拱度 → 按 B 值归一化 E/W"]
+    F --> G["ImportPreviewStore 暂存预览<br/>(IMemoryCache, 30min, Token 防越权)"]
+    G --> H["ConfirmDesignImport / ConfirmCamberImport<br/>写 source + calculation 双表"]
+    H --> I["③ 逐段实测填报 (LinearControl 工作台)"]
+    I --> I1{"DescribeSegmentFill<br/>Allowed / SkipAhead / Locked"}
+    I1 -- "跳段或锁定" --> I2["拒绝填报"]
+    I1 -- "允许" --> J["PerfectCast<br/>计算立模理论目标值"]
+    J --> K["SaveSurvey 写入 biz_concrete_beam_segment"]
+    K --> L["ConstructionGirderAlignment.Run<br/>短线匹配法线形算法"]
+    L --> M["落库浇筑端面坐标(KT)<br/>+ 测点坐标(KCT)"]
+    M --> N{"还有下一梁段?"}
+    N -- "是" --> I
+    N -- "否" --> O["④ 报告输出 (PDF)"]
+    O --> O1["单梁段报告<br/>SegmentReportBuilder<br/>Setup / AsCast"]
+    O --> O2["整体报告<br/>OverallReportBuilder<br/>Project / CastTheory / Theory"]
+    style A fill:#fdf3d8,stroke:#c9a227
+    style L fill:#e8f6e8,stroke:#3a8f3a
+    style O fill:#ece4f6,stroke:#7b52ab
+</pre>
+  </div>
+</section>
+
+<section>
+  <h2>二、数据模型 (ER 图)</h2>
+  <div class="diagram">
+<pre class="mermaid">
+erDiagram
+    biz_project ||--o{ biz_project_bridge : "1 : N"
+    biz_project_bridge ||--o{ biz_project_bridge_castingGroup : "BeamType=1"
+    biz_project_bridge_castingGroup ||--|| biz_concrete_beam_config : "配置"
+    biz_project_bridge_castingGroup ||--o{ biz_concrete_beam_design_coordinate_source : "设计坐标源"
+    biz_project_bridge_castingGroup ||--o{ biz_concrete_beam_camber_source : "预拱度源"
+    biz_concrete_beam_design_coordinate_source ||--o{ biz_concrete_beam_design_coordinate_calculation : "计算"
+    biz_concrete_beam_camber_source ||--o{ biz_concrete_beam_camber_calculation : "计算"
+    biz_project_bridge_castingGroup ||--o{ biz_concrete_beam_segment : "梁段实测"
+    biz_concrete_beam_design_coordinate_calculation ||--o{ biz_concrete_beam_ascast_coordinate : "KT 端面"
+    biz_concrete_beam_segment ||--o{ biz_concrete_beam_ascast_coordinate : "SegmentID"
+    biz_concrete_beam_segment ||--o{ biz_concrete_beam_ascast_measure : "KCT 测点"
+
+    biz_concrete_beam_config {
+        decimal OffsetA "测点偏位A"
+        decimal OffsetB "测点偏位B"
+        decimal OffsetC "测点偏位C"
+        decimal OffsetH "参考高程偏移"
+        bool ElevationIncludesCamber "标高是否含预拱度"
+    }
+    biz_concrete_beam_design_coordinate_source {
+        string NodeName "节点名"
+        decimal X "E/C/W 三点九列"
+        decimal Y ""
+        decimal Z ""
+    }
+    biz_concrete_beam_segment {
+        int SegmentIndex "段号 = 算法 M"
+        string Node1 "节点1"
+        string Node2 "节点2"
+        date CastingDate "浇筑日期"
+        decimal SurveyData "Match/Wet/Survey 实测"
+    }
+    biz_concrete_beam_ascast_measure {
+        string Side "0=North 1=South"
+    }
+</pre>
+  </div>
+  <p style="font-size:13px;color:#66788a;margin:8px 0 0">source → calculation 为"导入原件 → 计算结果"两段式；ascast_coordinate / ascast_measure 由梁段填报经算法派生，三者属同一条计算链，作废必须同事务整体作废。</p>
+</section>
+
+<section>
+  <h2>三、核心业务规则</h2>
+  <ul class="rules">
+    <li><b>填报顺序锁</b>：<code>ConcreteBeamWorkflowRules.DescribeSegmentFill</code> —— 不跳段，新增仅允许紧邻下一节（m = 已填最大段 + 1），更新仅允许最后一节；违反时返回 <code>SkipSegmentMessage</code> / <code>LockedSegmentMessage</code>。</li>
+    <li><b>上游锁定</b>：<code>IsUpstreamLocked</code> —— 一旦存在实测填报（<code>biz_concrete_beam_segment</code> 有效行），项目参数、设计坐标、预拱度全部只读。</li>
+    <li><b>配置变更作废</b>：<code>ShouldInvalidateAsCastAfterConfigChange</code> —— A/B/C/H 任一变化即作废既往浇筑坐标（首次保存除外）。</li>
+    <li><b>预拱度联动</b>：<code>ShouldClearCamberAfterDesignConfirmation</code> —— 标高不含预拱度且旧预拱度不可复用时，确认设计坐标须清独立预拱度。</li>
+    <li><b>导入防越权</b>：<code>ConcreteBeamImportPreviewStore</code> —— 预览 Token 校验账号 / 浇筑组 / 类型，30 分钟滑动过期。</li>
+    <li><b>数据权限</b>：<code>GetAllowedProjectIds()</code> —— admin 角色全量，否则按 <code>biz_project_user</code> 授权过滤。</li>
+  </ul>
+</section>
+
+<section>
+  <h2>四、关键代码位置索引</h2>
+  <table>
+    <tr><th>环节</th><th>类 / 文件</th></tr>
+    <tr><td>控制器（路由 /Biz/ConcreteBeam）</td><td>QL.PreAssembled/Areas/Biz/Controllers/ConcreteBeamController.cs</td></tr>
+    <tr><td>主服务（约 1900 行）</td><td>Service/PreAssembled/ConcreteBeamService.cs</td></tr>
+    <tr><td>设计坐标计算</td><td>Service/PreAssembled/ConcreteBeamDesignCalculator.cs</td></tr>
+    <tr><td>线形算法（移植自 Python）</td><td>Service/PreAssembled/BridgeSegmentAlignment/ConstructionGirderAlignment.cs</td></tr>
+    <tr><td>业务规则</td><td>Service/PreAssembled/ConcreteBeamWorkflowRules.cs</td></tr>
+    <tr><td>导入预览缓存</td><td>Service/PreAssembled/ConcreteBeamImportPreviewStore.cs</td></tr>
+    <tr><td>Excel 解析/模板/错误回写</td><td>Service/PreAssembled/Reports/ConcreteBeamExcelHelper.cs</td></tr>
+    <tr><td>报告生成</td><td>Reports/ConcreteBeamSegmentReportBuilder.cs、ConcreteBeamOverallReportBuilder.cs</td></tr>
+    <tr><td>实体与 DbSet</td><td>DataFactory/KingBase/QlPreAssembledDbContext.cs（行 189-196）</td></tr>
+    <tr><td>前端工作台</td><td>wwwroot/js/Biz/concrete-beam-linear-control.js（6 页签：项目信息/设计坐标/预拱度/立模填报/浇筑坐标/报告）</td></tr>
+  </table>
+</section>
+
+</main>
+<footer>由 AI 代码探索生成 · mermaid.js 渲染 · 需联网加载 CDN</footer>
+</body>
+</html>

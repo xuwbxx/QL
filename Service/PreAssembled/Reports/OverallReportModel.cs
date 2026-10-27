@@ -44,6 +44,12 @@ namespace Service.PreAssembled.Reports
         public DateTime ReportDate { get; set; } = DateTime.Now;
 
         /// <summary>
+        /// 客户端时区偏移（分钟，东八区=480）。
+        /// 报告里的日期/时间按此时区还原，并在格式化时附加 UTC±HH:mm 标识。
+        /// </summary>
+        public int? TimezoneOffsetMinutes { get; set; }
+
+        /// <summary>
         /// 是否输出全部 joint。仅对 <see cref="OverallReportKind.Theory"/> 生效：
         /// 未勾选时只列到「已浇筑梁段的最大 joint」，勾选后列出全部 joint。
         /// </summary>

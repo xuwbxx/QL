@@ -108,7 +108,8 @@ document.addEventListener('DOMContentLoaded', function () {
             },
 
             castDialogTitle() {
-                return this.castEditMode ? this.$t('biz.project.editSubItem') : this.$t('biz.project.addSubItem');
+                // console.log('castDialogTitle:', this.$t('biz.project.editCastGroup'))
+                return this.castEditMode ? this.$t('biz.project.editCastGroup') : this.$t('biz.project.addCastGroup');
             },
 
             // 项目状态 / 梁类型下拉选项（随语言切换自动更新）

@@ -6,14 +6,16 @@
 
 @section Styles {
     <style>
+        /* 整页不滚动：重置 body 默认 8px margin 并锁死视口高度（子页 layout 无全局 reset，父页 home-index.css 才有） */
+        html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
         [v-cloak] { display: none; }
-        .lc-container { background: #f0f2f5; min-height: 100%; }
-        .lc-header { background: #fff; padding: 16px 24px; border-bottom: 1px solid #e8e8e8; display: flex; align-items: center; }
+        .lc-container { background: #f0f2f5; height: 100%; display: flex; flex-direction: column; overflow: hidden; box-sizing: border-box; }
+        .lc-header { background: #fff; padding: 16px 24px; border-bottom: 1px solid #e8e8e8; display: flex; align-items: center; flex: 0 0 auto; }
         .lc-title { flex: 1; text-align: center; color: #1677c8; font-size: 18px; font-weight: 600; }
-        .lc-tabs { display: flex; gap: 8px; padding: 0 24px; background: #fff; border-bottom: 1px solid #e8e8e8; }
+        .lc-tabs { display: flex; gap: 8px; padding: 0 24px; background: #fff; border-bottom: 1px solid #e8e8e8; flex: 0 0 auto; }
         .lc-tab { padding: 13px 22px; cursor: pointer; color: #606266; border-bottom: 2px solid transparent; }
         .lc-tab.active { color: #1677c8; border-bottom-color: #1677c8; font-weight: 600; }
-        .lc-panel { background: #fff; padding: 18px 24px; min-height: 520px; }
+        .lc-panel { background: #fff; padding: 18px 24px; flex: 1 1 auto; min-height: 0; overflow-y: auto; box-sizing: border-box; }
         .lc-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 16px; }
         .lc-toolbar-left, .lc-toolbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .lc-lock-tip { margin: -6px 0 14px; padding: 8px 12px; background: #fffbe6; border: 1px solid #ffe58f; border-radius: 4px; color: #ad6800; font-size: 13px; line-height: 1.6; }
@@ -22,7 +24,7 @@
         .lc-import-fields { display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px; margin-bottom: 16px; }
         .lc-field-label { margin-bottom: 6px; color: #606266; font-size: 14px; }
         .lc-upload .el-upload, .lc-upload .el-upload-dragger { width: 100%; }
-        .lc-empty-panel { min-height: 480px; }
+        .lc-empty-panel { min-height: 0; }
         .lc-coordinate-input { width: 120px; }
 
         .monitoring-top {
@@ -115,30 +117,99 @@
             font-size: 12px;
         }
         
-        .chart-container {
+        .err-card-grid {
             display: flex;
             flex-wrap: wrap;
             gap: 16px;
-            padding: 12px;
+            padding: 16px;
             box-sizing: border-box;
         }
 
-        .chart-item {
+        .err-card {
             width: calc((100% - 2 * 16px) / 3);
             border: 1px solid #e5e7eb;
-            border-radius: 4px;
+            border-radius: 6px;
             box-sizing: border-box; /* 关键：边框不会额外增加宽度 */
+            background: #fff;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
         }
 
-        .chart-title {
-            text-align: center;
-            padding: 8px;
-            font-weight: bold;
+        .err-card-head {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eef0f4;
+        }
+
+        .err-card-title {
+            font-weight: 700;
+            color: #2563eb;
+            font-size: 15px;
+            white-space: nowrap;
+        }
+
+        .err-metric {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            min-width: 80px;
+            padding-left: 14px;
+            border-left: 1px solid #eef0f4;
+        }
+
+        .err-label {
+            font-size: 12px;
+            color: #8a94a6;
+        }
+
+        .err-val {
+            font-size: 16px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .err-mode-bar {
+            padding: 12px 16px 0;
+        }
+
+        .err-card-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 8px;
+        }
+
+        .err-merge-wrap {
+            padding: 16px;
             box-sizing: border-box;
         }
 
-        .chart-box {
-            height: 320px;
+        .err-merge-chart {
+            width: 100%;
+            height: calc(100vh - 250px);
+            min-height: 420px;
+            box-sizing: border-box;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            background: #fff;
+        }
+
+        .err-zoom-chart {
+            width: 100%;
+            height: calc(100vh - 130px);
+            box-sizing: border-box;
+        }
+
+        /* 正误差红、负误差绿（涨红跌绿） */
+        .err-pos { color: #cf1322; }
+        .err-neg { color: #389e0d; }
+
+        .err-card-chart {
+            height: 300px;
             width: 100%;
             box-sizing: border-box;
         }
@@ -206,17 +277,15 @@
                 <el-select v-model="measuredQuery.pushCount" :placeholder="$t('biz.steelBeam.pushCountPlaceholder')" style="width:190px" @@change="onPushChange">
                     <el-option v-for="item in state.queryPushCounts" :key="item" :label="item" :value="item"></el-option>
                 </el-select>
-                <el-select v-model="measureTimeValue" :placeholder="$t('biz.steelBeam.allTime')" style="width:220px">
+                <el-select v-model="measureTimeValue" :placeholder="$t('biz.steelBeam.allTime')" style="width:220px" @@change="onMeasureTimeChange">
                     <el-option v-for="item in measureTimeOptions" :key="item" :label="formatMeasureTime(item)" :value="item"></el-option>
                 </el-select>
                 <el-button type="primary" @@click="searchMeasured"><el-icon><Search /></el-icon> {{ $t('common.search') }}</el-button>
-                <el-button @@click="resetMeasured"><el-icon><Refresh-Left /></el-icon> {{ $t('common.reset') }}</el-button>
             </div>
             <div class="lc-toolbar-right">
+                <el-button plain type="default" @@click="downloadTemplate('measured')"><el-icon><Download /></el-icon>{{ $t('biz.steelBeam.downloadMeasuredTemplate') }}</el-button>
                 <el-button type="primary" :disabled="!state.hasTheoretical" @@click="openImport('measured')"><el-icon><Upload-Filled /></el-icon>{{ $t('biz.steelBeam.importMeasured') }}</el-button>
                 <el-button plain type="primary" :disabled="!state.hasMeasured" @@click="downloadMeasured"><el-icon><Download /></el-icon>{{ $t('biz.steelBeam.downloadMeasured') }}</el-button>
-                <el-button plain type="default" :disabled="!state.hasMeasured" :loading="rebuildLoading" @@click="rebuildDerived"><el-icon><Refresh /></el-icon>{{ $t('biz.steelBeam.rebuildDerived') }}</el-button>
-                <el-button plain type="default" @@click="downloadTemplate('measured')"><el-icon><Download /></el-icon>{{ $t('biz.steelBeam.downloadTemplate') }}</el-button>
             </div>
         </div>
         <el-table v-loading="loading" :data="rows" border stripe :span-method="measuredSpanMethod">
@@ -231,7 +300,10 @@
             <el-table-column :label="$t('biz.steelBeam.tableOperate')" width="130" align="center">
                 <template #default="scope">
                     <template v-if="editingId === scope.row.id"><el-button link type="primary" @@click="saveEdit(scope.row)">{{ $t('common.save') }}</el-button><el-button link @@click="cancelEdit"><el-icon><RefreshRight /></el-icon> {{ $t('common.cancel') }}</el-button></template>
-                    <el-button v-else-if="scope.row.canEdit" link type="primary" @@click="startEdit(scope.row)">{{ $t('common.edit') }}</el-button>
+                    <template v-else-if="scope.row.canEdit">
+                        <el-button link type="primary" @@click="startEdit(scope.row)">{{ $t('common.edit') }}</el-button>
+                        <el-button link type="danger" @@click="deleteMeasured(scope.row)">{{ $t('common.delete') }}</el-button>
+                    </template>
                 </template>
             </el-table-column>
         </el-table>
@@ -245,7 +317,9 @@
             <el-select v-model="calcTheoryReq.segmentNos"
                 @@change="calcTheoryReqChange"
                 filterable multiple clearable :placeholder="$t('biz.steelBeam.segmentPlaceholder')" style="width:200px">
-                <el-option v-for="item in segmentMonitorOptions" :key="item" :label="item" :value="item"></el-option>
+                <el-option v-for="item in segmentMonitorOptions" :key="item.segmentNo"
+                           :label="item.segmentNo + ' ' + (item.isAssembled ? $t('biz.steelBeam.segmentAssembled') : $t('biz.steelBeam.segmentPending'))"
+                           :value="item.segmentNo"></el-option>
             </el-select>
             <br />
             <br />
@@ -253,71 +327,59 @@
             <el-button :disabled="!(calcTheoryDownloadFlag==1)" @@click="calcTheoryDownload"><el-icon><Download /></el-icon> {{ $t('biz.steelBeam.btnDownloadCalc') }}</el-button>
         </div>
         <div class="monitoring-body">
-            <h1>中交三航局技术中心施工监控联系单</h1>
-
-            <div class="header‑wrap">
-                <div class="header‑label">项目名称：</div>
-                <div class="header‑underline">{{calcResult.projName}}</div>
-                <div class="header‑label">编号：</div>
-                <div class="header‑underline">{{calcResult.sheetNo}}</div>
-            </div>
-            <table class="calc-result-table">
-                <tr><th class="label">事由</th><th colspan="5"></th></tr>
-                <tr><td class="label">前提资料</td><td colspan="5"></td></tr>
-                <tr><td colspan="6" class="center">联系单内容</td></tr>
-                <tr><td colspan="6" class="noborder">根据{{calcResult.measuredSegments}}节段现场测量结果，{{calcResult.pendingSegments}}节段的定位标高见下表：</td></tr>
-                <tr><td colspan="6" class="noborder">&nbsp;</td></tr>
-                <tr>
-                    <td class="noborder border-top"></td>
-                    <td class="noborder" colspan="4">
-                        <el-table :data="calcResult?.rows" border class="calc-result-table-rows">
-                            <el-table-column prop="pointCode" label="测点编号"></el-table-column>
-                            <el-table-column label="待拼装钢箱梁定位高程">
-                                <el-table-column prop="designX" label="x"></el-table-column>
-                                <el-table-column prop="designY" label="y"></el-table-column>
-                                <el-table-column prop="designZ" label="z"></el-table-column>
-                            </el-table-column>
-                        </el-table>
-                    </td>
-                    <td class="noborder"></td>
-                </tr>
-                <tr>
-                    <td class="noborder center" colspan="6">图1 测点位置示意图</td>
-                </tr>
-                <tr>
-                    <td class="noborder noborder-bottom" colspan="6">
-                        <div class="note‑text">
-                            <p>备注：{{calcResult.remark}}</p>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label">编制</td>
-                    <td></td>
-                    <td class="label">签发</td>
-                    <td></td>
-                    <td class="label">日期</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td class="label">签收</td>
-                    <td></td>
-                    <td class="label">日期</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-            </table>
+            <el-table :data="calcResult?.rows" border class="calc-result-table-rows">
+                <el-table-column prop="pointCode" label="测点编号"></el-table-column>
+                <el-table-column label="梁段定位坐标">
+                    <el-table-column prop="designX" label="x"></el-table-column>
+                    <el-table-column prop="designY" label="y"></el-table-column>
+                    <el-table-column prop="designZ" label="z"></el-table-column>
+                </el-table-column>
+            </el-table>
         </div>
     </div>
     <div class="lc-panel lc-empty-panel" v-show="activeTab === 'analysis'">
-        <div class="chart-container">
-            <div class="chart-item" v-for="pos in posNameList" :key="pos">
-                <div class="chart-title">{{ pos }}</div>
-                <div ref="chartRefs" class="chart-box" :data-pos="pos"></div>
+        <div class="err-mode-bar">
+            <el-radio-group v-model="analysisMode" size="small" @@change="onAnalysisModeChange">
+                <el-radio-button value="dist">{{ $t('biz.steelBeam.analysisModeDist') }}</el-radio-button>
+                <el-radio-button value="merge">{{ $t('biz.steelBeam.analysisModeMerge') }}</el-radio-button>
+            </el-radio-group>
+        </div>
+        <div class="err-card-grid" v-show="analysisMode === 'dist'">
+            <div class="err-card" v-for="pos in posNameList" :key="pos">
+                <div class="err-card-head">
+                    <span class="err-card-title">{{ pos }}</span>
+                    <div class="err-metric">
+                        <span class="err-val err-pos">{{ formatError(cardMaxPositive(pos)) }}</span>
+                        <span class="err-label">{{ $t('biz.steelBeam.analysisMaxPositive') }}</span>
+                    </div>
+                    <div class="err-metric">
+                        <span class="err-val err-neg">{{ formatError(cardMaxNegative(pos)) }}</span>
+                        <span class="err-label">{{ $t('biz.steelBeam.analysisMaxNegative') }}</span>
+                    </div>
+                    <div class="err-card-actions">
+                        <el-button size="small" @@click="openZoom(pos)">{{ $t('biz.steelBeam.analysisZoom') }}</el-button>
+                        <el-button type="primary" size="small" @@click="onCardSortToggle(pos)">
+                            {{ cardSort[pos] === 'desc' ? $t('biz.steelBeam.analysisDesc') : $t('biz.steelBeam.analysisAsc') }}
+                        </el-button>
+                    </div>
+                </div>
+                <div class="err-card-chart" :data-pos="pos"></div>
             </div>
         </div>
+        <div class="err-merge-wrap" v-show="analysisMode === 'merge'">
+            <div class="err-card-head">
+                <span class="err-card-title">{{ $t('biz.steelBeam.analysisModeMerge') }}</span>
+                <div class="err-card-actions">
+                    <el-button size="small" @@click="openZoomMerge()">{{ $t('biz.steelBeam.analysisZoom') }}</el-button>
+                </div>
+            </div>
+            <div class="err-merge-chart"></div>
+        </div>
     </div>
+
+    <el-dialog v-model="zoomVisible" :title="zoomTarget.mode === 'merge' ? $t('biz.steelBeam.analysisModeMerge') : zoomTarget.pos" fullscreen @@opened="renderZoomChart">
+        <div class="err-zoom-chart"></div>
+    </el-dialog>
 
     <el-dialog v-model="importDialogVisible" :title="importType === 'theoretical' ? $t('biz.steelBeam.importTheoretical') : $t('biz.steelBeam.importMeasured')" width="560px" :close-on-click-modal="false" :close-on-press-escape="!importLoading" :show-close="!importLoading">
         <div class="lc-import-tip" v-if="importType === 'theoretical'">{{ $t('biz.steelBeam.theoryImportTip') }}</div>

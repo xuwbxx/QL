@@ -292,6 +292,38 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
         public static string CamberAlreadyIncluded(string? lang) => Zh(lang)
             ? "设计坐标标高已含预拱度，无需导入预拱度"
             : "Elevations already include camber; importing camber is not needed";
+        public static string DesignCamberSettingUnchanged(string? lang) => Zh(lang)
+            ? "包含预拱度设置未变化"
+            : "The camber-included setting is unchanged";
+        public static string DesignCamberNoDesignData(string? lang) => Zh(lang)
+            ? "当前没有设计坐标数据，未做任何变更"
+            : "There are no general coordinate rows; nothing was changed";
+        public static string DesignCamberSettingUpdated(string? lang) => Zh(lang)
+            ? "设计计算设置已更新，已按归一化算法重新生成设计计算数据"
+            : "The design calculation settings were updated and the design calculation data was regenerated with normalization";
+        public static string DesignCamberSettingUpdatedNoNormalize(string? lang) => Zh(lang)
+            ? "设计计算设置已更新，已按 source（含预拱度/0）重新生成设计计算数据"
+            : "The design calculation settings were updated and the design calculation data was regenerated from the source (with camber or 0)";
+        public static string CamberZeroApplied(string? lang) => Zh(lang)
+            ? "当前无可用预拱度数据，设计计算已按预拱度 0 生成，请到【预拱度】页签补充"
+            : "No usable camber data is available; the design calculation was generated with camber 0. Please fill it in on the Camber tab";
+        public static string DesignCamberSettingConfirm(string? lang, bool normalize, bool hasAsCastData, bool requiresCamber) => Zh(lang)
+            ? (normalize
+                ? "将按归一化算法重新生成设计计算数据，并作废下游梁段填报/浇筑坐标"
+                  + (requiresCamber ? "；当前无可用预拱度，将按 0 补齐" : "")
+                  + (hasAsCastData ? "；已有浇筑态数据将被作废" : "")
+                : "将按 source（含预拱度/0）重新生成设计计算数据，并作废下游梁段填报/浇筑坐标"
+                  + (requiresCamber ? "；当前无可用预拱度，将按 0 补齐" : "")
+                  + (hasAsCastData ? "；已有浇筑态数据将被作废" : ""))
+              + "。是否继续？"
+            : (normalize
+                ? "The design calculation data will be regenerated with normalization, and downstream segment survey/as-cast data will be invalidated"
+                  + (requiresCamber ? "; no usable camber data is available, so camber 0 will be used" : "")
+                  + (hasAsCastData ? "; existing as-cast data will be invalidated" : "")
+                : "The design calculation data will be regenerated from the source (with camber or 0), and downstream segment survey/as-cast data will be invalidated"
+                  + (requiresCamber ? "; no usable camber data is available, so camber 0 will be used" : "")
+                  + (hasAsCastData ? "; existing as-cast data will be invalidated" : ""))
+              + ". Continue?";
         public static string DesignChangedReimportCamber(string? lang) => Zh(lang)
             ? "设计坐标已变化，请重新导入预拱度"
             : "General coordinates have changed; please re-import camber data";
@@ -399,6 +431,21 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
         public static string MeasuredDataRequired(string? lang) => Zh(lang)
             ? "实测数据未填写或全部为 0，无法计算；请先填写实测数据后再保存"
             : "Survey data is empty or all zeros; please enter the survey data before saving";
+
+        /// <summary>UseB=true（已勾选“已有实测 b 值”）时，四个 b 值必须全部填写。</summary>
+        public static string BoltOffsetBRequired(string? lang) => Zh(lang)
+            ? "已勾选“已有实测 b 值”，请填写完整的四个 b 值（bNE、bNW、bSE、bSW）"
+            : "You selected \"measured b values\"; please fill in all four b values (bNE, bNW, bSE, bSW)";
+
+        /// <summary>仅更新浇筑日期的成功提示。</summary>
+        public static string PouringDateUpdated(string? lang, string segmentName) => Zh(lang)
+            ? $"已更新梁段「{segmentName}」的浇筑日期"
+            : $"Casting date updated for segment \"{segmentName}\"";
+
+        /// <summary>仅更新浇筑日期时，未找到该梁段的填报记录。</summary>
+        public static string SegmentSurveyNotFound(string? lang, string segmentName) => Zh(lang)
+            ? $"未找到梁段「{segmentName}」的填报记录，无法只更新浇筑日期"
+            : $"No survey record found for segment \"{segmentName}\"; the casting date cannot be updated alone";
         public static string ErrorFileName(string? lang, DateTime timestamp) => Zh(lang)
             ? $"混凝土梁_导入错误明细_{timestamp:yyyyMMddHHmmss}.xlsx"
             : $"ConcreteBeam_ImportErrors_{timestamp:yyyyMMddHHmmss}.xlsx";
@@ -452,6 +499,19 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
             ? "仅允许1-50位可见半角字符，禁止空格、中文、换行及以=、+、-、@开头"
             : "Only 1-50 visible half-width characters are allowed; spaces, CJK characters, line breaks and a leading = + - @ are not allowed";
         public static string SegmentIncomplete(string? lang) => Zh(lang) ? "该梁段实测数据不完整" : "Survey data for this segment is incomplete";
+        public static string SegmentMinPoints(string? lang, string segmentNo, int current) => Zh(lang)
+            ? $"梁段 {segmentNo} 有效测点不足，至少需要3个（当前 {current} 个）"
+            : $"Segment {segmentNo} has too few valid survey points; at least 3 are required (current {current})";
+        public static string SteelMeasuredIncompletePointsSkipped(string? lang, IEnumerable<string> pointCodes)
+        {
+            var codes = string.Join("、", pointCodes);
+            return Zh(lang)
+                ? $"以下测点因 X/Y/Z 坐标不完整，视为未上传已跳过：{codes}"
+                : $"The following points were skipped (treated as not uploaded) due to incomplete X/Y/Z coordinates: {codes}";
+        }
+        public static string SteelMeasuredNoValidPoints(string? lang) => Zh(lang)
+            ? "本次导入没有可入库的有效测点（均缺少完整的 X/Y/Z 坐标）"
+            : "No valid survey points to import (all rows are missing complete X/Y/Z coordinates)";
         public static string FieldSegmentNo(string? lang) => Zh(lang) ? "所属梁段号" : "Segment No.";
         public static string FieldPointCode(string? lang) => Zh(lang) ? "测点编号" : "Point Code";
         public static string[] SteelErrorFileHeaders(string? lang) => Zh(lang)
@@ -496,11 +556,14 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
             ? "顶推次数已变化，请刷新后重试"
             : "The push count has changed; refresh and retry";
         public static string SteelPushCountNotEditable(string? lang) => Zh(lang)
-            ? "非最大顶推次数的数据不可编辑"
-            : "Only the data of the maximum push count can be edited";
+            ? "仅最新顶推批次（最新测量时间）的数据可编辑或删除"
+            : "Only the data of the latest push batch (latest measure time) can be edited or deleted";
         public static string SteelMeasureTimeInFuture(string? lang) => Zh(lang)
             ? "测量时间不能晚于当前小时"
             : "Measure time must not be later than the current hour";
+        public static string SteelMeasureTimeOlderThanLatest(string? lang) => Zh(lang)
+            ? "本次测量时间早于该顶推次数已有批次的最新时间；同一顶推次数以最新测量时间的批次为准，不能上传更早的批次"
+            : "The measure time is earlier than the latest existing batch for this push count; the latest measure time wins, so an earlier batch cannot be uploaded";
         public static string SteelTheoryImportSuccess(string? lang, int count) => Zh(lang)
             ? $"成功导入{count}条理论数据"
             : $"{count} theoretical rows imported";
@@ -508,8 +571,8 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
             ? $"成功导入{count}条实测数据"
             : $"{count} survey rows imported";
         public static string SteelMeasuredImportSuccessWithDerived(string? lang, int count, int derivedCount) => Zh(lang)
-            ? $"成功导入{count}条实测数据，并推算{derivedCount}条已推出梁段的当批坐标"
-            : $"{count} survey rows imported; coordinates of {derivedCount} pushed-out point(s) derived for this batch";
+            ? $"成功导入{count}条实测数据，推算快照已更新（共{derivedCount}条坐标，含段内补全与历史点搬运）"
+            : $"{count} survey rows imported; derived snapshot updated ({derivedCount} coordinates, including filled-in and transported points)";
         public static string NoDownloadData(string? lang) => Zh(lang) ? "当前筛选条件下无可下载数据" : "No data to download under the current filter";
         public static string DataUpdatedRefresh(string? lang) => Zh(lang) ? "数据已更新，请刷新后重试" : "The data has changed; refresh and retry";
         public static string SteelGirderMissing(string? lang) => Zh(lang) ? "钢梁不存在或已失效" : "The steel girder does not exist or is no longer valid";
@@ -519,18 +582,51 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
             : $"The first segment has too few control points; at least 3 are required for rigid registration (girder: {girderName})";
 
         // ---- 钢梁推算坐标（derived_coordinate：已推出胎架梁段的当批坐标） ----
+        public static string SteelDerivedNoCommonSegments(string? lang, int pushCount) => Zh(lang)
+            ? $"第{pushCount}次顶推上传的梁段与第{pushCount - 1}次顶推完全不重叠，无法推算已推出胎架梁段的当批坐标；请在本次上传中至少包含一段上次也上传过的在架梁段，用于配准两次顶推的相对位移"
+            : $"The segments uploaded for push {pushCount} do not overlap at all with push {pushCount - 1}; coordinates of the pushed-out segments cannot be derived. Please include at least one in-bed segment that was also uploaded in the previous batch to register the relative displacement between the two pushes";
         public static string SteelDerivedCommonPointsInsufficient(string? lang, int pushCount, int count) => Zh(lang)
             ? $"第{pushCount}次顶推的配准公共点不足：仅有{count}个测点在上一批次与本批次都实测，至少需要3个；请检查本批次导入的测点"
             : $"Registration for push {pushCount} has only {count} common point(s) measured in both the previous and the current batch; at least 3 are required. Check the points imported for this batch";
         public static string SteelDerivedPrevBatchMissing(string? lang, int pushCount) => Zh(lang)
             ? $"未找到第{pushCount - 1}次顶推的实测批次，无法推算第{pushCount}次顶推的已推出梁段坐标"
             : $"The survey batch for push {pushCount - 1} was not found; coordinates of the pushed-out segments for push {pushCount} cannot be derived";
+        public static string SteelDerivedCompletionInsufficient(string? lang, int pushCount, int count) => Zh(lang)
+            ? $"第{pushCount}次顶推的段内补全上传点不足：至少需要3个本批上传测点作为配准基准，当前仅{count}个；请补充本批次上传的测点"
+            : $"Segment completion for push {pushCount} has only {count} uploaded point(s); at least 3 are required as the registration anchor. Add more points to this batch";
         public static string SteelDerivedNothingToRebuild(string? lang) => Zh(lang)
-            ? "当前钢梁只有顶推0次的实测数据，无需重算推算坐标"
-            : "This girder only has survey data for push 0; there is nothing to rebuild";
+            ? "当前钢梁尚无实测导入批次，无需重算推算坐标"
+            : "This girder has no survey batch yet; there is nothing to rebuild";
         public static string SteelDerivedRebuildSuccess(string? lang, int batchCount, int pointCount) => Zh(lang)
             ? $"已重算{batchCount}个顶推批次的推算坐标，共{pointCount}条"
             : $"Derived coordinates rebuilt for {batchCount} push batch(es), {pointCount} row(s) in total";
+        public static string SteelDerivedSegmentPointsInsufficient(string? lang, string segmentNo, int count) => Zh(lang)
+            ? $"梁段「{segmentNo}」本批仅上传{count}个测点，段内补全至少需要3个；请补充该梁段的测点"
+            : $"Segment \"{segmentNo}\" has only {count} uploaded point(s) in this batch; at least 3 are required for segment completion";
+        public static string SteelDerivedNoRepeatedSegment(string? lang, int pushCount) => Zh(lang)
+            ? $"第{pushCount}次顶推没有可用于配准的重复梁段：需要至少一段在上一次、本次各上传不少于3个测点"
+            : $"Push {pushCount} has no repeated segment usable for registration: at least one segment must have 3 or more uploaded points in both the previous and the current batch";
+        public static string SteelDerivedSegmentTheoryMissing(string? lang, string segmentNo) => Zh(lang)
+            ? $"梁段「{segmentNo}」在理论数据中不存在，无法进行段内补全"
+            : $"Segment \"{segmentNo}\" does not exist in the theoretical data; segment completion is not possible";
+        public static string SteelDerivedSnapshotMissing(string? lang, string segmentName) => Zh(lang)
+            ? $"梁段「{segmentName}」已拼装，但推算坐标快照中缺少该段数据；请先执行“重算推算坐标”后再计算"
+            : $"Segment \"{segmentName}\" is assembled, but its rows are missing from the derived snapshot. Rebuild the derived coordinates before calculating";
+        public static string SteelCalcSegmentsNotContinuous(string? lang) => Zh(lang)
+            ? "所选梁段必须按梁段顺序连续，不能跳段；请重新选择"
+            : "The selected segments must form a continuous range in segment order; skipping segments is not allowed";
+        public static string SteelCalcRegistrationPointsInsufficient(string? lang, int count) => Zh(lang)
+            ? $"可用于待拼装配准的实测点不足：当前仅{count}个，至少需要3个"
+            : $"Not enough measured-origin points for pending-segment registration: only {count} available, at least 3 required";
+        public static string SteelSegmentNotInTheory(string? lang, string segmentNo) => Zh(lang)
+            ? $"梁段「{segmentNo}」不在理论数据中，无法计算"
+            : $"Segment \"{segmentNo}\" is not present in the theoretical data and cannot be calculated";
+        public static string SteelRebuildBatchFilterRequired(string? lang) => Zh(lang)
+            ? "批量重建请至少指定项目ID或梁ID列表"
+            : "Specify at least a project ID or a list of girder IDs for the batch rebuild";
+        public static string SteelRebuildBatchNoGirder(string? lang) => Zh(lang)
+            ? "没有找到符合条件的钢梁"
+            : "No steel girders matched the rebuild filter";
 
         private static bool Zh(string? lang) => RequestLanguage.IsChinese(lang);
     }

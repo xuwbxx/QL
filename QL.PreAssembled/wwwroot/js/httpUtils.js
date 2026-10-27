@@ -89,6 +89,28 @@ const HttpUtils = (function () {
         top.window.location.href = "/Home/Login";
     }
 
+    // 「未获取到当前登录用户」的双语文案（与后端 BizMessages.AccountMissing 对应）
+    const _accountMissingMsgs = ['未获取到当前登录用户', 'The current user could not be resolved'];
+
+    /**
+     * 判断响应/异常消息是否为「未获取到当前登录用户」
+     * @param {string} msg 后端返回的 msg/message
+     * @returns {boolean}
+     */
+    function isAccountMissing(msg) {
+        return typeof msg === 'string' && _accountMissingMsgs.indexOf(msg) > -1;
+    }
+
+    /**
+     * 提示「未获取到当前登录用户」，点击确认（或关闭）后跳转登录页
+     * @param {string} [msg] 后端返回的消息，缺省用中文文案
+     */
+    function promptRelogin(msg) {
+        const text = msg || _accountMissingMsgs[0];
+        const goLogin = function () { top.window.location.href = "/Home/Login"; };
+        site.MessageBox.alert(text, "", { lockScroll: false }).then(goLogin, goLogin);
+    }
+
     // 请求拦截器：附加Bearer Token，附加i18n
     instance.interceptors.request.use(
         function (config) {
@@ -119,7 +141,12 @@ const HttpUtils = (function () {
             }
             const res = response.data;
             if (res.code !== 200 && res.success != true) {
-                site.Message.warning(res.message || res.msg || "业务请求异常");
+                const errMsg = res.message || res.msg || "";
+                if (isAccountMissing(errMsg)) {
+                    promptRelogin(errMsg);
+                    return Promise.reject(res);
+                }
+                site.MessageBox({ title: 'Error', message: errMsg || "业务请求异常", type: 'error', lockScroll: false });
                 return Promise.reject(res);
             }
             if (_options.silent == false && (res.msg || res.message)) {
@@ -129,7 +156,7 @@ const HttpUtils = (function () {
         },
         async function (error) {
             if (!error.response) {
-                site.Message.error("网络异常，无法连接服务器");
+                site.MessageBox.alert("网络异常，无法连接服务器", "", { lockScroll: false });
                 return Promise.reject(error);
             }
 
@@ -173,8 +200,11 @@ const HttpUtils = (function () {
             }
             // -----------------------------------------------------------------------------
             if (status == 500) {
-                if (error.response.data?.msg == '未获取到当前登录用户'
-                    || error.response.data?.msg == 'The current user could not be resolved') {
+                const data = error.response.data;
+                const errMsg = data?.msg || data?.message;
+                if (isAccountMissing(errMsg)) {
+                    promptRelogin(errMsg);
+                    return Promise.reject(error);
                 }
             }
             switch (status) {

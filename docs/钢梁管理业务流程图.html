@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>钢梁管理 - 完整业务流程</title>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#e8f1fb',
+      primaryBorderColor: '#3b82c4',
+      primaryTextColor: '#1a3a5c',
+      lineColor: '#5b7a99',
+      fontSize: '14px'
+    },
+    flowchart: { curve: 'basis', htmlLabels: true },
+    er: { fontSize: 13 }
+  });
+</script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    margin: 0; background: #f4f6f9; color: #2c3e50;
+  }
+  header {
+    background: linear-gradient(135deg, #134e5e 0%, #2e8b8b 60%, #71b280 100%);
+    color: #fff; padding: 28px 40px;
+  }
+  header h1 { margin: 0 0 6px; font-size: 26px; }
+  header p { margin: 0; opacity: .85; font-size: 13px; }
+  main { max-width: 1280px; margin: 0 auto; padding: 24px 40px 60px; }
+  section {
+    background: #fff; border-radius: 10px; padding: 24px 28px;
+    margin-bottom: 24px; box-shadow: 0 2px 8px rgba(30,60,90,.08);
+  }
+  h2 {
+    font-size: 19px; margin: 0 0 16px; padding-left: 12px;
+    border-left: 4px solid #2e8b8b; color: #134e5e;
+  }
+  .diagram { overflow-x: auto; }
+  .rules li { margin: 6px 0; line-height: 1.7; }
+  .rules code {
+    background: #eaf4f2; border-radius: 4px; padding: 1px 6px;
+    font-size: 13px; color: #b3452c; font-family: Consolas, monospace;
+  }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { border: 1px solid #d5e3e0; padding: 7px 10px; text-align: left; }
+  th { background: #eaf4f2; color: #134e5e; }
+  footer { text-align: center; color: #8a9bab; font-size: 12px; padding: 16px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>钢梁管理 · 完整业务流程</h1>
+  <p>QL.PreAssembled / Areas/Biz/SteelBeam · 顶推工况（批次递推）· 生成日期：2026-10-10</p>
+</header>
+<main>
+
+<section>
+  <h2>一、端到端业务流程</h2>
+  <div class="diagram">
+<pre class="mermaid">
+flowchart TD
+    A["项目 / 钢梁桥梁<br/>(biz_project → biz_project_bridge(BeamType=0))"] --> B["① 理论数据导入<br/>ImportTheoretical (xlsx ≤20MB)"]
+    B --> C{"SteelBeamExcelHelper 校验<br/>测点编号项目内唯一 / ≤4位小数 / 权值0~1"}
+    C -- "失败" --> D["生成错误明细 Excel + 原件落盘留痕"]
+    C -- "通过" --> E["事务: 软删旧理论 → 新建 theoretical<br/>CalcPointPositionOrderAndDistanceFromStart<br/>补算测位序号与起点距离"]
+    E --> F["② 实测数据按顶推批次导入<br/>ImportMeasured"]
+    F --> G{"校验规则<br/>PushCount = max 或 max+1<br/>同梁段点位整段齐全<br/>覆盖需 confirmOverwrite"}
+    G -- "失败" --> H["拒绝导入 (错误码)"]
+    G -- "通过" --> I["事务: 旧批次软删(含推算坐标)<br/>新建 measure_batch(ReplacedByBatchID链) + measured"]
+    I --> J{"PushCount > 0 ?"}
+    J -- "是" --> K["DeriveForBatchAsync<br/>SteelBeamDerivedCalculator.Derive<br/>公共测点(≥3) 求刚体变换 T → 递推补全完整点集"]
+    J -- "否(首段胎架)" --> L["仅落库实测"]
+    K --> M["落库 derived_coordinate<br/>(实测优先, 推算补齐)"]
+    L --> M
+    M --> N["③ 施工监控联系单 (monitoring 页签)"]
+    N --> N1["待拼装梁段 = 全量 - 最新完整点集涉及梁段"]
+    N1 --> N2["SteelGirderAlignment.Gescha<br/>(P=理论, Q=完整点集, R=权值) 加权刚体配准"]
+    N2 --> N3["NPOIWordUtils 填充 Word 模板<br/>下载监控联系单 docx"]
+    M --> O["④ 线形偏差分析 (analysis 页签)"]
+    O --> O1["首段求全局变换 T → 后续段姿态传递预测"]
+    O1 --> O2["Z 偏差 = 预测完工Z - 设计Z → 图表"]
+    style A fill:#fdf3d8,stroke:#c9a227
+    style K fill:#e8f6e8,stroke:#3a8f3a
+    style N2 fill:#ece4f6,stroke:#7b52ab
+</pre>
+  </div>
+</section>
+
+<section>
+  <h2>二、数据模型 (ER 图)</h2>
+  <div class="diagram">
+<pre class="mermaid">
+erDiagram
+    biz_project ||--o{ biz_project_bridge : "1 : N"
+    biz_project_bridge ||--o{ biz_steel_beam_theoretical : "BeamType=0 GirderID"
+    biz_project_bridge ||--o{ biz_steel_beam_measure_batch : "按桥梁"
+    biz_steel_beam_measure_batch ||--o{ biz_steel_beam_measured : "BatchID"
+    biz_steel_beam_theoretical ||--o{ biz_steel_beam_measured : "TheoreticalID"
+    biz_steel_beam_measure_batch ||--o{ biz_steel_beam_derived_coordinate : "BatchID"
+    biz_steel_beam_theoretical ||--o{ biz_steel_beam_derived_coordinate : "TheoreticalID"
+    biz_steel_beam_measure_batch |o--o| biz_steel_beam_measure_batch : "ReplacedByBatchID 覆盖链"
+
+    biz_steel_beam_theoretical {
+        decimal X "设计坐标"
+        decimal Y ""
+        decimal Z ""
+        decimal PreCamber "预拱度"
+        decimal Weight "配准权值 0~1"
+        string SegmentNo "梁段号"
+        string PositionName "测位名称"
+        int PositionOrder "测位序号"
+        decimal DistanceFromStart "距起点距离"
+    }
+    biz_steel_beam_measure_batch {
+        int PushCount "顶推次数"
+        datetime MeasureTime "精确到小时"
+        int ImportCount "导入条数"
+        bigint ReplacedByBatchID "被覆盖的旧批次"
+    }
+    biz_steel_beam_measured {
+        string PointCode "测点编号"
+        decimal MeasuredX "实测坐标"
+        decimal MeasuredY ""
+        decimal MeasuredZ ""
+    }
+    biz_steel_beam_derived_coordinate {
+        int SourcePushCount "推算链路追溯"
+        decimal X "刚体变换推算坐标"
+        decimal Y ""
+        decimal Z ""
+    }
+</pre>
+  </div>
+  <p style="font-size:13px;color:#66788a;margin:8px 0 0">derived_coordinate 与 measured 表「严格分家」——推算值仅用于补全完整点集，不与实测混存；所有表软删 Status=-1，乐观锁 Version 字段。</p>
+</section>
+
+<section>
+  <h2>三、核心业务规则</h2>
+  <ul class="rules">
+    <li><b>测点编号约束</b>：必填、≤50 位可见半角字符、禁中文/空格、不得以 <code>= + - @</code> 开头（<code>HasValidPointCode</code>）、Excel 内查重且<b>同一项目内跨梁唯一</b>。</li>
+    <li><b>数值精度</b>：坐标/预拱度最多 4 位小数，入库统一 <code>Math.Round(...,4)</code>；权值范围 0~1。</li>
+    <li><b>实测完整性</b>：<code>ValidateMeasuredSegmentCompleteness</code> —— 某梁段被触及则其所有理论点位必须整段齐全。</li>
+    <li><b>批次递进</b>：新导入 PushCount 只能是 max 或 max+1（<code>SteelPushCountOutOfRange</code>）；仅最新批次可编辑（<code>SteelPushCountNotEditable</code>）。</li>
+    <li><b>覆盖确认</b>：同批次同时间覆盖需 <code>confirmOverwrite=true</code>，事务内二次校验；旧批次记 <code>ReplacedByBatchID</code> 形成覆盖链。</li>
+    <li><b>理论数据锁定</b>：一旦存在任何实测批次，理论数据锁定（<code>SteelTheoryLockedForEdit / LockedForImport</code>）。</li>
+    <li><b>完整点集隔离</b>：监控联系单计算强调「不能跨批次混用」——实测优先、推算补齐（<code>LoadLatestCompleteSetAsync</code>）。</li>
+    <li><b>数据权限</b>：<code>EnsureGirderAccess</code> → 验证 BeamType=0 → <code>EnsureProjectAccess</code>；<code>GetAllowedProjectIds</code> admin 全量，否则按 <code>biz_project_user</code> 授权；JWT 未登录抛 Unauthorized。</li>
+    <li><b>留痕</b>：错误/成功导入的原始 Excel 均落盘（<code>SaveOriginal</code>，目录取配置 <code>SteelBeam:FileRoot</code>，默认 App_Data）。</li>
+  </ul>
+</section>
+
+<section>
+  <h2>四、关键代码位置索引</h2>
+  <table>
+    <tr><th>环节</th><th>类 / 文件</th></tr>
+    <tr><td>控制器（路由 /Biz/SteelBeam）</td><td>QL.PreAssembled/Areas/Biz/Controllers/SteelBeamController.cs</td></tr>
+    <tr><td>主服务</td><td>Service/PreAssembled/SteelBeamService.cs</td></tr>
+    <tr><td>派生计算（刚体变换递推）</td><td>Service/PreAssembled/SteelBeamDerivedCalculator.cs</td></tr>
+    <tr><td>刚体配准 / 加权 Procrustes 算法</td><td>Service/PreAssembled/BridgeSegmentAlignment/SteelGirderAlignment.cs（Gescha）</td></tr>
+    <tr><td>Excel 解析 / 校验 / 错误回写</td><td>Service/PreAssembled/Reports/SteelBeamExcelHelper.cs（通用能力下沉于 Tool/ExcelUtils.cs）</td></tr>
+    <tr><td>Word 联系单模板填充</td><td>Tool/NPOIWordUtils.cs + QL.PreAssembled/siteconf/cccc_3he_techcenter_construction_monitoring_comm_note_template.docx</td></tr>
+    <tr><td>实体与 DbSet</td><td>DataFactory/KingBase/QlPreAssembledDbContext.cs（行 185-188）</td></tr>
+    <tr><td>DTO</td><td>Model/tech/QL/DTO/BizSteelBeam/（CalcResultDTO、CalcSteelBeamOffsetDTO 等）</td></tr>
+    <tr><td>前端工作台</td><td>wwwroot/js/Biz/steel-beam-linear-control.js（4 页签：理论数据/实测数据/监控联系单/偏差分析）</td></tr>
+  </table>
+</section>
+
+</main>
+<footer>由 AI 代码探索生成 · mermaid.js 渲染 · 需联网加载 CDN</footer>
+</body>
+</html>

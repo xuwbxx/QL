@@ -124,13 +124,13 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
                 if (nSegType == 0)
                 {
                     output.LogMessage.Add("perfect cast:");
-                    ZeroErr(eArr, input.Bo, input.A, input.C, calcRes, KK, d, calcRes.cs,
+                    ZeroErr(eArr, input.Bo, input.UseB, input.A, input.C, calcRes, KK, d, calcRes.cs,
                         out KCBR, out KCFR, out KBR, out KFR);
                 }
                 else
                 {
                     output.LogMessage.Add("perfect cast:");
-                    OneErr(eArr, input.Bo, input.A, input.C, input.B, input.H, calcRes, KK, d, calcRes.cs,
+                    OneErr(eArr, input.Bo, input.UseB, input.A, input.C, input.B, input.H, calcRes, KK, d, calcRes.cs,
                         out KCBR, out KCFR, out KFR);
                 }
 
@@ -185,11 +185,16 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
                 output.K = DeepCopy2D(input.K);
 
                 // 偏差曲线：对已确定的节段（KT 前 mm 行，按首列非零判定有效行数），
-                // 计算 修正后端面(KT) 与 设计端面(K) 的逐节段偏差：
-                //   errL =X 向(长度方向)偏差   errHP =Y 向(水平)偏差   errH =Z 向(高程)偏差
+                // 计算 修正后端面(KT) 与 设计端面(K) 的逐节段偏差。
+                // 同时保留两套口径：
+                //   旧口径（errL/errHP/errH）= 中心线 X 向长度 / Y 向偏距 / Z 向高程；
+                //   新口径（errHE/errHC/errHW）= 东侧 / 中心 / 西侧测点的 Z 向高程。
                 List<double> errL = new List<double>();
                 List<double> errHP = new List<double>();
                 List<double> errH = new List<double>();
+                List<double> errHE = new List<double>();
+                List<double> errHC = new List<double>();
+                List<double> errHW = new List<double>();
                 int mm = 0;
                 for (int i = 0; i < KT.Length; i++)
                 {
@@ -201,10 +206,17 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
                     errL.Add(KT[i][3] - output.K[i][3]);
                     errHP.Add(KT[i][4] - output.K[i][4]);
                     errH.Add(KT[i][5] - output.K[i][5]);
+                    // 新口径：端面 9 列布局 [E.X,E.Y,E.Z, C.X,C.Y,C.Z, W.X,W.Y,W.Z]
+                    errHE.Add(KT[i][2] - output.K[i][2]);
+                    errHC.Add(KT[i][5] - output.K[i][5]);
+                    errHW.Add(KT[i][8] - output.K[i][8]);
                 }
                 output.ErrL = errL.ToArray();
                 output.ErrHP = errHP.ToArray();
                 output.ErrH = errH.ToArray();
+                output.ErrHE = errHE.ToArray();
+                output.ErrHC = errHC.ToArray();
+                output.ErrHW = errHW.ToArray();
             }
             else
             {
@@ -243,7 +255,12 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
                 H = 1.0,
                 M = 1,
                 St = 1,
-                Bo = new double[] { 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 },
+                UseB = false,
+                Bo = new double[]
+                {
+                    0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+                    2.9, 2.9, 2.9, 2.9
+                },
                 E = new double[]
                 {
                     0,2.9950,0,-0.0043,0.9996,1.0004,0.9992,1.0025,
@@ -278,7 +295,12 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
                 H = 1.0m,
                 M = 1,
                 St = 1,
-                Bo = new decimal[] { 0.1m, 0.1m, 0.1m, 0.1m, 0.1m, 0.1m },
+                UseB = false,
+                Bo = new decimal[]
+                {
+                    0.1m, 0.1m, 0.1m, 0.1m, 0.1m, 0.1m, 0.1m, 0.1m, 0.1m,
+                    2.9m, 2.9m, 2.9m, 2.9m
+                },
                 E = new decimal[]
                 {
                     0m,2.9950m,0m,-0.0043m,0.9996m,1.0004m,0.9992m,1.0025m,
@@ -322,6 +344,7 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
             dst.H = DecimalToDouble(src.H, digits);
             dst.M = src.M;
             dst.St = src.St;
+            dst.UseB = src.UseB;
 
             dst.Bo = src.Bo?.Select(x => DecimalToDouble(x, digits)).ToArray() ?? Array.Empty<double>();
 
@@ -395,6 +418,9 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
             dst.ErrL = src.ErrL?.Select(x => DoubleToDecimal(x, digits)).ToArray() ?? Array.Empty<decimal>();
             dst.ErrHP = src.ErrHP?.Select(x => DoubleToDecimal(x, digits)).ToArray() ?? Array.Empty<decimal>();
             dst.ErrH = src.ErrH?.Select(x => DoubleToDecimal(x, digits)).ToArray() ?? Array.Empty<decimal>();
+            dst.ErrHE = src.ErrHE?.Select(x => DoubleToDecimal(x, digits)).ToArray() ?? Array.Empty<decimal>();
+            dst.ErrHC = src.ErrHC?.Select(x => DoubleToDecimal(x, digits)).ToArray() ?? Array.Empty<decimal>();
+            dst.ErrHW = src.ErrHW?.Select(x => DoubleToDecimal(x, digits)).ToArray() ?? Array.Empty<decimal>();
 
             var cr = src.CalcResult;
             if (cr != null)
@@ -817,10 +843,31 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
             return rk;
         }
 
-        private void ZeroErr(double[] E, double[] bo, double A, double C, CalcResult calcRes, double[][] KK, double d, RotationParams cs,
+        /// <summary>
+        /// 【0 号段实测修正】ZeroErr。
+        /// <para>业务：0 号段无匹配段，南端=活动端模板、北端=固定端模板。本方法把现场实测 E 与测点偏位 Bo
+        /// 叠加到理论端面，得到 as-cast 端面/测点坐标，再经 <see cref="RevAxisCha"/> 逆变换回工程坐标系。</para>
+        /// <para>入参获取：</para>
+        /// <list type="bullet">
+        /// <item><description><paramref name="E"/>：前端「设站及测量」录入的 0 号段 14 项实测值，顺序见 <see cref="MeasuredEZerothSegment"/>；</description></item>
+        /// <item><description><paramref name="bo"/>：测点偏位，固定 10 项 [aNE,aNW,aSE,aSW,cN,cS,bNE,bNW,bSE,bSW]，
+        /// 由 biz_concrete_beam_segment 的 BoltOffset* 列装配；</description></item>
+        /// <item><description><paramref name="useB"/>：是否填写实测 b（BoltOffsetBUseMeasured）。false 时 b 走旧表达式；
+        /// true 时直接取 bNE/bNW/bSE/bSW；a 不受此开关影响，始终用四角落库值；</description></item>
+        /// <item><description><paramref name="A"/>/<paramref name="C"/>：项目信息中的 A、C 偏位参数；
+        /// <paramref name="calcRes"/>/<paramref name="KK"/>/<paramref name="d"/>/<paramref name="cs"/>：Calc/AxisCha 的产出。</description></item>
+        /// </list>
+        /// <para>输出：KCBR/KCFR（南/北端螺栓与钢筋测点）、KBR/KFR（南/北端节点），均为工程坐标系 9 列
+        /// [E.X,E.Y,E.Z, C.X,C.Y,C.Z, W.X,W.Y,W.Z]。</para>
+        /// </summary>
+        private void ZeroErr(double[] E, double[] bo, bool useB, double A, double C, CalcResult calcRes, double[][] KK, double d, RotationParams cs,
             out double[] KCBR, out double[] KCFR, out double[] KBR, out double[] KFR)
         {
-            double AN = bo[0], AS = bo[1], CN = bo[2], CS = bo[3];
+            // bo 固定 10 项布局（0 号段）：
+            // [0]aNE [1]aNW [2]aSE [3]aSW [4]cN [5]cS [6]bNE [7]bNW [8]bSE [9]bSW
+            double ANE = bo[0], ANW = bo[1], ASE = bo[2], ASW = bo[3];
+            double CN = bo[4], CS = bo[5];
+            double BNE = bo[6], BNW = bo[7], BSE = bo[8], BSW = bo[9];
             var theoreticalJointS = calcRes.TheoreticalJointS;
             var theoreticalJointN = calcRes.TheoreticalJointN;
             double matchSouthEastElev = calcRes.MatchSouthEastElev;
@@ -829,24 +876,26 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
             double matchNorthWestElev = calcRes.MatchNorthWestElev;
 
             // KCB：南端(浮动端头侧)三个测点 [0..2]=East [3..5]=Center [6..8]=West。
-            // 高程分量 = 理论Z + 实测高程 − 理论计算高程（把实测偏差叠加到理论位置上）
+            // 高程分量 = 理论Z + 实测高程 − 理论计算高程（把实测偏差叠加到理论位置上）。
+            // a 始终使用四角落库值；旧口径由保存时写 aNW=aNE、aSW=aSE 保证，算法不做归一化分支。
+            // b 分量按 useB 分支：true 直接取 b 四角值；false 保留修改前算法的中间量表达式。
             double[] KCB = new double[9];
-            KCB[0] = E[3] - AS;                                    // East测点X：实测东长 − 南纵向偏移
-            KCB[1] = E[2] + theoreticalJointS.E.Y;                 // East测点Y：浮动端头中心偏移 + 理论Y
+            KCB[0] = E[3] - ASE;                                     // East测点X：实测东长 − 南东角纵向偏位
+            KCB[1] = useB ? BSE : (E[2] + theoreticalJointS.E.Y);    // East测点Y：新=bSE；旧=浮动端头中心偏移+理论Y
             KCB[2] = theoreticalJointS.E.Z + E[4] - matchSouthEastElev; // East测点Z：理论Z + 实测高程 − 计算高程
-            KCB[6] = E[1] - AS;                                    // West测点X：实测西长 − 南纵向偏移
-            KCB[7] = E[2] + theoreticalJointS.W.Y;                 // West测点Y
+            KCB[6] = E[1] - ASW;                                     // West测点X：实测西长 − 南西角纵向偏位
+            KCB[7] = useB ? -BSW : (E[2] + theoreticalJointS.W.Y);   // West测点Y：新=−bSW；旧=浮动端头中心偏移+理论Y
             KCB[8] = theoreticalJointS.W.Z + E[6] - matchSouthWestElev; // West测点Z
-            KCB[3] = (E[1] + E[3]) / 2.0 - CS;                     // Center测点X：东西实测均值 − 南横向偏移
-            KCB[4] = theoreticalJointS.C.Y + E[12];                // Center测点Y：理论Y + 实测南偏距
-            KCB[5] = theoreticalJointS.C.Z;                        // Center测点Z：理论Z
+            KCB[3] = (E[1] + E[3]) / 2.0 - CS;                       // Center测点X：东西实测均值 − 南中心偏位
+            KCB[4] = theoreticalJointS.C.Y + E[12];                  // Center测点Y：理论Y + 实测南偏距
+            KCB[5] = theoreticalJointS.C.Z;                          // Center测点Z：理论Z
 
             double[] KCF = new double[9];
-            KCF[0] = theoreticalJointN.E.X + AN;
-            KCF[1] = theoreticalJointN.E.Y;
+            KCF[0] = theoreticalJointN.E.X + ANE;
+            KCF[1] = useB ? BNE : theoreticalJointN.E.Y;
             KCF[2] = theoreticalJointN.E.Z + E[5] - matchNorthEastElev;
-            KCF[6] = theoreticalJointN.W.X + AN;
-            KCF[7] = theoreticalJointN.W.Y;
+            KCF[6] = theoreticalJointN.W.X + ANW;
+            KCF[7] = useB ? -BNW : theoreticalJointN.W.Y;
             KCF[8] = theoreticalJointN.W.Z + E[7] - matchNorthWestElev;
             KCF[3] = theoreticalJointN.C.X + CN;
             KCF[4] = theoreticalJointN.C.Y + E[13];
@@ -858,7 +907,8 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
             KB[2] = E[8] - matchSouthEastElev;
             KB[6] = E[1];
             KB[7] = KCB[7];
-            KB[8] = E[9] - matchSouthEastElev;
+            // 西角 Z 必须用西侧实测高程作基准（既有 bug 修复：原为 matchSouthEastElev），始终生效，不随 useB。
+            KB[8] = E[9] - matchSouthWestElev;
             KB[3] = (KB[0] + KB[6]) / 2.0;
             KB[4] = E[2];
             KB[5] = KCB[5];
@@ -880,11 +930,34 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
             KFR = RevAxisCha(KK, d, KF, cs);
         }
 
-        private void OneErr(double[] E, double[] bo, double A, double C, double B, double H, CalcResult calcRes, double[][] KK, double d, RotationParams cs,
+        /// <summary>
+        /// 【1 号段 / 标准段实测修正】OneErr。
+        /// <para>业务：本段与上一段匹配浇筑。先把 16 项实测值转换成 24 项误差参数 rerr，
+        /// 再以实测南端为基准做 <see cref="SpAxis"/> 姿态修正，最后经 <see cref="RevAxisCha"/> 回工程坐标系。</para>
+        /// <para>入参获取：</para>
+        /// <list type="bullet">
+        /// <item><description><paramref name="E"/>：前端「设站及测量」录入的标准段 16 项实测值，顺序见 <see cref="MeasuredEStandardSegment"/>；</description></item>
+        /// <item><description><paramref name="bo"/>：固定 13 项 [aNE1,aNW1,cN1,aNE2,aNW2,aSE2,aSW2,cN2,cS2,bNE2,bNW2,bSE2,bSW2]，
+        /// 1=上一段北面、2=本段。aNE1/aNW1 直接取上一段落库值（保存时已按“两侧不一致”归一化）；</description></item>
+        /// <item><description><paramref name="useB"/>：是否填写实测 b。false 时 b 走旧表达式
+        /// （KCB[1]=actualPointN.E.Y+rerr[13]、KCF[1]=KCF[4]+B 等）；true 时直接取 b 四角值；</description></item>
+        /// <item><description><paramref name="A"/>/<paramref name="C"/>/<paramref name="B"/>/<paramref name="H"/>：项目信息参数；
+        /// <paramref name="calcRes"/>/<paramref name="KK"/>/<paramref name="d"/>/<paramref name="cs"/>：Calc/AxisCha 产出。</description></item>
+        /// </list>
+        /// <para>输出：KCBR/KCFR（南/北端螺栓与钢筋测点）、KFR（北端节点），工程坐标系 9 列
+        /// [E.X,E.Y,E.Z, C.X,C.Y,C.Z, W.X,W.Y,W.Z]。</para>
+        /// </summary>
+        private void OneErr(double[] E, double[] bo, bool useB, double A, double C, double B, double H, CalcResult calcRes, double[][] KK, double d, RotationParams cs,
             out double[] KCBR, out double[] KCFR, out double[] KFR)
         {
             double n = 1e-200;
-            double AN1 = bo[0], CN1 = bo[1], AN2 = bo[2], AS2 = bo[3], CN2 = bo[4], CS2 = bo[5];
+            // bo 固定 13 项布局（标准段）：
+            // [0]aNE1 [1]aNW1 [2]cN1 [3]aNE2 [4]aNW2 [5]aSE2 [6]aSW2 [7]cN2 [8]cS2
+            // [9]bNE2 [10]bNW2 [11]bSE2 [12]bSW2
+            double ANE1 = bo[0], ANW1 = bo[1], CN1 = bo[2];
+            double ANE2 = bo[3], ANW2 = bo[4], ASE2 = bo[5], ASW2 = bo[6];
+            double CN2 = bo[7], CS2 = bo[8];
+            double BNE2 = bo[9], BNW2 = bo[10], BSE2 = bo[11], BSW2 = bo[12];
             var theoreticalJointS = calcRes.TheoreticalJointS;
             var theoreticalJointN = calcRes.TheoreticalJointN;
             var matchJointN = calcRes.MatchJointN;
@@ -967,27 +1040,27 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
             rerr[23] = Math.Sqrt(1.0 - rerr[22] * rerr[22]);
 
             double[] KCB = new double[9];
-            KCB[0] = actualPointN.E.X - AN1 - AS2 + actualPointN.E.Y * rerr[14];
-            KCB[1] = actualPointN.E.Y + rerr[13];
+            KCB[0] = actualPointN.E.X - ANE1 - ASE2 + actualPointN.E.Y * rerr[14];
+            KCB[1] = useB ? BSE2 : (actualPointN.E.Y + rerr[13]);
             KCB[2] = wetCastJoint.E.Z + E[10] - wetCastSouthEastElev;
 
             KCB[3] = actualPointN.C.X - CN1 - CS2;
             KCB[4] = matchCastJoint.C.Y + E[14];
             KCB[5] = wetCastJoint.C.Z;
 
-            KCB[6] = actualPointN.W.X - AN1 - AS2 + actualPointN.W.Y * rerr[14];
-            KCB[7] = actualPointN.W.Y + rerr[13];
+            KCB[6] = actualPointN.W.X - ANW1 - ASW2 + actualPointN.W.Y * rerr[14];
+            KCB[7] = useB ? -BSW2 : (actualPointN.W.Y + rerr[13]);
             KCB[8] = wetCastJoint.W.Z + E[11] - wetCastSouthWestElev;
 
             double[] KCF = new double[9];
             KCF[3] = theoreticalJointN.C.X + CN2 - rerr[12];
             KCF[4] = theoreticalJointN.C.Y + E[15];
             KCF[5] = theoreticalJointN.C.Z;
-            KCF[0] = KCF[3] - CN2 + AN2;
-            KCF[1] = KCF[4] + B;
+            KCF[0] = KCF[3] - CN2 + ANE2;
+            KCF[1] = useB ? BNE2 : (KCF[4] + B);
             KCF[2] = theoreticalJointN.E.Z + E[12] - wetCastNorthEastElev;
-            KCF[6] = KCF[3] - CN2 + AN2;
-            KCF[7] = KCF[4] - B;
+            KCF[6] = KCF[3] - CN2 + ANW2;
+            KCF[7] = useB ? -BNW2 : (KCF[4] - B);
             KCF[8] = theoreticalJointN.W.Z + E[13] - wetCastNorthWestElev;
 
             double[] KF = new double[9];
@@ -1127,7 +1200,7 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
 
                 ReportRow row = new ReportRow
                 {
-                    Index = i,
+                    Index = i + 1, // 从1开始
                     BE = BE,
                     BW = BW
                 };
@@ -1668,17 +1741,27 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
         }
     }
 
-    /// <summary>double 版计算入参（对应 Python main 的全部入参）</summary>
+    /// <summary>
+    /// double 版计算入参（对应 Python main 的全部入参）。
+    /// <para>调用方装配建议（C# 侧 ConcreteBeamService）：</para>
+    /// <list type="bullet">
+    /// <item><description>K ← biz_concrete_beam_design_coordinate_calculation（设计坐标 + 预拱度），按端面顺序取 K[m]、K[m+1]；</description></item>
+    /// <item><description>KT ← biz_concrete_beam_ascast_coordinate（前序算法产出的 as-cast 端面）；</description></item>
+    /// <item><description>KCT ← biz_concrete_beam_ascast_measure（前序算法产出的测点，每节段南/北两行）；</description></item>
+    /// <item><description>ZerothMeasuredE / StandardMeasuredE ← 前端 SetupNSurveyDTO 的实测录入（0 号段 14 项 / 标准段 16 项）；</description></item>
+    /// <item><description>Bo ← biz_concrete_beam_segment 的 BoltOffset* 列；UseB ← BoltOffsetBUseMeasured。</description></item>
+    /// </list>
+    /// </summary>
     public class ComputeInput
     {
-        /// <summary>设计/理论端面坐标表（每行一个端面，9 列 [E,C,W]×XYZ）</summary>
+        /// <summary>设计/理论端面坐标表（每行一个端面，9 列 [E,C,W]×XYZ）。来源：design_coordinate_calculation。</summary>
         public double[][] K { get; set; }
         /// <summary>
-        /// 现场拼装（实测/修正后）端面坐标表，与 K 同构
+        /// 现场拼装（实测/修正后）端面坐标表，与 K 同构。来源：ascast_coordinate（前序算法产出）。
         /// </summary>
         public double[][] KT { get; set; }
         /// <summary>
-        /// 实测测点坐标表（每个已浇节段南/北两端各一行，共 2m 行）
+        /// 实测测点坐标表（每个已浇节段南/北两端各一行，共 2m 行）。来源：ascast_measure（前序算法产出）。
         /// </summary>
         public double[][] KCT { get; set; }
         /// <summary>
@@ -1780,16 +1863,37 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
             return list;
         }
 
+        /// <summary>项目信息偏位 A（米）。来源：biz_concrete_beam_config.OffsetA。</summary>
         public double A { get; set; }
+        /// <summary>项目信息偏位 B（米）。来源：biz_concrete_beam_config.OffsetB；UseB=false 时作为旧 b 公式的常量。</summary>
         public double B { get; set; }
+        /// <summary>项目信息偏位 C（米）。来源：biz_concrete_beam_config.OffsetC。</summary>
         public double C { get; set; }
+        /// <summary>参考高程 H（米）。来源：biz_concrete_beam_config.OffsetH。</summary>
         public double H { get; set; }
 
+        /// <summary>当前梁段几何序号（0 起），等于 biz_concrete_beam_segment.SegmentIndex，也是跨端面 m..m+1 的 m。</summary>
         public int M { get; set; }
+        /// <summary>0=理论放样（PerfectCast，不做实测修正）；1=实测修正（SaveSurvey，输出浇筑坐标）。</summary>
         public int St { get; set; }
 
+        /// <summary>
+        /// 测点偏位数组（固定 10/13 项，不随 UseB 变化）。
+        /// <para>0 号段（10 项）：[aNE, aNW, aSE, aSW, cN, cS, bNE, bNW, bSE, bSW]；</para>
+        /// <para>标准段（13 项）：[aNE1, aNW1, cN1, aNE2, aNW2, aSE2, aSW2, cN2, cS2, bNE2, bNW2, bSE2, bSW2]。</para>
+        /// 数据来源：biz_concrete_beam_segment 的 BoltOffset* 列（上一段取 prev 行，本段取当前行）。
+        /// a 始终取落库的四角值；b 是否参与计算由 <see cref="UseB"/> 决定。
+        /// </summary>
         public double[] Bo { get; set; }
-        /// <summary>向后兼容，原始E数组</summary>
+
+        /// <summary>
+        /// 是否填写实测 b（对应 biz_concrete_beam_segment.BoltOffsetBUseMeasured）。
+        /// <para>false（默认）：b 相关计算走修改前算法（ZeroErr/OneErr 内的旧表达式）；</para>
+        /// <para>true：使用 Bo 中的 bNE/bNW/bSE/bSW 四角值（绝对横向坐标，东 +、西 -）。</para>
+        /// 注意：a 值不受此开关影响，始终使用 Bo 中的 aNE/aNW/aSE/aSW。
+        /// </summary>
+        public bool UseB { get; set; }
+        /// <summary>向后兼容，原始E数组（14/16 项，来源同 <see cref="ZerothMeasuredE"/>/<see cref="StandardMeasuredE"/>）</summary>
         public double[] E { get; set; }
 
         /// <summary>0号段m=0专用实测E实体</summary>
@@ -1798,21 +1902,22 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
         public MeasuredEStandardSegment StandardMeasuredE { get; set; }
     }
 
+    /// <summary>
+    /// 计算结果。C# 侧消费去向（ConcreteBeamService.SaveSurvey）：
+    /// KT → ascast_coordinate（端面级）、KCT → ascast_measure（测点级）、
+    /// CalcResult → biz_concrete_beam_segment 的 Match*/WetCast*/Bulkhead* 字段、Err* → 偏差曲线/报告。
+    /// </summary>
     public class ComputeOutput
     {
+        /// <summary>算法判定是否通过；false 时调用方不应落库。</summary>
         public bool JudgePass { get; set; }
+        /// <summary>算法日志（供排查；业务文案由调用方按需双语化）。</summary>
         public List<string> LogMessage { get; set; } = new List<string>();
-        /// <summary>
-        /// 设计坐标（大地坐标）
-        /// </summary>
+        /// <summary>设计坐标（大地坐标），原样回传。</summary>
         public double[][] K { get; set; }
-        /// <summary>
-        /// 实测端面坐标（已转为大地坐标）
-        /// </summary>
+        /// <summary>修正后的 as-cast 端面坐标（大地坐标）。去向：ascast_coordinate。</summary>
         public double[][] KT { get; set; }
-        /// <summary>
-        /// 实测测点面坐标（已转为大地坐标）
-        /// </summary>
+        /// <summary>修正后的实测测点坐标（大地坐标）。去向：ascast_measure。</summary>
         public double[][] KCT { get; set; }
         /// <summary>
         /// X 向(长度方向)偏差
@@ -1823,9 +1928,21 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
         /// </summary>
         public double[] ErrHP { get; set; }
         /// <summary>
-        /// Z 向(高程)偏差
+        /// Z 向(高程)偏差（中心测点，旧口径）
         /// </summary>
         public double[] ErrH { get; set; }
+        /// <summary>
+        /// 东侧测点 Z 向高程偏差（新口径：KT[i][2] − K[i][2]）
+        /// </summary>
+        public double[] ErrHE { get; set; }
+        /// <summary>
+        /// 中心测点 Z 向高程偏差（新口径：KT[i][5] − K[i][5]）
+        /// </summary>
+        public double[] ErrHC { get; set; }
+        /// <summary>
+        /// 西侧测点 Z 向高程偏差（新口径：KT[i][8] − K[i][8]）
+        /// </summary>
+        public double[] ErrHW { get; set; }
         /// <summary>
         /// 设计中心长度
         /// </summary>
@@ -1843,7 +1960,7 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
         /// </summary>
         public double AsCastTotalCenterLength { get; set; }
         /// <summary>
-        /// 其他计算结果
+        /// 算法产出的立模参数。去向：biz_concrete_beam_segment 的 Match*/WetCast*/Bulkhead*/MatchCastTwist 字段。
         /// </summary>
         public CalcResult CalcResult { get; set; }
     }
@@ -1894,6 +2011,12 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
         public int St { get; set; }
 
         public decimal[] Bo { get; set; }
+
+        /// <summary>
+        /// 是否填写实测 b（对应 BoltOffsetBUseMeasured）。语义同 <see cref="ComputeInput.UseB"/>。
+        /// </summary>
+        public bool UseB { get; set; }
+
         public decimal[] E { get; set; }
 
         public MeasuredEZerothSegmentDecimal ZerothMeasuredE { get; set; }
@@ -1913,6 +2036,9 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
         public decimal[] ErrL { get; set; }
         public decimal[] ErrHP { get; set; }
         public decimal[] ErrH { get; set; }
+        public decimal[] ErrHE { get; set; }
+        public decimal[] ErrHC { get; set; }
+        public decimal[] ErrHW { get; set; }
 
 
         /// <summary>

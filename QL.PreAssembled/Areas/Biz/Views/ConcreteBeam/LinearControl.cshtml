@@ -23,7 +23,9 @@
         .lc-container {
             background: #f0f2f5;
             height: 100%;
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
         .lc-header {
@@ -48,6 +50,7 @@
             border-bottom: 1px solid #e8e8e8;
             display: flex;
             gap: 0;
+            flex: 0 0 auto;
         }
 
         .lc-tab-btn {
@@ -82,6 +85,9 @@
         .lc-tab-panel {
             padding: 16px 24px;
             background: #fff;
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
         }
 
         /* 项目信息页签左右布局 */
@@ -189,6 +195,7 @@
         }
 
         .sm-form-col-title {
+            min-height: 32px;
             font-size: 13px;
             color: #606266;
             margin-bottom: 0;
@@ -196,6 +203,7 @@
         }
 
         .sm-form-item {
+            min-height: 32px;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -208,6 +216,18 @@
                 min-width: 85px;
                 text-align: right;
             }
+
+        /* 输入框占满剩余宽度；有复选框时复选框靠右 */
+        .sm-form-item .el-input {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* 复选框 tooltip 的最大宽度，避免长文案拉成一行 */
+        .sm-tip-popper {
+            max-width: 320px;
+            line-height: 1.5;
+        }
 
         .sm-deviation-grid {
             display: flex;
@@ -226,7 +246,6 @@
             font-weight: 600;
             color: #303133;
             text-align: center;
-            margin-bottom: 12px;
         }
 
         .sm-section-title {
@@ -293,7 +312,7 @@
     </style>
 }
 
-<div id="app" class="lc-container">
+<div v-cloak id="app" class="lc-container">
     <div class="lc-tabs-bar">
         <div v-for="tab in tabs" :key="tab.name"
              :class="['lc-tab-btn', { active: activeTab === tab.name, disabled: tab.disabled }]"
@@ -448,16 +467,16 @@
         </el-table>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
             <div>
-                <el-checkbox v-model="designNormalize" @@change="onDesignNormalizeChange">{{ $t('biz.concreteBeam.normalize') }}</el-checkbox>
-                <el-checkbox v-model="designIncludeCamber" :disabled="!!designPreviewToken || hasSurveyData" @@change="onDesignCamberChange" style="margin-left: 16px;">{{ $t('biz.concreteBeam.camberIncluded') }}</el-checkbox>
+                <el-checkbox v-model="designNormalize" :disabled="hasSurveyData" @@change="onDesignNormalizeChange">{{ $t('biz.concreteBeam.normalize') }}</el-checkbox>
+                <el-checkbox v-model="designIncludeCamber" :disabled="hasSurveyData" @@change="onDesignCamberChange" style="margin-left: 16px;">{{ $t('biz.concreteBeam.camberIncluded') }}</el-checkbox>
             </div>
             <el-pagination background layout="total, sizes, prev, pager, next, jumper"
                            :total="designTotal" :page-size="designPageSize" :current-page="designPageIndex"
                            :page-sizes="[10, 20, 50, 100]" @@size-change="handleDesignSizeChange" @@current-change="handleDesignPageChange" />
         </div>
         <div style="text-align: center; padding: 20px 0 0; border-top: 1px solid #e8e8e8; margin-top: 20px;">
-            <el-button type="primary" @@click="handleDesignPrint">{{ $t('biz.concreteBeam.print') }}</el-button>
-            <el-button type="primary" @@click="handleDesignPreview">{{ $t('biz.concreteBeam.preview') }}</el-button>
+            <el-button type="primary" @@click="handleDesignPrint" :disabled="!!designPreviewToken || designNormalize !== designUseCalculation || designIncludeCamber !== confirmedDesignIncludesCamber">{{ $t('biz.concreteBeam.print') }}</el-button>
+            <el-button type="primary" @@click="handleDesignPreview" :disabled="!!designPreviewToken || designNormalize !== designUseCalculation || designIncludeCamber !== confirmedDesignIncludesCamber">{{ $t('biz.concreteBeam.preview') }}</el-button>
             <el-button type="primary" @@click="handleDesignConfirm" :disabled="hasSurveyData">{{ $t('common.apply') }}</el-button>
             <el-button @@click="handleDesignCancel" :disabled="hasSurveyData">{{ $t('common.cancel') }}</el-button>
         </div>
@@ -503,23 +522,7 @@
         </div>
     </div>
 
-    <!-- 设计坐标「核对与预览」：上半为已计算坐标（含预拱度），下半为 PrintReport 几何报告 -->
-    <el-dialog v-model="designPreviewVisible" width="980px" top="4vh"
-               :title="$t('biz.concreteBeam.designPreviewDialogTitle')" :close-on-click-modal="false">
-        <div v-loading="designPreviewLoading" style="max-height: 70vh; overflow: auto; background: #f5f7fa; padding: 12px;">
-            <div v-if="designPreviewError" style="padding: 32px 12px; text-align: center; color: #f56c6c; font-size: 14px;">
-                {{ designPreviewError }}
-            </div>
-            <template v-else>
-                <pre class="lc-mono">{{ designPreviewUpper }}</pre>
-                <pre class="lc-mono" style="margin-top: 20px;">{{ designPreviewLower }}</pre>
-            </template>
-        </div>
-        <template #footer>
-            <el-button type="primary" :disabled="!!designPreviewError" @@click="handleDesignPreviewPrint">{{ $t('biz.concreteBeam.print') }}</el-button>
-            <el-button @@click="designPreviewVisible = false">{{ $t('common.cancel') }}</el-button>
-        </template>
-    </el-dialog>
+    <!-- 设计坐标「核对与预览」已改为 PDF：复用【报告】页签的 PDF 预览弹窗（reportDialogVisible） -->
 
     <!-- 4. 设站及测量 -->
     <div class="lc-tab-panel" v-show="activeTab === 'setupSurvey'">
@@ -539,7 +542,7 @@
             <div class="sm-form-item" style="flex: 1; max-width: 360px;">
                 <label>{{ $t('biz.concreteBeam.castOn') }}</label>
                 <el-date-picker v-model="segmentSurvey.pouringDate" type="date" :placeholder="$t('common.pleaseSelect')"
-                                style="flex: 1;" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-date-picker>
+                                style="flex: 1;" :disabled="isPerfectCast || !segmentSurvey.segmentName || (!segmentSurvey.canEdit && !(segmentSurvey.segmentID > 0))"></el-date-picker>
             </div>
             <template v-if="!segmentIsFirst">
                 <div class="sm-form-item" style="flex: 1; max-width: 360px;">
@@ -572,13 +575,37 @@
                     <div class="sm-deviation-grid">
                         <div class="sm-deviation-col">
                             <div class="sm-deviation-header">{{ $t('biz.concreteBeam.north') }}</div>
-                            <div class="sm-form-item"><label>aN</label><el-input v-model="segmentSurvey.boltOffsetAN" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>aNE</label><el-input v-model="segmentSurvey.boltOffsetANE" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item">
+                                <label>aNW</label>
+                                <el-input v-model="segmentSurvey.boltOffsetANW" :disabled="!segmentSurvey.canEdit || isPerfectCast || !segmentSurvey.boltOffsetAUseNorth"></el-input>
+                                <el-tooltip :content="$t('biz.concreteBeam.aNorthTip')" placement="top" popper-class="sm-tip-popper">
+                                    <el-checkbox v-model="segmentSurvey.boltOffsetAUseNorth" :disabled="!segmentSurvey.canEdit || isPerfectCast">{{ $t('biz.concreteBeam.twoSidesInconsistent') }}</el-checkbox>
+                                </el-tooltip>
+                            </div>
                             <div class="sm-form-item"><label>cN</label><el-input v-model="segmentSurvey.boltOffsetCN" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item">
+                                <el-tooltip :content="$t('biz.concreteBeam.bTip')" placement="top" popper-class="sm-tip-popper">
+                                    <el-checkbox v-model="segmentSurvey.boltOffsetBUseMeasured" :disabled="!segmentSurvey.canEdit || isPerfectCast">{{ $t('biz.concreteBeam.hasMeasuredB') }}</el-checkbox>
+                                </el-tooltip>
+                            </div>
+                            <div class="sm-form-item"><label>bNE</label><el-input v-model="segmentSurvey.boltOffsetBNE" :disabled="!segmentSurvey.canEdit || isPerfectCast || !segmentSurvey.boltOffsetBUseMeasured"></el-input></div>
+                            <div class="sm-form-item"><label>bNW</label><el-input v-model="segmentSurvey.boltOffsetBNW" :disabled="!segmentSurvey.canEdit || isPerfectCast || !segmentSurvey.boltOffsetBUseMeasured"></el-input></div>
                         </div>
                         <div class="sm-deviation-col">
                             <div class="sm-deviation-header">{{ $t('biz.concreteBeam.south') }}</div>
-                            <div class="sm-form-item"><label>aS</label><el-input v-model="segmentSurvey.boltOffsetAS" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>aSE</label><el-input v-model="segmentSurvey.boltOffsetASE" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item">
+                                <label>aSW</label>
+                                <el-input v-model="segmentSurvey.boltOffsetASW" :disabled="!segmentSurvey.canEdit || isPerfectCast || !segmentSurvey.boltOffsetAUseSouth"></el-input>
+                                <el-tooltip :content="$t('biz.concreteBeam.aSouthTip')" placement="top" popper-class="sm-tip-popper">
+                                    <el-checkbox v-model="segmentSurvey.boltOffsetAUseSouth" :disabled="!segmentSurvey.canEdit || isPerfectCast">{{ $t('biz.concreteBeam.twoSidesInconsistent') }}</el-checkbox>
+                                </el-tooltip>
+                            </div>
                             <div class="sm-form-item"><label>cS</label><el-input v-model="segmentSurvey.boltOffsetCS" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>&nbsp;</label></div>
+                            <div class="sm-form-item"><label>bSE</label><el-input v-model="segmentSurvey.boltOffsetBSE" :disabled="!segmentSurvey.canEdit || isPerfectCast || !segmentSurvey.boltOffsetBUseMeasured"></el-input></div>
+                            <div class="sm-form-item"><label>bSW</label><el-input v-model="segmentSurvey.boltOffsetBSW" :disabled="!segmentSurvey.canEdit || isPerfectCast || !segmentSurvey.boltOffsetBUseMeasured"></el-input></div>
                         </div>
                     </div>
                 </div>
@@ -650,13 +677,37 @@
                     <div class="sm-deviation-grid">
                         <div class="sm-deviation-col">
                             <div class="sm-deviation-header">{{ $t('biz.concreteBeam.north') }}</div>
-                            <div class="sm-form-item"><label>aN</label><el-input v-model="segmentSurvey.boltOffsetAN" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>aNE</label><el-input v-model="segmentSurvey.boltOffsetANE" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item">
+                                <label>aNW</label>
+                                <el-input v-model="segmentSurvey.boltOffsetANW" :disabled="!segmentSurvey.canEdit || isPerfectCast || !segmentSurvey.boltOffsetAUseNorth"></el-input>
+                                <el-tooltip :content="$t('biz.concreteBeam.aNorthTip')" placement="top" popper-class="sm-tip-popper">
+                                    <el-checkbox v-model="segmentSurvey.boltOffsetAUseNorth" :disabled="!segmentSurvey.canEdit || isPerfectCast">{{ $t('biz.concreteBeam.twoSidesInconsistent') }}</el-checkbox>
+                                </el-tooltip>
+                            </div>
                             <div class="sm-form-item"><label>cN</label><el-input v-model="segmentSurvey.boltOffsetCN" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item">
+                                <el-tooltip :content="$t('biz.concreteBeam.bTip')" placement="top" popper-class="sm-tip-popper">
+                                    <el-checkbox v-model="segmentSurvey.boltOffsetBUseMeasured" :disabled="!segmentSurvey.canEdit || isPerfectCast">{{ $t('biz.concreteBeam.hasMeasuredB') }}</el-checkbox>
+                                </el-tooltip>
+                            </div>
+                            <div class="sm-form-item"><label>bNE</label><el-input v-model="segmentSurvey.boltOffsetBNE" :disabled="!segmentSurvey.canEdit || isPerfectCast || !segmentSurvey.boltOffsetBUseMeasured"></el-input></div>
+                            <div class="sm-form-item"><label>bNW</label><el-input v-model="segmentSurvey.boltOffsetBNW" :disabled="!segmentSurvey.canEdit || isPerfectCast || !segmentSurvey.boltOffsetBUseMeasured"></el-input></div>
                         </div>
                         <div class="sm-deviation-col">
                             <div class="sm-deviation-header">{{ $t('biz.concreteBeam.south') }}</div>
-                            <div class="sm-form-item"><label>aS</label><el-input v-model="segmentSurvey.boltOffsetAS" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>aSE</label><el-input v-model="segmentSurvey.boltOffsetASE" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item">
+                                <label>aSW</label>
+                                <el-input v-model="segmentSurvey.boltOffsetASW" :disabled="!segmentSurvey.canEdit || isPerfectCast || !segmentSurvey.boltOffsetAUseSouth"></el-input>
+                                <el-tooltip :content="$t('biz.concreteBeam.aSouthTip')" placement="top" popper-class="sm-tip-popper">
+                                    <el-checkbox v-model="segmentSurvey.boltOffsetAUseSouth" :disabled="!segmentSurvey.canEdit || isPerfectCast">{{ $t('biz.concreteBeam.twoSidesInconsistent') }}</el-checkbox>
+                                </el-tooltip>
+                            </div>
                             <div class="sm-form-item"><label>cS</label><el-input v-model="segmentSurvey.boltOffsetCS" :disabled="!segmentSurvey.canEdit || isPerfectCast"></el-input></div>
+                            <div class="sm-form-item"><label>&nbsp;</label></div>
+                            <div class="sm-form-item"><label>bSE</label><el-input v-model="segmentSurvey.boltOffsetBSE" :disabled="!segmentSurvey.canEdit || isPerfectCast || !segmentSurvey.boltOffsetBUseMeasured"></el-input></div>
+                            <div class="sm-form-item"><label>bSW</label><el-input v-model="segmentSurvey.boltOffsetBSW" :disabled="!segmentSurvey.canEdit || isPerfectCast || !segmentSurvey.boltOffsetBUseMeasured"></el-input></div>
                         </div>
                     </div>
                 </div>
@@ -719,7 +770,7 @@
         <!-- 底部按钮 -->
         <div style="text-align: center; padding: 16px 0 0; border-top: 1px solid #e8e8e8; margin-top: 12px;">
             <el-button type="primary" @@click="handleSegmentPrint">{{ $t('biz.concreteBeam.print') }}</el-button>
-            <el-button type="primary" @@click="handleSegmentConfirm" :disabled="isPerfectCast || !segmentSurvey.canEdit">{{ $t('common.apply') }}</el-button>
+            <el-button type="primary" @@click="handleSegmentConfirm" :disabled="isPerfectCast || !segmentSurvey.segmentName || (!segmentSurvey.canEdit && !(segmentSurvey.segmentID > 0))">{{ $t('common.apply') }}</el-button>
             <el-button @@click="handleSegmentCancel">{{ $t('common.cancel') }}</el-button>
         </div>
     </div>
@@ -900,7 +951,7 @@
                     <span style="margin: 0 8px; font-size: 13px;">{{ reportPageCount ? reportPageNo + ' / ' + reportPageCount : '-' }}</span>
                     <el-button size="small" :disabled="reportPageNo >= reportPageCount" @@click="reportNextPage">{{ $t('biz.concreteBeam.nextPage') }}</el-button>
                     <el-button size="small" :disabled="reportZoom <= 0.5" @@click="reportZoomOut">{{ $t('biz.concreteBeam.zoomOut') }}</el-button>
-                    <el-button size="small" :disabled="reportZoom >= 3" @@click="reportZoomIn">{{ $t('biz.concreteBeam.zoomIn') }}</el-button>
+                    <el-button size="small" :disabled="reportZoom >= reportZoomMax" @@click="reportZoomIn">{{ $t('biz.concreteBeam.zoomIn') }}</el-button>
                 </div>
                 <div>
                     <el-button type="primary" :disabled="!!reportError" @@click="handleReportPrint">{{ $t('biz.concreteBeam.print') }}</el-button>

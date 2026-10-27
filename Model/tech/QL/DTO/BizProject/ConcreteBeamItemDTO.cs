@@ -63,6 +63,8 @@
         /// </summary>
         public bool HasSurveyData { get; set; }
         public bool ElevationIncludesCamber { get; set; }
+        /// <summary>上次确认时【归一化坐标】的勾选值，用于刷新后回显与展示模式。</summary>
+        public bool Normalize { get; set; }
         public string CreatedBy { get; set; } = string.Empty;
         public DateTime? CreatedTime { get; set; }
         public DateTime? UpdatedTime { get; set; }
@@ -85,6 +87,11 @@
         public int PageSize { get; set; } = 10;
         public bool UseCalculation { get; set; }
         public bool DisplayIncludesCamber { get; set; }
+        /// <summary>
+        /// 设计坐标列表：true=显示 source 的归一化结果（不叠加 camber，不落库）；
+        /// false=显示 source。包含预拱度开关不影响该展示。
+        /// </summary>
+        public bool Normalized { get; set; }
     }
 
     public class ConcreteBeamSegmentDTO
@@ -189,6 +196,8 @@
     {
         public bool Success { get; set; }
         public bool RequiresOverwriteConfirmation { get; set; }
+        /// <summary>设计坐标已保存，但缺少可用预拱度，需要到【预拱度】页签导入后再计算。</summary>
+        public bool RequiresCamber { get; set; }
         public int ImportedCount { get; set; }
         public string PreviewToken { get; set; } = string.Empty;
         public string Message { get; set; } = string.Empty;
@@ -207,6 +216,30 @@
         public int CastingGroupID { get; set; }
         public string PreviewToken { get; set; } = string.Empty;
         public bool ConfirmOverwrite { get; set; }
+        /// <summary>
+        /// 当前【包含预拱度】勾选值；为空时退回 preview 里上传时的值（老客户端兼容）。
+        /// </summary>
+        public bool? ElevationIncludesCamber { get; set; }
+        /// <summary>
+        /// 当前【归一化坐标】勾选值；true 走 K 归一化，false 走 source(+camber/0)。
+        /// </summary>
+        public bool Normalize { get; set; }
+    }
+
+    /// <summary>
+    /// 仅切换【包含预拱度】并重算设计坐标（设计源数据已存在，不再走上传预览）。
+    /// </summary>
+    public class ConcreteBeamDesignCamberSettingDTO
+    {
+        public int CastingGroupID { get; set; }
+        /// <summary>切换后的【包含预拱度】值。</summary>
+        public bool ElevationIncludesCamber { get; set; }
+        /// <summary>是否已确认“会重算 K / 作废下游”的提示。</summary>
+        public bool ConfirmOverwrite { get; set; }
+        /// <summary>
+        /// 界面【归一化坐标】勾选值；false 时只更新包含预拱度设置，不重算 K、不作废下游。
+        /// </summary>
+        public bool Normalize { get; set; }
     }
 
     public class ConcreteBeamImportCancelDTO
@@ -377,7 +410,8 @@
 
         #region 测点偏位
         /// <summary>
-        /// 测点偏位北侧a值（Bolt Offsets's aN）
+        /// 测点偏位北侧a值（Bolt Offsets's aN）。【旧字段】兼容历史数据/旧报表；
+        /// 新逻辑以 <see cref="BoltOffsetANE"/>/<see cref="BoltOffsetANW"/> 为准。
         /// </summary>
         public decimal BoltOffsetAN { get; set; }
         /// <summary>
@@ -385,13 +419,46 @@
         /// </summary>
         public decimal BoltOffsetCN { get; set; }
         /// <summary>
-        /// 测点偏位南侧a值（Bolt Offsets's aS）
+        /// 测点偏位南侧a值（Bolt Offsets's aS）。【旧字段】兼容历史数据/旧报表；
+        /// 新逻辑以 <see cref="BoltOffsetASE"/>/<see cref="BoltOffsetASW"/> 为准。
         /// </summary>
         public decimal BoltOffsetAS { get; set; }
         /// <summary>
         /// 测点偏位南侧c值（Bolt Offsets's cS）
         /// </summary>
         public decimal BoltOffsetCS { get; set; }
+
+        /// <summary>北侧东角 a 值（算法 bo: aNE）。</summary>
+        public decimal BoltOffsetANE { get; set; }
+        /// <summary>北侧西角 a 值（算法 bo: aNW）。</summary>
+        public decimal BoltOffsetANW { get; set; }
+        /// <summary>南侧东角 a 值（算法 bo: aSE）。</summary>
+        public decimal BoltOffsetASE { get; set; }
+        /// <summary>南侧西角 a 值（算法 bo: aSW）。</summary>
+        public decimal BoltOffsetASW { get; set; }
+        /// <summary>北侧东角 b 值（算法 bo: bNE，绝对横向坐标，东 +）。</summary>
+        public decimal BoltOffsetBNE { get; set; }
+        /// <summary>北侧西角 b 值（算法 bo: bNW，绝对横向坐标，西 -）。</summary>
+        public decimal BoltOffsetBNW { get; set; }
+        /// <summary>南侧东角 b 值（算法 bo: bSE，绝对横向坐标，东 +）。</summary>
+        public decimal BoltOffsetBSE { get; set; }
+        /// <summary>南侧西角 b 值（算法 bo: bSW，绝对横向坐标，西 -）。</summary>
+        public decimal BoltOffsetBSW { get; set; }
+
+        /// <summary>
+        /// 北侧 a 是否两侧不一致（UI 复选状态）。
+        /// 仅用于填报回显与保存时归一化，不进入算法：未勾选时保存 aNW=aNE。
+        /// </summary>
+        public bool BoltOffsetAUseNorth { get; set; }
+        /// <summary>
+        /// 南侧 a 是否两侧不一致（UI 复选状态）。
+        /// 仅用于填报回显与保存时归一化，不进入算法：未勾选时保存 aSW=aSE。
+        /// </summary>
+        public bool BoltOffsetAUseSouth { get; set; }
+        /// <summary>
+        /// 是否填写实测 b（算法 useB 开关）。true 时四个 b 值必须全部填写。
+        /// </summary>
+        public bool BoltOffsetBUseMeasured { get; set; }
         #endregion
 
         #region 实测
@@ -509,6 +576,20 @@
         public string Message { get; set; } = string.Empty;
         /// <summary>本次是否执行了坐标修正（St=1）。false 表示仅理论放样。</summary>
         public bool CorrectionApplied { get; set; }
+    }
+
+    /// <summary>
+    /// 仅更新浇筑日期的请求（往期已锁定段也允许）。
+    /// 后端只写 PouringDate，不触碰其它字段。
+    /// </summary>
+    public class ConcreteBeamPouringDateDTO
+    {
+        /// <summary>浇筑组ID。</summary>
+        public int CastingGroupID { get; set; }
+        /// <summary>梁段名称（格式 {节点1}-{节点2}）。</summary>
+        public string SegmentName { get; set; } = string.Empty;
+        /// <summary>浇筑日期（只取日期部分，时间置 00:00:00）。</summary>
+        public DateTime? PouringDate { get; set; }
     }
 
     /// <summary>

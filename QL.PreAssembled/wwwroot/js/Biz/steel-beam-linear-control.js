@@ -40,8 +40,14 @@
             // [Shen, Lin] 监控计算 - 结束
             // [Shen, Lin] 误差分析 - 开始
             const posNameList = Vue.ref([]);
-            const chartRefs = Vue.ref([])
+            const cardData = Vue.ref({});        // posName -> 该测位所有点位行（asc）
+            const cardSort = Vue.reactive({});    // posName -> 'asc' | 'desc'（卡内独立升/降序，控制 X 轴方向）
             const chartInstances = new Map() // key:positionName, value:echart实例
+            const analysisMode = Vue.ref('dist'); // 'dist' 测位分布 | 'merge' 测位合并
+            const zoomVisible = Vue.ref(false);
+            const zoomTarget = Vue.reactive({ mode: 'dist', pos: '' }); // 放大弹窗目标
+            let mergeChartInstance = null; // 测位合并大图实例
+            let zoomChartInstance = null;  // 放大弹窗图实例
             // [Shen, Lin] 误差分析 - 结束
             const measureTimeOptions = Vue.ref([]);
             const measureTimeValue = Vue.ref('');
@@ -116,7 +122,7 @@
                 if (name === 'theoretical') loadTheory();
                 if (name === 'measured') resetMeasured();
                 if (name === 'monitoring') loadCalc();
-                if (name === 'analysis') loadAllCharts();
+                if (name === 'analysis') loadAllCards();
                 console.log('onTabChange', name);
             }
 
@@ -135,8 +141,17 @@
             }
 
             async function onPushChange(value) {
+                measuredQuery.pushCount = value;
                 measureTimeValue.value = '';
                 await loadMeasureTimes(value);
+                // 顶推次数变更后自动刷新（loadMeasureTimes 已把测量时间默认置为最新一次）
+                measuredQuery.pageIndex = 1;
+                await loadMeasured();
+            }
+
+            function onMeasureTimeChange() {
+                measuredQuery.pageIndex = 1;
+                loadMeasured();
             }
 
             function startEdit(row) {
@@ -154,6 +169,16 @@
                 try {
                     await HttpUtils.post(url, payload); ElMessage.success(i18nUtils.$t('message.saveSuccess')); cancelEdit();
                     if (activeTab.value === 'theoretical') await loadTheory(); else await loadMeasured();
+                } catch (e) { console.error(e); }
+            }
+
+            async function deleteMeasured(row) {
+                try { await ElMessageBox.confirm(i18nUtils.$t('common.confirmDelete'), i18nUtils.$t('biz.steelBeam.notice'), { type: 'warning' }); }
+                catch (e) { return; }
+                try {
+                    await HttpUtils.post('/Biz/SteelBeam/DeleteMeasured', { id: row.id, girderID: girderID, version: row.version });
+                    ElMessage.success(i18nUtils.$t('common.deleteSuccess'));
+                    await loadMeasured();
                 } catch (e) { console.error(e); }
             }
 
@@ -319,82 +344,202 @@
                     console.log('GetPositionNames', e);
                 }
             }
-            async function loadChartByPosition(positionName, sort) {
+            // 取单个测位全部点位（按服务端 asc 返回，前端再按卡片开关排序绘制）
+            async function loadPositionData(pos) {
                 try {
-                    const result = await HttpUtils.post('/Biz/SteelBeam/GetSteelBeamOffset?girderId=' + girderID
-                        + "&positionName=" + positionName + "&sort=" + (sort || 'asc')
+                    const data = await HttpUtils.post('/Biz/SteelBeam/GetSteelBeamOffset?girderId=' + girderID
+                        + "&positionName=" + pos + "&sort=asc"
                     );
-                    console.log('loadChartByPosition:', result);
-                    return result.rows;
+                    console.log('loadPositionData:', pos, data);
+                    const rows = (data && data.rows) ? data.rows : [];
+                    cardData.value = Object.assign({}, cardData.value, { [pos]: rows });
+                    if (!(pos in cardSort)) cardSort[pos] = 'asc';
+                    renderCardChart(pos);
+                    return rows;
                 } catch (e) {
-                    console.log('loadChartByPosition', e);
+                    console.log('loadPositionData', pos, e);
+                    return [];
                 }
             }
-            async function loadAllCharts() {
-                posNameList.value = await loadPositionNames()
-                await Vue.nextTick() // 等待dom渲染完成
+            // 测位编号自然排序：数字段按数值比较（忽略前导0），字母段按字母表比较；
+            // 字母+数字先比字母再比数字（A2 < A11、A1 < B1），纯数字 2 < 11。
+            function naturalCompare(a, b) {
+                const segA = String(a == null ? '' : a).match(/\d+|\D+/g) || [];
+                const segB = String(b == null ? '' : b).match(/\d+|\D+/g) || [];
+                const n = Math.min(segA.length, segB.length);
+                for (let i = 0; i < n; i++) {
+                    const x = segA[i], y = segB[i];
+                    const xNum = /^\d+$/.test(x), yNum = /^\d+$/.test(y);
+                    if (xNum && yNum) {
+                        const xi = parseInt(x, 10), yi = parseInt(y, 10);
+                        if (xi !== yi) return xi - yi;      // 数值比较，前导0不影响
+                    } else if (!xNum && !yNum) {
+                        const cmp = x.localeCompare(y, 'en', { sensitivity: 'base' });
+                        if (cmp !== 0) return cmp;          // 字母表顺序
+                    } else {
+                        return xNum ? -1 : 1;               // 数字段排在字母段前
+                    }
+                }
+                return segA.length - segB.length;           // 前缀相同者短者在前
+            }
+            // 加载所有测位：按测位编号自然排序后每卡一张 echarts 折线图
+            async function loadAllCards() {
+                cardData.value = {};
+                for (const k in cardSort) delete cardSort[k];
+                chartInstances.clear();
+                posNameList.value = ((await loadPositionNames()) || []).slice().sort(naturalCompare);
+                await Vue.nextTick(); // 等待卡片 DOM 渲染
                 for (const pos of posNameList.value) {
-                    try {
-                        const data = await loadChartByPosition(pos)
-                        renderChart(pos, data)
-                    } catch (e) { console.log('loadAllCharts', pos, e) }
+                    try { await loadPositionData(pos); }
+                    catch (e) { console.log('loadAllCards', pos, e); }
                 }
+                if (analysisMode.value === 'merge') { await Vue.nextTick(); renderMergeChart(); }
             }
-            // 渲染单个图表
-            function renderChart(posName, data) {
-                const dom = document.querySelector(`.chart-box[data-pos="${posName}"]`)
-                if (!dom) return
-                let chart = chartInstances.get(posName)
-                if (!chart) {
-                    chart = echarts.init(dom)
-                    chartInstances.set(posName, chart)
-                }
-
-                // 构造series数据，同时保留索引对应原始data
-                const seriesData = data.map((item) => {
-                    return [item.pointDistance, item.zError]
-                })
-
+            // 按当前卡片的升/降序，对点位按 X 轴（点位距离 PointDistance）排序
+            function sortedCardRows(pos) {
+                const rows = cardData.value[pos] || [];
+                const dir = cardSort[pos] || 'asc';
+                const sorted = rows.slice().sort((a, b) => {
+                    const av = a.pointDistance == null ? 0 : Number(a.pointDistance);
+                    const bv = b.pointDistance == null ? 0 : Number(b.pointDistance);
+                    return dir === 'desc' ? bv - av : av - bv;
+                });
+                return sorted;
+            }
+            // 该测位最大正误差（ZError 中 > 0 的最大值）
+            function cardMaxPositive(pos) {
+                const rows = cardData.value[pos] || [];
+                let max = null;
+                rows.forEach(r => {
+                    const v = r.zError == null ? null : Number(r.zError);
+                    if (v != null && v > 0 && (max === null || v > max)) max = v;
+                });
+                return max;
+            }
+            // 该测位最大负误差（ZError 中 < 0 的最小值）
+            function cardMaxNegative(pos) {
+                const rows = cardData.value[pos] || [];
+                let min = null;
+                rows.forEach(r => {
+                    const v = r.zError == null ? null : Number(r.zError);
+                    if (v != null && v < 0 && (min === null || v < min)) min = v;
+                });
+                return min;
+            }
+            // 误差值格式化：带正负号，4 位小数；空值显示 '-'
+            function formatError(value) {
+                if (value === null || value === undefined) return '-';
+                const v = Number(value);
+                if (isNaN(v)) return '-';
+                const s = v.toFixed(4);
+                return (v > 0 ? '+' : '') + s;
+            }
+            // 单个测位的 echarts option（big=true 时带「下载图片」工具）
+            function buildSingleOption(pos, big) {
+                const rows = sortedCardRows(pos);
+                const desc = cardSort[pos] === 'desc';
+                // 降序：X 值重算为 nMax - n（nMax = 本测位最大点位距离），实现点位顺序反置且坐标原点不变
+                const nMax = rows.reduce((m, r) => Math.max(m, Number(r.pointDistance) || 0), 0);
+                const xOf = (r) => {
+                    const x = Number(r.pointDistance) || 0;
+                    return desc ? nMax - x : x;
+                };
+                const seriesData = rows.map(r => [xOf(r), r.zError == null ? null : Number(r.zError)]);
+                const segmentNoStr = i18nUtils.$t('biz.steelBeam.segmentNo');
+                const pointCodeStr = i18nUtils.$t('biz.steelBeam.pointCode');
                 const option = {
                     tooltip: {
                         trigger: 'axis',
                         formatter: function (params) {
-                            // params[0] 是当前hover的项，dataIndex拿到下标，取原始data中的segmentNo
-                            const idx = params[0].dataIndex
-                            const row = data[idx]
-                            return `
-${row.pointDistance}<br/>
-${params[0].marker} ${params[0].seriesName} &nbsp; ${row.zError}<br/>
-SegmentNo：${row.segmentNo}
-                `
+                            const idx = params[0].dataIndex;
+                            const row = rows[idx];
+                            return `${pointCodeStr}: ${row.pointCode}<br/>` +
+                                `${segmentNoStr}：${row.segmentNo}<br/>` +
+                                `${i18nUtils.$t('biz.steelBeam.analysisYAxis')}: ${row.zError}<br/>` +
+                                `${i18nUtils.$t('biz.steelBeam.analysisXAxis')}: ${row.pointDistance}`
+                                ;
                         }
                     },
-                    grid: {
-                        left: 40,
-                        right: 20,
-                        top: 40,
-                        bottom: 40
-                    },
-                    xAxis: {
-                        name: 'PointDistance',
-                        type: 'value'
-                    },
-                    yAxis: {
-                        name: 'Z误差',
-                        type: 'value'
-                    },
-                    series: [
-                        {
-                            name: posName,
-                            type: 'line',
-                            data: seriesData,
-                            smooth: true
-                        }
-                    ]
-                }
-                chart.setOption(option, true)
+                    grid: { left: 50, right: 20, top: 40, bottom: 40 },
+                    // X 轴保持 0→nMax（原点在左）；顺序反置由数据的 nMax-n 变换实现，不用 inverse（那会连刻度一起翻）
+                    xAxis: { name: i18nUtils.$t('biz.steelBeam.analysisXAxis'), type: 'value' },
+                    yAxis: { name: i18nUtils.$t('biz.steelBeam.analysisYAxis'), type: 'value' },
+                    series: [{ name: pos, type: 'line', data: seriesData, smooth: false, connectNulls: false }]
+                };
+                if (big) option.toolbox = buildSaveToolbox();
+                return option;
             }
-
+            // 全部测位合并为一个折线图（多 series，图例=测位名）
+            function buildMergeOption(big) {
+                const series = posNameList.value.map(function (pos) {
+                    const rows = cardData.value[pos] || [];
+                    return { name: pos, type: 'line', smooth: false, connectNulls: false, data: rows.map(r => [Number(r.pointDistance) || 0, r.zError == null ? null : Number(r.zError)]) };
+                });
+                const option = {
+                    tooltip: { trigger: 'axis' },
+                    legend: { type: 'scroll', top: 6 },
+                    grid: { left: 50, right: 20, top: 60, bottom: 50 },
+                    xAxis: { name: i18nUtils.$t('biz.steelBeam.analysisXAxis'), type: 'value' },
+                    yAxis: { name: i18nUtils.$t('biz.steelBeam.analysisYAxis'), type: 'value' },
+                    series: series
+                };
+                if (big) option.toolbox = buildSaveToolbox();
+                return option;
+            }
+            // echarts「下载图片」工具（右上角）
+            function buildSaveToolbox() {
+                return {
+                    right: 18,
+                    feature: {
+                        saveAsImage: {
+                            title: i18nUtils.$t('biz.steelBeam.analysisSaveImage'),
+                            name: 'steel-beam-error',
+                            pixelRatio: 2
+                        }
+                    }
+                };
+            }
+            // 渲染单卡片内的 echarts 折线图（X=点位距离，Y=Z误差）
+            function renderCardChart(pos) {
+                const dom = document.querySelector(`.err-card-chart[data-pos="${pos}"]`);
+                if (!dom) return;
+                let chart = chartInstances.get(pos);
+                if (!chart) {
+                    chart = echarts.init(dom);
+                    chartInstances.set(pos, chart);
+                }
+                chart.setOption(buildSingleOption(pos, false), true);
+            }
+            // 渲染「测位合并」大图
+            function renderMergeChart() {
+                const dom = document.querySelector('.err-merge-chart');
+                if (!dom) return;
+                if (!mergeChartInstance) mergeChartInstance = echarts.init(dom);
+                mergeChartInstance.setOption(buildMergeOption(true), true);
+                mergeChartInstance.resize();
+            }
+            // 卡内升/降序按钮：切换 X 轴方向后仅重绘该卡片图表（不回请求后端）
+            function onCardSortToggle(pos) {
+                cardSort[pos] = (cardSort[pos] === 'desc') ? 'asc' : 'desc';
+                renderCardChart(pos);
+            }
+            // 切换「测位分布 / 测位合并」
+            async function onAnalysisModeChange() {
+                await Vue.nextTick();
+                if (analysisMode.value === 'merge') { renderMergeChart(); }
+                else { chartInstances.forEach(c => c.resize()); }
+            }
+            // 打开放大弹窗（单测位 / 全部合并）
+            function openZoom(pos) { zoomTarget.mode = 'dist'; zoomTarget.pos = pos; zoomVisible.value = true; }
+            function openZoomMerge() { zoomTarget.mode = 'merge'; zoomTarget.pos = ''; zoomVisible.value = true; }
+            // 放大弹窗内的图表渲染（由 el-dialog @@opened 触发）
+            function renderZoomChart() {
+                const dom = document.querySelector('.err-zoom-chart');
+                if (!dom) return;
+                if (!zoomChartInstance) zoomChartInstance = echarts.init(dom);
+                zoomChartInstance.setOption(zoomTarget.mode === 'merge' ? buildMergeOption(true) : buildSingleOption(zoomTarget.pos, true), true);
+                zoomChartInstance.resize();
+            }
             // 误差分析 - 结束
             function downloadBlob(blob, name) {
                 var url = URL.createObjectURL(blob); var link = document.createElement('a');
@@ -423,6 +568,18 @@ SegmentNo：${row.segmentNo}
                 await loadGirderInfo();
                 try { await loadState(); await loadTheoryOptions(); await loadTheory(); }
                 catch (e) { console.error(e); }
+                window.addEventListener('resize', () => {
+                    chartInstances.forEach(c => c.resize());
+                    if (mergeChartInstance) mergeChartInstance.resize();
+                    if (zoomChartInstance) zoomChartInstance.resize();
+                });
+                // 语言切换后重绘误差分析图表：echarts 轴名由 JS 运行时取 $t（非模板响应式），不会自动刷新
+                window.addEventListener('languageChanged', function () {
+                    if (!posNameList.value || posNameList.value.length === 0) return;
+                    posNameList.value.forEach(function (pos) { renderCardChart(pos); });
+                    if (analysisMode.value === 'merge') { renderMergeChart(); }
+                    if (zoomVisible.value) { renderZoomChart(); }
+                });
             });
 
             return {
@@ -434,7 +591,7 @@ SegmentNo：${row.segmentNo}
                 rebuildDerived: rebuildDerived,
                 onTabChange: onTabChange, searchTheory: searchTheory, resetTheory: resetTheory, loadTheory: loadTheory,
                 onTheorySize: onTheorySize, searchMeasured: searchMeasured, resetMeasured: resetMeasured, loadMeasured: loadMeasured,
-                onMeasuredSize: onMeasuredSize, onPushChange: onPushChange, startEdit: startEdit, cancelEdit: cancelEdit, saveEdit: saveEdit,
+                onMeasuredSize: onMeasuredSize, onPushChange: onPushChange, onMeasureTimeChange: onMeasureTimeChange, startEdit: startEdit, cancelEdit: cancelEdit, saveEdit: saveEdit, deleteMeasured: deleteMeasured,
                 openImport: openImport, onFileChange: onFileChange, onFileRemove: onFileRemove, onFileExceed: onFileExceed,
                 confirmImport: confirmImport, downloadTemplate: downloadTemplate, downloadMeasured: downloadMeasured,
                 measuredSpanMethod: measuredSpanMethod, formatMeasureTime: formatMeasureTime, formatDecimal: formatDecimal, disableFutureDate: disableFutureDate,
@@ -442,7 +599,11 @@ SegmentNo：${row.segmentNo}
                 loadCalcSegmentNo: loadCalcSegmentNo, loadCalc: loadCalc,
                 calcResult: calcResult, calcTheoryDownloadFlag: calcTheoryDownloadFlag, calcTheoryReqChange: calcTheoryReqChange,
                 calcTheoryDownload: calcTheoryDownload,
-                posNameList: posNameList
+                posNameList: posNameList,
+                analysisMode: analysisMode, onAnalysisModeChange: onAnalysisModeChange, zoomVisible: zoomVisible, zoomTarget: zoomTarget, openZoom: openZoom, openZoomMerge: openZoomMerge, renderZoomChart: renderZoomChart,
+                cardData: cardData, cardSort: cardSort,
+                sortedCardRows: sortedCardRows, cardMaxPositive: cardMaxPositive, cardMaxNegative: cardMaxNegative,
+                formatError: formatError, onCardSortToggle: onCardSortToggle
             };
         }
     });

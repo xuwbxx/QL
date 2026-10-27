@@ -25,7 +25,11 @@ var enMessages = {
         failed: 'Operation Failed',
         noData: 'No Data',
         pleaseSelect: 'Please Select',
-        pleaseInput: 'Please Input'
+        pleaseInput: 'Please Input',
+        titleInfo: 'Info',
+        titleSucces: 'Success',
+        titleError: 'Error',
+        titleWarning: 'Warning'
     },
     // App global texts
     app: {
@@ -83,8 +87,10 @@ var enMessages = {
             // ---- Top action bar ----
             addProject: 'Add Project',
             editProject: 'Edit Project',
-            addSubItem: 'Add Sub-item',
-            editSubItem: 'Edit Sub-item',
+            addSubItem: 'Add Girder',
+            addCastGroup: 'Add Casting Group',
+            editSubItem: 'Edit Girder',
+            editCastGroup: 'Edit Casting Group',
             authorize: 'Authorize',
             // ---- Search / table / form (field names) ----
             name: 'Project Name',
@@ -139,6 +145,8 @@ var enMessages = {
             // ---- Search bar ----
             pointPlaceholder: 'Please select a point code',
             segmentPlaceholder: 'Please select a segment No.',
+            segmentAssembled: '(Assembled)',
+            segmentPending: '(To be assembled)',
             pushCountPlaceholder: 'Please select push count',
             allTime: 'All Time',
             // ---- Toolbar buttons ----
@@ -148,6 +156,7 @@ var enMessages = {
             importMeasured: 'Import Measured Data',
             downloadMeasured: 'Download Measured Data',
             downloadTemplate: 'Download Template',
+            downloadMeasuredTemplate: 'Download Measured Template',
             rebuildDerived: 'Rebuild Derived Coordinates',
             rebuildDerivedConfirm: 'This rebuilds the derived coordinates of pushed-out segments for every push count from 1 to the maximum, overwriting the existing values. Continue?',
             rebuildDerivedSuccess: 'Derived coordinates rebuilt',
@@ -186,7 +195,18 @@ var enMessages = {
             importFailedDetail: 'Import failed; please check the error detail file',
             errorDetailFile: 'Error Details.xlsx',
             noDownloadData: 'No data to download under current filters',
-            measuredFileName: 'Steel Beam Measured Data.xlsx'
+            measuredFileName: 'Steel Beam Measured Data.xlsx',
+            // ---- Error analysis (cards + per-card echarts) ----
+            analysisMaxPositive: 'Max Positive Error',
+            analysisMaxNegative: 'Max Negative Error',
+            analysisAsc: 'Ascending',
+            analysisDesc: 'Descending',
+            analysisXAxis: 'Point Distance (m)',
+            analysisYAxis: 'Z Error (m)',
+            analysisModeDist: 'By Position',
+            analysisModeMerge: 'Merged',
+            analysisZoom: 'Zoom',
+            analysisSaveImage: 'Save Image'
         },
         // Biz module: Concrete Beam Management (Biz/ConcreteBeam)
         concreteBeam: {
@@ -245,7 +265,7 @@ var enMessages = {
             print: 'Print',
             preview: 'Preview',
             // ---- Camber tab ----
-            surveyLockedCamberTip: 'Segments have already been surveyed: camber feeds into the normalization of the general coordinates and is locked from further editing or re-import.',
+            surveyLockedCamberTip: 'Segments have already been surveyed: camber feeds into the design coordinate calculation and is locked from further editing or re-import.',
             camberPreviewDialogTitle: 'Camber Print Preview',
             camberNoPreviewData: 'No camber data to preview',
             camberNoPrintData: 'No camber data to print',
@@ -275,11 +295,16 @@ var enMessages = {
             importFailedDetail: 'Import failed; please check the error detail file',
             errorDetailFile: 'ConcreteBeam_Import_Error_Details.xlsx',
             designRefreshed: 'General coordinates refreshed',
-            designSavedUploadCamber: 'General coordinates saved. Please upload camber data as soon as possible to complete normalization',
+            designNoChanges: 'No changes to save',
+            designConfirmBeforePreview: 'Click Confirm to save the general coordinates before printing or previewing',
+            designSavedUploadCamber: 'General coordinates saved. Please upload camber data as soon as possible to complete the design coordinate calculation',
             // ---- Setup & Survey tab ----
             // Filter row
             setupSegmentLabel: 'Wet-Cast',
             castOn: 'Cast on',
+            surveyRequiredFields: 'Please fill in all editable fields in Setup & Survey (including the casting date)',
+            pouringDateRequired: 'Please select the casting date first',
+            pouringDateUpdated: 'Casting date updated',
             matchCast: 'Match-Cast',
             status: 'Status',
             tagStarter: 'STARTER',
@@ -294,6 +319,12 @@ var enMessages = {
             wetCast: 'Wet-Cast',
             matchSegment: 'Match-Cast',
             boltOffsets: 'Bolt Offsets',
+            twoSidesInconsistent: 'Two sides differ',
+            hasMeasuredB: 'Measured b values available',
+            aNorthTip: 'When checked, aNW is editable; otherwise aNW equals aNE.',
+            aSouthTip: 'When checked, aSW is editable; otherwise aSW equals aSE.',
+            bTip: 'When checked, all four b values (bNE/bNW/bSE/bSW) are required; otherwise the original algorithm is used.',
+            boltBRequired: 'Please fill in all four b values (bNE, bNW, bSE, bSW)',
             surveySection: 'Survey',
             // Fields
             eastElev: 'East Elev.',
