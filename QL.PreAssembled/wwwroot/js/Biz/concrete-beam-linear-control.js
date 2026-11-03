@@ -48,6 +48,7 @@
                     },
                     { name: 'setupSurvey', label: i18nUtils.$t('biz.concreteBeam.tabSetupSurvey'), disabled: !configured },
                     { name: 'pouringCoord', label: i18nUtils.$t('biz.concreteBeam.tabPouringCoord'), disabled: !configured },
+                    { name: 'alarm', label: i18nUtils.$t('biz.concreteBeam.tabAlarm'), disabled: !configured },
                     { name: 'report', label: i18nUtils.$t('biz.concreteBeam.tabReport'), disabled: !configured }
                 ];
             });
@@ -369,6 +370,7 @@
                 if (tabName === 'preCamber') loadCamberData();
                 if (tabName === 'setupSurvey') loadSetupSurveySheet();
                 if (tabName === 'pouringCoord') loadPouringCoordSheet();
+                if (tabName === 'alarm') loadAlarmSheet();
                 if (tabName === 'report') loadReportSheet();
             }
 
@@ -1697,6 +1699,146 @@
                 loadSegmentData();
                 loadCamberData();
             });
+            // ==================== 误差分析与报警 ====================
+            var alarmLoading = Vue.ref(false);
+            var alarmCharts = Vue.ref([]);
+            var alarmRecords = Vue.ref([]);
+            var alarmHasConfig = Vue.ref(false);
+            var alarmDialogVisible = Vue.ref(false);
+            // 弹框编辑状态机：首次录入/点「修改」→ 可编辑；点「确定」→ 只读
+            var alarmConfigEditable = Vue.ref(false);
+            var alarmConfigForm = Vue.reactive({
+                level1Min: '', level1Max: '',
+                level2Min: '', level2Max: '',
+                level3Min: '', level3Max: ''
+            });
+            // 三个图表容器 DOM（v-for + 函数式 ref 收集）
+            var alarmChartEls = [];
+            var alarmChartInstances = [];
+            function setAlarmChartRef(idx) {
+                return function (el) { alarmChartEls[idx] = el; };
+            }
+
+            function num4Alarm(v) { return (v === null || v === undefined) ? null : Number(v); }
+
+            async function loadAlarmSheet() {
+                alarmLoading.value = true;
+                try {
+                    var res = await HttpUtils.get('/Biz/ConcreteBeam/AlarmData', { castingGroupID: groupID });
+                    alarmCharts.value = (res && res.charts) || [];
+                    alarmRecords.value = (res && res.records) || [];
+                    alarmHasConfig.value = !!(res && res.hasConfig);
+                    Vue.nextTick(renderAlarmCharts);
+                } catch (e) { console.error('load alarm error', e); }
+                finally { alarmLoading.value = false; }
+            }
+
+            function renderAlarmCharts() {
+                if (!window.echarts) return;
+                var yLabel = i18nUtils.$t('biz.concreteBeam.alarmYAxis');
+                for (var i = 0; i < alarmCharts.value.length && i < 3; i++) {
+                    var c = alarmCharts.value[i];
+                    var el = alarmChartEls[i];
+                    if (!el) continue;
+                    if (alarmChartInstances[i]) { alarmChartInstances[i].dispose(); alarmChartInstances[i] = null; }
+                    var inst = window.echarts.init(el);
+                    alarmChartInstances[i] = inst;
+                    var devs = (c.deviations || []).map(num4Alarm);
+                    inst.setOption({
+                        title: { text: c.title, left: 'center', textStyle: { fontSize: 14 } },
+                        tooltip: { trigger: 'axis' },
+                        grid: { left: 56, right: 20, top: 36, bottom: 36 },
+                        xAxis: {
+                            type: 'category',
+                            name: i18nUtils.$t('biz.concreteBeam.alarmXAxis'),
+                            data: c.nodes || [],
+                            axisLabel: { fontSize: 11 }
+                        },
+                        yAxis: { type: 'value', name: yLabel },
+                        series: [{
+                            type: 'line',
+                            data: devs,
+                            connectNulls: false,
+                            symbolSize: 6
+                        }]
+                    });
+                }
+            }
+
+            function openAlarmConfig() {
+                HttpUtils.get('/Biz/ConcreteBeam/AlarmConfig', { castingGroupID: groupID }).then(function (res) {
+                    alarmConfigForm.level1Min = res && res.level1Min != null ? res.level1Min : '';
+                    alarmConfigForm.level1Max = res && res.level1Max != null ? res.level1Max : '';
+                    alarmConfigForm.level2Min = res && res.level2Min != null ? res.level2Min : '';
+                    alarmConfigForm.level2Max = res && res.level2Max != null ? res.level2Max : '';
+                    alarmConfigForm.level3Min = res && res.level3Min != null ? res.level3Min : '';
+                    alarmConfigForm.level3Max = res && res.level3Max != null ? res.level3Max : '';
+                    // 已存在配置 → 打开即为只读，需点「修改」解锁
+                    alarmConfigEditable.value = !(res && res.hasConfig);
+                    alarmDialogVisible.value = true;
+                }).catch(function (e) { console.error('load alarm config error', e); });
+            }
+
+            function onAlarmConfigEdit() { alarmConfigEditable.value = true; }
+
+            function toNumOrNull(v) {
+                if (v === '' || v === null || v === undefined) return null;
+                var n = Number(v);
+                return isNaN(n) ? NaN : n;
+            }
+
+            async function handleAlarmConfigSave() {
+                var pairs = [
+                    ['level1Min', 'level1Max', i18nUtils.$t('biz.concreteBeam.alarmLevel1')],
+                    ['level2Min', 'level2Max', i18nUtils.$t('biz.concreteBeam.alarmLevel2')],
+                    ['level3Min', 'level3Max', i18nUtils.$t('biz.concreteBeam.alarmLevel3')]
+                ];
+                for (var i = 0; i < pairs.length; i++) {
+                    var mn = toNumOrNull(alarmConfigForm[pairs[i][0]]);
+                    var mx = toNumOrNull(alarmConfigForm[pairs[i][1]]);
+                    if (isNaN(mn) || isNaN(mx)) {
+                        ElMessage.error(i18nUtils.$t('biz.concreteBeam.alarmInvalidNumber'));
+                        return;
+                    }
+                    if ((mn === null) !== (mx === null)) {
+                        ElMessage.error(i18nUtils.$t('biz.concreteBeam.alarmPairRequired')
+                            .replace('{0}', pairs[i][2]));
+                        return;
+                    }
+                    if (mn !== null && (mn < 0 || mx <= 0)) {
+                        ElMessage.error(i18nUtils.$t('biz.concreteBeam.alarmNonNegative'));
+                        return;
+                    }
+                    if (mn !== null && mn >= mx) {
+                        ElMessage.error(i18nUtils.$t('biz.concreteBeam.alarmMinLtMax').replace('{0}', pairs[i][2]));
+                        return;
+                    }
+                }
+                try {
+                    await HttpUtils.post('/Biz/ConcreteBeam/SaveAlarmConfig', {
+                        castingGroupID: groupID,
+                        level1Min: toNumOrNull(alarmConfigForm.level1Min),
+                        level1Max: toNumOrNull(alarmConfigForm.level1Max),
+                        level2Min: toNumOrNull(alarmConfigForm.level2Min),
+                        level2Max: toNumOrNull(alarmConfigForm.level2Max),
+                        level3Min: toNumOrNull(alarmConfigForm.level3Min),
+                        level3Max: toNumOrNull(alarmConfigForm.level3Max)
+                    });
+                    alarmHasConfig.value = true;
+                    alarmConfigEditable.value = false;
+                    ElMessage.success(i18nUtils.$t('biz.concreteBeam.alarmSaved'));
+                    loadAlarmSheet();
+                } catch (e) { console.error('save alarm config error', e); }
+            }
+
+            function handleAlarmConfigClose() { alarmDialogVisible.value = false; }
+
+            window.addEventListener('resize', function () {
+                for (var i = 0; i < alarmChartInstances.length; i++) {
+                    if (alarmChartInstances[i]) alarmChartInstances[i].resize();
+                }
+            });
+
             Vue.onBeforeUnmount(function () {
                 window.removeEventListener('beforeunload', handleBeforeUnload);
             });
@@ -1798,6 +1940,19 @@
                 handleReportPreview: handleReportPreview,
                 handleReportExport: handleReportExport,
                 handleReportCancel: handleReportCancel,
+                // 误差分析与报警
+                alarmLoading: alarmLoading,
+                alarmCharts: alarmCharts,
+                alarmRecords: alarmRecords,
+                alarmHasConfig: alarmHasConfig,
+                alarmDialogVisible: alarmDialogVisible,
+                alarmConfigEditable: alarmConfigEditable,
+                alarmConfigForm: alarmConfigForm,
+                setAlarmChartRef: setAlarmChartRef,
+                openAlarmConfig: openAlarmConfig,
+                onAlarmConfigEdit: onAlarmConfigEdit,
+                handleAlarmConfigSave: handleAlarmConfigSave,
+                handleAlarmConfigClose: handleAlarmConfigClose,
                 handleConfirm: handleConfirm,
                 handleCancel: handleCancel,
                 handleReset: handleReset,

@@ -12,7 +12,7 @@ using Tool;
 
 namespace Service.PreAssembled;
 
-public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
+public partial class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ConcreteBeamImportPreviewStore _previewStore;
@@ -1480,6 +1480,11 @@ public class ConcreteBeamService : ServiceBase<biz_project_bridge_castingGroup>
             UpsertMeasure(context, castingGroupID, entity.ID, 0, output.KCT[2 * m + 1], measureList, account, now);
 
             await Db.SaveAsync();
+
+            // 误差分析与报警：提交成功后按预警配置生成/更新预警记录（同事务，失败即整体回滚）
+            await EnsureAlarmRecordsAsync(context.ProjID, context.GirderID, castingGroupID, entity.ID,
+                jointIndexes.ToList(), source, calculation, output.KT.ToList(), now);
+
             Db.CommitTransaction();
         }
         catch (Exception ex)

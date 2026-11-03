@@ -194,6 +194,8 @@ namespace DataFactory.KingBase
         public DbSet<biz_concrete_beam_design_coordinate_calculation> biz_concrete_beam_design_coordinate_calculation { get; set; }
         public DbSet<biz_concrete_beam_ascast_coordinate> biz_concrete_beam_ascast_coordinate { get; set; }
         public DbSet<biz_concrete_beam_ascast_measure> biz_concrete_beam_ascast_measure { get; set; }
+        public DbSet<biz_concrete_beam_alarm_config> biz_concrete_beam_alarm_config { get; set; }
+        public DbSet<biz_concrete_beam_alarm_record> biz_concrete_beam_alarm_record { get; set; }
 
         #endregion
     }
@@ -1046,7 +1048,7 @@ namespace DataFactory.KingBase
         [Column(TypeName = "numeric(20,4)")] public decimal OffsetC { get; set; }
         /// <summary>浇筑参考高程偏移量H，单位：米。</summary>
         [Column(TypeName = "numeric(20,4)")] public decimal OffsetH { get; set; }
-        /// <summary>导入设计坐标时，页面是否勾选“标高含预拱度”。</summary>
+        /// <summary>导入设计坐标时，页面是否勾选"标高含预拱度"。</summary>
         public bool ElevationIncludesCamber { get; set; }
         /// <summary>
         /// 是否已执行归一化，用来确定打开标签页后展示source还是calculate
@@ -1453,6 +1455,86 @@ namespace DataFactory.KingBase
         /// </summary>
         public decimal? WestZ { get; set; }
 
+        /// <summary>数据状态：0正常，-1逻辑删除。</summary>
+        public int Status { get; set; }
+        /// <summary>创建人账号。</summary>
+        [MaxLength(100)] public string? CreatedBy { get; set; }
+        /// <summary>创建时间。</summary>
+        public DateTime? CreatedTime { get; set; }
+        /// <summary>最后更新人账号。</summary>
+        [MaxLength(100)] public string? UpdatedBy { get; set; }
+        /// <summary>最后更新时间。</summary>
+        public DateTime? UpdatedTime { get; set; }
+    }
+
+    /// <summary>
+    /// 混凝土梁预警配置表，每浇筑组一行。
+    /// 六个阈值列均可空，空 = 该等级未配置；区间判定左闭右开 [Min, Max)。
+    /// </summary>
+    public class biz_concrete_beam_alarm_config : IIDTable
+    {
+        /// <summary>主键ID。</summary>
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity), Column("ID")]
+        public int ID { get; set; }
+        /// <summary>所属项目ID。</summary>
+        public int ProjID { get; set; }
+        /// <summary>所属梁ID，对应项目梁表主键。</summary>
+        public int GirderID { get; set; }
+        /// <summary>所属浇筑组ID。</summary>
+        public int CastingGroupID { get; set; }
+        /// <summary>一级预警区间下限（绝对值，米），空 = 未配置。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal? Level1Min { get; set; }
+        /// <summary>一级预警区间上限（绝对值，米，不含），空 = 未配置。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal? Level1Max { get; set; }
+        /// <summary>二级预警区间下限（绝对值，米），空 = 未配置。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal? Level2Min { get; set; }
+        /// <summary>二级预警区间上限（绝对值，米，不含），空 = 未配置。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal? Level2Max { get; set; }
+        /// <summary>三级预警区间下限（绝对值，米），空 = 未配置。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal? Level3Min { get; set; }
+        /// <summary>三级预警区间上限（绝对值，米，不含），空 = 未配置。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal? Level3Max { get; set; }
+        /// <summary>数据状态：0正常，-1逻辑删除。</summary>
+        public int Status { get; set; }
+        /// <summary>创建人账号。</summary>
+        [MaxLength(100)] public string? CreatedBy { get; set; }
+        /// <summary>创建时间。</summary>
+        public DateTime? CreatedTime { get; set; }
+        /// <summary>最后更新人账号。</summary>
+        [MaxLength(100)] public string? UpdatedBy { get; set; }
+        /// <summary>最后更新时间。</summary>
+        public DateTime? UpdatedTime { get; set; }
+    }
+
+    /// <summary>
+    /// 混凝土梁预警记录表。
+    /// 偏差值在设站及测量提交后生成且固定不变；同一节点 + 测线 + 等级只保留一条记录（幂等）。
+    /// </summary>
+    public class biz_concrete_beam_alarm_record : IIDTable
+    {
+        /// <summary>主键ID。</summary>
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity), Column("ID")]
+        public int ID { get; set; }
+        /// <summary>所属项目ID。</summary>
+        public int ProjID { get; set; }
+        /// <summary>所属梁ID，对应项目梁表主键。</summary>
+        public int GirderID { get; set; }
+        /// <summary>所属浇筑组ID。</summary>
+        public int CastingGroupID { get; set; }
+        /// <summary>产出该节点的梁段ID（biz_concrete_beam_segment.ID）。</summary>
+        public int SegmentID { get; set; }
+        /// <summary>对应的设计坐标(source)ID，即节点端面锚点。</summary>
+        public int DesignCoordinateID { get; set; }
+        /// <summary>节点名称。</summary>
+        [MaxLength(100)] public string NodeName { get; set; } = string.Empty;
+        /// <summary>测线类型：E=东，C=中，W=西。</summary>
+        [MaxLength(10)] public string LineType { get; set; } = string.Empty;
+        /// <summary>节点偏差值（as-cast Z − 设计 Z），单位：米，带符号。</summary>
+        [Column(TypeName = "numeric(20,4)")] public decimal Deviation { get; set; }
+        /// <summary>预警等级：1=一级，2=二级，3=三级。</summary>
+        public int Level { get; set; }
+        /// <summary>预警时间（测量提交时间）。</summary>
+        public DateTime AlarmTime { get; set; }
         /// <summary>数据状态：0正常，-1逻辑删除。</summary>
         public int Status { get; set; }
         /// <summary>创建人账号。</summary>

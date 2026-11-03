@@ -29,6 +29,23 @@ public class ConcreteBeamController(ConcreteBeamService concreteBeamService) : C
     [HttpGet]
     public async Task<JsonResult> Config(int id) => await JsonCall(() => concreteBeamService.GetConfig(id));
 
+    // ==================== 误差分析与报警 ====================
+
+    /// <summary>误差分析与报警页面数据：三张折线图（东/中/西）+ 预警记录列表。</summary>
+    [HttpGet]
+    public async Task<JsonResult> AlarmData(int castingGroupID) =>
+        await JsonCall(() => concreteBeamService.GetAlarmPageData(castingGroupID));
+
+    /// <summary>预警配置读取（弹框初始展示）。</summary>
+    [HttpGet]
+    public async Task<JsonResult> AlarmConfig(int castingGroupID) =>
+        await JsonCall(() => concreteBeamService.GetAlarmConfig(castingGroupID));
+
+    /// <summary>预警配置保存（upsert，每浇筑组一行）。</summary>
+    [HttpPost]
+    public async Task<JsonResult> SaveAlarmConfig([FromBody] ConcreteBeamAlarmConfigSaveDTO req) =>
+        await JsonCall(() => concreteBeamService.SaveAlarmConfig(req));
+
     [HttpPost]
     public async Task<JsonResult> SaveConfig([FromBody] ConcreteBeamConfigSaveDTO req) =>
         await JsonCall(() => concreteBeamService.SaveConfig(req));
