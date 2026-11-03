@@ -734,8 +734,10 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
 
     /// <summary>
     /// 计算所选梁段的定位坐标。
-    /// <para>已拼装段（至少一个 MeasuredID&gt;0 的点）：直接读 derived 快照，不再重算；</para>
-    /// <para>待拼装段：用快照中 MeasuredID&gt;0 的点做 P/Q 配准，D=待拼装段设计坐标，Gescha 预测；</para>
+    /// <para>2026-10-30 口径变更：全部所选梁段（含已拼装）统一重算——
+    /// P/Q 用快照中 MeasuredID&gt;0 的实测血统点（实测直取 + T 搬运）做配准，
+    /// D=所选梁段设计坐标，Gescha 预测定位坐标，不再直读快照；</para>
+    /// <para>已拼装/待拼装分类仅用于 DTO 的 MeasuredSegments/PendingSegments 展示与快照缺失校验；</para>
     /// <para>允许混合选择，但所选梁段必须按梁段顺序连续（不跳段）。</para>
     /// </summary>
     public async Task<CalcResultDTO> GetCalcResultBySegment(int girderId, List<string> segmentNos)
@@ -800,65 +802,46 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         var theoryById = theory.ToDictionary(a => a.ID);
         var rowsWithOrder = new List<(CalcResultRowDTO Row, decimal Order)>();
 
-        // 1) 已拼装段：直接读 derived 快照（含 MeasuredID=0 的补全点）
-        foreach (var s in assembledSegments)
+        // 全部所选梁段统一重算（2026-10-30 口径变更，含已拼装段）：
+        // P/Q = 快照中 MeasuredID>0 的实测血统点（实测直取 + T 搬运），D = 所选梁段设计坐标
+        var p = new List<List<decimal>>() { new(), new(), new() };
+        var q = new List<List<decimal>>() { new(), new(), new() };
+        var r = new List<List<decimal>>() { new(), new(), new() };
+        foreach (var row in snapshot.Where(a => a.MeasuredID != 0))
         {
-            foreach (var point in snapshotBySegment[s])
-            {
-                var t = theoryById.GetValueOrDefault(point.TheoreticalID);
-                rowsWithOrder.Add((new CalcResultRowDTO
-                {
-                    PointCode = point.PointCode,
-                    DesignX = point.X,
-                    DesignY = point.Y,
-                    DesignZ = point.Z,
-                    SegmentNo = point.SegmentNo,
-                    PositionName = t?.PositionName ?? string.Empty
-                }, t?.DistanceFromStart ?? (decimal?)t?.PositionOrder ?? decimal.MaxValue));
-            }
+            if (!theoryById.TryGetValue(row.TheoreticalID, out var t)) continue;
+            p[0].Add(t.DesignX); p[1].Add(t.DesignY); p[2].Add(t.DesignZ);
+            q[0].Add(row.X); q[1].Add(row.Y); q[2].Add(row.Z);
+            r[0].Add(t.Weight); r[1].Add(t.Weight); r[2].Add(t.Weight);
+        }
+        if (p[0].Count < 3)
+            throw new InvalidOperationException(BizMessages.SteelCalcRegistrationPointsInsufficient(Lang, p[0].Count));
+
+        var selectedSet = segmentNos.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var selectedTheory = theory
+            .Where(a => selectedSet.Contains(a.SegmentNo))
+            .OrderBy(a => a.DistanceFromStart ?? (decimal?)a.PositionOrder ?? decimal.MaxValue)
+            .ThenBy(a => a.ID)
+            .ToList();
+        var d = new List<List<decimal>>() { new(), new(), new() };
+        foreach (var t in selectedTheory)
+        {
+            d[0].Add(t.DesignX); d[1].Add(t.DesignY); d[2].Add(t.DesignZ);
         }
 
-        // 2) 待拼装段：P/Q 只用 MeasuredID>0 的点；D=待拼装段设计坐标
-        if (pendingSegments.Count > 0)
+        var gescha = SteelGirderAlignment.Gescha(P: p, Q: q, D: d, R: r);
+        for (var i = 0; i < selectedTheory.Count; i++)
         {
-            var p = new List<List<decimal>>() { new(), new(), new() };
-            var q = new List<List<decimal>>() { new(), new(), new() };
-            var r = new List<List<decimal>>() { new(), new(), new() };
-            foreach (var row in snapshot.Where(a => a.MeasuredID != 0))
+            var t = selectedTheory[i];
+            rowsWithOrder.Add((new CalcResultRowDTO
             {
-                if (!theoryById.TryGetValue(row.TheoreticalID, out var t)) continue;
-                p[0].Add(t.DesignX); p[1].Add(t.DesignY); p[2].Add(t.DesignZ);
-                q[0].Add(row.X); q[1].Add(row.Y); q[2].Add(row.Z);
-                r[0].Add(t.Weight); r[1].Add(t.Weight); r[2].Add(t.Weight);
-            }
-            if (p[0].Count < 3)
-                throw new InvalidOperationException(BizMessages.SteelCalcRegistrationPointsInsufficient(Lang, p[0].Count));
-
-            var pendingTheory = theory
-                .Where(a => pendingSegments.Contains(a.SegmentNo, StringComparer.OrdinalIgnoreCase))
-                .OrderBy(a => a.DistanceFromStart ?? (decimal?)a.PositionOrder ?? decimal.MaxValue)
-                .ThenBy(a => a.ID)
-                .ToList();
-            var d = new List<List<decimal>>() { new(), new(), new() };
-            foreach (var t in pendingTheory)
-            {
-                d[0].Add(t.DesignX); d[1].Add(t.DesignY); d[2].Add(t.DesignZ);
-            }
-
-            var gescha = SteelGirderAlignment.Gescha(P: p, Q: q, D: d, R: r);
-            for (var i = 0; i < pendingTheory.Count; i++)
-            {
-                var t = pendingTheory[i];
-                rowsWithOrder.Add((new CalcResultRowDTO
-                {
-                    PointCode = t.PointCode,
-                    DesignX = Math.Round(gescha[0][i], 4, MidpointRounding.AwayFromZero),
-                    DesignY = Math.Round(gescha[1][i], 4, MidpointRounding.AwayFromZero),
-                    DesignZ = Math.Round(gescha[2][i], 4, MidpointRounding.AwayFromZero),
-                    SegmentNo = t.SegmentNo,
-                    PositionName = t.PositionName
-                }, t.DistanceFromStart ?? (decimal?)t.PositionOrder ?? decimal.MaxValue));
-            }
+                PointCode = t.PointCode,
+                DesignX = Math.Round(gescha[0][i], 4, MidpointRounding.AwayFromZero),
+                DesignY = Math.Round(gescha[1][i], 4, MidpointRounding.AwayFromZero),
+                DesignZ = Math.Round(gescha[2][i], 4, MidpointRounding.AwayFromZero),
+                SegmentNo = t.SegmentNo,
+                PositionName = t.PositionName
+            }, t.DistanceFromStart ?? (decimal?)t.PositionOrder ?? decimal.MaxValue));
         }
 
         return new CalcResultDTO
@@ -1195,22 +1178,17 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
 
     /// <summary>
     /// 计算梁段Z向线形偏差（误差分析数据源）。
-    /// 数据来源：biz_steel_beam_derived_coordinate（推算坐标表）中「最大顶推次数的最新批次」。
-    /// 该表按批次保存「完整梁段」当批坐标（在架段实测/补全 ∪ 出胎段搬运），
-    /// 每个测点每批次仅一行，因此天然不存在「同一点位跨顶推重复」的问题。
-    /// 口径说明：Z偏差 = 当批推算坐标 DerivedZ − 完工设计 Z（成桥组装态残差）；
-    /// 与早期「相对首段单次刚体变换」的实时算法语义不同，属既定口径变更。
+    /// 数据来源：biz_steel_beam_derived_coordinate（推算坐标表）滚动快照 active 行。
+    /// 口径说明（2026-10-27 变更）：Z偏差 = 实测坐标 Z（快照 DerivedZ）− 定位坐标 Z；
+    /// 定位坐标（计算值）由 SteelGirderAlignment.Gescha 加权刚体配准拟合：
+    /// 以全部快照点的「理论坐标 P / 快照坐标 Q / 权值 R」拟合全局变换，施加到各点理论坐标。
+    /// 测位筛选仅为展示过滤，不影响拟合（配准始终用全量测点）。
+    /// MeasuredID=0 的补全点：ZError 返回 null，前端折线图留空位（不画成 0）。
     /// </summary>
     /// <param name="girderId">梁ID</param>
     /// <param name="positionName">测位筛选，不传则全部</param>
     /// <param name="offsetType">偏差类型预留</param>
     /// <param name="sort">按 X 轴（点位距离）排序 asc/desc（距离恒为正值）</param>
-    /// <summary>
-    /// 误差分析：读取当前滚动快照（derived 表 active 行）并计算 Z 偏差。
-    /// <para>MeasuredID=0 的补全点：ZError 返回 null，前端折线图留空位（不画成 0）。</para>
-    /// <para>这样示例中「push0 上传 01/02/03，push1 上传 01/03/04/05」时，
-    /// 01-05 是有效点；06-10 从未实测，保留为空位。</para>
-    /// </summary>
     public async Task<CalcSteelBeamOffsetDTO> GetSteelBeamOffset(int girderId, string positionName = "", string offsetType = "", string sort = "asc")
     {
         var result = new CalcSteelBeamOffsetDTO { OffsetType = offsetType };
@@ -1224,23 +1202,51 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         var list = await query.ToListAsync();
         if (list.Count == 0) return result;
 
+        // 定位坐标（计算值）：Gescha 加权刚体配准（s=1），
+        // P=理论坐标，Q=快照实测/搬运坐标，R=理论权值，D=全部理论点 → 每点定位坐标。
+        // 拟合使用全量快照点（与配准/推算阶段口径一致）；点数不足 3 时无法拟合，退化为理论值。
+        var posZMap = new Dictionary<int, decimal>();
+        int n = list.Count;
+        if (n >= SteelBeamDerivedCalculator.MinSegmentPoints)
+        {
+            var matP = new double[3, n];
+            var matQ = new double[3, n];
+            var matR = new double[1, n];
+            for (int j = 0; j < n; j++)
+            {
+                var a = list[j];
+                matP[0, j] = (double)a.t.DesignX; matP[1, j] = (double)a.t.DesignY; matP[2, j] = (double)a.t.DesignZ;
+                matQ[0, j] = (double)a.d.DerivedX; matQ[1, j] = (double)a.d.DerivedY; matQ[2, j] = (double)a.d.DerivedZ;
+                matR[0, j] = (double)a.t.Weight;
+            }
+            var d1 = SteelGirderAlignment.Gescha(matP, matQ, matP, matR, 1.0);
+            for (int j = 0; j < n; j++)
+                posZMap[list[j].t.ID] = Math.Round((decimal)d1[2, j], 4, MidpointRounding.AwayFromZero);
+        }
+
         var rows = list
             .Where(a => string.IsNullOrWhiteSpace(positionName) || a.t.PositionName == positionName)
-            .Select(a => new CalcSteelBeamOffsetRow
+            .Select(a =>
             {
-                PushCount = a.d.PushCount,
-                SegmentNo = a.t.SegmentNo,
-                PointCode = a.t.PointCode,
-                PositionName = a.t.PositionName,
-                PositionOrder = a.t.PositionOrder,
-                PointDistance = a.t.DistanceFromStart,
-                X = a.t.DesignX,
-                Y = a.t.DesignY,
-                Z = a.t.DesignZ,
-                PredictZ = a.d.DerivedZ,
-                // 只有实测来源的点才画误差；纯补全点返回 null，折线图留空位
-                ZError = a.d.MeasuredID != 0 ? a.d.DerivedZ - a.t.DesignZ : (decimal?)null,
-                Value = a.d.MeasuredID != 0 ? a.d.DerivedZ - a.t.DesignZ : (decimal?)null
+                // 计算值：定位坐标 Z；未拟合时兜底为理论设计 Z
+                var posZ = posZMap.TryGetValue(a.t.ID, out var z) ? z : a.t.DesignZ;
+                return new CalcSteelBeamOffsetRow
+                {
+                    PushCount = a.d.PushCount,
+                    SegmentNo = a.t.SegmentNo,
+                    PointCode = a.t.PointCode,
+                    PositionName = a.t.PositionName,
+                    PositionOrder = a.t.PositionOrder,
+                    PointDistance = a.t.DistanceFromStart,
+                    X = a.t.DesignX,
+                    Y = a.t.DesignY,
+                    Z = a.t.DesignZ,
+                    PredictZ = posZ,
+                    // Z误差 = 实测坐标 Z（快照 DerivedZ）− 定位坐标 Z；
+                    // 补全点（MeasuredID=0）无实测，返回 null，折线图留空位
+                    ZError = a.d.MeasuredID != 0 ? a.d.DerivedZ - posZ : (decimal?)null,
+                    Value = a.d.MeasuredID != 0 ? a.d.DerivedZ - posZ : (decimal?)null
+                };
             })
             .ToList();
 

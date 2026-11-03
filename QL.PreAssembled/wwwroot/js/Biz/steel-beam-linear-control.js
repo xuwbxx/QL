@@ -450,6 +450,8 @@
                 const option = {
                     tooltip: {
                         trigger: 'axis',
+                        // 悬浮框限制在图表容器内，避免贴近右缘时溢出页面
+                        confine: true,
                         formatter: function (params) {
                             const idx = params[0].dataIndex;
                             const row = rows[idx];
@@ -476,7 +478,21 @@
                     return { name: pos, type: 'line', smooth: false, connectNulls: false, data: rows.map(r => [Number(r.pointDistance) || 0, r.zError == null ? null : Number(r.zError)]) };
                 });
                 const option = {
-                    tooltip: { trigger: 'axis' },
+                    tooltip: {
+                        trigger: 'axis',
+                        // 悬浮框限制在图表容器内；按误差值降序并过滤无数据项，避免列表过高/溢出页面
+                        confine: true,
+                        order: 'valueDesc',
+                        formatter: function (params) {
+                            if (!params || !params.length) return '';
+                            const lines = params
+                                .filter(function (p) { return p.value && p.value[1] != null; })
+                                .map(function (p) {
+                                    return p.marker + p.seriesName + ': ' + Number(p.value[1]).toFixed(4);
+                                });
+                            return lines.length ? lines.join('<br/>') : '-';
+                        }
+                    },
                     legend: { type: 'scroll', top: 6 },
                     grid: { left: 50, right: 20, top: 60, bottom: 50 },
                     xAxis: { name: i18nUtils.$t('biz.steelBeam.analysisXAxis'), type: 'value' },
