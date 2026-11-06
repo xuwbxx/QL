@@ -600,12 +600,12 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
         public static string SteelDerivedRebuildSuccess(string? lang, int batchCount, int pointCount) => Zh(lang)
             ? $"已重算{batchCount}个顶推批次的推算坐标，共{pointCount}条"
             : $"Derived coordinates rebuilt for {batchCount} push batch(es), {pointCount} row(s) in total";
-        public static string SteelDerivedSegmentPointsInsufficient(string? lang, string segmentNo, int count) => Zh(lang)
-            ? $"梁段「{segmentNo}」本批仅上传{count}个测点，段内补全至少需要3个；请补充该梁段的测点"
-            : $"Segment \"{segmentNo}\" has only {count} uploaded point(s) in this batch; at least 3 are required for segment completion";
+        public static string SteelDerivedSegmentPointsInsufficient(string? lang, string segmentNo, int count, int minPoints) => Zh(lang)
+            ? $"梁段「{segmentNo}」本批仅上传{count}个测点，段内补全至少需要{minPoints}个；请补充该梁段的测点"
+            : $"Segment \"{segmentNo}\" has only {count} uploaded point(s) in this batch; at least {minPoints} are required for segment completion";
         public static string SteelDerivedNoRepeatedSegment(string? lang, int pushCount) => Zh(lang)
-            ? $"第{pushCount}次顶推没有可用于配准的重复梁段：需要至少一段在上一次、本次各上传不少于3个测点"
-            : $"Push {pushCount} has no repeated segment usable for registration: at least one segment must have 3 or more uploaded points in both the previous and the current batch";
+            ? $"第{pushCount}次顶推没有可用于配准的重复梁段：需要至少一段在上一次、本次各上传不少于2个测点"
+            : $"Push {pushCount} has no repeated segment usable for registration: at least one segment must have 2 or more uploaded points in both the previous and the current batch";
         public static string SteelDerivedSegmentTheoryMissing(string? lang, string segmentNo) => Zh(lang)
             ? $"梁段「{segmentNo}」在理论数据中不存在，无法进行段内补全"
             : $"Segment \"{segmentNo}\" does not exist in the theoretical data; segment completion is not possible";

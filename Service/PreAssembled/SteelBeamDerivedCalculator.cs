@@ -34,8 +34,14 @@ namespace Service.PreAssembled;
 /// </summary>
 public static class SteelBeamDerivedCalculator
 {
-    /// <summary>一个梁段做刚体配准所需的最少上传点数。</summary>
+    /// <summary>一个梁段做刚体配准所需的最少上传点数（≥3 时用完整刚体拟合）。</summary>
     public const int MinSegmentPoints = 3;
+
+    /// <summary>
+    /// 跨批次配准（上一批→本批全局 T）所需的最少公共点数。
+    /// 2026-11-06 放宽：3 → 2；2 个公共点的绕连线轴旋转不唯一，SVD 取确定性最小旋转解，精度下降但流程可走通。
+    /// </summary>
+    public const int MinRegistrationPoints = 2;
 
     /// <summary>本批上传的实测点，带其对应的理论（设计）坐标，供逐段补全使用。</summary>
     /// <remarks><c>BatchID</c>：实测行所属批次。同一 PushCount 多批次按点合并时，
@@ -102,6 +108,8 @@ public static class SteelBeamDerivedCalculator
         var previousBySegment = previousSnapshot
             .GroupBy(a => a.SegmentNo, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+        // 是否首次实测：无上一批快照（push=0）。首次段内补全每段至少 2 点，后续至少 1 点
+        var hasPrevious = previousSnapshot.Count > 0;
 
         // 1. 逐段补全：对每个本批 touched 段，产出「本批完整集」
         var currentCompleteBySegment = new Dictionary<string, List<SnapshotPoint>>(StringComparer.OrdinalIgnoreCase);
@@ -124,14 +132,20 @@ public static class SteelBeamDerivedCalculator
                     u.Weight, u.MeasuredID, u.BatchID, pushCount));
             }
 
-            // 段内缺失点：先按本段上传点做一次 Gescha，得到「本次完整集」中的补全坐标。
-            // 注意：这里用本段自己的 P/Q，不用整批其他段的点；每段至少 3 个上传点。
+            // 段内缺失点：按本段上传点推算「本次完整集」中的补全坐标。
+            // 注意：这里用本段自己的 P/Q，不用整批其他段的点。
+            // 2026-11-06 放宽：首次实测（无上一批快照）每段至少 2 点——Gescha SVD 对 2 点给出
+            // 确定性最小旋转解（绕连线轴旋转不唯一，精度下降但结果可复现）；
+            // 后续批次每段至少 1 点——2 点仍走 Gescha，1 点退化为平移补全（假设段内无旋转）。
             if (missing.Count > 0)
             {
-                if (uploaded.Count < MinSegmentPoints)
-                    return Result.Fail(BizMessages.SteelDerivedSegmentPointsInsufficient(lang, segmentNo, uploaded.Count));
+                var minPoints = hasPrevious ? 1 : 2;
+                if (uploaded.Count < minPoints)
+                    return Result.Fail(BizMessages.SteelDerivedSegmentPointsInsufficient(lang, segmentNo, uploaded.Count, minPoints));
 
-                var predicted = CompleteBySegment(uploaded, missing);
+                var predicted = uploaded.Count >= 2
+                    ? CompleteBySegment(uploaded, missing)
+                    : CompleteByTranslation(uploaded, missing);
                 for (var i = 0; i < missing.Count; i++)
                 {
                     var m = missing[i];
@@ -148,7 +162,7 @@ public static class SteelBeamDerivedCalculator
         }
 
         // 2. 找重复梁段，用「上次完整集 vs 本次完整集」的同名测点拟合一个全局 T。
-        //    重复段判定：上一次该段 MeasuredID != 0 的点 >= 3，且本次该段上传点 >= 3。
+        //    重复段判定（2026-11-06 放宽）：上一次该段 MeasuredID != 0 的点 >= 2，且本次该段上传点 >= 2。
         var fitP = NewMatrix();
         var fitQ = NewMatrix();
         var fitR = NewMatrix();
@@ -158,7 +172,7 @@ public static class SteelBeamDerivedCalculator
 
             var previousMeasuredCount = previousComplete.Count(a => a.MeasuredID != 0);
             var currentUploadedCount = currentBySegment[segmentNo].Count;
-            if (previousMeasuredCount < MinSegmentPoints || currentUploadedCount < MinSegmentPoints) continue;
+            if (previousMeasuredCount < MinRegistrationPoints || currentUploadedCount < MinRegistrationPoints) continue;
 
             var previousMap = previousComplete
                 .GroupBy(a => a.TheoreticalID)
@@ -197,7 +211,7 @@ public static class SteelBeamDerivedCalculator
         var transported = new Dictionary<int, (decimal X, decimal Y, decimal Z)>();
         if (targets.Count > 0)
         {
-            if (fitP[0].Count < MinSegmentPoints)
+            if (fitP[0].Count < MinRegistrationPoints)
                 return Result.Fail(BizMessages.SteelDerivedNoRepeatedSegment(lang, pushCount));
 
             var d = NewMatrix();
@@ -322,6 +336,24 @@ public static class SteelBeamDerivedCalculator
                 Round4(transformed[2][i])));
         }
         return result;
+    }
+
+    /// <summary>
+    /// 单点平移补全（2026-11-06 新增，仅后续批次每段只上传 1 点时使用）：
+    /// 假设段内无旋转，用唯一上传点「实测−设计」的平移量直接推算本段缺失点。
+    /// 精度最低，仅用于推进顶推流程；待该段有更多实测点后由滚动快照自然覆盖。
+    /// </summary>
+    private static List<(decimal X, decimal Y, decimal Z)> CompleteByTranslation(
+        IReadOnlyList<MeasuredPoint> uploaded, IReadOnlyList<TheoryPoint> missing)
+    {
+        var anchor = uploaded.OrderBy(a => a.TheoreticalID).First();
+        var dx = anchor.MeasuredX - anchor.DesignX;
+        var dy = anchor.MeasuredY - anchor.DesignY;
+        var dz = anchor.MeasuredZ - anchor.DesignZ;
+        // 保持与传入 missing 相同的顺序：调用方按下标一一配对
+        return missing
+            .Select(m => (Round4(m.DesignX + dx), Round4(m.DesignY + dy), Round4(m.DesignZ + dz)))
+            .ToList();
     }
 
     private static List<List<decimal>> NewMatrix() => [new(), new(), new()];
