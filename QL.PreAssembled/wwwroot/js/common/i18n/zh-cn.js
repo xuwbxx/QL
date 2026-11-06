@@ -170,6 +170,7 @@ var zhCnMessages = {
             positionName: '测位名称',
             pushCount: '顶推次数',
             measureTime: '测量时间',
+            filledTag: '补齐',
             // ---- 导入弹窗 ----
             timePlaceholder: '请选择年月日和小时',
             theoryImportTip: '测点编号、设计坐标、预拱度、权值、所属梁段号和测位名称均为必填；坐标及预拱度单位为 m，权值范围为 0～1。',

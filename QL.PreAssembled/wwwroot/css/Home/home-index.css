@@ -69,6 +69,19 @@ html, body {
         color: #20202f;
     }
 
+/* 左侧菜单栏（Logo + 菜单项）统一字体：
+   Windows 下 'Helvetica Neue'/'Helvetica'/'PingFang SC' 均不存在，
+   逐字回退会导致 Logo 与菜单项（甚至不同菜单项之间）字形不一致，
+   显式将 Windows 实际可用的微软雅黑提到栈首，保证整栏同一字体 */
+.el-aside .sidebar-logo,
+.el-aside .sidebar-menu,
+.el-aside .sidebar-menu .el-menu-item,
+.el-aside .sidebar-menu .el-sub-menu__title,
+.el-aside .sidebar-menu .el-menu-item span,
+.el-aside .sidebar-menu .el-sub-menu__title span {
+    font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+}
+
 /* 展开状态完整显示文字 */
 .el-aside:not(.aside-collapse) .sidebar-logo {
     width: 240px;

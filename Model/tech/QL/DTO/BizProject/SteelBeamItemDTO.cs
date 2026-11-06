@@ -77,6 +77,8 @@
         public DateTime ImportTime { get; set; }
         public int Version { get; set; }
         public bool CanEdit { get; set; }
+        /// <summary>数据是否来自当前选中批次；false = 由同顶推次数下更早批次最近一次上传值补齐（前端标注来源时间且不可编辑/删除）。</summary>
+        public bool IsCurrentBatch { get; set; }
         public int PointRowSpan { get; set; }
     }
 

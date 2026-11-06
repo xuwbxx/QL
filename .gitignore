@@ -388,3 +388,9 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# 临时验证工程（AI 联调复现脚本，不入库）
+.tmp_verify/
+
+# 项目文档资料（需求/设计/数据验证等 docx、xlsx 等，不入库）
+docs/

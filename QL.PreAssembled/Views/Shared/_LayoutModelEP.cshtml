@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - QL.PreAssembled</title>
+    <title>@(string.IsNullOrEmpty(ViewData["Title"] as string) ? "节段拼装梁预制安装线形控制平台" : ViewData["Title"])</title>
     <!-- 本地样式，无外网依赖 -->
     <link rel="stylesheet" href="/lib/element-plus/index.css" />
 

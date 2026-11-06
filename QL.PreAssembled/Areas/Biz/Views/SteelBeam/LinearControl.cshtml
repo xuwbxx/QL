@@ -289,7 +289,7 @@
             </div>
         </div>
         <el-table v-loading="loading" :data="rows" border stripe :span-method="measuredSpanMethod">
-            <el-table-column prop="pointCode" :label="$t('biz.steelBeam.pointCode')" min-width="150" align="center"></el-table-column>
+            <el-table-column :label="$t('biz.steelBeam.pointCode')" min-width="150" align="center"><template #default="scope"><span>{{ scope.row.pointCode }}</span><el-tag v-if="!scope.row.isCurrentBatch" size="small" type="warning" style="margin-left:4px">{{ $t('biz.steelBeam.filledTag') }}</el-tag></template></el-table-column>
             <el-table-column :label="$t('biz.steelBeam.measuredCoord')" align="center">
                 <el-table-column label="X" width="150" align="center"><template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.x" class="lc-coordinate-input"></el-input><span v-else>{{ formatDecimal(scope.row.measuredX) }}</span></template></el-table-column>
                 <el-table-column label="Y" width="150" align="center"><template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.y" class="lc-coordinate-input"></el-input><span v-else>{{ formatDecimal(scope.row.measuredY) }}</span></template></el-table-column>

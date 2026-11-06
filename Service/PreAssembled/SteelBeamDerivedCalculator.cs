@@ -38,11 +38,13 @@ public static class SteelBeamDerivedCalculator
     public const int MinSegmentPoints = 3;
 
     /// <summary>本批上传的实测点，带其对应的理论（设计）坐标，供逐段补全使用。</summary>
+    /// <remarks><c>BatchID</c>：实测行所属批次。同一 PushCount 多批次按点合并时，
+    /// 上传点需保留各自真实批次，避免全部误标为最新批。</remarks>
     public sealed record MeasuredPoint(
         int TheoreticalID, string PointCode, string SegmentNo,
         decimal DesignX, decimal DesignY, decimal DesignZ,
         decimal MeasuredX, decimal MeasuredY, decimal MeasuredZ,
-        decimal Weight, int MeasuredID);
+        decimal Weight, int MeasuredID, int BatchID);
 
     /// <summary>理论（设计）测点，用于识别段内缺失点。</summary>
     public sealed record TheoryPoint(
@@ -119,7 +121,7 @@ public static class SteelBeamDerivedCalculator
                 complete.Add(new SnapshotPoint(
                     u.TheoreticalID, u.PointCode, segmentNo,
                     Round4(u.MeasuredX), Round4(u.MeasuredY), Round4(u.MeasuredZ),
-                    u.Weight, u.MeasuredID, batchID, pushCount));
+                    u.Weight, u.MeasuredID, u.BatchID, pushCount));
             }
 
             // 段内缺失点：先按本段上传点做一次 Gescha，得到「本次完整集」中的补全坐标。
@@ -233,7 +235,7 @@ public static class SteelBeamDerivedCalculator
                 rows.Add(new SnapshotPoint(
                     u.TheoreticalID, u.PointCode, segmentNo,
                     Round4(u.MeasuredX), Round4(u.MeasuredY), Round4(u.MeasuredZ),
-                    u.Weight, u.MeasuredID, batchID, pushCount));
+                    u.Weight, u.MeasuredID, u.BatchID, pushCount));
             }
 
             // 段内缺失点

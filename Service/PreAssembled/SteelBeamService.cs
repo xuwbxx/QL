@@ -139,52 +139,104 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         return new { points, segments };
     }
 
+    /// <summary>
+    /// 实测数据列表（选中批次 + 更早批次补齐口径，2026-11-04 变更）：
+    /// 测量时间必选（未传时默认最新一次）；返回「选中批次全部测点 ∪ 缺失测点用同顶推次数下
+    /// 测量时间严格早于选中批次的最近一次上传值补齐」的完整测点集。
+    /// 补齐行 IsCurrentBatch=false：MeasureTime 显示来源批次时间，CanEdit 恒为 false（不可编辑/删除）。
+    /// 排序：选中批次行在前（按导入顺序），补齐行在后。
+    /// 批次可见池（2026-11-04 扩）：active 批次 + 被新导入覆盖的历史批次（Status=-1 且 ReplacedByBatchID 非空），
+    /// 其测点行虽随批次整体作废，但作为历史上传数据仍可查询（只读）；仅用户真正删除的批次不可见。
+    /// </summary>
     public async Task<SteelBeamPagedResultDTO<SteelBeamMeasuredItemDTO>> MeasuredList(SteelBeamMeasuredQueryDTO req)
     {
         await EnsureGirderAccess(req.GirderID);
-        var batches = Db.Query<biz_steel_beam_measure_batch>().Where(a => a.GirderID == req.GirderID && a.Status != -1);
-        // 可编辑/删除的仅「最大顶推次数 + 最新测量时间」的最新批次（与 LoadLatestCompleteSetAsync 同口径）
-        var latestBatchId = await batches
+        var batches = Db.Query<biz_steel_beam_measure_batch>()
+            .Where(a => a.GirderID == req.GirderID && (a.Status != StatusDelete || a.ReplacedByBatchID != null));
+
+        // 选中批次：测量时间必选；未传时默认最新一次（限顶推次数内，未传顶推次数则全局最新）
+        var selQuery = batches;
+        if (req.PushCount.HasValue) selQuery = selQuery.Where(a => a.PushCount == req.PushCount.Value);
+        if (req.MeasureTime.HasValue) selQuery = selQuery.Where(a => a.MeasureTime == req.MeasureTime.Value);
+        var selectedBatch = await selQuery
+            .OrderByDescending(a => a.MeasureTime).ThenByDescending(a => a.ID)
+            .Select(a => new { a.ID, a.PushCount, a.MeasureTime, a.Status })
+            .FirstOrDefaultAsync();
+        if (selectedBatch == null) return new() { Total = 0 };
+
+        // 可编辑/删除的仅「最大顶推次数 + 最新测量时间」的最新 active 批次（与 LoadLatestCompleteSetAsync 同口径）
+        var latestBatchId = await Db.Query<biz_steel_beam_measure_batch>()
+            .Where(a => a.GirderID == req.GirderID && a.Status != StatusDelete)
             .OrderByDescending(a => a.PushCount).ThenByDescending(a => a.MeasureTime).ThenByDescending(a => a.ID)
             .Select(a => (int?)a.ID).FirstOrDefaultAsync();
-        var query = from measured in Db.Query<biz_steel_beam_measured>().Where(a => a.GirderID == req.GirderID && a.Status != -1)
-                    join batch in batches on measured.BatchID equals batch.ID
-                    select new { measured, batch };
-        if (req.PushCount.HasValue) query = query.Where(a => a.batch.PushCount == req.PushCount.Value);
-        if (req.MeasureTime.HasValue) query = query.Where(a => a.batch.MeasureTime == req.MeasureTime.Value);
 
-        var pointQuery = query.Select(a => a.measured.PointCode).Distinct();
-        var total = await pointQuery.CountAsync();
+        // 选中批次的测点行：active 批次取正常行；被覆盖批次（整体作废）取其全部行作历史展示
+        var selectedRows = await Db.Query<biz_steel_beam_measured>()
+            .Where(a => a.GirderID == req.GirderID && a.BatchID == selectedBatch.ID)
+            .ToListAsync();
+        if (selectedBatch.Status != StatusDelete)
+            selectedRows = selectedRows.Where(a => a.Status != StatusDelete).ToList();
+
+        // 补齐候选：同顶推次数、测量时间严格早于选中批次的实测行，按 测量时间/ID 倒序（越靠前越新）；
+        // 行有效性 = 正常行，或被覆盖批次内的行（随批次作废，仅作历史展示）
+        var selectedPoints = selectedRows.Select(a => a.PointCode).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var fillRows = await (from m in Db.Query<biz_steel_beam_measured>()
+                                  .Where(a => a.GirderID == req.GirderID)
+                              join b in batches on m.BatchID equals b.ID
+                              where b.PushCount == selectedBatch.PushCount && b.MeasureTime < selectedBatch.MeasureTime
+                              orderby b.MeasureTime descending, m.ID descending
+                              select new { m, SourceTime = b.MeasureTime, BatchStatus = b.Status }).ToListAsync();
+        var fillMap = new Dictionary<string, (biz_steel_beam_measured Row, DateTime SourceTime)>(StringComparer.OrdinalIgnoreCase);
+        foreach (var x in fillRows)
+        {
+            if (x.m.Status == StatusDelete && x.BatchStatus != StatusDelete) continue;
+            if (selectedPoints.Contains(x.m.PointCode)) continue;
+            if (fillMap.ContainsKey(x.m.PointCode)) continue;
+            fillMap[x.m.PointCode] = (x.m, x.SourceTime);
+        }
+
+        var items = new List<SteelBeamMeasuredItemDTO>(selectedRows.Count + fillMap.Count);
+        foreach (var m in selectedRows)
+            items.Add(ToMeasuredItem(m, selectedBatch.PushCount, selectedBatch.MeasureTime, true, m.BatchID == latestBatchId));
+        foreach (var f in fillMap.Values)
+            items.Add(ToMeasuredItem(f.Row, selectedBatch.PushCount, f.SourceTime, false, false));
+
+        // 统一按测点编号排序（忽略大小写，与旧口径一致），本批次行与补齐行混排
+        items = items.OrderBy(a => a.PointCode.ToLower()).ToList();
+
         var page = Math.Max(req.PageIndex, 1);
         var size = NormalizePageSize(req.PageSize);
-        var pointCodes = await pointQuery.OrderBy(a => a.ToLower()).Skip((page - 1) * size).Take(size).ToListAsync();
-        if (pointCodes.Count == 0) return new() { Total = total };
-
-        var data = await query.Where(a => pointCodes.Contains(a.measured.PointCode))
-            .Select(a => new SteelBeamMeasuredItemDTO
-            {
-                ID = a.measured.ID,
-                PointCode = a.measured.PointCode,
-                MeasuredX = a.measured.MeasuredX,
-                MeasuredY = a.measured.MeasuredY,
-                MeasuredZ = a.measured.MeasuredZ,
-                PushCount = a.batch.PushCount,
-                MeasureTime = a.batch.MeasureTime,
-                ImportTime = a.measured.ImportTime,
-                Version = a.measured.Version,
-                CanEdit = a.batch.ID == latestBatchId
-            }).ToListAsync();
-        var ordered = data.OrderBy(a => a.ID).ToList();
-        foreach (var group in ordered.GroupBy(a => a.PointCode, StringComparer.OrdinalIgnoreCase))
-            group.First().PointRowSpan = group.Count();
-        return new() { List = ordered, Total = total };
+        return new()
+        {
+            List = items.Skip((page - 1) * size).Take(size).ToList(),
+            Total = items.Count
+        };
     }
 
+    private static SteelBeamMeasuredItemDTO ToMeasuredItem(
+        biz_steel_beam_measured m, int pushCount, DateTime measureTime, bool isCurrentBatch, bool canEdit) => new()
+    {
+        ID = m.ID,
+        PointCode = m.PointCode,
+        MeasuredX = m.MeasuredX,
+        MeasuredY = m.MeasuredY,
+        MeasuredZ = m.MeasuredZ,
+        PushCount = pushCount,
+        MeasureTime = measureTime,
+        ImportTime = m.ImportTime,
+        Version = m.Version,
+        CanEdit = canEdit,
+        IsCurrentBatch = isCurrentBatch,
+        PointRowSpan = 1
+    };
+
+    /// <summary>测量时间选项：active 批次 + 被覆盖的历史批次（Status=-1 且 ReplacedByBatchID 非空）均可见。</summary>
     public async Task<List<DateTime>> MeasureTimeOptions(int girderID, int pushCount)
     {
         await EnsureGirderAccess(girderID);
         return await Db.Query<biz_steel_beam_measure_batch>()
-            .Where(a => a.GirderID == girderID && a.Status != -1 && a.PushCount == pushCount)
+            .Where(a => a.GirderID == girderID && a.PushCount == pushCount
+                        && (a.Status != StatusDelete || a.ReplacedByBatchID != null))
             .Select(a => a.MeasureTime).Distinct().OrderByDescending(a => a).ToListAsync();
     }
 
@@ -488,32 +540,9 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
             Db.GetRepository<biz_steel_beam_measured>().AddList(rows);
             await Db.SaveAsync();
 
-            // 同一 PushCount 允许多个 batch：本次为最新，之前同 PushCount 的 batch 视为被覆盖。
-            // 旧 batch 的实测行一并作废，避免 replay 时被当成有效数据。
-            var supersededBatches = await Db.Query<biz_steel_beam_measure_batch>()
-                .Where(a => a.GirderID == girderID && a.PushCount == pushCount && a.ID != batch.ID && a.Status != StatusDelete)
-                .ToListAsync();
-            foreach (var old in supersededBatches)
-            {
-                old.Status = StatusDelete;
-                old.ReplacedByBatchID = batch.ID;
-                old.UpdatedBy = account;
-                old.UpdatedTime = timestamp;
-            }
-            var supersededIds = supersededBatches.Select(a => a.ID).ToList();
-            if (supersededIds.Count > 0)
-            {
-                var supersededMeasured = await Db.Query<biz_steel_beam_measured>()
-                    .Where(a => supersededIds.Contains(a.BatchID) && a.Status != StatusDelete)
-                    .ToListAsync();
-                foreach (var old in supersededMeasured)
-                {
-                    old.Status = StatusDelete;
-                    old.UpdatedBy = account;
-                    old.UpdatedTime = timestamp;
-                }
-            }
-            await Db.SaveAsync();
+            // 同一 PushCount 允许多个 batch：不再整批作废旧 batch（2026-11-05 变更），
+            // 改为「按点位取最新」——replay 阶段按 TheoreticalID 取 MeasureTime 最新的实测值，
+            // 旧批独有的点保留实测血统，不丢失。此处无需再处理旧批，直接进入 replay。
 
             // replay 0..当前 PushCount：按最新快照重建 derived（唯一滚动快照）。
             // 之前批次不可修改，因此 replay 是确定性的；失败直接回滚整个导入事务。
@@ -734,9 +763,9 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
 
     /// <summary>
     /// 计算所选梁段的定位坐标。
-    /// <para>2026-10-30 口径变更：全部所选梁段（含已拼装）统一重算——
-    /// P/Q 用快照中 MeasuredID&gt;0 的实测血统点（实测直取 + T 搬运）做配准，
-    /// D=所选梁段设计坐标，Gescha 预测定位坐标，不再直读快照；</para>
+    /// <para>2026-11-05 口径变更：全部所选梁段（含已拼装）统一重算——
+    /// 配准 Q 一律使用「本次上传（最新批次）的实测数据」（P=对应理论坐标，R=理论权值），
+    /// 不再使用快照中历史批次的实测值/搬运补全值，与误差分析 GetSteelBeamOffset 口径一致；</para>
     /// <para>已拼装/待拼装分类仅用于 DTO 的 MeasuredSegments/PendingSegments 展示与快照缺失校验；</para>
     /// <para>允许混合选择，但所选梁段必须按梁段顺序连续（不跳段）。</para>
     /// </summary>
@@ -799,20 +828,21 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
                 throw new InvalidOperationException(BizMessages.SteelDerivedSnapshotMissing(Lang, s));
         }
 
-        var theoryById = theory.ToDictionary(a => a.ID);
         var rowsWithOrder = new List<(CalcResultRowDTO Row, decimal Order)>();
 
-        // 全部所选梁段统一重算（2026-10-30 口径变更，含已拼装段）：
-        // P/Q = 快照中 MeasuredID>0 的实测血统点（实测直取 + T 搬运），D = 所选梁段设计坐标
+        // 全部所选梁段统一重算（2026-11-05 口径变更，与误差分析 GetSteelBeamOffset 一致）：
+        // 配准控制点 = 最新 PushCount 的按点合并有效实测集：P=理论坐标，Q=实测原值，R=理论权值；
+        // 不再使用快照中历史批次的实测/搬运点；D = 所选梁段设计坐标。
+        var effective = await LoadLatestPushEffectiveMeasuredAsync(girderId);
+
         var p = new List<List<decimal>>() { new(), new(), new() };
         var q = new List<List<decimal>>() { new(), new(), new() };
         var r = new List<List<decimal>>() { new(), new(), new() };
-        foreach (var row in snapshot.Where(a => a.MeasuredID != 0))
+        foreach (var a in effective)
         {
-            if (!theoryById.TryGetValue(row.TheoreticalID, out var t)) continue;
-            p[0].Add(t.DesignX); p[1].Add(t.DesignY); p[2].Add(t.DesignZ);
-            q[0].Add(row.X); q[1].Add(row.Y); q[2].Add(row.Z);
-            r[0].Add(t.Weight); r[1].Add(t.Weight); r[2].Add(t.Weight);
+            p[0].Add(a.DesignX); p[1].Add(a.DesignY); p[2].Add(a.DesignZ);
+            q[0].Add(a.MeasuredX); q[1].Add(a.MeasuredY); q[2].Add(a.MeasuredZ);
+            r[0].Add(a.Weight); r[1].Add(a.Weight); r[2].Add(a.Weight);
         }
         if (p[0].Count < 3)
             throw new InvalidOperationException(BizMessages.SteelCalcRegistrationPointsInsufficient(Lang, p[0].Count));
@@ -959,8 +989,9 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
 
     /// <summary>
     /// replay 核心：从 PushCount=0 到最大批次逐批重建滚动快照，最终 upsert 到 derived 表。
-    /// <para>必须升序：第 k 批依赖第 k-1 批的快照；同一 PushCount 只取 MeasureTime 最新的 batch。
-    /// 旧 batch 独有的点不会进入快照，天然满足「同一次顶推以最新 batch 为准」。</para>
+    /// <para>必须升序：第 k 批依赖第 k-1 批的快照；同一 PushCount 允许多个 batch，按「点位取最新」
+    /// 合并——每个测点取该 PushCount 下 MeasureTime 最新（其次实测行 ID 最大）的实测值，
+    /// 旧批独有的点保留实测血统，不整批作废。</para>
     /// </summary>
     private async Task<(int BatchCount, int PointCount)> RebuildDerivedCoreAsync(
         int projID, int girderID, string account, DateTime timestamp)
@@ -971,11 +1002,11 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         if (batches.Count == 0)
             throw new InvalidOperationException(BizMessages.SteelDerivedNothingToRebuild(Lang));
 
-        // 同一 PushCount 允许多个 batch：以 MeasureTime 最新的为准，旧 batch 视为被覆盖
-        var latestByPush = batches
+        // 同一 PushCount 允许多个 batch：按点位取最新（不整批作废）
+        var byPush = batches
             .GroupBy(a => a.PushCount)
-            .ToDictionary(g => g.Key, g => g.OrderByDescending(a => a.MeasureTime).ThenByDescending(a => a.ID).First());
-        var maxPush = latestByPush.Keys.Max();
+            .ToDictionary(g => g.Key, g => g.OrderByDescending(a => a.MeasureTime).ThenByDescending(a => a.ID).ToList());
+        var maxPush = byPush.Keys.Max();
 
         var theory = await LoadAllTheoryPointsAsync(girderID);
         var snapshot = new List<SteelBeamDerivedCalculator.SnapshotPoint>();
@@ -983,9 +1014,19 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
 
         for (var k = 0; k <= maxPush; k++)
         {
-            if (!latestByPush.TryGetValue(k, out var batch)) continue;
-            var measured = await LoadMeasuredWithTheoryAsync(batch.ID);
-            var result = SteelBeamDerivedCalculator.BuildSnapshot(k, batch.ID, measured, snapshot, theory, Lang);
+            if (!byPush.TryGetValue(k, out var pushBatches) || pushBatches.Count == 0) continue;
+            // 合并该 PushCount 全部 active 批次的实测行，逐点取 MeasureTime 最新（其次实测行 ID 最大）
+            var timeById = pushBatches.ToDictionary(b => b.ID, b => b.MeasureTime);
+            var merged = new List<SteelBeamDerivedCalculator.MeasuredPoint>();
+            foreach (var b in pushBatches)
+                merged.AddRange(await LoadMeasuredWithTheoryAsync(b.ID));
+            var measured = merged
+                .GroupBy(a => a.TheoreticalID)
+                .Select(g => g.OrderByDescending(a => timeById[a.BatchID]).ThenByDescending(a => a.MeasuredID).First())
+                .OrderBy(a => a.TheoreticalID)
+                .ToList();
+            var newest = pushBatches.First();
+            var result = SteelBeamDerivedCalculator.BuildSnapshot(k, newest.ID, measured, snapshot, theory, Lang);
             if (!result.Success) throw new InvalidOperationException(result.ErrorMessage);
             snapshot = result.Rows;
             batchCount++;
@@ -1088,6 +1129,7 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
                           select new
                           {
                               m.ID,
+                              m.BatchID,
                               m.TheoreticalID,
                               m.PointCode,
                               t.SegmentNo,
@@ -1103,7 +1145,30 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
             a.TheoreticalID, a.PointCode, a.SegmentNo,
             a.DesignX, a.DesignY, a.DesignZ,
             a.MeasuredX, a.MeasuredY, a.MeasuredZ,
-            a.Weight, a.ID)).ToList();
+            a.Weight, a.ID, a.BatchID)).ToList();
+    }
+
+    /// <summary>
+    /// 载入「最新 PushCount」的按点合并有效实测集（配准 Q 用）：
+    /// 同一 PushCount 允许多个 batch，逐点取 MeasureTime 最新（其次实测行 ID 最大）的实测值，
+    /// 与 replay 的按点合并口径一致；旧批独有的点保留实测血统。
+    /// </summary>
+    private async Task<List<SteelBeamDerivedCalculator.MeasuredPoint>> LoadLatestPushEffectiveMeasuredAsync(int girderId)
+    {
+        var batches = await Db.Query<biz_steel_beam_measure_batch>()
+            .Where(a => a.GirderID == girderId && a.Status != StatusDelete)
+            .ToListAsync();
+        if (batches.Count == 0) return new List<SteelBeamDerivedCalculator.MeasuredPoint>();
+        var maxPush = batches.Max(a => a.PushCount);
+        var pushBatches = batches.Where(a => a.PushCount == maxPush).ToList();
+        var timeById = pushBatches.ToDictionary(b => b.ID, b => b.MeasureTime);
+        var merged = new List<SteelBeamDerivedCalculator.MeasuredPoint>();
+        foreach (var b in pushBatches)
+            merged.AddRange(await LoadMeasuredWithTheoryAsync(b.ID));
+        return merged
+            .GroupBy(a => a.TheoreticalID)
+            .Select(g => g.OrderByDescending(a => timeById[a.BatchID]).ThenByDescending(a => a.MeasuredID).First())
+            .ToList();
     }
 
     /// <summary>载入本钢梁全部理论测点（逐段补全与出胎段识别共用）。</summary>
@@ -1179,10 +1244,13 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
     /// <summary>
     /// 计算梁段Z向线形偏差（误差分析数据源）。
     /// 数据来源：biz_steel_beam_derived_coordinate（推算坐标表）滚动快照 active 行。
-    /// 口径说明（2026-10-27 变更）：Z偏差 = 实测坐标 Z（快照 DerivedZ）− 定位坐标 Z；
+    /// 口径说明（2026-11-05 变更）：Z偏差 = 实测坐标 Z（快照 DerivedZ）− 定位坐标 Z；
     /// 定位坐标（计算值）由 SteelGirderAlignment.Gescha 加权刚体配准拟合：
-    /// 以全部快照点的「理论坐标 P / 快照坐标 Q / 权值 R」拟合全局变换，施加到各点理论坐标。
-    /// 测位筛选仅为展示过滤，不影响拟合（配准始终用全量测点）。
+    /// 配准 Q 一律使用「本次上传（最新批次）的实测数据」（P=对应理论坐标，R=理论权值），
+    /// 不再使用快照中前次批次的实测值/搬运补全值——快照点构成（实测/补全比例）随导入历史不同，
+    /// 会导致同样的实测数据在不同梁上拟合出不同的刚体变换，误差结果不一致；
+    /// 配准出 rot/t 后施加到全部理论点（D）得到各点定位坐标。
+    /// 测位筛选仅为展示过滤，不影响拟合。
     /// MeasuredID=0 的补全点：ZError 返回 null，前端折线图留空位（不画成 0）。
     /// </summary>
     /// <param name="girderId">梁ID</param>
@@ -1203,26 +1271,42 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         if (list.Count == 0) return result;
 
         // 定位坐标（计算值）：Gescha 加权刚体配准（s=1），
-        // P=理论坐标，Q=快照实测/搬运坐标，R=理论权值，D=全部理论点 → 每点定位坐标。
-        // 拟合使用全量快照点（与配准/推算阶段口径一致）；点数不足 3 时无法拟合，退化为理论值。
+        // 配准控制点 = 本次上传（最新批次）实测行：P=理论坐标，Q=实测坐标，R=理论权值；
+        // D=全部快照点的理论坐标 → 每点定位坐标。
+        // 最新批次实测不足 3 点（或无批次）时无法拟合，退化为理论值。
         var posZMap = new Dictionary<int, decimal>();
         int n = list.Count;
-        if (n >= SteelBeamDerivedCalculator.MinSegmentPoints)
+
+        // 配准控制点 = 最新 PushCount 的按点合并有效实测集（同 PushCount 多批次逐点取最新）
+        var measuredPts = await LoadLatestPushEffectiveMeasuredAsync(girderId);
+
+        if (measuredPts.Count >= SteelBeamDerivedCalculator.MinSegmentPoints && n >= SteelBeamDerivedCalculator.MinSegmentPoints)
         {
-            var matP = new double[3, n];
-            var matQ = new double[3, n];
-            var matR = new double[1, n];
+            int m = measuredPts.Count;
+            var matP = new double[3, m];
+            var matQ = new double[3, m];
+            var matR = new double[1, m];
+            for (int j = 0; j < m; j++)
+            {
+                var a = measuredPts[j];
+                matP[0, j] = (double)a.DesignX; matP[1, j] = (double)a.DesignY; matP[2, j] = (double)a.DesignZ;
+                matQ[0, j] = (double)a.MeasuredX; matQ[1, j] = (double)a.MeasuredY; matQ[2, j] = (double)a.MeasuredZ;
+                matR[0, j] = (double)a.Weight;
+            }
+            var matD = new double[3, n];
             for (int j = 0; j < n; j++)
             {
                 var a = list[j];
-                matP[0, j] = (double)a.t.DesignX; matP[1, j] = (double)a.t.DesignY; matP[2, j] = (double)a.t.DesignZ;
-                matQ[0, j] = (double)a.d.DerivedX; matQ[1, j] = (double)a.d.DerivedY; matQ[2, j] = (double)a.d.DerivedZ;
-                matR[0, j] = (double)a.t.Weight;
+                matD[0, j] = (double)a.t.DesignX; matD[1, j] = (double)a.t.DesignY; matD[2, j] = (double)a.t.DesignZ;
             }
-            var d1 = SteelGirderAlignment.Gescha(matP, matQ, matP, matR, 1.0);
+            var d1 = SteelGirderAlignment.Gescha(matP, matQ, matD, matR, 1.0);
             for (int j = 0; j < n; j++)
                 posZMap[list[j].t.ID] = Math.Round((decimal)d1[2, j], 4, MidpointRounding.AwayFromZero);
         }
+
+        // 误差只展示「最新 PushCount 有效集」内的点（2026-11-05 口径）：
+        // 历史批次搬运点/补全点不展示误差，避免不同梁因历史拼装进度不同而产生不一致。
+        var effectiveIds = measuredPts.Select(a => a.TheoreticalID).ToHashSet();
 
         var rows = list
             .Where(a => string.IsNullOrWhiteSpace(positionName) || a.t.PositionName == positionName)
@@ -1243,9 +1327,9 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
                     Z = a.t.DesignZ,
                     PredictZ = posZ,
                     // Z误差 = 实测坐标 Z（快照 DerivedZ）− 定位坐标 Z；
-                    // 补全点（MeasuredID=0）无实测，返回 null，折线图留空位
-                    ZError = a.d.MeasuredID != 0 ? a.d.DerivedZ - posZ : (decimal?)null,
-                    Value = a.d.MeasuredID != 0 ? a.d.DerivedZ - posZ : (decimal?)null
+                    // 仅最新有效集内的点返回误差，其余（搬运/补全）返回 null，折线图留空位
+                    ZError = effectiveIds.Contains(a.d.TheoreticalID) ? a.d.DerivedZ - posZ : (decimal?)null,
+                    Value = effectiveIds.Contains(a.d.TheoreticalID) ? a.d.DerivedZ - posZ : (decimal?)null
                 };
             })
             .ToList();

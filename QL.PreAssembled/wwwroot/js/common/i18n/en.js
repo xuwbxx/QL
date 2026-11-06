@@ -172,6 +172,7 @@ var enMessages = {
             positionName: 'Position Name',
             pushCount: 'Push Count',
             measureTime: 'Measure Time',
+            filledTag: 'Filled',
             // ---- Import dialog ----
             timePlaceholder: 'Select date and hour',
             theoryImportTip: 'Point code, design coordinates, pre-camber, weight, segment No. and position name are all required; coordinates and pre-camber are in meters, weight ranges from 0 to 1.',
