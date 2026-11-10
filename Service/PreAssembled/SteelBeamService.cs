@@ -996,11 +996,27 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
     private async Task<(int BatchCount, int PointCount)> RebuildDerivedCoreAsync(
         int projID, int girderID, string account, DateTime timestamp)
     {
+        var (snapshot, batchCount, maxPush) = await ComputeSnapshotAsync(girderID);
+        if (snapshot.Count == 0)
+            throw new InvalidOperationException(BizMessages.SteelDerivedNothingToRebuild(Lang));
+
+        await ReplaceSnapshotAsync(projID, girderID, maxPush, snapshot, account, timestamp);
+        return (batchCount, snapshot.Count);
+    }
+
+    /// <summary>
+    /// 内存重算滚动快照（不落库）：从 PushCount=0 到最大批次逐批 BuildSnapshot。
+    /// <para>同一 PushCount 多个 batch 按点位取最新；结果即「当前工况」各测点坐标，
+    /// 其中 MeasuredID != 0 的点为实测血统（历史实测经跨批次刚体变换搬运到当前状态），
+    /// 供误差分析作「当前工况实测值」反向拟合来源，与落库快照解耦。</para>
+    /// </summary>
+    private async Task<(List<SteelBeamDerivedCalculator.SnapshotPoint> Snapshot, int BatchCount, int MaxPush)> ComputeSnapshotAsync(int girderId)
+    {
         var batches = await Db.Query<biz_steel_beam_measure_batch>()
-            .Where(a => a.GirderID == girderID && a.Status != StatusDelete)
+            .Where(a => a.GirderID == girderId && a.Status != StatusDelete)
             .ToListAsync();
         if (batches.Count == 0)
-            throw new InvalidOperationException(BizMessages.SteelDerivedNothingToRebuild(Lang));
+            return (new List<SteelBeamDerivedCalculator.SnapshotPoint>(), 0, 0);
 
         // 同一 PushCount 允许多个 batch：按点位取最新（不整批作废）
         var byPush = batches
@@ -1008,7 +1024,7 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
             .ToDictionary(g => g.Key, g => g.OrderByDescending(a => a.MeasureTime).ThenByDescending(a => a.ID).ToList());
         var maxPush = byPush.Keys.Max();
 
-        var theory = await LoadAllTheoryPointsAsync(girderID);
+        var theory = await LoadAllTheoryPointsAsync(girderId);
         var snapshot = new List<SteelBeamDerivedCalculator.SnapshotPoint>();
         var batchCount = 0;
 
@@ -1032,8 +1048,7 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
             batchCount++;
         }
 
-        await ReplaceSnapshotAsync(projID, girderID, maxPush, snapshot, account, timestamp);
-        return (batchCount, snapshot.Count);
+        return (snapshot, batchCount, maxPush);
     }
 
     /// <summary>
@@ -1243,15 +1258,14 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
 
     /// <summary>
     /// 计算梁段Z向线形偏差（误差分析数据源）。
-    /// 数据来源：biz_steel_beam_derived_coordinate（推算坐标表）滚动快照 active 行。
-    /// 口径说明（2026-11-05 变更）：Z偏差 = 实测坐标 Z（快照 DerivedZ）− 定位坐标 Z；
-    /// 定位坐标（计算值）由 SteelGirderAlignment.Gescha 加权刚体配准拟合：
-    /// 配准 Q 一律使用「本次上传（最新批次）的实测数据」（P=对应理论坐标，R=理论权值），
-    /// 不再使用快照中前次批次的实测值/搬运补全值——快照点构成（实测/补全比例）随导入历史不同，
-    /// 会导致同样的实测数据在不同梁上拟合出不同的刚体变换，误差结果不一致；
-    /// 配准出 rot/t 后施加到全部理论点（D）得到各点定位坐标。
+    /// 口径说明（2026-11-06 变更）：
+    /// 实测值 = 反向拟合：内存重算滚动快照（0..最大工况逐批 BuildSnapshot），
+    ///         把历史实测经跨批次刚体变换搬运到当前状态，得到各点「当前工况实测值」，
+    ///         与落库快照解耦（不依赖是否已执行重算）。
+    /// 理论值 = 定位坐标：Gescha 加权刚体配准，配准 Q 用最新工况实测点，施加到快照各点理论坐标。
+    /// Z偏差 = 实测值 − 定位坐标 Z；所有 MeasuredID != 0 的实测血统点均输出误差，
+    /// 补全点（MeasuredID=0）ZError 返回 null，前端折线图留空位（不画成 0）。
     /// 测位筛选仅为展示过滤，不影响拟合。
-    /// MeasuredID=0 的补全点：ZError 返回 null，前端折线图留空位（不画成 0）。
     /// </summary>
     /// <param name="girderId">梁ID</param>
     /// <param name="positionName">测位筛选，不传则全部</param>
@@ -1261,23 +1275,21 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
     {
         var result = new CalcSteelBeamOffsetDTO { OffsetType = offsetType };
 
-        // 滚动快照：derived 表 active 行（每点一条），不再按批次过滤
-        var query = from d in Db.Query<biz_steel_beam_derived_coordinate>()
-                        .Where(a => a.GirderID == girderId && a.Status != StatusDelete)
-                    join t in Db.Query<biz_steel_beam_theoretical>()
-                        .Where(a => a.Status != StatusDelete && a.GirderID == girderId) on d.TheoreticalID equals t.ID
-                    select new { d, t };
-        var list = await query.ToListAsync();
-        if (list.Count == 0) return result;
+        // 1) 反向拟合：内存重算滚动快照（不读落库快照），得到「当前工况」各点坐标；
+        //    MeasuredID != 0 = 实测血统（历史实测经跨批次刚体变换搬运到当前状态），即当前工况实测值。
+        var (snapshot, _, _) = await ComputeSnapshotAsync(girderId);
+        if (snapshot.Count == 0) return result;
 
-        // 定位坐标（计算值）：Gescha 加权刚体配准（s=1），
-        // 配准控制点 = 本次上传（最新批次）实测行：P=理论坐标，Q=实测坐标，R=理论权值；
-        // D=全部快照点的理论坐标 → 每点定位坐标。
-        // 最新批次实测不足 3 点（或无批次）时无法拟合，退化为理论值。
+        var tids = snapshot.Select(a => a.TheoreticalID).Distinct().ToList();
+        var theoryMap = await Db.Query<biz_steel_beam_theoretical>()
+            .Where(a => a.GirderID == girderId && a.Status != StatusDelete && tids.Contains(a.ID))
+            .ToDictionaryAsync(a => a.ID);
+
+        // 2) 定位坐标（理论值）：Gescha 加权刚体配准（s=1），
+        //    配准 Q = 最新工况实测点（与监控计算口径一致），D = 快照各点理论坐标 → 每点定位坐标。
+        //    最新工况实测不足 3 点时无法拟合，退化为理论设计值。
         var posZMap = new Dictionary<int, decimal>();
-        int n = list.Count;
-
-        // 配准控制点 = 最新 PushCount 的按点合并有效实测集（同 PushCount 多批次逐点取最新）
+        int n = snapshot.Count;
         var measuredPts = await LoadLatestPushEffectiveMeasuredAsync(girderId);
 
         if (measuredPts.Count >= SteelBeamDerivedCalculator.MinSegmentPoints && n >= SteelBeamDerivedCalculator.MinSegmentPoints)
@@ -1296,40 +1308,37 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
             var matD = new double[3, n];
             for (int j = 0; j < n; j++)
             {
-                var a = list[j];
-                matD[0, j] = (double)a.t.DesignX; matD[1, j] = (double)a.t.DesignY; matD[2, j] = (double)a.t.DesignZ;
+                var t = theoryMap[snapshot[j].TheoreticalID];
+                matD[0, j] = (double)t.DesignX; matD[1, j] = (double)t.DesignY; matD[2, j] = (double)t.DesignZ;
             }
             var d1 = SteelGirderAlignment.Gescha(matP, matQ, matD, matR, 1.0);
             for (int j = 0; j < n; j++)
-                posZMap[list[j].t.ID] = Math.Round((decimal)d1[2, j], 4, MidpointRounding.AwayFromZero);
+                posZMap[snapshot[j].TheoreticalID] = Math.Round((decimal)d1[2, j], 4, MidpointRounding.AwayFromZero);
         }
 
-        // 误差只展示「最新 PushCount 有效集」内的点（2026-11-05 口径）：
-        // 历史批次搬运点/补全点不展示误差，避免不同梁因历史拼装进度不同而产生不一致。
-        var effectiveIds = measuredPts.Select(a => a.TheoreticalID).ToHashSet();
-
-        var rows = list
-            .Where(a => string.IsNullOrWhiteSpace(positionName) || a.t.PositionName == positionName)
+        // 3) 误差 = 当前工况实测值（反向拟合快照 Z）− 定位坐标 Z；
+        //    所有 MeasuredID != 0 的实测血统点均输出误差；补全点（MeasuredID=0）留空（折线断开）。
+        var rows = snapshot
+            .Where(a => theoryMap.ContainsKey(a.TheoreticalID)
+                        && (string.IsNullOrWhiteSpace(positionName) || theoryMap[a.TheoreticalID].PositionName == positionName))
             .Select(a =>
             {
-                // 计算值：定位坐标 Z；未拟合时兜底为理论设计 Z
-                var posZ = posZMap.TryGetValue(a.t.ID, out var z) ? z : a.t.DesignZ;
+                var t = theoryMap[a.TheoreticalID];
+                var posZ = posZMap.TryGetValue(a.TheoreticalID, out var z) ? z : t.DesignZ;
                 return new CalcSteelBeamOffsetRow
                 {
-                    PushCount = a.d.PushCount,
-                    SegmentNo = a.t.SegmentNo,
-                    PointCode = a.t.PointCode,
-                    PositionName = a.t.PositionName,
-                    PositionOrder = a.t.PositionOrder,
-                    PointDistance = a.t.DistanceFromStart,
-                    X = a.t.DesignX,
-                    Y = a.t.DesignY,
-                    Z = a.t.DesignZ,
+                    PushCount = a.SourcePushCount,
+                    SegmentNo = a.SegmentNo,
+                    PointCode = a.PointCode,
+                    PositionName = t.PositionName,
+                    PositionOrder = t.PositionOrder,
+                    PointDistance = t.DistanceFromStart,
+                    X = t.DesignX,
+                    Y = t.DesignY,
+                    Z = t.DesignZ,
                     PredictZ = posZ,
-                    // Z误差 = 实测坐标 Z（快照 DerivedZ）− 定位坐标 Z；
-                    // 仅最新有效集内的点返回误差，其余（搬运/补全）返回 null，折线图留空位
-                    ZError = effectiveIds.Contains(a.d.TheoreticalID) ? a.d.DerivedZ - posZ : (decimal?)null,
-                    Value = effectiveIds.Contains(a.d.TheoreticalID) ? a.d.DerivedZ - posZ : (decimal?)null
+                    ZError = a.MeasuredID != 0 ? a.Z - posZ : (decimal?)null,
+                    Value = a.MeasuredID != 0 ? a.Z - posZ : (decimal?)null
                 };
             })
             .ToList();
