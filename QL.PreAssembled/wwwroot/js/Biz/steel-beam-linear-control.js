@@ -466,18 +466,42 @@
                     // X 轴保持 0→nMax（原点在左）；顺序反置由数据的 nMax-n 变换实现，不用 inverse（那会连刻度一起翻）
                     xAxis: { name: i18nUtils.$t('biz.steelBeam.analysisXAxis'), type: 'value' },
                     yAxis: { name: i18nUtils.$t('biz.steelBeam.analysisYAxis'), type: 'value' },
-                    series: [{ name: pos, type: 'line', data: seriesData, smooth: false, connectNulls: false }]
+                    // 单测位小图统一使用第 1 种颜色；connectNulls=true 使孤点与前一个点相连（折线连续）
+                    series: [{ name: pos, type: 'line', data: seriesData, smooth: false, connectNulls: true, color: POSITION_COLORS[0] }]
                 };
                 if (big) option.toolbox = buildSaveToolbox();
                 return option;
             }
+            // 测位配色：固定 30 种常用分类色（不随机，刷新前后一致）。
+            // 前 9 个沿用 ECharts 内置主题色（token.color.theme），第 10 个补红色凑满前 10；
+            // 其余为常用高区分度分类色。合并图按测位顺序取色，单测位小图统一取第 1 色。
+            const POSITION_COLORS = [
+                // —— 原 ECharts 默认主题色（9 个）——
+                '#5070dd', '#b6d634', '#505372', '#ff994d', '#0ca8df',
+                '#ffd10a', '#fb628b', '#785db0', '#3fbe95',
+                // —— 第 10 个（补红）——
+                '#d94f4f',
+                // —— 其余 20 个常用分类色 ——
+                '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf',
+                '#2ca02c', '#1f77b4', '#ff7f0e', '#9467bd', '#d62728',
+                '#aec7e8', '#ffbb78', '#98df8a', '#ff9896', '#c5b0d5',
+                '#c49c94', '#f7b6d2', '#c7c7c7', '#dbdb8d', '#9edae5'
+            ];
+            // 合并图：按测位顺序取色（超过 30 个循环复用）
+            const positionColor = function (pos) {
+                const idx = (posNameList.value || []).indexOf(pos);
+                return POSITION_COLORS[(idx < 0 ? 0 : idx) % POSITION_COLORS.length];
+            };
             // 全部测位合并为一个折线图（多 series，图例=测位名）
             function buildMergeOption(big) {
                 const series = posNameList.value.map(function (pos) {
                     const rows = cardData.value[pos] || [];
-                    return { name: pos, type: 'line', smooth: false, connectNulls: false, data: rows.map(r => [Number(r.pointDistance) || 0, r.zError == null ? null : Number(r.zError)]) };
+                    // connectNulls=true：补全点（null）间隙直接连线，孤点与前一个点相连，折线保持连续
+                    return { name: pos, type: 'line', smooth: false, connectNulls: true, color: positionColor(pos), data: rows.map(r => [Number(r.pointDistance) || 0, r.zError == null ? null : Number(r.zError)]) };
                 });
                 const option = {
+                    // 30 色固定调色板（图例与折线一致，避免默认 10 色循环导致颜色重复）
+                    color: POSITION_COLORS,
                     tooltip: {
                         trigger: 'axis',
                         // 悬浮框限制在图表容器内；按误差值降序并过滤无数据项，避免列表过高/溢出页面
