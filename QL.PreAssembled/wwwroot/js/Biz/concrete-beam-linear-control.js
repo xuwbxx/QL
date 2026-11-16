@@ -486,7 +486,6 @@
             }
             function handleImportDesignCoord() { openImport('design'); }
             function downloadDesignTemplate() { window.location.href = '/Biz/ConcreteBeam/DesignCoordinateTemplate'; }
-            function handleDesignPrint() { ElMessage.info(i18nUtils.$t('biz.concreteBeam.printTodo')); }
 
             // ===== 设计坐标「核对与预览」=====
             // 上半段：已计算坐标（含预拱度）；下半段：PrintReport 几何报告。
@@ -670,22 +669,39 @@
                 await handleReportPrint();
             }
 
-            /** 设计坐标的打印/预览只读已落库 calculation：有预览/草稿时禁止，避免看到旧值。 */
-            function ensureDesignConfirmedForPreview() {
-                if (designPreviewToken.value ||
-                    designNormalize.value !== designUseCalculation.value ||
-                    designIncludeCamber.value !== confirmedDesignIncludesCamber.value) {
-                    ElMessage.warning(i18nUtils.$t('biz.concreteBeam.designConfirmBeforePreview'));
-                    return false;
-                }
-                return true;
+            /** 预拱度 PDF 地址：Project Title / Casting Set / Date + Camber 表格（与界面列一致） */
+            function buildCamberPdfUrl() {
+                return '/Biz/ConcreteBeam/CamberPreviewPdf'
+                    + '?castingGroupID=' + encodeURIComponent(groupID)
+                    + '&timezoneOffsetMinutes=' + getClientTimezoneOffsetMinutes();
             }
+            /** 预拱度预览：复用【报告】页签的 PDF 预览弹窗。 */
+            async function showCamberPreview() {
+                if (!guardOrientationPreview()) return;
+                invalidateReportCache();
+                reportUrlOverride.value = buildCamberPdfUrl();
+                reportDownloadName.value = 'camber-preview';
+                setReportDialogTitle(function () { return i18nUtils.$t('biz.concreteBeam.camberPreviewDialogTitle'); });
+                reportDialogVisible.value = true;
+                await renderReportPage(1);
+            }
+            /** 预拱度打印：先打开 PDF 预览，再调用报告弹窗的打印。 */
+            async function printCamberPreview() {
+                if (!guardOrientationPreview()) return;
+                invalidateReportCache();
+                reportUrlOverride.value = buildCamberPdfUrl();
+                reportDownloadName.value = 'camber-preview';
+                setReportDialogTitle(function () { return i18nUtils.$t('biz.concreteBeam.camberPreviewDialogTitle'); });
+                reportDialogVisible.value = true;
+                await renderReportPage(1);
+                await handleReportPrint();
+            }
+
+            // 设计坐标的打印/预览：与预拱度页签一致，不做「先应用再预览」校验，直接走 PDF 预览/打印
             async function handleDesignPreview() {
-                if (!ensureDesignConfirmedForPreview()) return;
                 await showOrientationPreview();
             }
             async function handleDesignPrint() {
-                if (!ensureDesignConfirmedForPreview()) return;
                 await printOrientationPreview();
             }
 
@@ -803,8 +819,8 @@
             }
             // 预拱度页签的「打印 / 预览」与 General Coordinates 完全一致：
             // 预拱度本身没有独立的预览形态，它已叠加进 design_coordinate_calculation，故共用坐标核对预览
-            async function handleCamberPreview() { await showOrientationPreview(); }
-            async function handleCamberPrint() { await printOrientationPreview(); }
+            async function handleCamberPreview() { await showCamberPreview(); }
+            async function handleCamberPrint() { await printCamberPreview(); }
             async function handleCamberConfirm() {
                 if (!ensureSurveyEditable(i18nUtils.$t('biz.concreteBeam.subjectCamber'))) return;
                 if (!camberPreviewToken.value) { ElMessage.info(i18nUtils.$t('biz.concreteBeam.importCamberFirst')); return; }
@@ -851,8 +867,55 @@
                 } catch (e) { console.error('load pouring coords error', e); }
             }
 
-            function handlePouringPrint() { ElMessage.info(i18nUtils.$t('biz.concreteBeam.printTodo')); }
-            function handlePouringPreview() { ElMessage.info('预览功能待开发'); }
+            // 2026-11-13：浇筑坐标打印/预览。内容口径 = 页头 5 行 + 只有 AS-CAST COORDINATES 一章
+            // （后端 SegmentReportKind.Pouring）；只输出已填报实测数据的梁段，预览/打印复用报告页签的 PDF 弹窗与打印通道。
+            function buildPouringCoordsPdfUrl() {
+                return '/Biz/ConcreteBeam/PouringCoordsPdf'
+                    + '?castingGroupID=' + encodeURIComponent(groupID)
+                    + '&segmentName=' + encodeURIComponent(pouringView.segmentName || '')
+                    + '&timezoneOffsetMinutes=' + getClientTimezoneOffsetMinutes();
+            }
+
+            /** 未选段 / 未填报实测数据时拦下，不出图。 */
+            function ensurePouringPrintable() {
+                if (!pouringView.segmentName) {
+                    ElMessage.warning(i18nUtils.$t('biz.concreteBeam.selectSegmentPrompt'));
+                    return false;
+                }
+                if (!pouringView.isFilled) {
+                    ElMessage.warning(i18nUtils.$t('biz.concreteBeam.pouringNotFilledBlock'));
+                    return false;
+                }
+                return true;
+            }
+
+            async function handlePouringPreview() {
+                if (!ensurePouringPrintable()) return;
+                invalidateReportCache();
+                reportUrlOverride.value = buildPouringCoordsPdfUrl();
+                reportDownloadName.value = (pouringView.segmentName || 'segment') + '-pouringcoords';
+                setReportDialogTitle(function () {
+                    return (pouringView.segmentName || '') + ' · ' + i18nUtils.$t('biz.concreteBeam.tabPouringCoord');
+                });
+                reportDialogVisible.value = true;
+                await renderReportPage(1);
+            }
+
+            async function handlePouringPrint() {
+                if (!ensurePouringPrintable()) return;
+                invalidateReportCache();
+                reportUrlOverride.value = buildPouringCoordsPdfUrl();
+                reportDownloadName.value = (pouringView.segmentName || 'segment') + '-pouringcoords';
+                reportLoading.value = true;
+                try {
+                    printPdfBlob(await fetchReportBlob());
+                } catch (e) {
+                    ElMessage.error((e && e.message) || i18nUtils.$t('biz.concreteBeam.reportGenFailed'));
+                } finally {
+                    reportLoading.value = false;
+                }
+            }
+
             function handlePouringCancel() { ElMessage.info(i18nUtils.$t('biz.concreteBeam.cancelled')); }
 
             // ========== 报告页签 ==========
@@ -863,7 +926,9 @@
             var reportIncludeAll = Vue.ref(true);
             var reportSegmentList = Vue.ref([]);
             var reportSegmentName = Vue.ref('');
-            var reportSegmentType = Vue.ref('已浇筑梁段');
+            // 2026-11-13：整体报告 3 项 + 单梁段报告 2 项合并为同一组单选，全局只能选中一个。
+            // 初值：整体报告选中「理论坐标」，单梁段组不选中（此时梁段名称下拉禁用）。
+            var reportSegmentType = Vue.ref('');
             var reportLoading = Vue.ref(false);
             var reportExporting = Vue.ref(false);
             var reportUnavailableHint = Vue.ref('');
@@ -922,7 +987,10 @@
             /** 整体报告的单选/勾选变化：切到整体报告并作废已缓存的 PDF（includeAll 也影响取数）。 */
             function onReportOverallChange() {
                 reportScope.value = 'overall';
+                // 同一组单选：清空单梁段报告的选择，保证全局只有一个选中项
+                reportSegmentType.value = '';
                 invalidateReportCache();
+                refreshReportHint();
             }
 
             function reportKindSuffix() { return currentReportType(); }
@@ -1014,6 +1082,8 @@
             /** 报告类型单选变化：缓存作废 + 刷新提示。 */
             function onReportTypeChange() {
                 reportScope.value = 'segment';
+                // 同一组单选：清空整体报告的选择，保证全局只有一个选中项
+                reportOverallType.value = '';
                 invalidateReportCache();
                 refreshReportHint();
             }
@@ -1041,6 +1111,8 @@
             async function fetchReportBlob() {
                 var token = localStorage.getItem('authToken');
                 var resp = await fetch(buildReportUrl(), {
+                    // 2026-11-13：报告每次都要重新生成，禁用浏览器缓存（否则同一 URL 会拿回旧 PDF）
+                    cache: 'no-store',
                     headers: token ? { 'Authorization': 'Bearer ' + token } : {}
                 });
                 var contentType = resp.headers.get('content-type') || '';
@@ -1127,35 +1199,40 @@
             }
             async function reportZoomOut() { reportZoom.value = Math.max(0.5, Number((reportZoom.value - 0.2).toFixed(2))); await renderReportPage(reportPageNo.value); }
 
+            /** 用隐藏 iframe 载入 PDF 字节并调起浏览器打印（报告页签与浇筑坐标共用）。 */
+            function printPdfBlob(blob) {
+                var url = URL.createObjectURL(blob);
+                var frame = document.createElement('iframe');
+                frame.style.position = 'fixed';
+                frame.style.right = '0';
+                frame.style.bottom = '0';
+                frame.style.width = '0';
+                frame.style.height = '0';
+                frame.style.border = '0';
+                frame.onload = function () {
+                    try {
+                        frame.contentWindow.focus();
+                        frame.contentWindow.print();
+                    } catch (e) {
+                        ElMessage.warning(i18nUtils.$t('biz.concreteBeam.printBlocked'));
+                    }
+                    // 打印对话框是模态的，这里延后回收；PDF 文档较大，给它足够时间
+                    setTimeout(function () {
+                        if (frame.parentNode) frame.parentNode.removeChild(frame);
+                        URL.revokeObjectURL(url);
+                    }, 60000);
+                };
+                frame.src = url;
+                document.body.appendChild(frame);
+            }
+
             /** 打印：隐藏 iframe 载入同一份 PDF 后调浏览器打印（与预览共用已取回的字节）。 */
             async function handleReportPrint() {
                 if (!ensureReportReady()) return;
                 reportLoading.value = true;
                 try {
                     if (!reportPdfBlob) reportPdfBlob = await fetchReportBlob();
-                    var url = URL.createObjectURL(reportPdfBlob);
-                    var frame = document.createElement('iframe');
-                    frame.style.position = 'fixed';
-                    frame.style.right = '0';
-                    frame.style.bottom = '0';
-                    frame.style.width = '0';
-                    frame.style.height = '0';
-                    frame.style.border = '0';
-                    frame.onload = function () {
-                        try {
-                            frame.contentWindow.focus();
-                            frame.contentWindow.print();
-                        } catch (e) {
-                            ElMessage.warning(i18nUtils.$t('biz.concreteBeam.printBlocked'));
-                        }
-                        // 打印对话框是模态的，这里延后回收；PDF 文档较大，给它足够时间
-                        setTimeout(function () {
-                            if (frame.parentNode) frame.parentNode.removeChild(frame);
-                            URL.revokeObjectURL(url);
-                        }, 60000);
-                    };
-                    frame.src = url;
-                    document.body.appendChild(frame);
+                    printPdfBlob(reportPdfBlob);
                 } catch (e) {
                     ElMessage.error((e && e.message) || i18nUtils.$t('biz.concreteBeam.reportGenFailed'));
                 } finally {
@@ -1187,6 +1264,24 @@
                 } finally {
                     reportExporting.value = false;
                 }
+            }
+
+            /**
+             * 报告页签底部按钮：先清掉外部入口（设站及测量打印 / 浇筑坐标打印）留下的地址与缓存，
+             * 否则会命中 reportUrlOverride 而打出上一次那份 PDF。弹窗内的按钮不走这里。
+             */
+            function handleReportTabPrint() {
+                reportUrlOverride.value = '';
+                reportDownloadName.value = '';
+                invalidateReportCache();
+                return handleReportPrint();
+            }
+
+            function handleReportTabExport() {
+                reportUrlOverride.value = '';
+                reportDownloadName.value = '';
+                invalidateReportCache();
+                return handleReportExport();
             }
 
             function handleReportCancel() {
@@ -1629,6 +1724,8 @@
                     + '?castingGroupID=' + encodeURIComponent(groupID)
                     + '&segmentName=' + encodeURIComponent(segmentName || '')
                     + '&reportType=' + (isFilled ? 'baogao' : 'setting')
+                    // 设站及测量打印：不输出 AS-CAST COORDINATES 及其后内容（报告页签不受影响）
+                    + '&excludeAsCast=true'
                     + '&timezoneOffsetMinutes=' + getClientTimezoneOffsetMinutes();
                 reportDownloadName.value = (segmentName || 'segment') + '-' + (isFilled ? 'baogao' : 'setting');
                 setReportDialogTitle(function () {
@@ -1705,6 +1802,9 @@
             var alarmRecords = Vue.ref([]);
             var alarmHasConfig = Vue.ref(false);
             var alarmDialogVisible = Vue.ref(false);
+            // 2026-11-13：已有梁段实测填报时预警配置锁定（服务端 GetAlarmConfig 返回 locked）。
+            // 锁定时弹框只读，「修改」「确定」均不可用，从未配置过也不能首次录入。
+            var alarmConfigLocked = Vue.ref(false);
             // 弹框编辑状态机：首次录入/点「修改」→ 可编辑；点「确定」→ 只读
             var alarmConfigEditable = Vue.ref(false);
             var alarmConfigForm = Vue.reactive({
@@ -1774,12 +1874,25 @@
                     alarmConfigForm.level3Min = res && res.level3Min != null ? res.level3Min : '';
                     alarmConfigForm.level3Max = res && res.level3Max != null ? res.level3Max : '';
                     // 已存在配置 → 打开即为只读，需点「修改」解锁
-                    alarmConfigEditable.value = !(res && res.hasConfig);
+                    // 入口已移到【项目信息】，此处按需回填 hasConfig，不再依赖先进入报警页签
+                    alarmHasConfig.value = !!(res && res.hasConfig);
+                    alarmConfigLocked.value = !!(res && res.locked);
+                    // 锁定时一律只读（含「从未配置过」的情形），保证阈值口径不被改写
+                    alarmConfigEditable.value = !(res && res.hasConfig) && !alarmConfigLocked.value;
                     alarmDialogVisible.value = true;
                 }).catch(function (e) { console.error('load alarm config error', e); });
             }
 
-            function onAlarmConfigEdit() { alarmConfigEditable.value = true; }
+            function onAlarmConfigEdit() {
+                // 视图层已禁用按钮，这里是防绕过（键盘残留事件等）；服务端 SaveAlarmConfig 同样会拒绝
+                if (alarmConfigLocked.value) {
+                    ElMessage.warning(i18nUtils.$t('biz.concreteBeam.surveyLockedAction', {
+                        subject: i18nUtils.$t('biz.concreteBeam.alarmConfig')
+                    }));
+                    return;
+                }
+                alarmConfigEditable.value = true;
+            }
 
             function toNumOrNull(v) {
                 if (v === '' || v === null || v === undefined) return null;
@@ -1788,6 +1901,13 @@
             }
 
             async function handleAlarmConfigSave() {
+                // 2026-11-13：锁定后不允许保存（兜底；服务端 SaveAlarmConfig 同样拒绝）
+                if (alarmConfigLocked.value) {
+                    ElMessage.warning(i18nUtils.$t('biz.concreteBeam.surveyLockedAction', {
+                        subject: i18nUtils.$t('biz.concreteBeam.alarmConfig')
+                    }));
+                    return;
+                }
                 var pairs = [
                     ['level1Min', 'level1Max', i18nUtils.$t('biz.concreteBeam.alarmLevel1')],
                     ['level2Min', 'level2Max', i18nUtils.$t('biz.concreteBeam.alarmLevel2')],
@@ -1913,6 +2033,8 @@
                 handlePouringPrint: handlePouringPrint,
                 handlePouringPreview: handlePouringPreview,
                 handlePouringCancel: handlePouringCancel,
+                // 梁段名称下拉的禁用条件由 reportScope 决定（overall → 禁用）
+                reportScope: reportScope,
                 reportOverallType: reportOverallType,
                 reportIncludeAll: reportIncludeAll,
                 onReportOverallChange: onReportOverallChange,
@@ -1939,6 +2061,9 @@
                 handleReportPrint: handleReportPrint,
                 handleReportPreview: handleReportPreview,
                 handleReportExport: handleReportExport,
+                // 页签底部按钮：先清外部入口（设站及测量 / 浇筑坐标）留下的地址
+                handleReportTabPrint: handleReportTabPrint,
+                handleReportTabExport: handleReportTabExport,
                 handleReportCancel: handleReportCancel,
                 // 误差分析与报警
                 alarmLoading: alarmLoading,
@@ -1946,6 +2071,7 @@
                 alarmRecords: alarmRecords,
                 alarmHasConfig: alarmHasConfig,
                 alarmDialogVisible: alarmDialogVisible,
+                alarmConfigLocked: alarmConfigLocked,
                 alarmConfigEditable: alarmConfigEditable,
                 alarmConfigForm: alarmConfigForm,
                 setAlarmChartRef: setAlarmChartRef,

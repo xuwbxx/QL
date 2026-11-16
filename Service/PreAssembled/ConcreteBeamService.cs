@@ -406,6 +406,39 @@ public partial class ConcreteBeamService : ServiceBase<biz_project_bridge_castin
         return ConcreteBeamOrientationReportBuilder.Build(model);
     }
 
+    /// <summary>
+    /// 预拱度「打印/预览」PDF：页首 Project Title / Casting Set / Date（含客户端时区），
+    /// 其下 Camber: 标题 + 与界面一致的预拱度表格（No. / Name / ZE / ZC / ZW，全部数据不分页）。
+    /// </summary>
+    public async Task<byte[]> BuildCamberPreviewPdf(int castingGroupID, int? timezoneOffsetMinutes = null)
+    {
+        var context = await EnsureCastingGroupAccess(castingGroupID);
+
+        var rows = await Db.Query<biz_concrete_beam_camber_calculation>()
+            .Where(a => a.CastingGroupID == castingGroupID && a.Status != -1)
+            .OrderBy(a => a.ID)
+            .Select(a => new { a.NodeName, a.ZE, a.ZC, a.ZW })
+            .ToListAsync();
+        if (rows.Count == 0)
+            throw new InvalidOperationException(BizMessages.CamberRequired(Lang));
+
+        var model = new CamberReportModel
+        {
+            ProjectTitle = context.ProjectName,
+            CastingSet = context.CastingGroupName,
+            ReportDate = NowForClient(timezoneOffsetMinutes),
+            TimezoneOffsetMinutes = timezoneOffsetMinutes,
+            Headers = new List<string> { "No.", "Name", "ZE", "ZC", "ZW" },
+            Rows = rows.Select((a, i) => new List<string>
+            {
+                (i + 1).ToString(CultureInfo.InvariantCulture),
+                a.NodeName ?? string.Empty,
+                Fmt4(a.ZE), Fmt4(a.ZC), Fmt4(a.ZW)
+            }).ToList()
+        };
+        return ConcreteBeamCamberReportBuilder.Build(model);
+    }
+
     /// <summary>decimal → 4 位小数字符串（不变文化）。</summary>
     private static string Fmt4(decimal v) => v.ToString("0.0000", CultureInfo.InvariantCulture);
 
@@ -1435,6 +1468,10 @@ public partial class ConcreteBeamService : ServiceBase<biz_project_bridge_castin
         {
             Db.BeginTransaction();
             var isNew = existing == null;
+            // 2026-11-13：修改已填报段时，先留存改动前的录入参数快照，写入后再比对。
+            // 只要有任一参数发生变化，本段端面上已生成的预警记录就要作废并按新数据重建——
+            // 阈值判级依赖偏差，偏差变了等级可能从二级跳到三级，而幂等键含等级，旧记录不会被覆盖。
+            var surveyParamBefore = isNew ? null : SurveyParamSnapshot(existing!);
             entity = existing ?? new biz_concrete_beam_segment
             {
                 ProjID = context.ProjID,
@@ -1448,6 +1485,8 @@ public partial class ConcreteBeamService : ServiceBase<biz_project_bridge_castin
             else { entity.UpdatedBy = account; entity.UpdatedTime = now; }
             ApplySurveyInput(entity, req, target);
             ApplyCalcResult(entity, output.CalcResult);
+            // 参数是否真的变了（新建段无需比对；值完全一致则不动既有预警记录与预警时间）
+            var surveyChanged = !isNew && SurveyParamChanged(surveyParamBefore!, SurveyParamSnapshot(entity));
             // 先落 segment 拿到主键，再写以其为外键的测点行
             await Db.SaveAsync();
 
@@ -1480,6 +1519,11 @@ public partial class ConcreteBeamService : ServiceBase<biz_project_bridge_castin
             UpsertMeasure(context, castingGroupID, entity.ID, 0, output.KCT[2 * m + 1], measureList, account, now);
 
             await Db.SaveAsync();
+
+            // 2026-11-13：本段实测参数发生变化 → 先作废本段端面上已生成的预警记录（含不同等级的历史记录），
+            // 再由新数据重建，避免新旧判级并存。
+            if (surveyChanged)
+                await ClearAlarmRecordsAsync(castingGroupID, jointIndexes.Select(ji => source[ji].ID), now, account);
 
             // 误差分析与报警：提交成功后按预警配置生成/更新预警记录（同事务，失败即整体回滚）
             await EnsureAlarmRecordsAsync(context.ProjID, context.GirderID, castingGroupID, entity.ID,
@@ -1791,13 +1835,29 @@ public partial class ConcreteBeamService : ServiceBase<biz_project_bridge_castin
     /// <param name="castingGroupID">浇筑组ID。</param>
     /// <param name="segmentName">梁段名称，格式 {节点1}-{节点2}。</param>
     /// <param name="reportType"><see cref="ReportTypeSetup"/> / <see cref="ReportTypeAsCast"/>；其余值一律按梁段设置处理。</param>
+    /// <param name="excludeAsCast">
+    /// true = 不输出 AS-CAST COORDINATES 章及其后内容（【设站及测量】打印用）；
+    /// false = 完整三章（【报告】页签用）。此前章节（MATCH-CAST SETUP / SURVEY）不受影响。
+    /// </param>
     public async Task<byte[]> BuildSegmentReportPdf(int castingGroupID, string segmentName, string reportType,
-        int? timezoneOffsetMinutes = null)
+        int? timezoneOffsetMinutes = null, bool excludeAsCast = false)
     {
         var kind = string.Equals(reportType, ReportTypeAsCast, StringComparison.OrdinalIgnoreCase)
             ? SegmentReportKind.AsCast
             : SegmentReportKind.Setup;
-        var model = await GetSegmentReportModel(castingGroupID, segmentName, kind, timezoneOffsetMinutes);
+        var model = await GetSegmentReportModel(castingGroupID, segmentName, kind, timezoneOffsetMinutes, excludeAsCast);
+        return ConcreteBeamSegmentReportBuilder.Build(model);
+    }
+
+    /// <summary>
+    /// 【浇筑坐标】页签的打印/预览 PDF：页头 5 行 + 只有 AS-CAST COORDINATES 一章。
+    /// 与「已浇筑梁段」报告的区别：不输出 MATCH-CAST SETUP 与 SURVEY。
+    /// </summary>
+    /// <remarks>只有已填报实测数据的梁段可出图；未填报时由 <see cref="GetSegmentReportModel"/> 抛业务异常。</remarks>
+    public async Task<byte[]> BuildPouringCoordsPdf(int castingGroupID, string segmentName,
+        int? timezoneOffsetMinutes = null)
+    {
+        var model = await GetSegmentReportModel(castingGroupID, segmentName, SegmentReportKind.Pouring, timezoneOffsetMinutes);
         return ConcreteBeamSegmentReportBuilder.Build(model);
     }
 
@@ -1817,7 +1877,7 @@ public partial class ConcreteBeamService : ServiceBase<biz_project_bridge_castin
     /// 「已浇筑梁段」报告要求本段已填报；「梁段设置」报告不要求（它描述的是浇筑目标）。
     /// </remarks>
     public async Task<SegmentReportModel> GetSegmentReportModel(int castingGroupID, string segmentName, SegmentReportKind kind,
-        int? timezoneOffsetMinutes = null)
+        int? timezoneOffsetMinutes = null, bool excludeAsCast = false)
     {
         if (string.IsNullOrWhiteSpace(segmentName)) throw new InvalidOperationException(BizMessages.SegmentNameRequired(Lang));
 
@@ -1832,8 +1892,11 @@ public partial class ConcreteBeamService : ServiceBase<biz_project_bridge_castin
         var thisRecord = records.FirstOrDefault(a =>
             string.Equals(a.SegmentName, target.SegmentName, StringComparison.Ordinal));
 
-        if (kind == SegmentReportKind.AsCast && thisRecord == null)
-            throw new InvalidOperationException($"梁段「{target.SegmentName}」尚未填报实测数据，无法生成「已浇筑梁段」报告");
+        // 浇筑坐标报告同样要求本段已填报：AS-CAST 章的数据来自本段实测落库结果
+        if ((kind == SegmentReportKind.AsCast || kind == SegmentReportKind.Pouring) && thisRecord == null)
+            throw new InvalidOperationException(kind == SegmentReportKind.Pouring
+                ? $"梁段「{target.SegmentName}」尚未填报实测数据，无法生成「浇筑坐标」报告"
+                : $"梁段「{target.SegmentName}」尚未填报实测数据，无法生成「已浇筑梁段」报告");
 
         // 上游（匹配）段：名称取梁段列表给出的 Upstream，浇筑日期回查 segment 表
         var matchName = isFirst
@@ -1861,17 +1924,31 @@ public partial class ConcreteBeamService : ServiceBase<biz_project_bridge_castin
             MatchCastCastOn = ToClientLocal(matchCastOn, timezoneOffsetMinutes)
         };
 
-        // Setup 章：现算 St=0 的立模参数（与本段是否已填报无关）
-        var setup = await PerfectCast(new PerfectCastReqDTO
+        // Setup 章：现算 St=0 的立模参数（与本段是否已填报无关）。
+        // 【浇筑坐标】报告不含本章（只保留页头 + AS-CAST COORDINATES），故直接跳过。
+        if (kind != SegmentReportKind.Pouring)
         {
-            CastingGroupID = castingGroupID,
-            SegmentNo = target.SegmentName
-        });
-        AppendSetupChapter(model, setup, isFirst);
+            var setup = await PerfectCast(new PerfectCastReqDTO
+            {
+                CastingGroupID = castingGroupID,
+                SegmentNo = target.SegmentName
+            });
+            AppendSetupChapter(model, setup, isFirst);
+        }
 
         if (kind == SegmentReportKind.AsCast)
         {
             AppendSurveyChapter(model, thisRecord!, isFirst);
+            // 2026-11-13：【设站及测量】打印不再输出 AS-CAST COORDINATES 及其后内容（North/South Joint、
+            // Bolts and Hairpins、Length），由 excludeAsCast 开关控制；方法体保留，后续需要时可恢复调用。
+            // 【报告】页签仍传 excludeAsCast=false，保持完整三章。
+            if (!excludeAsCast)
+                await AppendAsCastChapter(model, castingGroupID, thisRecord!, m);
+            // await AppendAsCastChapter(model, castingGroupID, thisRecord!, m);
+        }
+        else if (kind == SegmentReportKind.Pouring)
+        {
+            // 2026-11-13：【浇筑坐标】页签打印/预览 = 页头 5 行（由报告渲染器统一输出）+ 仅 AS-CAST COORDINATES 章
             await AppendAsCastChapter(model, castingGroupID, thisRecord!, m);
         }
 
@@ -2600,6 +2677,41 @@ public partial class ConcreteBeamService : ServiceBase<biz_project_bridge_castin
     };
 
     /// <summary>把前端录入（实测 + 偏位常数 + 浇筑日期）写入梁段实体。</summary>
+    /// <summary>
+    /// 填报参数快照：供"修改本段实测数据时是否发生变化"的比对使用，不参与任何业务计算。
+    /// 覆盖 <see cref="ApplySurveyInput"/> 写入的全部录入项（浇筑日期、a/b 偏位四角与三个标志、
+    /// 匹配段实测、浇筑段实测与 hairpin、三个长度、固定端模板三项）。
+    /// </summary>
+    /// <remarks>
+    /// 取的是<b>落库口径</b>（已做"两侧不一致"归一化后的值），所以前后快照可比；
+    /// 用装箱后的 object 数组逐项 Equals，避免 decimal 精度与区域格式化带来的干扰。
+    /// </remarks>
+    private static object?[] SurveyParamSnapshot(biz_concrete_beam_segment s) =>
+    [
+        s.PouringDate,
+        s.BoltOffsetANE, s.BoltOffsetANW, s.BoltOffsetASE, s.BoltOffsetASW,
+        s.BoltOffsetBNE, s.BoltOffsetBNW, s.BoltOffsetBSE, s.BoltOffsetBSW,
+        s.BoltOffsetCN, s.BoltOffsetCS,
+        s.BoltOffsetAUseNorth, s.BoltOffsetAUseSouth, s.BoltOffsetBUseMeasured,
+        s.SurveyMatchNorthEastElev, s.SurveyMatchNorthWestElev,
+        s.SurveyMatchSouthEastElev, s.SurveyMatchSouthWestElev,
+        s.SurveyMatchNorthCenterOffset, s.SurveyMatchSouthCenterOffset,
+        s.SurveyWetNorthEastElev, s.SurveyWetNorthWestElev,
+        s.SurveyWetSouthEastElev, s.SurveyWetSouthWestElev,
+        s.SurveyWetNorthCenterOffset, s.SurveyWetSouthCenterOffset,
+        s.SurveyWetCenterLength, s.SurveyWetEastLength, s.SurveyWetWestLength,
+        s.SurveyBulkheadEastElev, s.SurveyBulkheadWestElev, s.SurveyBulkheadCenterOffset
+    ];
+
+    /// <summary>比较两份填报参数快照，任意一项不同即为 true。</summary>
+    private static bool SurveyParamChanged(object?[] before, object?[] after)
+    {
+        if (before.Length != after.Length) return true;
+        for (var i = 0; i < before.Length; i++)
+            if (!Equals(before[i], after[i])) return true;
+        return false;
+    }
+
     private static void ApplySurveyInput(biz_concrete_beam_segment entity, SetupNSurveyDTO req,
         ConcreteBeamSegmentDTO target)
     {

@@ -50,7 +50,9 @@ public partial class ConcreteBeamService
             Level1Min = cfg?.Level1Min, Level1Max = cfg?.Level1Max,
             Level2Min = cfg?.Level2Min, Level2Max = cfg?.Level2Max,
             Level3Min = cfg?.Level3Min, Level3Max = cfg?.Level3Max,
-            HasConfig = cfg != null
+            HasConfig = cfg != null,
+            // 已有梁段实测填报 → 预警配置只读（前端据此禁用「修改」「确定」）
+            Locked = await HasSurveyData(castingGroupID)
         };
     }
 
@@ -61,6 +63,9 @@ public partial class ConcreteBeamService
     public async Task<ConcreteBeamAlarmConfigDTO> SaveAlarmConfig(ConcreteBeamAlarmConfigSaveDTO req)
     {
         var ctx = await EnsureCastingGroupAccess(req.CastingGroupID);
+        // 2026-11-13：已有梁段实测填报后，预警配置随上游输入一并锁定（阈值口径变更会让
+        // 已归档的预警判级失去可比性）。前端已禁用「修改」「确定」，此处兜底拒绝绕过前端的调用。
+        await EnsureSurveyEditable(req.CastingGroupID, ConcreteBeamWorkflowRules.SurveyLockedAlarmMessage(Lang));
         ValidateAlarmConfig(req);
 
         var account = GetCurrentAccount();
@@ -94,7 +99,9 @@ public partial class ConcreteBeamService
             Level1Min = cfg.Level1Min, Level1Max = cfg.Level1Max,
             Level2Min = cfg.Level2Min, Level2Max = cfg.Level2Max,
             Level3Min = cfg.Level3Min, Level3Max = cfg.Level3Max,
-            HasConfig = true
+            HasConfig = true,
+            // 能走到这里说明未锁定（锁定已在上面拒绝）
+            Locked = false
         };
     }
 
@@ -200,6 +207,36 @@ public partial class ConcreteBeamService
             })
             .ToListAsync();
         return page;
+    }
+
+    /// <summary>
+    /// 作废指定端面节点上已生成的预警记录（软删除，在 SaveSurvey 事务内调用）。
+    /// </summary>
+    /// <remarks>
+    /// 修改本段实测数据后必须整节点清理：判级幂等键含「等级」，偏差变化导致等级变化时
+    /// 旧记录不会被后续 upsert 覆盖，只清同等级会留下与新判级并存的脏数据。
+    /// </remarks>
+    /// <param name="castingGroupID">浇筑组ID</param>
+    /// <param name="designCoordinateIds">本段产出的端面节点（design_coordinate.source.ID）</param>
+    /// <param name="now">作废时间</param>
+    /// <param name="account">操作人</param>
+    internal async Task ClearAlarmRecordsAsync(int castingGroupID, IEnumerable<int> designCoordinateIds,
+        DateTime now, string account)
+    {
+        var ids = designCoordinateIds.Distinct().ToList();
+        if (ids.Count == 0) return;
+
+        var rows = await Db.Query<biz_concrete_beam_alarm_record>()
+            .Where(a => a.CastingGroupID == castingGroupID && a.Status != -1
+                        && ids.Contains(a.DesignCoordinateID))
+            .ToListAsync();
+        foreach (var row in rows)
+        {
+            row.Status = -1;
+            row.UpdatedBy = account;
+            row.UpdatedTime = now;
+        }
+        await Db.SaveAsync();
     }
 
     /// <summary>

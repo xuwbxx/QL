@@ -355,6 +355,9 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
         public static string SurveyLockedCamber(string? lang) => Zh(lang)
             ? SurveyLockedReason(lang) + "，预拱度不允许再修改"
             : SurveyLockedReason(lang) + ": camber can no longer be modified";
+        public static string SurveyLockedAlarm(string? lang) => Zh(lang)
+            ? SurveyLockedReason(lang) + "，预警配置不允许再修改"
+            : SurveyLockedReason(lang) + ": alarm configuration can no longer be modified";
 
         // ---- 覆盖确认与下游作废 ----
         public static string DesignOverwriteConfirm(string? lang, bool hasAsCastData) => hasAsCastData

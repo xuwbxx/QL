@@ -84,6 +84,44 @@ public class ConcreteBeamController(ConcreteBeamService concreteBeamService) : C
             return BadRequest(new { message = ex.Message });
         }
     }
+    /// <summary>
+    /// 预拱度「打印/预览」PDF：Project Title / Casting Set / Date + Camber 表格（No. / Name / ZE / ZC / ZW）。
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> CamberPreviewPdf(int castingGroupID, int? timezoneOffsetMinutes = null)
+    {
+        concreteBeamService.EnsureAuthenticated();
+        try
+        {
+            var bytes = await concreteBeamService.BuildCamberPreviewPdf(castingGroupID, timezoneOffsetMinutes);
+            return File(bytes, "application/pdf", "camber-preview.pdf");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// 【浇筑坐标】页签打印/预览 PDF：页头 5 行 + 只有 AS-CAST COORDINATES 一章。
+    /// 只有已填报实测数据的梁段可出图；未填报时返回 400 + JSON。
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> PouringCoordsPdf(int castingGroupID, string segmentName, int? timezoneOffsetMinutes = null)
+    {
+        concreteBeamService.EnsureAuthenticated();
+        try
+        {
+            var bytes = await concreteBeamService.BuildPouringCoordsPdf(
+                castingGroupID, segmentName ?? string.Empty, timezoneOffsetMinutes);
+            return File(bytes, "application/pdf", $"{SanitizeFileName(segmentName)}-pouringcoords.pdf");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpPost]
     public async Task<JsonResult> DesignImportPreviewList([FromBody] ConcreteBeamImportPreviewQueryDTO req) =>
         await JsonCall(() => concreteBeamService.DesignImportPreviewList(req));
@@ -183,13 +221,13 @@ public class ConcreteBeamController(ConcreteBeamService concreteBeamService) : C
     /// </remarks>
     [HttpGet]
     public async Task<IActionResult> SegmentReportPdf(int castingGroupID, string segmentName, string reportType,
-        int? timezoneOffsetMinutes = null)
+        int? timezoneOffsetMinutes = null, bool excludeAsCast = false)
     {
         concreteBeamService.EnsureAuthenticated();
         try
         {
             var bytes = await concreteBeamService.BuildSegmentReportPdf(
-                castingGroupID, segmentName ?? string.Empty, reportType ?? string.Empty, timezoneOffsetMinutes);
+                castingGroupID, segmentName ?? string.Empty, reportType ?? string.Empty, timezoneOffsetMinutes, excludeAsCast);
             var suffix = string.Equals(reportType, ConcreteBeamService.ReportTypeAsCast, StringComparison.OrdinalIgnoreCase)
                 ? ConcreteBeamService.ReportTypeAsCast
                 : ConcreteBeamService.ReportTypeSetup;

@@ -12,7 +12,13 @@ namespace Service.PreAssembled.Reports
         Setup,
 
         /// <summary>已浇筑梁段（浇筑后）：MATCH-CAST SETUP + SURVEY + AS-CAST COORDINATES 三章。</summary>
-        AsCast
+        AsCast,
+
+        /// <summary>
+        /// 浇筑坐标（【浇筑坐标】页签的打印/预览）：页头 5 行 + 只有 AS-CAST COORDINATES 一章。
+        /// 不输出 MATCH-CAST SETUP 与 SURVEY，与「已浇筑梁段」报告区分开。
+        /// </summary>
+        Pouring
     }
 
     /// <summary>
@@ -130,6 +136,11 @@ namespace Service.PreAssembled.Reports
 
         /// <summary>建议的 PDF 文件名（不含扩展名）。</summary>
         public string SuggestedFileName =>
-            $"{WetCastSegmentName}-{(Kind == SegmentReportKind.Setup ? "setting" : "baogao")}".Trim('-');
+            $"{WetCastSegmentName}-{Kind switch
+            {
+                SegmentReportKind.Setup => "setting",
+                SegmentReportKind.Pouring => "pouringcoords",
+                _ => "baogao"
+            }}".Trim('-');
     }
 }

@@ -70,9 +70,12 @@ namespace Service.PreAssembled.Reports
         {
             var document = new Document();
             document.Info.Title = $"Segment Report - {model.WetCastSegmentName}";
-            document.Info.Subject = model.Kind == SegmentReportKind.Setup
-                ? "Match-Cast Setup"
-                : "As-Cast Segment Report";
+            document.Info.Subject = model.Kind switch
+            {
+                SegmentReportKind.Setup => "Match-Cast Setup",
+                SegmentReportKind.Pouring => "As-Cast Coordinates",
+                _ => "As-Cast Segment Report"
+            };
             // 注：MigraDoc 的 DocumentInfo 没有 CreationDate，文档创建时间在渲染后写到 PDF 信息字典上
 
             var normal = document.Styles[StyleNames.Normal];

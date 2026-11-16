@@ -246,6 +246,8 @@ var zhCnMessages = {
             alarmNonNegative: '预警阈值不允许负数',
             alarmMinLtMax: '{0}的区间要求 最小值 < 最大值',
             alarmConfigTip: '各等级数值区间为左闭右开 [最小值, 最大值)，即包含最小值、不包含最大值；未填写的等级视为未配置，偏差绝对值超过已配置上限时自动按上一级生成预警。',
+            // 2026-11-13：已有梁段实测填报后预警配置锁定
+            alarmConfigLockedTip: '已有梁段完成实测填报：预警阈值是既往预警判级的基准，已锁定不允许再修改。',
             // ---- 项目信息页签 ----
             // 上游输入锁定后的提示条
             surveyLockedProjectTip: '已有梁段完成实测填报：A、B、C 与参考高程是全部既有浇筑坐标的基准，已锁定不允许再修改。',
@@ -282,6 +284,7 @@ var zhCnMessages = {
             westControlPoint: '西侧控制点',
             normalize: '归一化坐标',
             camberIncluded: '标高含预拱度',
+            camberPreviewDialogTitle: '预拱度预览',
             designPreviewDialogTitle: '坐标核对与预览',
             orientationPreviewPending: '当前处于导入预览状态，请先点击「确定」保存后再预览或打印',
             segmentNotSurveyedHint: '该梁段尚未记录实测，报告只包含 Set-Up 值',
@@ -387,6 +390,8 @@ var zhCnMessages = {
             selectSegmentPrompt: '请选择梁段',
             noDisplayableSegment: '暂无可展示的梁段',
             notFilledTip: '该梁段尚未填报实测数据：浇筑前的理论坐标可正常查看，浇筑坐标与定位点信息待填报后生成。',
+            // 2026-11-13：浇筑坐标打印/预览只针对已填报段
+            pouringNotFilledBlock: '该梁段尚未填报实测数据，无法生成浇筑坐标报告',
             fieldNameHeader: '字段名称',
             // 端面卡片标题（faceName 后端为「活动端/固定端」，前端按 faceKey 拼 key）
             floatingBulkheadJointTheoretical: '活动端理论坐标',

@@ -248,6 +248,8 @@ var enMessages = {
             alarmNonNegative: 'Alarm thresholds must be non-negative',
             alarmMinLtMax: '{0} range requires min < max',
             alarmConfigTip: 'Each level uses a half-open interval [min, max) — min inclusive, max exclusive. Levels left blank are treated as not configured; a deviation whose absolute value exceeds a configured upper bound automatically raises one level higher.',
+            // 2026-11-13: alarm settings are locked once any segment has been surveyed
+            alarmConfigLockedTip: 'Segments have already been surveyed: the alarm thresholds are the basis of all previous alarm levels and are locked from further editing.',
             // ---- Project Properties tab ----
             // Tip shown when upstream inputs are locked
             surveyLockedProjectTip: 'Segments have already been surveyed: A, B, C and the reference elevation are the datum for all existing cast coordinates and are locked from further editing.',
@@ -284,6 +286,7 @@ var enMessages = {
             westControlPoint: 'West Control Point',
             normalize: 'Normalize',
             camberIncluded: 'Camber Included in Displayed Elevations',
+            camberPreviewDialogTitle: 'Camber Preview',
             designPreviewDialogTitle: 'Coordinate Check and Preview',
             orientationPreviewPending: 'Import preview is pending; click Confirm to save it before previewing or printing',
             segmentNotSurveyedHint: 'Survey has not been recorded for this segment; the report contains Set-Up values only',
@@ -389,6 +392,8 @@ var enMessages = {
             selectSegmentPrompt: 'Please select a segment',
             noDisplayableSegment: 'No segment available for display',
             notFilledTip: 'This segment has not been surveyed yet: pre-cast theoretical coordinates are available; as-cast coordinates and bolt/hairpin data will be generated after survey entry.',
+            // 2026-11-13: as-cast coordinate print/preview is only available for surveyed segments
+            pouringNotFilledBlock: 'This segment has not been surveyed yet; the as-cast coordinate report cannot be generated',
             fieldNameHeader: '',
             // End-face card titles (backend faceName is 活动端/固定端; frontend maps to faceKey)
             floatingBulkheadJointTheoretical: 'Floating Bulkhead Joint Theoretical Coordinates',

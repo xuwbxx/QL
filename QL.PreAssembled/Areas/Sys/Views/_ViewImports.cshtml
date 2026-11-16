@@ -1,0 +1,6 @@
+@*
+    2026-11-13：注册 MVC 内置 Tag Helper。
+    原因同 Areas/Biz/Views/_ViewImports.cshtml：Areas 下视图不在 Views/_ViewImports.cshtml
+    查找链上，不补这一行则 asp-append-version="true" 不生效，脚本 URL 无版本号、浏览器吃旧缓存。
+*@
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

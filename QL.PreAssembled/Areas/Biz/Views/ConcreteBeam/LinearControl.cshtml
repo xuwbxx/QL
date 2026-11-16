@@ -370,7 +370,11 @@
 
             <!-- 右侧表格 -->
             <div class="pi-main">
-                <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    @* 2026-11-13：「预警配置」由【误差分析与报警】页签迁移至此。 *@
+                    <div>
+                        <el-button type="primary" @@click="openAlarmConfig">{{ $t('biz.concreteBeam.alarmConfig') }}</el-button>
+                    </div>
                     <div class="pi-meta">
                         {{ $t('biz.concreteBeam.createdBy') }}：{{ projectInfo.createdBy || '-' }}<br />
                         {{ $t('biz.concreteBeam.createdTime') }}：{{ projectInfo.createdTime || '-' }}<br />
@@ -475,8 +479,8 @@
                            :page-sizes="[10, 20, 50, 100]" @@size-change="handleDesignSizeChange" @@current-change="handleDesignPageChange" />
         </div>
         <div style="text-align: center; padding: 20px 0 0; border-top: 1px solid #e8e8e8; margin-top: 20px;">
-            <el-button type="primary" @@click="handleDesignPrint" :disabled="!!designPreviewToken || designNormalize !== designUseCalculation || designIncludeCamber !== confirmedDesignIncludesCamber">{{ $t('biz.concreteBeam.print') }}</el-button>
-            <el-button type="primary" @@click="handleDesignPreview" :disabled="!!designPreviewToken || designNormalize !== designUseCalculation || designIncludeCamber !== confirmedDesignIncludesCamber">{{ $t('biz.concreteBeam.preview') }}</el-button>
+            <el-button type="primary" @@click="handleDesignPrint">{{ $t('biz.concreteBeam.print') }}</el-button>
+            <el-button type="primary" @@click="handleDesignPreview">{{ $t('biz.concreteBeam.preview') }}</el-button>
             <el-button type="primary" @@click="handleDesignConfirm" :disabled="hasSurveyData">{{ $t('common.apply') }}</el-button>
             <el-button @@click="handleDesignCancel" :disabled="hasSurveyData">{{ $t('common.cancel') }}</el-button>
         </div>
@@ -894,9 +898,12 @@
     <!-- 6. 报告 -->
     <!-- 误差分析与报警 -->
     <div class="lc-tab-panel" v-show="activeTab === 'alarm'" v-loading="alarmLoading">
+        @* 2026-11-13：「预警配置」入口已迁移到【项目信息】页签（右侧梁段表格上方工具行左侧），
+           此处保留原按钮以便需要时恢复。
         <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
             <el-button type="primary" @@click="openAlarmConfig">{{ $t('biz.concreteBeam.alarmConfig') }}</el-button>
         </div>
+        *@
 
         <!-- 三张折线图：东 / 中 / 西 -->
         <div style="display: flex; gap: 16px; flex-wrap: wrap;">
@@ -932,10 +939,18 @@
         </el-table>
 
         <!-- 预警配置弹框 -->
+        @* 2026-11-13：入口已迁到【项目信息】，本弹框仍挂在本面板内，而面板 v-show=false 时整体 display:none；
+           Element Plus 的 el-dialog 默认 append-to-body=false（渲染在原地），会被父级连带隐藏，
+           表现为「点【预警配置】毫无反应」。加 append-to-body 让弹框挂到 body，与触发页签解耦。 *@
         <el-dialog v-model="alarmDialogVisible" :title="$t('biz.concreteBeam.alarmConfig')" width="640px"
-                   :close-on-click-modal="false">
+                   append-to-body :close-on-click-modal="false">
             <div style="font-size: 12px; color: #909399; margin-bottom: 12px;">
                 {{ $t('biz.concreteBeam.alarmConfigTip') }}
+            </div>
+            @* 2026-11-13：已有梁段实测填报后预警配置锁定，只读展示。 *@
+            <div v-if="alarmConfigLocked"
+                 style="margin-bottom: 12px; padding: 8px 12px; background: #fdf6ec; border: 1px solid #f5dab1; border-radius: 4px; color: #e6a23c; font-size: 13px;">
+                {{ $t('biz.concreteBeam.alarmConfigLockedTip') }}
             </div>
             <el-table :data="[{ key: 1 }, { key: 2 }, { key: 3 }]" border style="width: 100%;" :show-header="true">
                 <el-table-column :label="$t('biz.concreteBeam.alarmColLevel')" width="120" align="center">
@@ -959,7 +974,7 @@
             <template #footer>
                 <div style="display: flex; justify-content: space-between;">
                     <div>
-                        <el-button v-if="!alarmConfigEditable && alarmHasConfig" @@click="onAlarmConfigEdit">
+                        <el-button v-if="!alarmConfigEditable && alarmHasConfig" :disabled="alarmConfigLocked" @@click="onAlarmConfigEdit">
                             {{ $t('biz.concreteBeam.alarmEdit') }}
                         </el-button>
                     </div>
@@ -982,7 +997,10 @@
             <div style="text-align: left;"><el-radio v-model="reportOverallType" label="浇筑和理论坐标" @@change="onReportOverallChange">{{ $t('biz.concreteBeam.reportCastTheory') }}</el-radio></div>
             <div style="display: flex; align-items: center; gap: 24px;">
                 <el-radio v-model="reportOverallType" label="理论坐标" @@change="onReportOverallChange">{{ $t('biz.concreteBeam.reportTheory') }}</el-radio>
-                <el-checkbox v-model="reportIncludeAll" @@change="onReportOverallChange">{{ $t('biz.concreteBeam.includeAll') }}</el-checkbox>
+                @* 2026-11-13：【包含所有】按要求隐藏并禁用；值仍参与请求（includeAll 按勾选状态提交，
+                   当前默认 true = 理论坐标报告列出全部节点）。 *@
+                <el-checkbox v-model="reportIncludeAll" :disabled="true" v-show="false"
+                             @@change="onReportOverallChange">{{ $t('biz.concreteBeam.includeAll') }}</el-checkbox>
             </div>
         </div>
 
@@ -992,7 +1010,9 @@
             <div style="display: flex; align-items: center; justify-content: center; gap: 24px;">
                 <div class="sm-form-item" style="flex: 1; max-width: 360px;">
                     <label>{{ $t('biz.concreteBeam.pouringSegmentLabel') }}</label>
-                    <el-select v-model="reportSegmentName" :placeholder="$t('biz.concreteBeam.selectSegmentPrompt')" style="flex: 1;" @@change="onReportSegmentChange">
+                    @* 2026-11-13：整体报告与单梁段报告合并为同一组单选，仅选中单梁段报告时本下拉可用 *@
+                    <el-select v-model="reportSegmentName" :disabled="reportScope !== 'segment'"
+                               :placeholder="$t('biz.concreteBeam.selectSegmentPrompt')" style="flex: 1;" @@change="onReportSegmentChange">
                         <el-option v-for="s in reportSegmentList" :key="s.segmentName" :label="s.label" :value="s.segmentName"></el-option>
                     </el-select>
                 </div>
@@ -1008,9 +1028,9 @@
 
         <!-- 底部按钮 -->
         <div style="text-align: center; padding: 16px 0 0; border-top: 1px solid #e8e8e8; margin-top: 12px;">
-            <el-button type="primary" :loading="reportLoading" @@click="handleReportPrint">{{ $t('biz.concreteBeam.print') }}</el-button>
+            <el-button type="primary" :loading="reportLoading" @@click="handleReportTabPrint">{{ $t('biz.concreteBeam.print') }}</el-button>
             <el-button type="primary" @@click="handleReportPreview">{{ $t('biz.concreteBeam.preview') }}</el-button>
-            <el-button type="primary" :loading="reportExporting" @@click="handleReportExport">{{ $t('biz.concreteBeam.export') }}</el-button>
+            <el-button type="primary" :loading="reportExporting" @@click="handleReportTabExport">{{ $t('biz.concreteBeam.export') }}</el-button>
             <el-button @@click="handleReportCancel">{{ $t('common.cancel') }}</el-button>
         </div>
     </div>

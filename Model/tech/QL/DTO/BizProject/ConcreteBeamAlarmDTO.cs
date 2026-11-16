@@ -25,6 +25,11 @@ public class ConcreteBeamAlarmConfigDTO
     public decimal? Level3Max { set; get; }
     /// <summary>是否已存在配置（决定弹框初始只读/可编辑）。</summary>
     public bool HasConfig { set; get; }
+    /// <summary>
+    /// 是否已被锁定：浇筑组下已有梁段实测填报时为 true，预警配置只读，
+    /// 「修改」「确定」均不可用（从未配置过也不能首次录入）。
+    /// </summary>
+    public bool Locked { set; get; }
 }
 
 /// <summary>单条预警记录。</summary>

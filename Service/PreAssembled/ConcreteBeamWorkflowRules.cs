@@ -139,5 +139,8 @@ public static class ConcreteBeamWorkflowRules
     /// <summary>预拱度被锁定时的拒绝文案。</summary>
     public static string SurveyLockedCamberMessage(string? lang) => BizMessages.SurveyLockedCamber(lang);
 
+    /// <summary>预警配置被锁定时的拒绝文案。</summary>
+    public static string SurveyLockedAlarmMessage(string? lang) => BizMessages.SurveyLockedAlarm(lang);
+
     #endregion
 }

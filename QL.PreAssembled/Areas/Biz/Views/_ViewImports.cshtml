@@ -1,0 +1,9 @@
+@*
+    2026-11-13：注册 MVC 内置 Tag Helper。
+    原因：Areas 下的视图不在 Views/_ViewImports.cshtml 的查找链上（查找只沿父目录向上，
+    Areas/Biz/Views/** 找不到项目根下的 Views/_ViewImports.cshtml），导致本区域内
+    asp-append-version="true" 全部不生效——渲染出来的 <script src> 不带 ?v=xxx，
+    浏览器一直用旧的 JS 缓存，改完代码「界面没变化」。
+    本文件只补这一行，不改动任何现有标记。
+*@
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
