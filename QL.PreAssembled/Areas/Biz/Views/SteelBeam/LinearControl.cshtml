@@ -283,21 +283,30 @@
                 <el-button type="primary" @@click="searchMeasured"><el-icon><Search /></el-icon> {{ $t('common.search') }}</el-button>
             </div>
             <div class="lc-toolbar-right">
+                @* 2026-11-17：新增多选批量删除（仅最新批次可编辑行可勾选） *@
+                <el-button type="danger" plain :disabled="!measuredSelection.length" @@click="batchDeleteMeasured">
+                    <el-icon><Delete /></el-icon>{{ $t('biz.steelBeam.batchDelete') }}
+                    <span v-if="measuredSelection.length">({{ measuredSelection.length }})</span>
+                </el-button>
                 <el-button plain type="default" @@click="downloadTemplate('measured')"><el-icon><Download /></el-icon>{{ $t('biz.steelBeam.downloadMeasuredTemplate') }}</el-button>
                 <el-button type="primary" :disabled="!state.hasTheoretical" @@click="openImport('measured')"><el-icon><Upload-Filled /></el-icon>{{ $t('biz.steelBeam.importMeasured') }}</el-button>
                 <el-button plain type="primary" :disabled="!state.hasMeasured" @@click="downloadMeasured"><el-icon><Download /></el-icon>{{ $t('biz.steelBeam.downloadMeasured') }}</el-button>
             </div>
         </div>
-        <el-table v-loading="loading" :data="rows" border stripe :span-method="measuredSpanMethod">
-            <el-table-column :label="$t('biz.steelBeam.pointCode')" min-width="150" align="center"><template #default="scope"><span>{{ scope.row.pointCode }}</span><el-tag v-if="!scope.row.isCurrentBatch" size="small" type="warning" style="margin-left:4px">{{ $t('biz.steelBeam.filledTag') }}</el-tag></template></el-table-column>
+        <el-table ref="measuredTableRef" v-loading="loading" :data="rows" border stripe :span-method="measuredSpanMethod"
+                  @@selection-change="onMeasuredSelectionChange">
+            @* 2026-11-17：多选列，只有 canEdit（最新批次）行可勾选；补齐行/历史批次行禁止勾选 *@
+            <el-table-column type="selection" width="46" align="center" :selectable="measuredRowSelectable"></el-table-column>
+            @* 2026-11-17：列宽调整——测点编号改为定宽（240 = 原 120 加宽一倍），剩余宽度分给 X/Y/Z *@
+            <el-table-column :label="$t('biz.steelBeam.pointCode')" width="240" align="center"><template #default="scope"><span>{{ scope.row.pointCode }}</span><el-tag v-if="!scope.row.isCurrentBatch" size="small" type="warning" style="margin-left:4px">{{ $t('biz.steelBeam.filledTag') }}</el-tag></template></el-table-column>
             <el-table-column :label="$t('biz.steelBeam.measuredCoord')" align="center">
-                <el-table-column label="X" width="150" align="center"><template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.x" class="lc-coordinate-input"></el-input><span v-else>{{ formatDecimal(scope.row.measuredX) }}</span></template></el-table-column>
-                <el-table-column label="Y" width="150" align="center"><template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.y" class="lc-coordinate-input"></el-input><span v-else>{{ formatDecimal(scope.row.measuredY) }}</span></template></el-table-column>
-                <el-table-column label="Z" width="150" align="center"><template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.z" class="lc-coordinate-input"></el-input><span v-else>{{ formatDecimal(scope.row.measuredZ) }}</span></template></el-table-column>
+                <el-table-column label="X" min-width="120" align="center"><template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.x" class="lc-coordinate-input"></el-input><span v-else>{{ formatDecimal(scope.row.measuredX) }}</span></template></el-table-column>
+                <el-table-column label="Y" min-width="120" align="center"><template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.y" class="lc-coordinate-input"></el-input><span v-else>{{ formatDecimal(scope.row.measuredY) }}</span></template></el-table-column>
+                <el-table-column label="Z" min-width="120" align="center"><template #default="scope"><el-input v-if="editingId === scope.row.id" v-model="editForm.z" class="lc-coordinate-input"></el-input><span v-else>{{ formatDecimal(scope.row.measuredZ) }}</span></template></el-table-column>
             </el-table-column>
-            <el-table-column prop="pushCount" :label="$t('biz.steelBeam.pushCount')" width="100" align="center"></el-table-column>
-            <el-table-column :label="$t('biz.steelBeam.measureTime')" width="180" align="center"><template #default="scope">{{ formatMeasureTime(scope.row.measureTime) }}</template></el-table-column>
-            <el-table-column :label="$t('biz.steelBeam.tableOperate')" width="130" align="center">
+            <el-table-column prop="pushCount" :label="$t('biz.steelBeam.pushCount')" width="80" align="center"></el-table-column>
+            <el-table-column :label="$t('biz.steelBeam.measureTime')" width="160" align="center"><template #default="scope">{{ formatMeasureTime(scope.row.measureTime) }}</template></el-table-column>
+            <el-table-column :label="$t('biz.steelBeam.tableOperate')" width="110" align="center">
                 <template #default="scope">
                     <template v-if="editingId === scope.row.id"><el-button link type="primary" @@click="saveEdit(scope.row)">{{ $t('common.save') }}</el-button><el-button link @@click="cancelEdit"><el-icon><RefreshRight /></el-icon> {{ $t('common.cancel') }}</el-button></template>
                     <template v-else-if="scope.row.canEdit">

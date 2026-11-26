@@ -144,7 +144,7 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
     /// 测量时间必选（未传时默认最新一次）；返回「选中批次全部测点 ∪ 缺失测点用同顶推次数下
     /// 测量时间严格早于选中批次的最近一次上传值补齐」的完整测点集。
     /// 补齐行 IsCurrentBatch=false：MeasureTime 显示来源批次时间，CanEdit 恒为 false（不可编辑/删除）。
-    /// 排序：选中批次行在前（按导入顺序），补齐行在后。
+    /// 排序：统一按「理论坐标导入顺序」（理论表 ID），本批次行与补齐行混排，与监控计算口径一致。
     /// 批次可见池（2026-11-04 扩）：active 批次 + 被新导入覆盖的历史批次（Status=-1 且 ReplacedByBatchID 非空），
     /// 其测点行虽随批次整体作废，但作为历史上传数据仍可查询（只读）；仅用户真正删除的批次不可见。
     /// </summary>
@@ -174,6 +174,14 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         var selectedRows = await Db.Query<biz_steel_beam_measured>()
             .Where(a => a.GirderID == req.GirderID && a.BatchID == selectedBatch.ID)
             .ToListAsync();
+        // 2026-11-17：本批次被用户逐点删除的测点（active 批次里的 Status=-1 行）。
+        // 这些点不再参与下面的「补齐」——否则删掉的点会被同顶推次数更早批次的同点数据补回来，
+        // 表现为「删了又出现」。被覆盖导入的旧批次是整批连同其行一起置 -1，不在此列。
+        var suppressedPoints = selectedBatch.Status != StatusDelete
+            ? selectedRows.Where(a => a.Status == StatusDelete)
+                          .Select(a => a.PointCode)
+                          .ToHashSet(StringComparer.OrdinalIgnoreCase)
+            : new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         if (selectedBatch.Status != StatusDelete)
             selectedRows = selectedRows.Where(a => a.Status != StatusDelete).ToList();
 
@@ -191,25 +199,43 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         {
             if (x.m.Status == StatusDelete && x.BatchStatus != StatusDelete) continue;
             if (selectedPoints.Contains(x.m.PointCode)) continue;
+            // 本批次已被删除的测点：不再从历史批次补齐
+            if (suppressedPoints.Contains(x.m.PointCode)) continue;
             if (fillMap.ContainsKey(x.m.PointCode)) continue;
             fillMap[x.m.PointCode] = (x.m, x.SourceTime);
         }
 
-        var items = new List<SteelBeamMeasuredItemDTO>(selectedRows.Count + fillMap.Count);
-        foreach (var m in selectedRows)
-            items.Add(ToMeasuredItem(m, selectedBatch.PushCount, selectedBatch.MeasureTime, true, m.BatchID == latestBatchId));
-        foreach (var f in fillMap.Values)
-            items.Add(ToMeasuredItem(f.Row, selectedBatch.PushCount, f.SourceTime, false, false));
+        // 2026-11-19：排序改为「理论坐标导入顺序」，与「监控计算」口径一致。
+        // 理论数据按 Excel 行序逐行插入，自增 ID 即导入顺序；不能用 PointCode 排
+        // （编号无统一格式，F-1/F-10/…/F-19/F-2 的字符串序会错乱）。
+        // 理论表里找不到的点（历史遗留实测行）排最后，用实测行 ID 保证顺序稳定。
+        var theoryOrder = (await Db.Query<biz_steel_beam_theoretical>()
+            .Where(a => a.GirderID == req.GirderID && a.Status != StatusDelete)
+            .Select(a => new { a.ID, a.PointCode })
+            .ToListAsync())
+            .GroupBy(a => a.PointCode, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.Min(x => x.ID), StringComparer.OrdinalIgnoreCase);
 
-        // 统一按测点编号排序（忽略大小写，与旧口径一致），本批次行与补齐行混排
-        items = items.OrderBy(a => a.PointCode.ToLower()).ToList();
+        var items = new List<(SteelBeamMeasuredItemDTO Item, int TheoryOrder, int MeasuredID)>(selectedRows.Count + fillMap.Count);
+        foreach (var m in selectedRows)
+            items.Add((ToMeasuredItem(m, selectedBatch.PushCount, selectedBatch.MeasureTime, true, m.BatchID == latestBatchId),
+                theoryOrder.TryGetValue(m.PointCode, out var curOrder) ? curOrder : int.MaxValue, m.ID));
+        foreach (var f in fillMap.Values)
+            items.Add((ToMeasuredItem(f.Row, selectedBatch.PushCount, f.SourceTime, false, false),
+                theoryOrder.TryGetValue(f.Row.PointCode, out var fillOrder) ? fillOrder : int.MaxValue, f.Row.ID));
+
+        // 本批次行与补齐行混排，统一按理论导入顺序
+        var ordered = items
+            .OrderBy(a => a.TheoryOrder)
+            .ThenBy(a => a.MeasuredID)
+            .ToList();
 
         var page = Math.Max(req.PageIndex, 1);
         var size = NormalizePageSize(req.PageSize);
         return new()
         {
-            List = items.Skip((page - 1) * size).Take(size).ToList(),
-            Total = items.Count
+            List = ordered.Skip((page - 1) * size).Take(size).Select(a => a.Item).ToList(),
+            Total = ordered.Count
         };
     }
 
@@ -365,6 +391,60 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
             Version = row.measured.Version,
             CanEdit = false
         };
+    }
+
+    /// <summary>
+    /// 实测数据批量删除：口径与单行删除完全一致——
+    /// 仅允许删除「最大顶推次数 + 最新测量时间」批次的 active 行（补齐行/历史批次行不可删）。
+    /// </summary>
+    /// <remarks>
+    /// 与逐行删除的差别只有一处：所有行在同一个事务里一次软删除，随后**只重建一次**滚动快照，
+    /// 避免批量删 N 行就 replay N 次快照。任一步失败整体回滚。
+    /// </remarks>
+    /// <returns>实际删除的行数（已失效/已删除的行会被跳过）。</returns>
+    public async Task<int> DeleteMeasuredBatch(SteelBeamMeasuredBatchDeleteDTO req)
+    {
+        var context = await EnsureGirderAccess(req.GirderID);
+        var ids = (req.IDs ?? new List<int>()).Distinct().ToList();
+        if (ids.Count == 0) throw new InvalidOperationException(BizMessages.SteelMeasuredNoSelection(Lang));
+
+        var latestBatchId = await Db.Query<biz_steel_beam_measure_batch>()
+            .Where(a => a.GirderID == req.GirderID && a.Status != -1)
+            .OrderByDescending(a => a.PushCount).ThenByDescending(a => a.MeasureTime).ThenByDescending(a => a.ID)
+            .Select(a => (int?)a.ID).FirstOrDefaultAsync();
+
+        var rows = await (from measured in Db.Query<biz_steel_beam_measured>()
+                          join batch in Db.Query<biz_steel_beam_measure_batch>().Where(a => a.Status != -1)
+                              on measured.BatchID equals batch.ID
+                          where ids.Contains(measured.ID) && measured.GirderID == req.GirderID && measured.Status != -1
+                          select new { measured, batch }).ToListAsync();
+        if (rows.Count == 0) throw new InvalidOperationException(BizMessages.DataUpdatedRefresh(Lang));
+        if (rows.Any(a => a.batch.ID != latestBatchId))
+            throw new InvalidOperationException(BizMessages.SteelPushCountNotEditable(Lang));
+
+        var account = GetCurrentAccount();
+        var timestamp = DateTime.Now;
+        Db.BeginTransaction();
+        try
+        {
+            foreach (var row in rows)
+            {
+                row.measured.Status = -1;
+                row.measured.Version++;
+                row.measured.UpdatedBy = account;
+                row.measured.UpdatedTime = timestamp;
+            }
+            await Db.SaveAsync();
+            // 整批删除后统一重建一次滚动快照，失败整体回滚
+            await RebuildDerivedCoreAsync(context.ProjID, req.GirderID, account, timestamp);
+            Db.CommitTransaction();
+        }
+        catch
+        {
+            Db.RollbackTransaction();
+            throw;
+        }
+        return rows.Count;
     }
 
     public async Task<SteelBeamImportOutcome> ImportTheoretical(int girderID, byte[] bytes, bool confirmOverwrite)
@@ -806,16 +886,12 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
             .GroupBy(a => a.SegmentNo, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
 
-        // 已拼装 = 该段在实测表中至少有一个点；即使 derived 快照缺失也能识别，
-        // 从而给出「请先 RebuildDerived」的明确提示，而不是静默当成待拼装。
-        var measuredTheoryIds = (await Db.Query<biz_steel_beam_measured>()
-            .Where(a => a.GirderID == girderId && a.Status != StatusDelete)
-            .Select(a => a.TheoreticalID).Distinct().ToListAsync()).ToHashSet();
-        var theoryBySegment = theory
-            .GroupBy(a => a.SegmentNo, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+        // 已拼装 = 该段在推算快照中至少有一个「实测血统」点（MeasuredID != 0）。
+        // 2026-11-18：与下拉 GetCalcSegmentNoByGirderId 统一口径（同源快照），
+        // 避免「下拉显示待拼装、计算却报已拼装」的自相矛盾；
+        // 被用户删掉的点已降级为补全值（MeasuredID=0），因此不会再把该段误判为已拼装。
         var assembledSegments = segmentNos
-            .Where(s => theoryBySegment.TryGetValue(s, out var pts) && pts.Any(t => measuredTheoryIds.Contains(t.ID)))
+            .Where(s => snapshotBySegment.TryGetValue(s, out var pts) && pts.Any(t => t.MeasuredID != 0))
             .ToList();
         var pendingSegments = segmentNos
             .Where(s => !assembledSegments.Contains(s, StringComparer.OrdinalIgnoreCase))
@@ -848,10 +924,13 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
             throw new InvalidOperationException(BizMessages.SteelCalcRegistrationPointsInsufficient(Lang, p[0].Count));
 
         var selectedSet = segmentNos.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        // 2026-11-17：输出顺序 = 「理论坐标导入时的测点顺序」。
+        // 理论数据按 Excel 行序逐行插入，自增 ID 即导入顺序；不能用 PositionOrder/DistanceFromStart
+        // （它们被 CalcPointPositionOrderAndDistanceFromStart 按几何轴线重排过），
+        // 也不能按 PointCode 排（测点编号无统一格式，各项目不通用）。
         var selectedTheory = theory
             .Where(a => selectedSet.Contains(a.SegmentNo))
-            .OrderBy(a => a.DistanceFromStart ?? (decimal?)a.PositionOrder ?? decimal.MaxValue)
-            .ThenBy(a => a.ID)
+            .OrderBy(a => a.ID)
             .ToList();
         var d = new List<List<decimal>>() { new(), new(), new() };
         foreach (var t in selectedTheory)
@@ -871,7 +950,7 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
                 DesignZ = Math.Round(gescha[2][i], 4, MidpointRounding.AwayFromZero),
                 SegmentNo = t.SegmentNo,
                 PositionName = t.PositionName
-            }, t.DistanceFromStart ?? (decimal?)t.PositionOrder ?? decimal.MaxValue));
+            }, i));
         }
 
         return new CalcResultDTO
@@ -880,9 +959,9 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
             SheetNo = "请填写",
             MeasuredSegments = string.Join(",", assembledSegments),
             PendingSegments = string.Join(",", pendingSegments),
+            // Order 即 selectedTheory 的下标（导入顺序），唯一，无需再用 PointCode 兜底次级排序
             Rows = rowsWithOrder
                 .OrderBy(a => a.Order)
-                .ThenBy(a => a.Row.PointCode, StringComparer.OrdinalIgnoreCase)
                 .Select(a => a.Row)
                 .ToList()
         };
@@ -997,9 +1076,9 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
         int projID, int girderID, string account, DateTime timestamp)
     {
         var (snapshot, batchCount, maxPush) = await ComputeSnapshotAsync(girderID);
-        if (snapshot.Count == 0)
-            throw new InvalidOperationException(BizMessages.SteelDerivedNothingToRebuild(Lang));
-
+        // 2026-11-18：允许快照为空。删光某根梁的实测数据后重算仍要成功，
+        // 否则删除事务会被这里抛出的异常整体回滚，表现为“删不掉”。
+        // 空快照走 ReplaceSnapshotAsync 会把现有 active 行全部置 -1（该梁全部显示待拼装）。
         await ReplaceSnapshotAsync(projID, girderID, maxPush, snapshot, account, timestamp);
         return (batchCount, snapshot.Count);
     }
@@ -1041,8 +1120,13 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
                 .Select(g => g.OrderByDescending(a => timeById[a.BatchID]).ThenByDescending(a => a.MeasuredID).First())
                 .OrderBy(a => a.TheoreticalID)
                 .ToList();
+            // 2026-11-18：本批次被用户逐点删除的测点交给推算器「降级为补全值」处理——
+            // 不作为本批有效上传点、不保留实测血统（MeasuredID=0），但该段仍要产出快照行。
+            // 之前在这里把点从 measured/snapshot 整点剔除，会把整段从快照里抹掉（连补全行都没了），
+            // 导致「下拉显示待拼装、计算却报已拼装且快照缺段」。
+            var suppressedIds = await LoadDeletedTheoryIdsAsync(pushBatches.Select(b => b.ID).ToList());
             var newest = pushBatches.First();
-            var result = SteelBeamDerivedCalculator.BuildSnapshot(k, newest.ID, measured, snapshot, theory, Lang);
+            var result = SteelBeamDerivedCalculator.BuildSnapshot(k, newest.ID, measured, snapshot, theory, Lang, suppressedIds);
             if (!result.Success) throw new InvalidOperationException(result.ErrorMessage);
             snapshot = result.Rows;
             batchCount++;
@@ -1136,6 +1220,23 @@ public class SteelBeamService : ServiceBase<biz_project_bridge>
     /// 载入某批次上传的实测点（带理论坐标 + 实测行ID）。
     /// <para>MeasuredID 写回 derived，供误差分析区分「实测来源」与「纯补全」。</para>
     /// </summary>
+    /// <summary>
+    /// 取指定批次集合内「被用户逐点删除」的测点（行 Status=-1）。
+    /// </summary>
+    /// <remarks>
+    /// 只应传入 active 批次的 ID：被覆盖导入的旧批次是「批次 + 其全部测点行」一起置 -1，
+    /// 不能与用户逐点删除混为一谈，否则整批覆盖会被误判成删除。
+    /// </remarks>
+    private async Task<HashSet<int>> LoadDeletedTheoryIdsAsync(List<int> activeBatchIDs)
+    {
+        if (activeBatchIDs.Count == 0) return new HashSet<int>();
+        var ids = await Db.Query<biz_steel_beam_measured>()
+            .Where(a => activeBatchIDs.Contains(a.BatchID) && a.Status == StatusDelete)
+            .Select(a => a.TheoreticalID)
+            .ToListAsync();
+        return ids.ToHashSet();
+    }
+
     private async Task<List<SteelBeamDerivedCalculator.MeasuredPoint>> LoadMeasuredWithTheoryAsync(int batchID)
     {
         var rows = await (from m in Db.Query<biz_steel_beam_measured>().Where(a => a.BatchID == batchID && a.Status != StatusDelete)

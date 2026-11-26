@@ -48,7 +48,7 @@ var enMessages = {
         passwordRule: 'Password length must be between 6 and 30 characters',
         rememberMe: 'Remember Me',
         forgotPassword: 'Forgot Password?',
-        footer: 'Demo Account: admin / Password: shjgwY#829',
+        footer: '',//'Demo Account: admin / Password: shjgwY#829',
         loginSuccess: 'Login Successful',
         loginFailed: 'Login failed, please check your account and password',
         networkError: 'Network request failed, please try again later'
@@ -173,6 +173,11 @@ var enMessages = {
             pushCount: 'Push Count',
             measureTime: 'Measure Time',
             filledTag: 'Filled',
+            // 2026-11-17: multi-select batch delete for survey data
+            batchDelete: 'Batch Delete',
+            batchDeleteNone: 'Select at least one survey point first',
+            batchDeleteConfirm: 'Delete the {count} selected survey rows? Deleted rows will no longer participate in filling or calculation.',
+            batchDeleteSuccess: '{count} survey rows deleted',
             // ---- Import dialog ----
             timePlaceholder: 'Select date and hour',
             theoryImportTip: 'Point code, design coordinates, pre-camber, weight, segment No. and position name are all required; coordinates and pre-camber are in meters, weight ranges from 0 to 1.',

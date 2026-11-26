@@ -65,6 +65,9 @@
             const importMeasureTime = Vue.ref(null);
             const uploadRef = Vue.ref(null);
             const rebuildLoading = Vue.ref(false);
+            // 2026-11-17：实测数据多选批量删除
+            const measuredTableRef = Vue.ref(null);
+            const measuredSelection = Vue.ref([]);
 
             async function loadGirderInfo() {
                 try {
@@ -103,6 +106,8 @@
                     measuredQuery.measureTime = measureTimeValue.value || null;
                     var data = await HttpUtils.post('/Biz/SteelBeam/MeasuredList', measuredQuery);
                     rows.value = data.list || []; total.value = data.total || 0;
+                    // 数据集整体换掉后勾选状态必须清空，否则批量删除会带着上一批的 id
+                    resetMeasuredSelection();
                 } catch (e) { rows.value = []; total.value = 0; }
                 finally { loading.value = false; }
             }
@@ -173,11 +178,44 @@
             }
 
             async function deleteMeasured(row) {
-                try { await ElMessageBox.confirm(i18nUtils.$t('common.confirmDelete'), i18nUtils.$t('biz.steelBeam.notice'), { type: 'warning' }); }
+                // 2026-11-17：这两条文案在语言包里挂在 message 下（不是 common），原来取 common.* 会直接显示原始 key
+                try { await ElMessageBox.confirm(i18nUtils.$t('message.confirmDelete'), i18nUtils.$t('biz.steelBeam.notice'), { type: 'warning' }); }
                 catch (e) { return; }
                 try {
                     await HttpUtils.post('/Biz/SteelBeam/DeleteMeasured', { id: row.id, girderID: girderID, version: row.version });
-                    ElMessage.success(i18nUtils.$t('common.deleteSuccess'));
+                    ElMessage.success(i18nUtils.$t('message.deleteSuccess'));
+                    await loadMeasured();
+                } catch (e) { console.error(e); }
+            }
+
+            // ===== 实测数据多选批量删除（2026-11-17） =====
+            // 只有 canEdit 的行可勾选：补齐行（IsCurrentBatch=false）与历史批次行在服务端也不允许删除
+            function measuredRowSelectable(row) { return !!(row && row.canEdit); }
+
+            function onMeasuredSelectionChange(selection) {
+                measuredSelection.value = selection || [];
+            }
+
+            /** 分页/刷新后清空勾选，避免跨页残留（el-table 的 selection 只在当前数据集内有效） */
+            function resetMeasuredSelection() {
+                measuredSelection.value = [];
+                Vue.nextTick(function () {
+                    if (measuredTableRef.value) measuredTableRef.value.clearSelection();
+                });
+            }
+
+            async function batchDeleteMeasured() {
+                var ids = (measuredSelection.value || []).map(function (r) { return r.id; });
+                if (!ids.length) { ElMessage.warning(i18nUtils.$t('biz.steelBeam.batchDeleteNone')); return; }
+                try {
+                    await ElMessageBox.confirm(
+                        i18nUtils.$t('biz.steelBeam.batchDeleteConfirm', { count: ids.length }),
+                        i18nUtils.$t('biz.steelBeam.notice'), { type: 'warning' });
+                } catch (e) { return; }
+                try {
+                    var deleted = await HttpUtils.post('/Biz/SteelBeam/DeleteMeasuredBatch', { girderID: girderID, ids: ids });
+                    var count = Number(deleted) || ids.length;
+                    ElMessage.success(i18nUtils.$t('biz.steelBeam.batchDeleteSuccess', { count: count }));
                     await loadMeasured();
                 } catch (e) { console.error(e); }
             }
@@ -397,7 +435,8 @@
             }
             // 按当前卡片的升/降序，对点位按 X 轴（点位距离 PointDistance）排序
             function sortedCardRows(pos) {
-                const rows = cardData.value[pos] || [];
+                // 2026-11-16：过滤掉没有点位距离的行——前端兜底成 0 会把它们画到 x=0，把坐标轴硬拉到原点
+                const rows = (cardData.value[pos] || []).filter(r => r.pointDistance != null);
                 const dir = cardSort[pos] || 'asc';
                 const sorted = rows.slice().sort((a, b) => {
                     const av = a.pointDistance == null ? 0 : Number(a.pointDistance);
@@ -463,8 +502,11 @@
                         }
                     },
                     grid: { left: 50, right: 20, top: 40, bottom: 40 },
-                    // X 轴保持 0→nMax（原点在左）；顺序反置由数据的 nMax-n 变换实现，不用 inverse（那会连刻度一起翻）
-                    xAxis: { name: i18nUtils.$t('biz.steelBeam.analysisXAxis'), type: 'value' },
+                    // 顺序反置仍由数据的 nMax-n 变换实现（不用 inverse，那会连刻度一起翻）；
+                    // 2026-11-16：轴范围改为按数据自适应，避免数据不覆盖全长时左侧留大片空白
+                    // 2026-11-19：只统计有误差值的点，补全点(y=null)不绘制却会把轴拉宽
+                    xAxis: withXAxisRange({ name: i18nUtils.$t('biz.steelBeam.analysisXAxis'), type: 'value' },
+                        pickAxisX(seriesData)),
                     yAxis: { name: i18nUtils.$t('biz.steelBeam.analysisYAxis'), type: 'value' },
                     // 单测位小图统一使用第 1 种颜色；connectNulls=true 使孤点与前一个点相连（折线连续）
                     series: [{ name: pos, type: 'line', data: seriesData, smooth: false, connectNulls: true, color: POSITION_COLORS[0] }]
@@ -494,11 +536,16 @@
             };
             // 全部测位合并为一个折线图（多 series，图例=测位名）
             function buildMergeOption(big) {
+                // 2026-11-16：过滤掉没有点位距离的行——前端兜底成 0 会把它们画到 x=0，把坐标轴硬拉到原点
                 const series = posNameList.value.map(function (pos) {
-                    const rows = cardData.value[pos] || [];
+                    const rows = (cardData.value[pos] || []).filter(r => r.pointDistance != null);
                     // connectNulls=true：补全点（null）间隙直接连线，孤点与前一个点相连，折线保持连续
-                    return { name: pos, type: 'line', smooth: false, connectNulls: true, color: positionColor(pos), data: rows.map(r => [Number(r.pointDistance) || 0, r.zError == null ? null : Number(r.zError)]) };
+                    return { name: pos, type: 'line', smooth: false, connectNulls: true, color: positionColor(pos), data: rows.map(r => [Number(r.pointDistance), r.zError == null ? null : Number(r.zError)]) };
                 });
+                // 合并所有 series 的 X 值，用于自适应轴范围（只扫一遍，避免每个测位各算一次）
+                // 2026-11-19：只统计有误差值的点——补全点(y=null)不绘制，但会把轴拉到它的里程上
+                // （例如整段补全的测点里程很小），表现为左侧一大片空白。
+                const allX = pickAxisX([].concat.apply([], series.map(function (s) { return s.data; })));
                 const option = {
                     // 30 色固定调色板（图例与折线一致，避免默认 10 色循环导致颜色重复）
                     color: POSITION_COLORS,
@@ -519,13 +566,67 @@
                     },
                     legend: { type: 'scroll', top: 6 },
                     grid: { left: 50, right: 20, top: 60, bottom: 50 },
-                    xAxis: { name: i18nUtils.$t('biz.steelBeam.analysisXAxis'), type: 'value' },
+                    // 2026-11-16：轴范围按全部测位的数据范围自适应（±3%），曲线铺满绘图区
+                    xAxis: withXAxisRange({ name: i18nUtils.$t('biz.steelBeam.analysisXAxis'), type: 'value' }, allX),
                     yAxis: { name: i18nUtils.$t('biz.steelBeam.analysisYAxis'), type: 'value' },
                     series: series
                 };
                 if (big) option.toolbox = buildSaveToolbox();
                 return option;
             }
+            // 2026-11-16：X 轴范围取“相邻的标准间隔值”为起点/终点——
+            // 先用数据跨度算出约 6 等分的标准刻度间隔（1/2/5 × 10^n），再把 min 向下、
+            // max 向上取到该间隔的整数倍。例：数据 62.69~118.29、间隔 10 → 轴取 60~120。
+            // 这样既不会像默认刻度那样从 0 起（左侧大片空白），也不会让首尾点贴在绘图区边缘被裁。
+            // 2026-11-19：自适应轴范围只统计「有数值」的点（data 项形如 [x, y]，y 为 null 即补全点）。
+            // 补全点不绘制，但 ECharts 计算数据区间时仍会用到它的 X，把轴拉到 0 或很远处，
+            // 造成「曲线挤在右侧、左侧一大片空白」。若所有点都无数值，退回全部 X，避免轴退化。
+            function pickAxisX(data) {
+                const visible = [];
+                const all = [];
+                (data || []).forEach(function (d) {
+                    if (!d || d[0] == null || isNaN(d[0])) return;
+                    all.push(d[0]);
+                    if (d[1] != null) visible.push(d[0]);
+                });
+                return visible.length ? visible : all;
+            }
+            function buildXAxisRange(xValues) {
+                const vals = xValues.filter(function (v) { return v != null && !isNaN(v); });
+                if (!vals.length) return null;
+                let min = vals[0];
+                let max = vals[0];
+                for (let i = 1; i < vals.length; i++) {
+                    if (vals[i] < min) min = vals[i];
+                    if (vals[i] > max) max = vals[i];
+                }
+                const span = max - min;
+                // 标准间隔：跨度/6 向上取到 1、2、5 × 10^n；单点（跨度 0）时按数值量级兜底
+                const rawStep = span > 0 ? span / 6 : Math.max(Math.abs(max) / 6, 1);
+                const mag = Math.pow(10, Math.floor(Math.log10(rawStep)));
+                const norm = rawStep / mag;
+                // 消掉浮点尾差（如 9.999999999999998），否则算出 59.99999999999999 这种刻度
+                const step = Number(((norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10) * mag).toPrecision(12));
+                // 向外取整到标准间隔的整数倍
+                let lower = Number((Math.floor(min / step) * step).toPrecision(12));
+                let upper = Number((Math.ceil(max / step) * step).toPrecision(12));
+                // 点位距离恒非负：降序（nMax-n 变换）时不要把轴推到负数
+                if (min >= 0 && lower < 0) lower = 0;
+                // 单点或恰好落在刻度上时补一格，避免轴退化成一条线
+                if (upper <= lower) upper = lower + step;
+                return { min: lower, max: upper };
+            }
+
+            // 把自适应范围写进 xAxis 配置；无有效数据时保持 ECharts 默认
+            function withXAxisRange(axis, xValues) {
+                const range = buildXAxisRange(xValues);
+                if (range) {
+                    axis.min = range.min;
+                    axis.max = range.max;
+                }
+                return axis;
+            }
+
             // echarts「下载图片」工具（右上角）
             function buildSaveToolbox() {
                 return {
@@ -593,7 +694,8 @@
             function extractError(error) { return error && error.message ? error.message : i18nUtils.$t('common.failed'); }
 
             function measuredSpanMethod(args) {
-                if (args.columnIndex !== 0) return [1, 1];
+                // 2026-11-17：第 0 列改为多选列，测点编号变成第 1 列（合并逻辑随之右移）
+                if (args.columnIndex !== 1) return [1, 1];
                 return args.row.pointRowSpan > 0 ? [args.row.pointRowSpan, 1] : [0, 0];
             }
             function formatMeasureTime(value) {
@@ -632,6 +734,10 @@
                 onTabChange: onTabChange, searchTheory: searchTheory, resetTheory: resetTheory, loadTheory: loadTheory,
                 onTheorySize: onTheorySize, searchMeasured: searchMeasured, resetMeasured: resetMeasured, loadMeasured: loadMeasured,
                 onMeasuredSize: onMeasuredSize, onPushChange: onPushChange, onMeasureTimeChange: onMeasureTimeChange, startEdit: startEdit, cancelEdit: cancelEdit, saveEdit: saveEdit, deleteMeasured: deleteMeasured,
+                // 2026-11-17：多选批量删除
+                measuredTableRef: measuredTableRef, measuredSelection: measuredSelection,
+                measuredRowSelectable: measuredRowSelectable, onMeasuredSelectionChange: onMeasuredSelectionChange,
+                batchDeleteMeasured: batchDeleteMeasured,
                 openImport: openImport, onFileChange: onFileChange, onFileRemove: onFileRemove, onFileExceed: onFileExceed,
                 confirmImport: confirmImport, downloadTemplate: downloadTemplate, downloadMeasured: downloadMeasured,
                 measuredSpanMethod: measuredSpanMethod, formatMeasureTime: formatMeasureTime, formatDecimal: formatDecimal, disableFutureDate: disableFutureDate,
@@ -654,7 +760,8 @@
     app.use(ElementPlus, { locale: window.ElementPlusLocaleZhCn });
     // 注册页面模板用到的图标（原只注册了UploadFilled，Search/RefreshLeft/RefreshRight未注册不显示）
     if (window.ElementPlusIconsVue) {
-        ['Search', 'RefreshLeft', 'RefreshRight', 'Refresh', 'UploadFilled', 'Download'].forEach(function (name) {
+        // 2026-11-17：批量删除按钮用到 Delete 图标，一并注册
+        ['Search', 'RefreshLeft', 'RefreshRight', 'Refresh', 'UploadFilled', 'Download', 'Delete'].forEach(function (name) {
             if (window.ElementPlusIconsVue[name]) app.component(name, window.ElementPlusIconsVue[name]);
         });
     }

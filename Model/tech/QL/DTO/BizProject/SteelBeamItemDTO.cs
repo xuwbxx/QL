@@ -92,6 +92,14 @@
         public int Version { get; set; }
     }
 
+    /// <summary>实测数据批量删除请求（口径与单行删除一致：仅最新批次的可编辑行）。</summary>
+    public class SteelBeamMeasuredBatchDeleteDTO
+    {
+        public int GirderID { get; set; }
+        /// <summary>待删除的实测行ID集合（前端勾选结果）。</summary>
+        public System.Collections.Generic.List<int> IDs { get; set; } = new();
+    }
+
     public class SteelBeamImportStateDTO
     {
         public bool HasTheoretical { get; set; }

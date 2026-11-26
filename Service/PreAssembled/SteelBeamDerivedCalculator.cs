@@ -93,11 +93,17 @@ public static class SteelBeamDerivedCalculator
         IReadOnlyList<MeasuredPoint> currentMeasured,
         IReadOnlyList<SnapshotPoint> previousSnapshot,
         IReadOnlyList<TheoryPoint> allTheory,
-        string? lang)
+        string? lang,
+        IReadOnlySet<int>? suppressedIds = null)
     {
         ArgumentNullException.ThrowIfNull(currentMeasured);
         ArgumentNullException.ThrowIfNull(previousSnapshot);
         ArgumentNullException.ThrowIfNull(allTheory);
+
+        // 2026-11-18：被用户逐点删除的测点（suppressed）。这些点不作为本批有效上传点、
+        // 不保留实测血统（MeasuredID=0），但该段仍要产出快照行（按补全值/设计坐标），
+        // 否则会出现「段被整段抹掉 → 下拉显示待拼装、计算却报已拼装且快照缺段」的矛盾。
+        IReadOnlySet<int> suppressed = suppressedIds ?? new HashSet<int>();
 
         var theoryBySegment = allTheory
             .GroupBy(a => a.SegmentNo, StringComparer.OrdinalIgnoreCase)
@@ -112,18 +118,24 @@ public static class SteelBeamDerivedCalculator
         var hasPrevious = previousSnapshot.Count > 0;
 
         // 1. 逐段补全：对每个本批 touched 段，产出「本批完整集」
+        //    2026-11-18：被删除点（suppressed）视为「该段缺失点」——不参与本段拟合、不输出实测血统，
+        //    而是用本段其它上传点补全（MeasuredID=0）。若该段有效上传点不足（例如整段被删光），
+        //    退化为设计坐标补全，保证该段在快照里仍有行。
         var currentCompleteBySegment = new Dictionary<string, List<SnapshotPoint>>(StringComparer.OrdinalIgnoreCase);
-        foreach (var (segmentNo, uploaded) in currentBySegment)
+        var activeUploadedBySegment = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (segmentNo, uploadedAll) in currentBySegment)
         {
             if (!theoryBySegment.TryGetValue(segmentNo, out var theory))
                 return Result.Fail(BizMessages.SteelDerivedSegmentTheoryMissing(lang, segmentNo));
 
+            var uploaded = uploadedAll.Where(a => !suppressed.Contains(a.TheoreticalID)).ToList();
             var uploadedIds = uploaded.Select(a => a.TheoreticalID).ToHashSet();
             var missing = theory.Where(a => !uploadedIds.Contains(a.TheoreticalID)).ToList();
+            activeUploadedBySegment[segmentNo] = uploaded.Count;
 
             var complete = new List<SnapshotPoint>(uploaded.Count + missing.Count);
 
-            // 本批上传点：真实实测，MeasuredID = 本批 measured.ID
+            // 有效上传点：真实实测，MeasuredID = 本批 measured.ID
             foreach (var u in uploaded)
             {
                 complete.Add(new SnapshotPoint(
@@ -141,18 +153,34 @@ public static class SteelBeamDerivedCalculator
             {
                 var minPoints = hasPrevious ? 1 : 2;
                 if (uploaded.Count < minPoints)
-                    return Result.Fail(BizMessages.SteelDerivedSegmentPointsInsufficient(lang, segmentNo, uploaded.Count, minPoints));
-
-                var predicted = uploaded.Count >= 2
-                    ? CompleteBySegment(uploaded, missing)
-                    : CompleteByTranslation(uploaded, missing);
-                for (var i = 0; i < missing.Count; i++)
                 {
-                    var m = missing[i];
-                    complete.Add(new SnapshotPoint(
-                        m.TheoreticalID, m.PointCode, segmentNo,
-                        predicted[i].X, predicted[i].Y, predicted[i].Z,
-                        m.Weight, 0, 0, pushCount));
+                    // 只有「本来就没传够点」才报错；若不足是删除造成的，降级为设计坐标补全，
+                    // 避免删点后重建直接失败（删除事务会整体回滚）。
+                    var suppressedCount = uploadedAll.Count - uploaded.Count;
+                    if (suppressedCount == 0)
+                        return Result.Fail(BizMessages.SteelDerivedSegmentPointsInsufficient(lang, segmentNo, uploaded.Count, minPoints));
+
+                    foreach (var m in missing)
+                    {
+                        complete.Add(new SnapshotPoint(
+                            m.TheoreticalID, m.PointCode, segmentNo,
+                            Round4(m.DesignX), Round4(m.DesignY), Round4(m.DesignZ),
+                            m.Weight, 0, 0, pushCount));
+                    }
+                }
+                else
+                {
+                    var predicted = uploaded.Count >= 2
+                        ? CompleteBySegment(uploaded, missing)
+                        : CompleteByTranslation(uploaded, missing);
+                    for (var i = 0; i < missing.Count; i++)
+                    {
+                        var m = missing[i];
+                        complete.Add(new SnapshotPoint(
+                            m.TheoreticalID, m.PointCode, segmentNo,
+                            predicted[i].X, predicted[i].Y, predicted[i].Z,
+                            m.Weight, 0, 0, pushCount));
+                    }
                 }
             }
 
@@ -171,7 +199,8 @@ public static class SteelBeamDerivedCalculator
             if (!previousBySegment.TryGetValue(segmentNo, out var previousComplete)) continue;
 
             var previousMeasuredCount = previousComplete.Count(a => a.MeasuredID != 0);
-            var currentUploadedCount = currentBySegment[segmentNo].Count;
+            // 用「有效上传点」数判断，避免整段被删（只剩补全/设计坐标）的段污染全局 T
+            var currentUploadedCount = activeUploadedBySegment.TryGetValue(segmentNo, out var activeCount) ? activeCount : 0;
             if (previousMeasuredCount < MinRegistrationPoints || currentUploadedCount < MinRegistrationPoints) continue;
 
             var previousMap = previousComplete
@@ -194,7 +223,11 @@ public static class SteelBeamDerivedCalculator
         {
             if (touchedSegments.Contains(segmentNo))
             {
-                var uploadedIds = currentBySegment[segmentNo].Select(a => a.TheoreticalID).ToHashSet();
+                // 被删除点不算「本批已上传」，仍允许按上一批快照搬运（只搬坐标，不带实测血统）
+                var uploadedIds = currentBySegment[segmentNo]
+                    .Where(a => !suppressed.Contains(a.TheoreticalID))
+                    .Select(a => a.TheoreticalID)
+                    .ToHashSet();
                 foreach (var p in previousPoints)
                 {
                     if (uploadedIds.Contains(p.TheoreticalID)) continue;
@@ -241,11 +274,16 @@ public static class SteelBeamDerivedCalculator
             var previousMap = previousBySegment.TryGetValue(segmentNo, out var previousPoints)
                 ? previousPoints.GroupBy(a => a.TheoreticalID).ToDictionary(g => g.Key, g => g.First())
                 : new Dictionary<int, SnapshotPoint>();
-            var uploadedIds = currentBySegment[segmentNo].Select(a => a.TheoreticalID).ToHashSet();
+            // 2026-11-18：被删除点不算本批有效上传点，交由下面的「缺失点」分支按补全值输出
+            var uploadedIds = currentBySegment[segmentNo]
+                .Where(a => !suppressed.Contains(a.TheoreticalID))
+                .Select(a => a.TheoreticalID)
+                .ToHashSet();
 
-            // 本批上传点
+            // 本批有效上传点（真实实测）
             foreach (var u in currentBySegment[segmentNo])
             {
+                if (suppressed.Contains(u.TheoreticalID)) continue;
                 rows.Add(new SnapshotPoint(
                     u.TheoreticalID, u.PointCode, segmentNo,
                     Round4(u.MeasuredX), Round4(u.MeasuredY), Round4(u.MeasuredZ),
@@ -257,13 +295,23 @@ public static class SteelBeamDerivedCalculator
             {
                 if (uploadedIds.Contains(curr.TheoreticalID)) continue;
 
-                if (previousMap.TryGetValue(curr.TheoreticalID, out var prev) && prev.MeasuredID != 0)
+                var isSuppressed = suppressed.Contains(curr.TheoreticalID);
+                if (!isSuppressed
+                    && previousMap.TryGetValue(curr.TheoreticalID, out var prev) && prev.MeasuredID != 0)
                 {
                     var xyz = transported[curr.TheoreticalID];
                     rows.Add(new SnapshotPoint(
                         curr.TheoreticalID, curr.PointCode, segmentNo,
                         xyz.X, xyz.Y, xyz.Z,
                         curr.Weight, prev.MeasuredID, batchID, pushCount - 1));
+                }
+                else if (isSuppressed && transported.TryGetValue(curr.TheoreticalID, out var moved))
+                {
+                    // 被删除点：若上一批有该点，用 T 搬运坐标（更贴近当前工况），但不保留实测血统
+                    rows.Add(new SnapshotPoint(
+                        curr.TheoreticalID, curr.PointCode, segmentNo,
+                        moved.X, moved.Y, moved.Z,
+                        curr.Weight, 0, 0, pushCount - 1));
                 }
                 else
                 {
@@ -283,11 +331,13 @@ public static class SteelBeamDerivedCalculator
             foreach (var p in previousPoints)
             {
                 var xyz = transported[p.TheoreticalID];
+                // 出胎段里被删除的点同样降级为补全值
+                var hasMeasuredLineage = p.MeasuredID != 0 && !suppressed.Contains(p.TheoreticalID);
                 rows.Add(new SnapshotPoint(
                     p.TheoreticalID, p.PointCode, segmentNo,
                     xyz.X, xyz.Y, xyz.Z,
-                    p.Weight, p.MeasuredID,
-                    p.MeasuredID != 0 ? batchID : 0,
+                    p.Weight, hasMeasuredLineage ? p.MeasuredID : 0,
+                    hasMeasuredLineage ? batchID : 0,
                     pushCount - 1));
             }
         }

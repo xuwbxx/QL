@@ -515,6 +515,9 @@ namespace Service.PreAssembled.BridgeSegmentAlignment
         public static string SteelMeasuredNoValidPoints(string? lang) => Zh(lang)
             ? "本次导入没有可入库的有效测点（均缺少完整的 X/Y/Z 坐标）"
             : "No valid survey points to import (all rows are missing complete X/Y/Z coordinates)";
+        public static string SteelMeasuredNoSelection(string? lang) => Zh(lang)
+            ? "未选择要删除的实测数据"
+            : "No survey rows selected for deletion";
         public static string FieldSegmentNo(string? lang) => Zh(lang) ? "所属梁段号" : "Segment No.";
         public static string FieldPointCode(string? lang) => Zh(lang) ? "测点编号" : "Point Code";
         public static string[] SteelErrorFileHeaders(string? lang) => Zh(lang)

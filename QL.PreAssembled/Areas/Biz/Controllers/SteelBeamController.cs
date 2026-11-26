@@ -65,6 +65,10 @@ public class SteelBeamController : Controller
     [HttpPost]
     public Task<JsonResult> DeleteMeasured([FromBody] SteelBeamCoordinateUpdateDTO req) => JsonCall(() => _service.DeleteMeasured(req));
 
+    /// <summary>实测数据批量删除（仅最新批次可删，返回实际删除行数）。</summary>
+    [HttpPost]
+    public Task<JsonResult> DeleteMeasuredBatch([FromBody] SteelBeamMeasuredBatchDeleteDTO req) => JsonCall(() => _service.DeleteMeasuredBatch(req));
+
     [HttpPost]
     [RequestSizeLimit(ExcelUtils.MaxFileBytes + 1024 * 1024)]
     public async Task<IActionResult> ImportTheoretical(int girderID, bool confirmOverwrite, IFormFile file)

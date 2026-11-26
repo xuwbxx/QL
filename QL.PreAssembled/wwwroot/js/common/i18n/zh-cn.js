@@ -46,7 +46,7 @@ var zhCnMessages = {
         passwordRule: '密码长度在 6 到 30 个字符',
         rememberMe: '记住我',
         forgotPassword: '忘记密码？',
-        footer: '演示账号：admin / 密码：shjgwY#829',
+        footer: '',//'演示账号：admin / 密码：shjgwY#829',
         loginSuccess: '登录成功',
         loginFailed: '登录失败，请检查账号密码',
         networkError: '网络请求失败，请稍后重试'
@@ -171,6 +171,11 @@ var zhCnMessages = {
             pushCount: '顶推次数',
             measureTime: '测量时间',
             filledTag: '补齐',
+            // 2026-11-17：实测数据多选批量删除
+            batchDelete: '批量删除',
+            batchDeleteNone: '请先勾选要删除的测点',
+            batchDeleteConfirm: '确认删除选中的 {count} 条实测数据吗？删除后不再参与补齐与计算。',
+            batchDeleteSuccess: '已删除 {count} 条实测数据',
             // ---- 导入弹窗 ----
             timePlaceholder: '请选择年月日和小时',
             theoryImportTip: '测点编号、设计坐标、预拱度、权值、所属梁段号和测位名称均为必填；坐标及预拱度单位为 m，权值范围为 0～1。',
